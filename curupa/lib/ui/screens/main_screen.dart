@@ -68,6 +68,7 @@ class _MainScreenState extends State<MainScreen> {
 
     isRegistered().then((result) {
       if (result) {
+        _globals.setFilePickerGlobal();
         getUserData();
       }
     });
@@ -213,16 +214,18 @@ class _MainScreenState extends State<MainScreen> {
     if (userId != null) {
       Stream<User> userStream = Auth.getUser(userId);
       userStream.listen((User _user) async {
-        print("DataReceived: " + _user.userID);
-        DocumentReference groupRef = _user.groupRef;
-        DocumentSnapshot docsnapshot = await groupRef.get();
-        if (docsnapshot.exists) {
-          String year = docsnapshot['year'];
-          String documentID = docsnapshot.documentID;
-          _globals.group = new Group(year: year, documentID: documentID);
-        }
-        _globals.user = _user;
-        getDescription();
+        Auth.getUserDocumentReference(_user.userID).then((doc) async {
+          DocumentReference groupRef = _user.groupRef;
+          _user.userRef = doc;
+          DocumentSnapshot docsnapshot = await groupRef.get();
+          if (docsnapshot.exists) {
+            String year = docsnapshot['year'];
+            String documentID = docsnapshot.documentID;
+            _globals.group = new Group(year: year, documentID: documentID);
+          }
+          _globals.user = _user;
+          getDescription();
+        });
       });
     }
   }

@@ -3,6 +3,7 @@ import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
+import 'package:onboarding_flow/business/validator.dart';
 import 'package:onboarding_flow/models/group.dart';
 import 'package:onboarding_flow/ui/widgets/custom_alert_dialog.dart';
 import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
@@ -21,11 +22,14 @@ class _GroupScreenState extends State<GroupScreen> {
   Group _currentGroup;
   String _currentItem;
 
-  final TextEditingController _group = new TextEditingController();
-  final TextEditingController _country = new TextEditingController();
+  //Cyber Children
+  //final TextEditingController _group = new TextEditingController();
+  //final TextEditingController _country = new TextEditingController();
+  //CustomTextField _groupField;
+  //CustomTextField _countryField;
 
-  CustomTextField _groupField;
-  CustomTextField _countryField;
+  final TextEditingController _newGroup = new TextEditingController();
+  CustomTextField _newGroupField;
 
   VoidCallback onBackPress;
 
@@ -38,6 +42,17 @@ class _GroupScreenState extends State<GroupScreen> {
   @override
   void initState() {
     super.initState();
+
+    _groups.add(new Group(year: "Elegir", documentID: null));
+
+    _newGroupField = new CustomTextField(
+      baseColor: Colors.grey,
+      borderColor: Colors.grey[400],
+      errorColor: Colors.red,
+      controller: _newGroup,
+      hint: "Ingresa tu camada",
+      validator: Validator.validateName,
+    );
 
     _loadingInProgress = true;
 
@@ -135,6 +150,20 @@ class _GroupScreenState extends State<GroupScreen> {
                             )
                           ],
                         )),
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                          EdgeInsets.only(top: 40.0, left: 50.0, right: 50.0),
+                      child: Stack(
+                        children: <Widget>[
+                          new Text(
+                              "Si tu camada no esta en el lista por favor agregala, utiliza solo numeros.",
+                              style:
+                                  TextStyle(fontSize: 26.0, color: Colors.grey),
+                              textAlign: TextAlign.center),
+                          _newGroupField,
+                        ],
                       ),
                     ),
                     Padding(

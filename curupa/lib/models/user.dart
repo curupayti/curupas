@@ -8,6 +8,7 @@ class User {
   final String email;
   final String profilePictureURL;
   DocumentReference groupRef;
+  DocumentReference userRef;
   Group group;
 
   User({
@@ -48,7 +49,13 @@ class User {
     return User.fromJson(doc.data);
   }
 
-  void setGroupReference(DocumentReference ref) {}
+  void setGroupReference(DocumentReference ref) {
+    groupRef = ref;
+  }
+
+  void setUserReference(DocumentReference ref) {
+    userRef = ref;
+  }
 
   void createNewGroup(Group _group) {
     this.group = _group;

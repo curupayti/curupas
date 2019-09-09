@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:onboarding_flow/models/feeds.dart';
-import 'package:onboarding_flow/ui/screens/feed/feed_swiper_screen.dart';
 
 class FeedCard extends StatelessWidget {
   FeedCard(this.feed);

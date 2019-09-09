@@ -1,17 +1,22 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onboarding_flow/models/description.dart';
 import 'package:onboarding_flow/models/feeds.dart';
 import 'package:onboarding_flow/models/user.dart';
 import 'package:flutter/services.dart';
+import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum authProblems { UserNotFound, PasswordNotValid, NetworkError, UnknownError }
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
+//final googleSignIn = new GoogleSignIn();
 
 SharedPreferences prefs;
+
+final analytics = new FirebaseAnalytics();
 
 class Auth {
   static Future<String> signIn(String email, String password) async {
@@ -96,6 +101,13 @@ class Auth {
     });
   }
 
+  static Future<DocumentReference> getUserDocumentReference(
+      String userID) async {
+    DocumentReference document =
+        await Firestore.instance.collection('users').document(userID);
+    return document;
+  }
+
   static Stream<Description> getDescription() {
     return Firestore.instance
         .collection("descriptions")
@@ -106,20 +118,6 @@ class Auth {
       }).first;
     });
   }
-
-  /*static Future<List<Map<dynamic, dynamic>>> getFeed() async {
-    List<DocumentSnapshot> templist;
-    List<Map<dynamic, dynamic>> list = new List();
-    CollectionReference collectionRef = Firestore.instance.collection("feeds");
-    QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
-    templist = collectionSnapshot.documents;
-
-    list = await templist.map((DocumentSnapshot docSnapshot) {
-      return docSnapshot.data;
-    }).toList();
-
-    return list;
-  }*/
 
   static Future<List<Feed>> getFeed() async {
     List<DocumentSnapshot> templist;

@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:core';
 import 'dart:io';
-import 'dart:math';
-import 'package:file_picker/file_picker.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
 import 'package:onboarding_flow/business/auth.dart';
@@ -14,8 +12,6 @@ import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
 import 'package:onboarding_flow/ui/widgets/custom_alert_dialog.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
 
@@ -39,17 +35,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _blackVisible = false;
   VoidCallback onBackPress;
 
-  //File Picker
-  FileType _pickingType;
-  bool _multiPick = false;
-  bool _hasValidMime = false;
-  String _path;
-  String _fileName;
-  Map<String, String> _paths;
-  String _extension;
-  String _imagePath;
-  bool _imageSelected;
-
   GestureDetector _avatar;
 
   Image _avatarImage = Image.asset("assets/images/default.png");
@@ -59,6 +44,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _loadingInProgress = false;
 
   double width, _left;
+
+  //File vars
+  String _imagePath;
+  bool _imageSelected;
 
   void _rebuild() {
     setState(() {});
@@ -119,21 +108,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       hint: "Contraseña",
       validator: Validator.validatePassword,
     );
-  }
-
-  Future<String> getImagePath() async {
-    String _path;
-    _pickingType = FileType.IMAGE;
-    _hasValidMime = true;
-    try {
-      _paths = null;
-      _path = await FilePicker.getFilePath(
-          type: _pickingType, fileExtension: _extension);
-    } on PlatformException catch (e) {
-      print("Unsupported operation" + e.toString());
-    }
-    if (!mounted) return null;
-    return _path;
   }
 
   @override
@@ -255,7 +229,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               children: <Widget>[
                                 new GestureDetector(
                                   onTap: () {
-                                    getImagePath().then((result) {
+                                    _globals.filePickerGlobal
+                                        .getImagePath(false)
+                                        .then((result) {
                                       File _file = new File(result);
                                       if (_file != null) {
                                         _imageSelected = true;
@@ -400,8 +376,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         await Auth.signUp(email, password).then((uID) async {
           if (_imageSelected) {
+            //-
             //Uploading file
-            String extension = p.extension(_imagePath);
+            /*String extension = p.extension(_imagePath);
             String fileName =
                 Random().nextInt(1000000).toString() + '$extension';
             final StorageReference storageRef =
@@ -415,25 +392,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
             final StorageTaskSnapshot downloadUrl =
                 (await uploadTask.onComplete);
             final String url = (await downloadUrl.ref.getDownloadURL());
-
-            streamSubscription.cancel();
-            User user = new User(
-                userID: uID,
-                email: email,
-                name: fullname,
-                birthday: birthday,
-                profilePictureURL: url);
-
-            if (await Auth.addUser(user)) {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              prefs.setBool('registered', true);
-              prefs.setString('userId', uID);
-              setState(() {
-                _loadingInProgress = false;
-              });
-              _globals.user = user;
-              Navigator.of(context).pushNamed("/group");
-            }
+            streamSubscription.cancel();*/
+            _globals.filePickerGlobal.uploadFile(_imagePath).then((url) async {
+              User user = new User(
+                  userID: uID,
+                  email: email,
+                  name: fullname,
+                  birthday: birthday,
+                  profilePictureURL: url);
+              bool added = await Auth.addUser(user);
+              if (added) {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setBool('registered', true);
+                prefs.setString('userId', uID);
+                setState(() {
+                  _loadingInProgress = false;
+                });
+                _globals.user = user;
+                Navigator.of(context).pushNamed("/group");
+              }
+            });
           }
         });
       } catch (e) {

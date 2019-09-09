@@ -1,3 +1,9 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:math';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:onboarding_flow/models/description.dart';
@@ -5,8 +11,9 @@ import 'package:onboarding_flow/models/feeds.dart';
 import 'package:onboarding_flow/models/group.dart';
 import 'package:onboarding_flow/models/user.dart';
 import 'package:youtube_api/youtube_api.dart';
-
+import 'package:file_picker/file_picker.dart';
 import 'models/streaming.dart';
+import 'package:path/path.dart' as p;
 
 User user = new User();
 Group group = new Group();
@@ -14,6 +21,7 @@ Description description = new Description();
 List<Feed> feeds = new List<Feed>();
 Data dataFeed;
 Streammer streammer;
+FilePickerGlobal filePickerGlobal;
 
 class Streammer {
   List<YT_API> ytResult = [];
@@ -46,6 +54,10 @@ class Streammer {
   }
 }
 
+void setFilePickerGlobal() {
+  filePickerGlobal = new FilePickerGlobal();
+}
+
 void setYoutubeApi(List<YT_API> _ytResult) {
   streammer = new Streammer();
   streammer.setYtResutl(_ytResult);
@@ -59,62 +71,51 @@ void setDataFeed(String desc, List<Feed> feeds) {
     location: 'Hurlingham, Buenos Aires',
     biography: desc,
     feeds: feeds,
-    /*<Feeds>[
-      Video(
-        title: 'Free - Mr. Big - Live at Granada Studios 1970',
-        thumbnail: 'assets/images/test.png',
-        url: 'https://www.youtube.com/watch?v=_FhCilozomo',
-      ),
-      Video(
-        title: 'Free - Ride on a Pony - Live at Granada Studios 1970',
-        thumbnail: 'assets/images/test.png',
-        url: 'https://www.youtube.com/watch?v=EDHNZuAnBoU',
-      ),
-      Video(
-        title: 'Free - Songs of Yesterday - Live at Granada Studios 1970',
-        thumbnail: 'assets/images/test.png',
-        url: 'https://www.youtube.com/watch?v=eI1FT0a_bos',
-      ),
-      Video(
-        title: 'Free - I\'ll Be Creepin\' - Live at Granada Studios 1970',
-        thumbnail: 'assets/images/test.png',
-        url: 'https://www.youtube.com/watch?v=3qK8O3UoqN8',
-      ),
-    ],*/
   );
 }
 
-/*void setDataVideo(String desc, List<Feed> feeds) {
-  dataVideo = new Data(
-    name: 'Curupa',
-    avatar: 'assets/images/escudo.png',
-    backdropPhoto: 'assets/images/cancha.png',
-    location: 'Hurlingham, Buenos Aires',
-    biography: desc,
-    videos: <Feeds>[
-      Video(
-        title: 'Free - Mr. Big - Live at Granada Studios 1970',
-        thumbnail: 'assets/images/test.png',
-        url: 'https://www.youtube.com/watch?v=_FhCilozomo',
-      ),
-      Video(
-        title: 'Free - Ride on a Pony - Live at Granada Studios 1970',
-        thumbnail: 'assets/images/test.png',
-        url: 'https://www.youtube.com/watch?v=EDHNZuAnBoU',
-      ),
-      Video(
-        title: 'Free - Songs of Yesterday - Live at Granada Studios 1970',
-        thumbnail: 'assets/images/test.png',
-        url: 'https://www.youtube.com/watch?v=eI1FT0a_bos',
-      ),
-      Video(
-        title: 'Free - I\'ll Be Creepin\' - Live at Granada Studios 1970',
-        thumbnail: 'assets/images/test.png',
-        url: 'https://www.youtube.com/watch?v=3qK8O3UoqN8',
-      ),
-    ],
-  );
-}*/
+class FilePickerGlobal {
+  //File Picker
+  FileType _pickingType;
+  bool _multiPick = false;
+  bool _hasValidMime = false;
+  String _path;
+  String _fileName;
+  Map<String, String> _paths;
+  String _extension;
+
+  Future<String> getImagePath(bool upload) async {
+    String _path;
+    _pickingType = FileType.IMAGE;
+    _hasValidMime = true;
+    _paths = null;
+    _path = await FilePicker.getFilePath(
+        type: _pickingType, fileExtension: _extension);
+    if (upload) {
+      await uploadFile(_path).then((url) async {
+        return url;
+      });
+    } else {
+      return _path;
+    }
+  }
+
+  Future<String> uploadFile(String _imagePath) async {
+    String extension = p.extension(_imagePath);
+    String fileName = Random().nextInt(1000000).toString() + '$extension';
+    StorageReference storageRef =
+        FirebaseStorage.instance.ref().child(fileName);
+    StorageUploadTask uploadTask = storageRef.putFile(File(_imagePath));
+    StreamSubscription<StorageTaskEvent> streamSubscription =
+        uploadTask.events.listen((event) {
+      print('EVENT ${event.type}');
+    });
+    StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+    String url = (await downloadUrl.ref.getDownloadURL());
+    streamSubscription.cancel();
+    return url;
+  }
+}
 
 class Data {
   Data({

@@ -1,18 +1,15 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:flutter/material.dart";
-import 'package:onboarding_flow/globals.dart' as _globals;
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_chat_app/ChatMessageListItem.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:onboarding_flow/ui/screens/chat/ChatMessageListItem.dart';
+import 'package:onboarding_flow/globals.dart' as _globals;
 
+var currentUserEmail;
+var _scaffoldContext;
+DocumentReference userRef;
 
 class GroupPage extends StatefulWidget {
   GroupPage({Key key}) : super(key: key);
@@ -24,7 +21,7 @@ class _GroupPageState extends State<GroupPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: new Container(), //FeedDetailsPage(),
+      child: new ChatScreen(), //FeedDetailsPage(),
     );
   }
 
@@ -45,59 +42,51 @@ class ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textEditingController =
       new TextEditingController();
   bool _isComposingMessage = false;
-  final reference = FirebaseDatabase.instance.reference().child('messages');
+
+  final referenceMessages =
+      FirebaseDatabase.instance.reference().child('messages');
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(
-          title: new Text("Flutter Chat App"),
-          elevation:
-              Theme.of(context).platform == TargetPlatform.iOS ? 0.0 : 4.0,
-          actions: <Widget>[
-            new IconButton(
-                icon: new Icon(Icons.exit_to_app), onPressed: _signOut)
-          ],
-        ),
         body: new Container(
-          child: new Column(
-            children: <Widget>[
-              new Flexible(
-                child: new FirebaseAnimatedList(
-                  query: reference,
-                  padding: const EdgeInsets.all(8.0),
-                  reverse: true,
-                  sort: (a, b) => b.key.compareTo(a.key),
-                  //comparing timestamp of messages to check which one would appear first
-                  itemBuilder: (_, DataSnapshot messageSnapshot,
-                      Animation<double> animation) {
-                    return new ChatMessageListItem(
-                      messageSnapshot: messageSnapshot,
-                      animation: animation,
-                    );
-                  },
-                ),
-              ),
-              new Divider(height: 1.0),
-              new Container(
-                decoration:
-                    new BoxDecoration(color: Theme.of(context).cardColor),
-                child: _buildTextComposer(),
-              ),
-              new Builder(builder: (BuildContext context) {
-                _scaffoldContext = context;
-                return new Container(width: 0.0, height: 0.0);
-              })
-            ],
+      child: new Column(
+        children: <Widget>[
+          new Flexible(
+            child: new FirebaseAnimatedList(
+              query: referenceMessages,
+              padding: const EdgeInsets.all(8.0),
+              reverse: true,
+              sort: (a, b) => b.key.compareTo(a.key),
+              //comparing timestamp of messages to check which one would appear first
+              itemBuilder: (_, DataSnapshot messageSnapshot,
+                  Animation<double> animation, int) {
+                return new ChatMessageListItem(
+                  messageSnapshot: messageSnapshot,
+                  animation: animation,
+                );
+              },
+            ),
           ),
-          decoration: Theme.of(context).platform == TargetPlatform.iOS
-              ? new BoxDecoration(
-                  border: new Border(
-                      top: new BorderSide(
-                  color: Colors.grey[200],
-                )))
-              : null,
-        ));
+          new Divider(height: 1.0),
+          new Container(
+            decoration: new BoxDecoration(color: Theme.of(context).cardColor),
+            child: _buildTextComposer(),
+          ),
+          new Builder(builder: (BuildContext context) {
+            _scaffoldContext = context;
+            return new Container(width: 0.0, height: 0.0);
+          })
+        ],
+      ),
+      decoration: Theme.of(context).platform == TargetPlatform.iOS
+          ? new BoxDecoration(
+              border: new Border(
+                  top: new BorderSide(
+              color: Colors.grey[200],
+            )))
+          : null,
+    ));
   }
 
   CupertinoButton getIOSSendButton() {
@@ -137,8 +126,14 @@ class ChatScreenState extends State<ChatScreen> {
                       color: Theme.of(context).accentColor,
                     ),
                     onPressed: () async {
-                      await _ensureLoggedIn();
-                      File imageFile = await ImagePicker.pickImage();
+                      _globals.filePickerGlobal
+                          .getImagePath(true)
+                          .then((result) {
+                        _sendMessage(messageText: null, imageUrl: result);
+                      });
+
+                      /*await _ensureLoggedIn();*/
+                      /*File imageFile = await ImagePicker.pickImage();
                       int timestamp = new DateTime.now().millisecondsSinceEpoch;
                       StorageReference storageReference = FirebaseStorage
                           .instance
@@ -146,9 +141,7 @@ class ChatScreenState extends State<ChatScreen> {
                           .child("img_" + timestamp.toString() + ".jpg");
                       StorageUploadTask uploadTask =
                           storageReference.put(imageFile);
-                      Uri downloadUrl = (await uploadTask.future).downloadUrl;
-                      _sendMessage(
-                          messageText: null, imageUrl: downloadUrl.toString());
+                      Uri downloadUrl = (await uploadTask.future).downloadUrl;*/
                     }),
               ),
               new Flexible(
@@ -182,46 +175,26 @@ class ChatScreenState extends State<ChatScreen> {
       _isComposingMessage = false;
     });
 
-    await _ensureLoggedIn();
-    _sendMessage(messageText: text, imageUrl: null);
+    //await _ensureLoggedIn();
+    //_sendMessage(messageText: text, imageUrl: null);
   }
 
   void _sendMessage({String messageText, String imageUrl}) {
-    reference.push().set({
+    referenceMessages.push().set({
       'text': messageText,
-      'email': googleSignIn.currentUser.email,
+      'email': _globals.user.email,
       'imageUrl': imageUrl,
-      'senderName': googleSignIn.currentUser.displayName,
-      'senderPhotoUrl': googleSignIn.currentUser.photoUrl,
+      'userRef': _globals.user.userRef,
+      'groupRef': _globals.user.groupRef,
+      'senderName': _globals.user.name,
+      'senderPhotoUrl': _globals.user.profilePictureURL,
     });
 
-    analytics.logEvent(name: 'send_message');
+    //analytics.logEvent(name: 'send_message');
   }
 
-  Future<Null> _ensureLoggedIn() async {
-    GoogleSignInAccount signedInUser = googleSignIn.currentUser;
-    if (signedInUser == null)
-      signedInUser = await googleSignIn.signInSilently();
-    if (signedInUser == null) {
-      await googleSignIn.signIn();
-      analytics.logLogin();
-    }
-
-    currentUserEmail = googleSignIn.currentUser.email;
-
-    if (await auth.currentUser() == null) {
-      GoogleSignInAuthentication credentials =
-          await googleSignIn.currentUser.authentication;
-      await auth.signInWithGoogle(
-          idToken: credentials.idToken, accessToken: credentials.accessToken);
-    }
-  }
-
-  Future _signOut() async {
-    await auth.signOut();
-    googleSignIn.signOut();
-    Scaffold
-        .of(_scaffoldContext)
-        .showSnackBar(new SnackBar(content: new Text('User logged out')));
-  }
+  // Example code for sign out.
+  /*void _signOut() async {
+    await _auth.signOut();
+  }*/
 }
