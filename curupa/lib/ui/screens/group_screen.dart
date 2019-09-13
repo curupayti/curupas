@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:onboarding_flow/business/auth.dart';
 import 'package:onboarding_flow/business/validator.dart';
 import 'package:onboarding_flow/models/group.dart';
 import 'package:onboarding_flow/ui/widgets/custom_alert_dialog.dart';
@@ -35,6 +38,12 @@ class _GroupScreenState extends State<GroupScreen> {
 
   bool _loadingInProgress;
 
+  OverlayEntry overlayEntry;
+  FocusNode phoneNumberFocusNodeGroup = new FocusNode();
+
+  //Public for being changed via InputDoneGroup
+  //CustomFlatButton _createGroupButton;
+
   void _rebuild() {
     setState(() {});
   }
@@ -43,16 +52,51 @@ class _GroupScreenState extends State<GroupScreen> {
   void initState() {
     super.initState();
 
-    _groups.add(new Group(year: "Elegir", documentID: null));
+    /*_createGroupButton = CustomFlatButton(
+      title: "Crear Nueva Camada",
+      fontSize: 22,
+      fontWeight: FontWeight.w700,
+      textColor: Colors.black12,
+      onPressed: () {
+        _createNewGroup();
+      },
+      splashColor: Colors.black12,
+      borderColor: Colors.grey, //Color.fromRGBO(59, 89, 152, 1.0),
+      borderWidth: 0,
+      color: Colors.grey, //Color.fromRGBO(212, 20, 15, 1.0),
+    );*/
+
+    //SharedPreferences prefs = await SharedPreferences.getInstance();
+    //bool registered = prefs.getBool('registered');
+
+    //if (registered) {
+    phoneNumberFocusNodeGroup.addListener(() {
+      bool hasFocus = phoneNumberFocusNodeGroup.hasFocus;
+      if (hasFocus)
+        showOverlayGroup(context);
+      else
+        removeOverlay();
+    });
 
     _newGroupField = new CustomTextField(
       baseColor: Colors.grey,
       borderColor: Colors.grey[400],
       errorColor: Colors.red,
       controller: _newGroup,
+      maxLength: 4,
+      //fontSize: 20.0,
+      style: new TextStyle(
+        fontSize: 25.0,
+        height: 1.5,
+        color: Colors.black,
+        fontWeight: FontWeight.bold,
+      ),
       hint: "Ingresa tu camada",
-      validator: Validator.validateName,
+      inputType: TextInputType.number,
+      validator: Validator.validateShortNumber,
+      focusNode: phoneNumberFocusNodeGroup,
     );
+    //}
 
     _loadingInProgress = true;
 
@@ -72,6 +116,7 @@ class _GroupScreenState extends State<GroupScreen> {
     List<DropdownMenuItem<String>> items = new List();
     QuerySnapshot querySnapshot =
         await Firestore.instance.collection("groups").getDocuments();
+    items.add(new DropdownMenuItem(value: null, child: new Text("----")));
     for (var doc in querySnapshot.documents) {
       String year = doc['year'];
       String documentID = doc.documentID;
@@ -84,6 +129,8 @@ class _GroupScreenState extends State<GroupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    //FocusScope.of(context).requestFocus(FocusNode());
+
     return WillPopScope(
       onWillPop: onBackPress,
       child: Scaffold(
@@ -108,7 +155,7 @@ class _GroupScreenState extends State<GroupScreen> {
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.only(
-                          top: 40.0, bottom: 10.0, left: 10.0, right: 10.0),
+                          top: 30.0, bottom: 10.0, left: 10.0, right: 10.0),
                       child: Text(
                         "Datos de camada",
                         softWrap: true,
@@ -124,28 +171,29 @@ class _GroupScreenState extends State<GroupScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(
-                          top: 80.0, bottom: 80.0, left: 20.0, right: 20.0),
+                          top: 30.0, left: 20.0, right: 20.0),
                       child: new Container(
-                        color: Colors.white,
+                        //color: Colors.grey,
                         child: new Center(
                             child: new Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            new Text(
-                                "Selecciona tu camada. Tu grupo de amigos, tu lugar de pertenencia.",
+                            new Text("Selecciona tu camada",
                                 style: TextStyle(
-                                    fontSize: 26.0, color: Colors.grey),
+                                    fontSize: 40.0, color: Colors.grey),
                                 textAlign: TextAlign.center),
                             new Container(
-                              padding: new EdgeInsets.only(top: 100.0),
+                              padding: new EdgeInsets.only(top: 20.0),
                             ),
                             new DropdownButton(
                               value: _currentItem,
                               items: _groupMenuItems,
-                              iconSize: 60.0,
+                              iconSize: 80.0,
                               style: TextStyle(
-                                  fontSize: 35.0, color: Colors.black),
+                                  fontSize: 35.0,
+                                  color: Colors.black,
+                                  backgroundColor: Colors.white),
                               onChanged: changedGroupItem,
                             )
                           ],
@@ -154,23 +202,29 @@ class _GroupScreenState extends State<GroupScreen> {
                     ),
                     Padding(
                       padding:
-                          EdgeInsets.only(top: 40.0, left: 50.0, right: 50.0),
-                      child: Stack(
-                        children: <Widget>[
-                          new Text(
-                              "Si tu camada no esta en el lista por favor agregala, utiliza solo numeros.",
-                              style:
-                                  TextStyle(fontSize: 26.0, color: Colors.grey),
-                              textAlign: TextAlign.center),
-                          _newGroupField,
-                        ],
-                      ),
+                          EdgeInsets.only(top: 20.0, left: 50.0, right: 50.0),
+                      child: new Text(
+                          "Si tu camada no esta en el menu crea una nueva",
+                          style: TextStyle(fontSize: 26.0, color: Colors.grey),
+                          textAlign: TextAlign.center),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 25.0, horizontal: 40.0),
+                      padding:
+                          EdgeInsets.only(top: 20.0, left: 50.0, right: 50.0),
+                      child: _newGroupField,
+                    ),
+                    /*Padding(
+                      padding: const EdgeInsets.only(
+                          top: 30.0, left: 30.0, right: 30.0),
+                      //symmetric(vertical: 25.0, horizontal: 40.0),
+                      child: _createGroupButton,
+                    ),*/
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          top: 30.0, left: 30.0, right: 30.0),
+                      //symmetric(vertical: 25.0, horizontal: 40.0),
                       child: CustomFlatButton(
-                        title: "Guardar Camada",
+                        title: "Guardar Camada Elegida",
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                         textColor: Colors.white,
@@ -216,11 +270,43 @@ class _GroupScreenState extends State<GroupScreen> {
     return g;
   }
 
+  void _createNewGroup() async {
+    String year = _newGroup.text;
+    Auth.checkGroupExist(year).then((result) {
+      if (result) {
+        _showErrorAlert(
+          title: "La camada ya existe",
+          content:
+              "La camada que intentas agregar ya existe, seleccionala en el menu.",
+          onPressed: _closeDialog,
+        );
+        _newGroup.clear();
+      } else {
+        Auth.addGroup(year).then((groupRef) async {
+          DocumentSnapshot docsnapshot = await groupRef.get();
+          if (docsnapshot.exists) {
+            String year = docsnapshot['year'];
+            String documentID = docsnapshot.documentID;
+            _loadingInProgress = true;
+            getGroupsList().then((val) => setState(() {
+                  _loadingInProgress = false;
+                  _groupMenuItems = val;
+                  _currentGroup = getGroupById(documentID);
+                  _currentItem = _currentGroup.year;
+                }));
+          }
+        });
+      }
+    });
+  }
+
   void _saveGroup(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('group', true);
+
     String userId = _globals.user.userID;
     String groupId = _currentGroup.documentID;
+
     DocumentReference groupRef =
         Firestore.instance.collection('groups').document(groupId);
 
@@ -260,6 +346,77 @@ class _GroupScreenState extends State<GroupScreen> {
           onPressed: onPressed,
         );
       },
+    );
+  }
+
+  showOverlayGroup(BuildContext context) {
+    if (overlayEntry != null) return;
+    OverlayState overlayState = Overlay.of(context);
+    overlayEntry = OverlayEntry(builder: (context) {
+      return Positioned(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          right: 0.0,
+          left: 0.0,
+          child: InputDoneGroup(this));
+    });
+
+    overlayState.insert(overlayEntry);
+  }
+
+  removeOverlay() {
+    if (overlayEntry != null) {
+      overlayEntry.remove();
+      overlayEntry = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    phoneNumberFocusNodeGroup.dispose();
+    super.dispose();
+  }
+}
+
+class InputDoneGroup extends StatelessWidget {
+  _GroupScreenState parent;
+  InputDoneGroup(this.parent);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: Colors.grey, //Color(Const.doneButtonBg),
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
+          child: CupertinoButton(
+            padding: EdgeInsets.only(right: 24.0, top: 8.0, bottom: 8.0),
+            onPressed: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
+
+              String year = this.parent._newGroup.text;
+              if (year.length != 4) {
+                this.parent._showErrorAlert(
+                    title: "Error de formato",
+                    content: "Debes cargar el años con cuatro digitos",
+                    onPressed: () {
+                      this.parent._closeDialog;
+                      this.parent._newGroup.clear();
+                    });
+              } else {
+                this.parent._createNewGroup();
+              }
+            },
+            child: Text("CREAR CAMADA",
+                style: TextStyle(
+                    color: Colors.blue, //Color(Const.colorPrimary),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25.0)),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onboarding_flow/models/description.dart';
 import 'package:onboarding_flow/models/feeds.dart';
+import 'package:onboarding_flow/models/group.dart';
 import 'package:onboarding_flow/models/user.dart';
 import 'package:flutter/services.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
@@ -87,6 +88,36 @@ class Auth {
     } catch (e) {
       return false;
     }
+  }
+
+  static Future<DocumentReference> addGroup(String group) async {
+    DocumentReference groupRef =
+        await Firestore.instance.collection('groups').add({'year': group});
+    return groupRef;
+  }
+
+  static Future<bool> checkGroupExist(String year) async {
+    QuerySnapshot querySnapshot =
+        await Firestore.instance.collection("groups").getDocuments();
+    for (var doc in querySnapshot.documents) {
+      String docYear = doc['year'];
+      if (year == docYear) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static Stream<Group> getGroupByYear(String year) {
+    return Firestore.instance
+        .collection("groups")
+        .where("year", isEqualTo: year)
+        .snapshots()
+        .map((QuerySnapshot snapshot) {
+      return snapshot.documents.map((doc) {
+        return Group.fromDocument(doc);
+      }).first;
+    });
   }
 
   static Stream<User> getUser(String userID) {

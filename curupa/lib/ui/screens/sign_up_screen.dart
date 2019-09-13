@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:core';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:onboarding_flow/business/auth.dart';
 import "package:onboarding_flow/ui/widgets/custom_text_field.dart";
 import 'package:onboarding_flow/business/validator.dart';
@@ -32,6 +35,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   CustomTextField _birthdayField;
   CustomTextField _emailField;
   CustomTextField _passwordField;
+
+  //https://medium.com/flutterpub/flutter-keyboard-actions-and-next-focus-field-3260dc4c694
+
+  FocusNode inputOne = FocusNode();
+  FocusNode inputTwo = FocusNode();
+
   bool _blackVisible = false;
   VoidCallback onBackPress;
 
@@ -49,6 +58,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String _imagePath;
   bool _imageSelected;
 
+  OverlayEntry overlayEntry;
+  FocusNode phoneNumberFocusNodeSignUp = new FocusNode();
+  InputDoneSignUp inputDoneSignUp;
+
   void _rebuild() {
     setState(() {});
   }
@@ -56,6 +69,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   void initState() {
     super.initState();
+
+    if (_globals.filePickerGlobal == null) {
+      _globals.setFilePickerGlobal();
+    }
 
     onBackPress = () {
       Navigator.of(context).pop();
@@ -66,9 +83,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       borderColor: Colors.grey[400],
       errorColor: Colors.red,
       controller: _fullname,
+      //autocorrect: false,
       hint: "Nombre completo",
+      inputAction: TextInputAction.done,
       validator: Validator.validateName,
     );
+
+    inputDoneSignUp = new InputDoneSignUp(this);
 
     _phoneField = new CustomTextField(
       baseColor: Colors.grey,
@@ -77,7 +98,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       controller: _number,
       hint: "Telefono móvil",
       validator: Validator.validateNumber,
+      inputAction: TextInputAction.next,
       inputType: TextInputType.number,
+      focusNode: phoneNumberFocusNodeSignUp,
     );
 
     _birthdayField = new CustomTextField(
@@ -98,7 +121,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       hint: "Dirección de E-mail",
       inputType: TextInputType.emailAddress,
       validator: Validator.validateEmail,
+      inputAction: TextInputAction.done,
     );
+
     _passwordField = CustomTextField(
       baseColor: Colors.grey,
       borderColor: Colors.grey[400],
@@ -107,7 +132,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
       obscureText: true,
       hint: "Contraseña",
       validator: Validator.validatePassword,
+      inputAction: TextInputAction.done,
     );
+
+    phoneNumberFocusNodeSignUp.addListener(() {
+      bool hasFocus = phoneNumberFocusNodeSignUp.hasFocus;
+      if (hasFocus)
+        showOverlay(context);
+      else
+        removeOverlay();
+    });
+  }
+
+  void _fieldFocusChange(
+      BuildContext context, FocusNode currentFocus, FocusNode nextFocus) {
+    currentFocus.unfocus();
+    FocusScope.of(context).requestFocus(nextFocus);
   }
 
   @override
@@ -354,6 +394,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  showOverlay(BuildContext context) {
+    if (overlayEntry != null) return;
+    OverlayState overlayState = Overlay.of(context);
+    overlayEntry = OverlayEntry(builder: (context) {
+      return Positioned(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          right: 0.0,
+          left: 0.0,
+          child: inputDoneSignUp);
+    });
+
+    overlayState.insert(overlayEntry);
+  }
+
+  removeOverlay() {
+    if (overlayEntry != null) {
+      overlayEntry.remove();
+      overlayEntry = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    phoneNumberFocusNodeSignUp.dispose();
+    super.dispose();
+  }
+
   void _signUp(
       {String fullname,
       String number,
@@ -405,6 +473,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 prefs.setBool('registered', true);
                 prefs.setString('userId', uID);
+                if (inputDoneSignUp != null) {
+                  //phoneNumberFocusNodeSignUp.dispose();
+                  phoneNumberFocusNodeSignUp = null;
+                  inputDoneSignUp = null;
+                }
                 setState(() {
                   _loadingInProgress = false;
                 });
@@ -437,7 +510,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _showErrorAlert({String title, String content, VoidCallback onPressed}) {
     showDialog(
-      barrierDismissible: false,
+      barrierDismissible: true,
       context: context,
       builder: (context) {
         return CustomAlertDialog(
@@ -446,6 +519,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
           onPressed: onPressed,
         );
       },
+    );
+  }
+}
+
+class InputDoneSignUp extends StatelessWidget {
+  _SignUpScreenState parent;
+
+  InputDoneSignUp(this.parent);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: Colors.grey, //Color(Const.doneButtonBg),
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
+          child: CupertinoButton(
+            padding: EdgeInsets.only(right: 24.0, top: 8.0, bottom: 8.0),
+            onPressed: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
+              //this.parent.setState(() {});
+            },
+            child: Text("Cerrar",
+                style: TextStyle(
+                    color: Colors.blue, //Color(Const.colorPrimary),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0)),
+          ),
+        ),
+      ),
     );
   }
 }

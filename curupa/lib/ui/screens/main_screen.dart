@@ -64,8 +64,6 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-    //_navigationController = new CircularBottomNavigationController(selectedPos);
-
     isRegistered().then((result) {
       if (result) {
         _globals.setFilePickerGlobal();

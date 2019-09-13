@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class CustomFlatButton extends StatelessWidget {
   final String title;
-  final Color textColor;
+  Color textColor;
   final double fontSize;
   final FontWeight fontWeight;
   final VoidCallback onPressed;
-  final Color color;
+  Color color;
   final Color splashColor;
   final Color borderColor;
   final double borderWidth;

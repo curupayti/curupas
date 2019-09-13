@@ -32,6 +32,8 @@ dependencies:
   youtube_api: ^0.7.2
   fancy_bottom_navigation: ^0.3.2
   firebase_analytics: ^5.0.1
+  keyboard_actions: "^2.1.2"
+  keyboard_visibility: any
 
   #flutter_icons:
   #  image_path: "assets/images/escudo.png"

@@ -10,6 +10,12 @@ class CustomTextField extends StatefulWidget {
   final bool obscureText;
   final Function validator;
   final Function onChanged;
+  final FocusNode focusNode;
+  final TextInputAction inputAction;
+  //final TextOnFieldSubmitted onFieldSubmitted;
+  final ValueChanged<String> onFieldSubmitted;
+  final int maxLength;
+  final TextStyle style;
 
   CustomTextField(
       {this.hint,
@@ -20,7 +26,12 @@ class CustomTextField extends StatefulWidget {
       this.errorColor,
       this.inputType, // = TextInputType.text,
       this.obscureText = false,
-      this.validator});
+      this.validator,
+      this.focusNode,
+      this.inputAction,
+      this.onFieldSubmitted,
+      this.maxLength,
+      this.style});
 
   _CustomTextFieldState createState() => _CustomTextFieldState();
 }
@@ -46,6 +57,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.0),
         child: TextField(
+          style: widget.style,
+          focusNode: widget.focusNode,
+          textInputAction: widget.inputAction,
+          onSubmitted: widget.onFieldSubmitted,
+          maxLength: widget.maxLength,
           obscureText: widget.obscureText,
           onChanged: (text) {
             if (widget.onChanged != null) {
@@ -59,7 +75,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               }
             });
           },
-          //keyboardType: widget.inputType,
+          keyboardType: widget.inputType,
           controller: widget.controller,
           decoration: InputDecoration(
             hintStyle: TextStyle(
