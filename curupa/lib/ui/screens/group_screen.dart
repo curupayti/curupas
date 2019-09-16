@@ -145,8 +145,6 @@ class _GroupScreenState extends State<GroupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //FocusScope.of(context).requestFocus(FocusNode());
-
     return WillPopScope(
       onWillPop: onBackPress,
       child: Scaffold(
