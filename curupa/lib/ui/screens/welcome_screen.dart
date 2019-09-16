@@ -49,6 +49,7 @@ class WelcomeScreen extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 40.0),
             child: CustomFlatButton(
+              enabled: true,
               title: "Ingresa",
               fontSize: 22,
               fontWeight: FontWeight.w700,
@@ -66,6 +67,7 @@ class WelcomeScreen extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 40.0),
             child: CustomFlatButton(
+              enabled: true,
               title: "Registrate",
               fontSize: 22,
               fontWeight: FontWeight.w700,

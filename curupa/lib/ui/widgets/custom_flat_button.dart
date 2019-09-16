@@ -8,8 +8,9 @@ class CustomFlatButton extends StatelessWidget {
   final VoidCallback onPressed;
   Color color;
   final Color splashColor;
-  final Color borderColor;
+  Color borderColor;
   final double borderWidth;
+  bool enabled;
 
   CustomFlatButton(
       {this.title,
@@ -20,12 +21,13 @@ class CustomFlatButton extends StatelessWidget {
       this.color,
       this.splashColor,
       this.borderColor,
-      this.borderWidth});
+      this.borderWidth,
+      this.enabled});
 
   @override
   Widget build(BuildContext context) {
     return FlatButton(
-      onPressed: onPressed,
+      onPressed: enabled ? onPressed : null, //onPressed,
       color: color,
       splashColor: splashColor,
       child: Padding(

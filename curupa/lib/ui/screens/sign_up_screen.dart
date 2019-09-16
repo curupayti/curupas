@@ -56,11 +56,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   //File vars
   String _imagePath;
-  bool _imageSelected;
+  bool _imageSelected = false;
 
   OverlayEntry overlayEntry;
   FocusNode phoneNumberFocusNodeSignUp = new FocusNode();
+  FocusNode passFocusNodeSignUp = new FocusNode();
   InputDoneSignUp inputDoneSignUp;
+
+  CustomFlatButton _regiterButton;
 
   void _rebuild() {
     setState(() {});
@@ -83,7 +86,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       borderColor: Colors.grey[400],
       errorColor: Colors.red,
       controller: _fullname,
-      //autocorrect: false,
       hint: "Nombre completo",
       inputAction: TextInputAction.done,
       validator: Validator.validateName,
@@ -133,15 +135,80 @@ class _SignUpScreenState extends State<SignUpScreen> {
       hint: "Contraseña",
       validator: Validator.validatePassword,
       inputAction: TextInputAction.done,
+      focusNode: passFocusNodeSignUp,
     );
+
+    createRegisterButton(false);
 
     phoneNumberFocusNodeSignUp.addListener(() {
       bool hasFocus = phoneNumberFocusNodeSignUp.hasFocus;
-      if (hasFocus)
+      if (hasFocus) {
         showOverlay(context);
-      else
+      } else {
         removeOverlay();
+      }
     });
+
+    passFocusNodeSignUp.addListener(() {
+      bool hasFocus = passFocusNodeSignUp.hasFocus;
+      if (!hasFocus) {
+        bool completed = true;
+        if (!_imageSelected) {
+          completed = false;
+        } else if (_fullname.text.isEmpty) {
+          completed = false;
+        } else if (_number.text.isEmpty) {
+          completed = false;
+        } else if (_birthday.text.isEmpty) {
+          completed = false;
+        } else if (_email.text.isEmpty) {
+          completed = false;
+        } else if (_password.text.isEmpty) {
+          completed = false;
+        }
+        if (completed) {
+          enableButton();
+        }
+      }
+    });
+  }
+
+  void enableButton() {
+    createRegisterButton(true);
+    _rebuild();
+  }
+
+  void createRegisterButton(bool enabled) {
+    Color color, borderColor, textColor;
+    if (enabled) {
+      color = Color.fromRGBO(59, 89, 152, 1.0);
+      borderColor = Color.fromRGBO(59, 89, 152, 1.0);
+      textColor = Colors.white;
+    } else {
+      color = Colors.black26;
+      borderColor = Colors.black54;
+      textColor = Colors.black26;
+    }
+    _regiterButton = CustomFlatButton(
+      title: "Registrate",
+      fontSize: 22,
+      fontWeight: FontWeight.w700,
+      textColor: textColor, //Colors.white,
+      enabled: enabled,
+      onPressed: () {
+        _signUp(
+            fullname: _fullname.text,
+            number: _number.text,
+            birthday: _birthday.text,
+            email: _email.text,
+            password: _password.text,
+            context: context);
+      },
+      splashColor: Colors.black12,
+      borderColor: borderColor, //Color.fromRGBO(59, 89, 152, 1.0),
+      borderWidth: 0,
+      color: color, //Color.fromRGBO(59, 89, 152, 1.0),
+    );
   }
 
   void _fieldFocusChange(
@@ -343,25 +410,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           vertical: 25.0, horizontal: 40.0),
-                      child: CustomFlatButton(
-                        title: "Registrate",
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        textColor: Colors.white,
-                        onPressed: () {
-                          _signUp(
-                              fullname: _fullname.text,
-                              number: _number.text,
-                              birthday: _birthday.text,
-                              email: _email.text,
-                              password: _password.text,
-                              context: context);
-                        },
-                        splashColor: Colors.black12,
-                        borderColor: Color.fromRGBO(59, 89, 152, 1.0),
-                        borderWidth: 0,
-                        color: Color.fromRGBO(59, 89, 152, 1.0),
-                      ),
+                      child: _regiterButton,
                     ),
                   ],
                 ),
@@ -433,8 +482,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         Validator.validateEmail(email) &&
         Validator.validateNumber(number) &&
         Validator.validateBirthday(birthday) &&
-        Validator.validatePassword(password) &&
-        _imageSelected) {
+        Validator.validatePassword(password)) {
       setState(() {
         _loadingInProgress = true;
       });
@@ -474,7 +522,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 prefs.setBool('registered', true);
                 prefs.setString('userId', uID);
                 if (inputDoneSignUp != null) {
-                  //phoneNumberFocusNodeSignUp.dispose();
                   phoneNumberFocusNodeSignUp = null;
                   inputDoneSignUp = null;
                 }

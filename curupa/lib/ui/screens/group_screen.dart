@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:onboarding_flow/business/auth.dart';
 import 'package:onboarding_flow/business/validator.dart';
 import 'package:onboarding_flow/models/group.dart';
@@ -43,6 +42,7 @@ class _GroupScreenState extends State<GroupScreen> {
 
   //Public for being changed via InputDoneGroup
   //CustomFlatButton _createGroupButton;
+  CustomFlatButton _saveGroupButton;
 
   void _rebuild() {
     setState(() {});
@@ -52,24 +52,8 @@ class _GroupScreenState extends State<GroupScreen> {
   void initState() {
     super.initState();
 
-    /*_createGroupButton = CustomFlatButton(
-      title: "Crear Nueva Camada",
-      fontSize: 22,
-      fontWeight: FontWeight.w700,
-      textColor: Colors.black12,
-      onPressed: () {
-        _createNewGroup();
-      },
-      splashColor: Colors.black12,
-      borderColor: Colors.grey, //Color.fromRGBO(59, 89, 152, 1.0),
-      borderWidth: 0,
-      color: Colors.grey, //Color.fromRGBO(212, 20, 15, 1.0),
-    );*/
+    setButtonEnabled(false);
 
-    //SharedPreferences prefs = await SharedPreferences.getInstance();
-    //bool registered = prefs.getBool('registered');
-
-    //if (registered) {
     phoneNumberFocusNodeGroup.addListener(() {
       bool hasFocus = phoneNumberFocusNodeGroup.hasFocus;
       if (hasFocus)
@@ -103,6 +87,7 @@ class _GroupScreenState extends State<GroupScreen> {
     getGroupsList().then((val) => setState(() {
           _loadingInProgress = false;
           _groupMenuItems = val;
+          print(_groupMenuItems.length);
           _currentItem = _groupMenuItems[0].value;
           _currentGroup = getGroupById(_currentItem);
         }));
@@ -110,6 +95,38 @@ class _GroupScreenState extends State<GroupScreen> {
     onBackPress = () {
       Navigator.of(context).pop();
     };
+  }
+
+  void enableButton() {
+    setButtonEnabled(true);
+    _rebuild();
+  }
+
+  void setButtonEnabled(bool enabled) {
+    Color color, borderColor, textColor;
+    if (enabled) {
+      color = Color.fromRGBO(59, 89, 152, 1.0);
+      borderColor = Color.fromRGBO(59, 89, 152, 1.0);
+      textColor = Colors.white;
+    } else {
+      color = Colors.black26;
+      borderColor = Colors.black54;
+      textColor = Colors.black26;
+    }
+    _saveGroupButton = CustomFlatButton(
+      title: "Guardar Camada",
+      enabled: enabled,
+      fontSize: 22,
+      fontWeight: FontWeight.w700,
+      textColor: textColor,
+      onPressed: () {
+        _saveGroup(context);
+      },
+      splashColor: Colors.black12,
+      borderColor: borderColor,
+      borderWidth: 0,
+      color: color, //
+    );
   }
 
   Future<List<DropdownMenuItem<String>>> getGroupsList() async {
@@ -223,19 +240,7 @@ class _GroupScreenState extends State<GroupScreen> {
                       padding: const EdgeInsets.only(
                           top: 30.0, left: 30.0, right: 30.0),
                       //symmetric(vertical: 25.0, horizontal: 40.0),
-                      child: CustomFlatButton(
-                        title: "Guardar Camada Elegida",
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        textColor: Colors.white,
-                        onPressed: () {
-                          _saveGroup(context);
-                        },
-                        splashColor: Colors.black12,
-                        borderColor: Color.fromRGBO(59, 89, 152, 1.0),
-                        borderWidth: 0,
-                        color: Color.fromRGBO(59, 89, 152, 1.0),
-                      ),
+                      child: _saveGroupButton,
                     ),
                   ],
                 ),
@@ -280,18 +285,25 @@ class _GroupScreenState extends State<GroupScreen> {
               "La camada que intentas agregar ya existe, seleccionala en el menu.",
           onPressed: _closeDialog,
         );
-        _newGroup.clear();
+        setState(() {
+          _newGroup.clear();
+        });
       } else {
         Auth.addGroup(year).then((groupRef) async {
           DocumentSnapshot docsnapshot = await groupRef.get();
           if (docsnapshot.exists) {
             String year = docsnapshot['year'];
             String documentID = docsnapshot.documentID;
+            _groups = new List();
             _loadingInProgress = true;
             getGroupsList().then((val) => setState(() {
+                  _newGroup.clear();
                   _loadingInProgress = false;
+                  _groupMenuItems = new List();
                   _groupMenuItems = val;
+                  print(_groupMenuItems.length);
                   _currentGroup = getGroupById(documentID);
+                  print(_currentGroup.year);
                   _currentItem = _currentGroup.year;
                 }));
           }

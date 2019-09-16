@@ -159,6 +159,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
                   borderColor: Colors.white,
                   borderWidth: 2,
                   color: Color.fromRGBO(191, 4, 17, 1.0),
+                  enabled: false,
                 ),
               ),
             ],
