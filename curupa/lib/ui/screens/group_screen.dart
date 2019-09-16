@@ -83,7 +83,6 @@ class _GroupScreenState extends State<GroupScreen> {
     //}
 
     _loadingInProgress = true;
-
     getGroupsList().then((val) => setState(() {
           _loadingInProgress = false;
           _groupMenuItems = val;
@@ -162,6 +161,8 @@ class _GroupScreenState extends State<GroupScreen> {
         child: new CircularProgressIndicator(),
       );
     } else {
+      print(_currentItem);
+      print(_groupMenuItems.length);
       return new Center(
         child: Stack(
           children: <Widget>[
@@ -260,9 +261,10 @@ class _GroupScreenState extends State<GroupScreen> {
 
   void changedGroupItem(String selected) {
     setState(() {
+      _loadingInProgress = false;
       _currentItem = selected;
+      _currentGroup = getGroupById(selected);
     });
-    _currentGroup = getGroupById(selected);
   }
 
   Group getGroupById(String documentId) {
@@ -272,6 +274,7 @@ class _GroupScreenState extends State<GroupScreen> {
         g = _groups[i];
       }
     }
+    print(g.year);
     return g;
   }
 
@@ -294,18 +297,20 @@ class _GroupScreenState extends State<GroupScreen> {
           if (docsnapshot.exists) {
             String year = docsnapshot['year'];
             String documentID = docsnapshot.documentID;
-            _groups = new List();
             _loadingInProgress = true;
-            getGroupsList().then((val) => setState(() {
-                  _newGroup.clear();
-                  _loadingInProgress = false;
-                  _groupMenuItems = new List();
-                  _groupMenuItems = val;
-                  print(_groupMenuItems.length);
-                  _currentGroup = getGroupById(documentID);
-                  print(_currentGroup.year);
-                  _currentItem = _currentGroup.year;
-                }));
+            _groups = new List();
+            //_groupMenuItems = new List();
+            getGroupsList().then((val) /*=> setState(()*/ {
+              _newGroup.clear();
+              _groupMenuItems = val;
+              print(_groupMenuItems.length);
+              //_currentGroup = getGroupById(documentID);
+              //print(_currentGroup.year);
+              //_currentItem = _currentGroup.year;
+              //print(_currentItem);
+              //_rebuild();
+              changedGroupItem(documentID);
+            });
           }
         });
       }
