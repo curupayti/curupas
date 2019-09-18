@@ -1,15 +1,11 @@
 import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:onboarding_flow/business/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:onboarding_flow/models/description.dart';
 import 'package:onboarding_flow/models/feeds.dart';
-import 'package:onboarding_flow/models/group.dart';
 import 'package:onboarding_flow/models/streaming.dart';
-import 'package:onboarding_flow/models/user.dart';
 import 'package:onboarding_flow/ui/screens/pages/group_page.dart';
 import 'package:onboarding_flow/ui/screens/pages/home_page.dart';
 import 'package:onboarding_flow/ui/screens/pages/profile_page.dart';
@@ -67,10 +63,15 @@ class _MainScreenState extends State<MainScreen> {
     isRegistered().then((result) {
       if (result) {
         _globals.setFilePickerGlobal();
-        getUserData();
+        String userId = prefs.getString('userId');
+        bool group = prefs.getBool('group');
+        if (group == null) {
+          group = false;
+        }
+        _globals.getUserData(userId, group);
+        getDescription();
       }
     });
-
     super.initState();
   }
 
@@ -204,27 +205,6 @@ class _MainScreenState extends State<MainScreen> {
           },
         ),
       );
-    }
-  }
-
-  void getUserData() async {
-    String userId = prefs.getString('userId');
-    if (userId != null) {
-      Stream<User> userStream = Auth.getUser(userId);
-      userStream.listen((User _user) async {
-        Auth.getUserDocumentReference(_user.userID).then((doc) async {
-          DocumentReference groupRef = _user.groupRef;
-          _user.userRef = doc;
-          DocumentSnapshot docsnapshot = await groupRef.get();
-          if (docsnapshot.exists) {
-            String year = docsnapshot['year'];
-            String documentID = docsnapshot.documentID;
-            _globals.group = new Group(year: year, documentID: documentID);
-          }
-          _globals.user = _user;
-          getDescription();
-        });
-      });
     }
   }
 

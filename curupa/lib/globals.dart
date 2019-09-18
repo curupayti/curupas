@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,8 +11,10 @@ import 'package:onboarding_flow/models/description.dart';
 import 'package:onboarding_flow/models/feeds.dart';
 import 'package:onboarding_flow/models/group.dart';
 import 'package:onboarding_flow/models/user.dart';
+import 'package:onboarding_flow/ui/widgets/custom_alert_dialog.dart';
 import 'package:youtube_api/youtube_api.dart';
 import 'package:file_picker/file_picker.dart';
+import 'business/auth.dart';
 import 'models/streaming.dart';
 import 'package:path/path.dart' as p;
 
@@ -22,6 +25,27 @@ List<Feed> feeds = new List<Feed>();
 Data dataFeed;
 Streammer streammer;
 FilePickerGlobal filePickerGlobal;
+
+void getUserData(String userId, bool hasGroup) async {
+  if (userId != null) {
+    Stream<User> userStream = Auth.getUser(userId);
+    userStream.listen((User _user) async {
+      Auth.getUserDocumentReference(_user.userID).then((doc) async {
+        _user.userRef = doc;
+        user = _user;
+        if (hasGroup) {
+          DocumentReference groupRef = _user.groupRef;
+          DocumentSnapshot docsnapshot = await groupRef.get();
+          if (docsnapshot.exists) {
+            String year = docsnapshot['year'];
+            String documentID = docsnapshot.documentID;
+            group = new Group(year: year, documentID: documentID);
+          }
+        }
+      });
+    });
+  }
+}
 
 class Streammer {
   List<YT_API> ytResult = [];
@@ -71,6 +95,24 @@ void setDataFeed(String desc, List<Feed> feeds) {
     location: 'Hurlingham, Buenos Aires',
     biography: desc,
     feeds: feeds,
+  );
+}
+
+void showErrorAlert(
+    {BuildContext context,
+    String title,
+    String content,
+    VoidCallback onPressed}) {
+  showDialog(
+    barrierDismissible: true,
+    context: context,
+    builder: (context) {
+      return CustomAlertDialog(
+        content: content,
+        title: title,
+        onPressed: onPressed,
+      );
+    },
   );
 }
 

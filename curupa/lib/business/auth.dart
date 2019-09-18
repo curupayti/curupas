@@ -13,7 +13,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum authProblems { UserNotFound, PasswordNotValid, NetworkError, UnknownError }
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-//final googleSignIn = new GoogleSignIn();
 
 SharedPreferences prefs;
 

@@ -39,10 +39,11 @@ class _GroupScreenState extends State<GroupScreen> {
 
   OverlayEntry overlayEntry;
   FocusNode phoneNumberFocusNodeGroup = new FocusNode();
-
-  //Public for being changed via InputDoneGroup
-  //CustomFlatButton _createGroupButton;
   CustomFlatButton _saveGroupButton;
+
+  Text _newGroupText;
+
+  SharedPreferences prefs;
 
   void _rebuild() {
     setState(() {});
@@ -51,6 +52,8 @@ class _GroupScreenState extends State<GroupScreen> {
   @override
   void initState() {
     super.initState();
+
+    isUserId();
 
     setButtonEnabled(false);
 
@@ -62,13 +65,15 @@ class _GroupScreenState extends State<GroupScreen> {
         removeOverlay();
     });
 
+    _createNewTextGroup("Si tu camada no esta en el menu crea una nueva");
+    _setButtonEnabled(false);
+
     _newGroupField = new CustomTextField(
       baseColor: Colors.grey,
       borderColor: Colors.grey[400],
       errorColor: Colors.red,
       controller: _newGroup,
       maxLength: 4,
-      //fontSize: 20.0,
       style: new TextStyle(
         fontSize: 25.0,
         height: 1.5,
@@ -80,15 +85,14 @@ class _GroupScreenState extends State<GroupScreen> {
       validator: Validator.validateShortNumber,
       focusNode: phoneNumberFocusNodeGroup,
     );
-    //}
 
     _loadingInProgress = true;
+
     getGroupsList().then((val) => setState(() {
           _loadingInProgress = false;
           _groupMenuItems = val;
           print(_groupMenuItems.length);
           _currentItem = _groupMenuItems[0].value;
-          _currentGroup = getGroupById(_currentItem);
         }));
 
     onBackPress = () {
@@ -96,7 +100,20 @@ class _GroupScreenState extends State<GroupScreen> {
     };
   }
 
-  void enableButton() {
+  void isUserId() async {
+    String userId = await getUserId();
+    if (userId != "" && userId != null) {
+      _globals.getUserData(userId, false);
+    }
+  }
+
+  Future<String> getUserId() async {
+    prefs = await SharedPreferences.getInstance();
+    String userId = prefs.getString('userId');
+    return userId;
+  }
+
+  void _enableButton() {
     setButtonEnabled(true);
     _rebuild();
   }
@@ -189,7 +206,6 @@ class _GroupScreenState extends State<GroupScreen> {
                       padding: const EdgeInsets.only(
                           top: 30.0, left: 20.0, right: 20.0),
                       child: new Container(
-                        //color: Colors.grey,
                         child: new Center(
                             child: new Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -210,7 +226,7 @@ class _GroupScreenState extends State<GroupScreen> {
                                   fontSize: 35.0,
                                   color: Colors.black,
                                   backgroundColor: Colors.white),
-                              onChanged: changedGroupItem,
+                              onChanged: _changedGroupItem,
                             )
                           ],
                         )),
@@ -219,26 +235,16 @@ class _GroupScreenState extends State<GroupScreen> {
                     Padding(
                       padding:
                           EdgeInsets.only(top: 20.0, left: 50.0, right: 50.0),
-                      child: new Text(
-                          "Si tu camada no esta en el menu crea una nueva",
-                          style: TextStyle(fontSize: 26.0, color: Colors.grey),
-                          textAlign: TextAlign.center),
+                      child: _newGroupText,
                     ),
                     Padding(
                       padding:
                           EdgeInsets.only(top: 20.0, left: 50.0, right: 50.0),
                       child: _newGroupField,
                     ),
-                    /*Padding(
-                      padding: const EdgeInsets.only(
-                          top: 30.0, left: 30.0, right: 30.0),
-                      //symmetric(vertical: 25.0, horizontal: 40.0),
-                      child: _createGroupButton,
-                    ),*/
                     Padding(
                       padding: const EdgeInsets.only(
                           top: 30.0, left: 30.0, right: 30.0),
-                      //symmetric(vertical: 25.0, horizontal: 40.0),
                       child: _saveGroupButton,
                     ),
                   ],
@@ -257,22 +263,69 @@ class _GroupScreenState extends State<GroupScreen> {
     }
   }
 
-  void changedGroupItem(String selected) {
+  void _createNewTextGroup(String text) {
+    _newGroupText = new Text(text,
+        style: TextStyle(fontSize: 26.0, color: Colors.grey),
+        textAlign: TextAlign.center);
+  }
+
+  void _groupSelected(String selected) {
     setState(() {
-      _loadingInProgress = false;
-      _currentItem = selected;
-      _currentGroup = getGroupById(selected);
+      _createNewTextGroup(
+          "Elegiste la camada ${selected}, pulsa el boton de guardar");
+      _enableButton();
     });
   }
 
-  Group getGroupById(String documentId) {
+  void _setButtonEnabled(bool enabled) {
+    Color color, borderColor, textColor;
+    if (enabled) {
+      color = Color.fromRGBO(59, 89, 152, 1.0);
+      borderColor = Color.fromRGBO(59, 89, 152, 1.0);
+      textColor = Colors.white;
+    } else {
+      color = Colors.black26;
+      borderColor = Colors.black54;
+      textColor = Colors.black26;
+    }
+    _saveGroupButton = CustomFlatButton(
+      title: "Guardar Camada",
+      enabled: enabled,
+      fontSize: 22,
+      fontWeight: FontWeight.w700,
+      textColor: textColor,
+      onPressed: () {
+        _saveGroup(context);
+      },
+      splashColor: Colors.black12,
+      borderColor: borderColor,
+      borderWidth: 0,
+      color: color,
+    );
+  }
+
+  void _changedGroupItem(String selected) {
+    setState(() {
+      _loadingInProgress = false;
+      _currentItem = selected;
+      if (selected != null) {
+        _currentGroup = _getGroupById(selected);
+        String groupId = _currentGroup.documentID;
+        String year = _currentGroup.year;
+        print(year);
+        print(groupId);
+        _groupSelected(year);
+      }
+    });
+  }
+
+  Group _getGroupById(String documentId) {
     Group g;
     for (int i = 0; i < _groups.length; i++) {
       if (_groups[i].documentID == documentId) {
         g = _groups[i];
       }
     }
-    print(g.year);
     return g;
   }
 
@@ -280,7 +333,8 @@ class _GroupScreenState extends State<GroupScreen> {
     String year = _newGroup.text;
     Auth.checkGroupExist(year).then((result) {
       if (result) {
-        _showErrorAlert(
+        _globals.showErrorAlert(
+          context: context,
           title: "La camada ya existe",
           content:
               "La camada que intentas agregar ya existe, seleccionala en el menu.",
@@ -297,17 +351,11 @@ class _GroupScreenState extends State<GroupScreen> {
             String documentID = docsnapshot.documentID;
             _loadingInProgress = true;
             _groups = new List();
-            //_groupMenuItems = new List();
-            getGroupsList().then((val) /*=> setState(()*/ {
+            getGroupsList().then((val) {
               _newGroup.clear();
               _groupMenuItems = val;
-              print(_groupMenuItems.length);
-              //_currentGroup = getGroupById(documentID);
-              //print(_currentGroup.year);
-              //_currentItem = _currentGroup.year;
-              //print(_currentItem);
-              //_rebuild();
-              changedGroupItem(documentID);
+              _changedGroupItem(documentID);
+              _groupSelected(year);
             });
           }
         });
@@ -316,21 +364,19 @@ class _GroupScreenState extends State<GroupScreen> {
   }
 
   void _saveGroup(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('group', true);
-
     String userId = _globals.user.userID;
     String groupId = _currentGroup.documentID;
+    String year = _currentGroup.year;
 
     DocumentReference groupRef =
         Firestore.instance.collection('groups').document(groupId);
 
-    Firestore.instance
-        .collection('users')
-        .document(userId)
-        .updateData({'groupRef': groupRef}).then((userUpdated) async {
+    Firestore.instance.collection('users').document(userId).updateData(
+        {'groupRef': groupRef, "group": year}).then((userUpdated) async {
       _globals.user.groupRef = groupRef;
-      _showErrorAlert(
+      _globals.showErrorAlert(
+        context: context,
         title: "Registración completa",
         content: "Has completado la registraciónc on éxito. ",
         onPressed: _closeDialog,
@@ -350,20 +396,6 @@ class _GroupScreenState extends State<GroupScreen> {
         (Route<dynamic> route) => false);
   }
 
-  void _showErrorAlert({String title, String content, VoidCallback onPressed}) {
-    showDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (context) {
-        return CustomAlertDialog(
-          content: content,
-          title: title,
-          onPressed: onPressed,
-        );
-      },
-    );
-  }
-
   showOverlayGroup(BuildContext context) {
     if (overlayEntry != null) return;
     OverlayState overlayState = Overlay.of(context);
@@ -374,7 +406,6 @@ class _GroupScreenState extends State<GroupScreen> {
           left: 0.0,
           child: InputDoneGroup(this));
     });
-
     overlayState.insert(overlayEntry);
   }
 
@@ -387,7 +418,6 @@ class _GroupScreenState extends State<GroupScreen> {
 
   @override
   void dispose() {
-    // Clean up the focus node when the Form is disposed.
     phoneNumberFocusNodeGroup.dispose();
     super.dispose();
   }
@@ -396,12 +426,11 @@ class _GroupScreenState extends State<GroupScreen> {
 class InputDoneGroup extends StatelessWidget {
   _GroupScreenState parent;
   InputDoneGroup(this.parent);
-
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: Colors.grey, //Color(Const.doneButtonBg),
+      color: Colors.grey,
       child: Align(
         alignment: Alignment.topRight,
         child: Padding(
@@ -410,10 +439,10 @@ class InputDoneGroup extends StatelessWidget {
             padding: EdgeInsets.only(right: 24.0, top: 8.0, bottom: 8.0),
             onPressed: () {
               FocusScope.of(context).requestFocus(new FocusNode());
-
               String year = this.parent._newGroup.text;
               if (year.length != 4) {
-                this.parent._showErrorAlert(
+                _globals.showErrorAlert(
+                    context: context,
                     title: "Error de formato",
                     content: "Debes cargar el años con cuatro digitos",
                     onPressed: () {

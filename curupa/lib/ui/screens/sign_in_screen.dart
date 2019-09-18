@@ -6,6 +6,7 @@ import 'package:onboarding_flow/business/validator.dart';
 import 'package:flutter/services.dart';
 import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
 import 'package:onboarding_flow/ui/widgets/custom_alert_dialog.dart';
+import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:onboarding_flow/models/user.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -187,7 +188,8 @@ class _SignInScreenState extends State<SignInScreen> {
       } catch (e) {
         print("Error in email sign in: $e");
         String exception = Auth.getExceptionText(e);
-        _showErrorAlert(
+        _globals.showErrorAlert(
+          context: context,
           title: "Login failed",
           content: exception,
           onPressed: _changeBlackVisible,
@@ -225,25 +227,12 @@ class _SignInScreenState extends State<SignInScreen> {
     } catch (e) {
       print("Error in facebook sign in: $e");
       String exception = Auth.getExceptionText(e);
-      _showErrorAlert(
+      _globals.showErrorAlert(
+        context: context,
         title: "Login failed",
         content: exception,
         onPressed: _changeBlackVisible,
       );
     }
-  }
-
-  void _showErrorAlert({String title, String content, VoidCallback onPressed}) {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) {
-        return CustomAlertDialog(
-          content: content,
-          title: title,
-          onPressed: onPressed,
-        );
-      },
-    );
   }
 }

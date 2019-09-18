@@ -492,23 +492,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         await Auth.signUp(email, password).then((uID) async {
           if (_imageSelected) {
-            //-
-            //Uploading file
-            /*String extension = p.extension(_imagePath);
-            String fileName =
-                Random().nextInt(1000000).toString() + '$extension';
-            final StorageReference storageRef =
-                FirebaseStorage.instance.ref().child(fileName);
-            final StorageUploadTask uploadTask =
-                storageRef.putFile(File(_imagePath));
-            final StreamSubscription<StorageTaskEvent> streamSubscription =
-                uploadTask.events.listen((event) {
-              print('EVENT ${event.type}');
-            });
-            final StorageTaskSnapshot downloadUrl =
-                (await uploadTask.onComplete);
-            final String url = (await downloadUrl.ref.getDownloadURL());
-            streamSubscription.cancel();*/
             _globals.filePickerGlobal.uploadFile(_imagePath).then((url) async {
               User user = new User(
                   userID: uID,
@@ -537,7 +520,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       } catch (e) {
         print("Error in sign up: $e");
         String exception = Auth.getExceptionText(e);
-        _showErrorAlert(
+        _globals.showErrorAlert(
+          context: context,
           title: "Signup failed",
           content: exception,
           onPressed: _changeBlackVisible,
@@ -553,20 +537,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() {
       _blackVisible = !_blackVisible;
     });
-  }
-
-  void _showErrorAlert({String title, String content, VoidCallback onPressed}) {
-    showDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (context) {
-        return CustomAlertDialog(
-          content: content,
-          title: title,
-          onPressed: onPressed,
-        );
-      },
-    );
   }
 }
 
