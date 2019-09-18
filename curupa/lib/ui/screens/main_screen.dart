@@ -186,14 +186,15 @@ class _MainScreenState extends State<MainScreen> {
                 child: currentPage,
                 bucket: bucket,
               ),
-              padding: EdgeInsets.only(bottom: bottomNavBarHeight),
+              padding: EdgeInsets.only(
+                  bottom:
+                      0.0), //bottomNavBarHeight), //Modificar esto o sacar padding.
             ),
-            //Align(alignment: Alignment.bottomCenter, child: bottomNav())
           ],
         ),
         bottomNavigationBar: FancyBottomNavigation(
           tabs: tabItems,
-          circleColor: Color(0xFF0bf0411),
+          circleColor: Color.fromRGBO(223, 0, 9, 1), //,Color(0xFF0bf0411),
           inactiveIconColor: Color(0xFF0bf0411),
           initialSelection: 0,
           key: bottomNavigationKey,
@@ -265,7 +266,7 @@ class _MainScreenState extends State<MainScreen> {
     pageTitle = pageTitles[0];
     tabItems = List.of([
       new TabData(iconData: Icons.home, title: pageTitles[0]),
-      new TabData(iconData: Icons.view_stream, title: pageTitles[1]),
+      new TabData(iconData: Icons.videocam, title: pageTitles[1]),
       new TabData(iconData: Icons.group_work, title: pageTitles[2]),
       new TabData(iconData: Icons.account_circle, title: pageTitles[3]),
     ]);

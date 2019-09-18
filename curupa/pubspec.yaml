@@ -34,6 +34,7 @@ dependencies:
   firebase_analytics: ^5.0.1
   keyboard_actions: "^2.1.2"
   keyboard_visibility: any
+  flutter_speed_dial: ^1.2.1
 
   #flutter_icons:
   #  image_path: "assets/images/escudo.png"
@@ -67,6 +68,7 @@ flutter:
     - assets/images/curupa_anexo.png
     - assets/images/cancha.png
     - assets/images/test.png
+    - assets/images/camadas.png
   #  - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.

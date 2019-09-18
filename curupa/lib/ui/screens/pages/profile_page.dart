@@ -8,46 +8,12 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  //Image _avatarImage = Image.asset("assets/images/default.png");
+class _ProfilePageState extends State<ProfilePage> { 
 
   @override
   void initState() {
-    super.initState();
-    //print(_globals.user.name);
+    super.initState();   
   }
-
-  /*@override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Container(
-                height: 100.0,
-                width: 100.0,
-                child: new Container(
-                  width: 200.0,
-                  height: 200.0,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white30),
-                  ),
-                  margin: const EdgeInsets.only(top: 32.0, left: 16.0),
-                  padding: const EdgeInsets.all(3.0),
-                  child: ClipOval(
-                    child: _avatarImage,
-                  ),
-                )),
-            Text("Name: ${_globals.user.name}"),
-            Text("Email: ${_globals.user.email}"),
-          ],
-        ),
-      ),
-    );
-  }*/
 
   @override
   Widget build(BuildContext context) {
