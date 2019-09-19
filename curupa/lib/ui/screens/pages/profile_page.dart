@@ -1,26 +1,11 @@
 import "package:flutter/material.dart";
-import 'package:onboarding_flow/business/auth.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
 
 class ProfilePage extends StatefulWidget {
   ProfilePage({Key key}) : super(key: key);
   @override
   _ProfilePageState createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> { 
-
-  @override
-  void initState() {
-    super.initState();   
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: MyProfilePage(),
-    );
-  }
 }
 
 var color1 = Color(0xFFa572c0);
@@ -30,390 +15,74 @@ var profileImage = NetworkImage(
 
 bool _status = true;
 
-class MyProfilePage extends StatelessWidget {
+final TextEditingController _fullnameController = new TextEditingController();
+final TextEditingController _groupController = new TextEditingController();
+final TextEditingController _emailController = new TextEditingController();
+final TextEditingController _phoneController = new TextEditingController();
+final TextEditingController _birthdayController = new TextEditingController();
+
+class _ProfilePageState extends State<ProfilePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: ProfilePageScreen(),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fullnameController.text = _globals.user.name;
+    _groupController.text = _globals.group.year;
+    _emailController.text = _globals.user.email;
+    _phoneController.text = _globals.user.phone;
+    _birthdayController.text = _globals.user.birthday;
+  }
+}
+
+class ProfilePageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: <Widget>[
-          SizedBox(
-            height: 8.0,
-          ),
           UpperSection(),
-          //SizedBox(
-          //  height: 32.0,
-          //),
-          MiddleSection(), //https://medium.com/@agungsurya/create-a-simple-animated-floatingactionbutton-in-flutter-2d24f37cfbcc
-          Spacer(),
-          //BottomSection(),
+          MiddleSection(),
         ],
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 50.0, right: 30),
-        child: FloatingActionButton(
-          onPressed: () {
-            // Add your onPressed code here!
-          },
-          child: Icon(Icons.add),
-          backgroundColor: Colors.red,
-          foregroundColor: Colors.white,
-        ),
-      ),
+      floatingActionButton: buildSpeedDial(),
     );
   }
 }
 
-/*class BottomSection extends StatelessWidget {
-  const BottomSection({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 50.0,
-      color: color1.withOpacity(0.2),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Text('Security & Data'),
-                SizedBox(
-                  width: 16.0,
-                ),
-                Text('Settings'),
-              ],
-            ),
-            Text('Help')
-          ],
-        ),
-      ),
-    );
-  }
-}*/
-
-class MiddleSection extends StatelessWidget {
-  const MiddleSection({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return new Container(
-      color: Color(0xffFFFFFF),
-      child: Padding(
-        padding: EdgeInsets.only(bottom: 25.0),
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 25.0),
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        new Text(
-                          'Parsonal Information',
-                          style: TextStyle(
-                              fontSize: 18.0, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        _status ? _getEditIcon() : new Container(),
-                      ],
-                    )
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 25.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        new Text(
-                          'Name',
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Flexible(
-                      child: new TextField(
-                        decoration: const InputDecoration(
-                          hintText: "Enter Your Name",
-                        ),
-                        enabled: !_status,
-                        autofocus: !_status,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 25.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        new Text(
-                          'Email ID',
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Flexible(
-                      child: new TextField(
-                        decoration:
-                            const InputDecoration(hintText: "Enter Email ID"),
-                        enabled: !_status,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 25.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        new Text(
-                          'Mobile',
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Flexible(
-                      child: new TextField(
-                        decoration: const InputDecoration(
-                            hintText: "Enter Mobile Number"),
-                        enabled: !_status,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 25.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(
-                      child: Container(
-                        child: new Text(
-                          'Pin Code',
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      flex: 2,
-                    ),
-                    Expanded(
-                      child: Container(
-                        child: new Text(
-                          'State',
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      flex: 2,
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Flexible(
-                      child: Padding(
-                        padding: EdgeInsets.only(right: 10.0),
-                        child: new TextField(
-                          decoration:
-                              const InputDecoration(hintText: "Enter Pin Code"),
-                          enabled: !_status,
-                        ),
-                      ),
-                      flex: 2,
-                    ),
-                    Flexible(
-                      child: new TextField(
-                        decoration:
-                            const InputDecoration(hintText: "Enter State"),
-                        enabled: !_status,
-                      ),
-                      flex: 2,
-                    ),
-                  ],
-                )),
-            !_status ? _getActionButtons() : new Container(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _getEditIcon() {
-    return new GestureDetector(
-      child: new CircleAvatar(
-        backgroundColor: Colors.red,
-        radius: 14.0,
-        child: new Icon(
-          Icons.edit,
-          color: Colors.white,
-          size: 16.0,
-        ),
-      ),
-      onTap: () {
-        /*setState(() {
-          _status = false;
-        });*/
-      },
-    );
-  }
-
-  Widget _getActionButtons() {
-    return Padding(
-      padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 45.0),
-      child: new Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(right: 10.0),
-              child: Container(
-                  child: new RaisedButton(
-                child: new Text("Save"),
-                textColor: Colors.white,
-                color: Colors.green,
-                onPressed: () {
-                  /*setState(() {
-                    _status = true;
-                    FocusScope.of(context).requestFocus(new FocusNode());
-                  });*/
-                },
-                shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(20.0)),
-              )),
-            ),
-            flex: 2,
-          ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(left: 10.0),
-              child: Container(
-                  child: new RaisedButton(
-                child: new Text("Cancel"),
-                textColor: Colors.white,
-                color: Colors.red,
-                onPressed: () {
-                  /*setState(() {
-                    _status = true;
-                    FocusScope.of(context).requestFocus(new FocusNode());
-                  })*/
-                  ;
-                },
-                shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(20.0)),
-              )),
-            ),
-            flex: 2,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ItemCard extends StatelessWidget {
-  final icon;
-  final name;
-  final tasks;
-  const ItemCard(this.icon, this.name, this.tasks);
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: Container(
-        height: 160.0,
-        width: 120.0,
-        decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-                colors: [color1, color2])),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Icon(
-                icon,
-                color: Colors.white,
-              ),
-              Spacer(),
-              Text(
-                name,
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(
-                height: 4.0,
-              ),
-              Text(
-                tasks,
-                style: TextStyle(color: Colors.white.withOpacity(0.6)),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+SpeedDial buildSpeedDial() {
+  return SpeedDial(
+    marginRight: 25,
+    marginBottom: 50,
+    animatedIcon: AnimatedIcons.menu_close,
+    animatedIconTheme: IconThemeData(size: 22.0),
+    visible: true,
+    closeManually: false,
+    curve: Curves.bounceIn,
+    overlayColor: Colors.black,
+    overlayOpacity: 0.5,
+    onOpen: () => print('OPENING DIAL'),
+    onClose: () => print('DIAL CLOSED'),
+    tooltip: 'Menu',
+    heroTag: 'speed-dial-hero-tag',
+    backgroundColor: Colors.white,
+    foregroundColor: Colors.black,
+    elevation: 8.0,
+    shape: CircleBorder(),
+    children: [
+      SpeedDialChild(
+          child: Icon(Icons.edit, color: Colors.white),
+          backgroundColor: Color.fromRGBO(0, 29, 126, 1),
+          label: 'Editar perfil',
+          labelStyle: TextStyle(fontSize: 18.0),
+          onTap: () => print('FIRST CHILD')),
+    ],
+  );
 }
 
 class UpperSection extends StatelessWidget {
@@ -429,43 +98,40 @@ class UpperSection extends StatelessWidget {
           padding: EdgeInsets.all(32.0),
           child: Column(
             children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 10.0),
-                child: new Stack(fit: StackFit.loose, children: <Widget>[
-                  new Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      new Container(
-                        width: 200.0,
-                        height: 200.0,
-                        decoration: new BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: new DecorationImage(
-                              image: new NetworkImage(
-                                  _globals.user.profilePictureURL),
-                              fit: BoxFit.cover,
-                            )),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                      padding: EdgeInsets.only(top: 150.0, right: 90.0),
-                      child: new Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          new CircleAvatar(
-                            backgroundColor: Colors.red,
-                            radius: 30.0,
-                            child: new Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                            ),
-                          )
-                        ],
-                      )),
-                ]),
-              ),
+              new Stack(fit: StackFit.loose, children: <Widget>[
+                new Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Container(
+                      width: 150.0,
+                      height: 150.0,
+                      decoration: new BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: new DecorationImage(
+                            image: new NetworkImage(
+                                _globals.user.profilePictureURL),
+                            fit: BoxFit.cover,
+                          )),
+                    ),
+                  ],
+                ),
+                Padding(
+                    padding: EdgeInsets.only(top: 110.0, right: 90.0),
+                    child: new Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new CircleAvatar(
+                          backgroundColor: Colors.red,
+                          radius: 30.0,
+                          child: new Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                          ),
+                        )
+                      ],
+                    )),
+              ]),
               SizedBox(
                 height: 16.0,
               ),
@@ -474,19 +140,197 @@ class UpperSection extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 30.0,
                 ),
-              ),
-              SizedBox(
-                height: 4.0,
-              ),
-              Text(
-                _globals.group.year,
-                style: TextStyle(color: Colors.grey),
               )
             ],
           ),
         ),
-        SizedBox(height: 16.0),
       ],
+    );
+  }
+}
+
+class MiddleSection extends StatelessWidget {
+  const MiddleSection({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 25.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      new Text(
+                        'Nombre',
+                        style: TextStyle(
+                            fontSize: 16.0, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              )),
+          Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Flexible(
+                    child: new TextField(
+                      decoration: const InputDecoration(
+                        hintText: "Ingresa tu nombre",
+                      ),
+                      enabled: !_status,
+                      autofocus: !_status,
+                      controller: _fullnameController,
+                    ),
+                  ),
+                ],
+              )),
+          Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      new Text(
+                        'Camada',
+                        style: TextStyle(
+                            fontSize: 16.0, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              )),
+          Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Flexible(
+                    child: new TextField(
+                      decoration: const InputDecoration(
+                        hintText: "Ingresa tu camada",
+                      ),
+                      enabled: !_status,
+                      autofocus: !_status,
+                      controller: _groupController,
+                    ),
+                  ),
+                ],
+              )),
+          Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      new Text(
+                        'Email',
+                        style: TextStyle(
+                            fontSize: 16.0, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              )),
+          Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Flexible(
+                    child: new TextField(
+                        decoration:
+                            const InputDecoration(hintText: "Ingresa tu email"),
+                        enabled: !_status,
+                        controller: _emailController),
+                  ),
+                ],
+              )),
+          Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      new Text(
+                        'Telefono',
+                        style: TextStyle(
+                            fontSize: 16.0, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              )),
+          Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Flexible(
+                    child: new TextField(
+                      decoration: const InputDecoration(
+                          hintText: "Ingresa tu telefono"),
+                      enabled: !_status,
+                      controller: _phoneController,
+                    ),
+                  ),
+                ],
+              )),
+          Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      new Text(
+                        'Fecha de nacimiento',
+                        style: TextStyle(
+                            fontSize: 16.0, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              )),
+          Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 110.0, top: 2.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Flexible(
+                    child: new TextField(
+                      decoration: const InputDecoration(
+                          hintText: "Ingresa tu fecha de nacimiento"),
+                      enabled: !_status,
+                      controller: _birthdayController,
+                    ),
+                  ),
+                ],
+              )),
+        ],
+      ),
     );
   }
 }

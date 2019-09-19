@@ -337,7 +337,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 new GestureDetector(
                                   onTap: () {
                                     _globals.filePickerGlobal
-                                        .getImagePath(false)
+                                        .getImagePath()
                                         .then((result) {
                                       File _file = new File(result);
                                       if (_file != null) {
@@ -492,7 +492,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         await Auth.signUp(email, password).then((uID) async {
           if (_imageSelected) {
-            _globals.filePickerGlobal.uploadFile(_imagePath).then((url) async {
+            String loweName = _globals.user.name.toLowerCase();
+            String toUnderscore = loweName.replaceAll(" ", "_");
+            String imageName = "${_globals.group.year}/users/${toUnderscore}";
+            _globals.filePickerGlobal
+                .uploadFile(_imagePath, imageName)
+                .then((url) async {
               User user = new User(
                   userID: uID,
                   phone: phone,

@@ -127,27 +127,29 @@ class FilePickerGlobal {
   Map<String, String> _paths;
   String _extension;
 
-  Future<String> getImagePath(bool upload) async {
+  Future<String> getImagePath(/*bool upload*/) async {
     String _path;
     _pickingType = FileType.IMAGE;
     _hasValidMime = true;
     _paths = null;
     _path = await FilePicker.getFilePath(
         type: _pickingType, fileExtension: _extension);
-    if (upload) {
+    /*if (upload) {
       await uploadFile(_path).then((url) async {
         return url;
       });
     } else {
       return _path;
-    }
+    }*/
+    return _path;
   }
 
-  Future<String> uploadFile(String _imagePath) async {
+  Future<String> uploadFile(String _imagePath, String fileName) async {
     String extension = p.extension(_imagePath);
-    String fileName = Random().nextInt(1000000).toString() + '$extension';
+    //Random().nextInt(1000000).toString()
+    String fileFolderExtension = fileName + '$extension';
     StorageReference storageRef =
-        FirebaseStorage.instance.ref().child(fileName);
+        FirebaseStorage.instance.ref().child(fileFolderExtension);
     StorageUploadTask uploadTask = storageRef.putFile(File(_imagePath));
     StreamSubscription<StorageTaskEvent> streamSubscription =
         uploadTask.events.listen((event) {
