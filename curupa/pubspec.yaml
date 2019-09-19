@@ -30,6 +30,7 @@ dependencies:
   notifier: ^1.0.2
   cached_network_image: ^1.1.1
   youtube_api: ^0.7.2
+  youtube_player_flutter: ^4.1.0
   fancy_bottom_navigation: ^0.3.2
   firebase_analytics: ^5.0.1
   keyboard_actions: "^2.1.2"
@@ -69,6 +70,7 @@ flutter:
     - assets/images/cancha.png
     - assets/images/test.png
     - assets/images/camadas.png
+    - assets/images/not_available.png
   #  - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.

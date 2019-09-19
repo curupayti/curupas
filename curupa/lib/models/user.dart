@@ -4,6 +4,7 @@ import 'package:onboarding_flow/models/group.dart';
 class User {
   final String userID;
   final String name;
+  final String phone;
   final String birthday;
   final String email;
   final String profilePictureURL;
@@ -14,6 +15,7 @@ class User {
   User({
     this.userID,
     this.name,
+    this.phone,
     this.birthday,
     this.email,
     this.profilePictureURL,
@@ -25,6 +27,7 @@ class User {
     return {
       'userID': userID,
       'name': name,
+      'phone': phone,
       'birthday': birthday,
       'email': email == null ? '' : email,
       'profilePictureURL': profilePictureURL,
@@ -36,6 +39,7 @@ class User {
   factory User.fromJson(Map<String, Object> doc) {
     User user = new User(
       userID: doc['userID'],
+      phone: doc['phone'],
       name: doc['name'],
       birthday: doc['birthday'],
       email: doc['email'],

@@ -24,6 +24,7 @@ Description description = new Description();
 List<Feed> feeds = new List<Feed>();
 Data dataFeed;
 Streammer streammer;
+bool streamingReachable = false;
 FilePickerGlobal filePickerGlobal;
 
 void getUserData(String userId, bool hasGroup) async {

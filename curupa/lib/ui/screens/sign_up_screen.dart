@@ -99,7 +99,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       errorColor: Colors.red,
       controller: _number,
       hint: "Telefono móvil",
-      validator: Validator.validateNumber,
+      validator: Validator.validatePhone,
       inputAction: TextInputAction.next,
       inputType: TextInputType.number,
       focusNode: phoneNumberFocusNodeSignUp,
@@ -198,7 +198,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       onPressed: () {
         _signUp(
             fullname: _fullname.text,
-            number: _number.text,
+            phone: _number.text,
             birthday: _birthday.text,
             email: _email.text,
             password: _password.text,
@@ -473,15 +473,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _signUp(
       {String fullname,
-      String number,
+      String phone,
       String birthday,
       String email,
       String password,
       BuildContext context}) async {
     if (Validator.validateName(fullname) &&
-        Validator.validateEmail(email) &&
-        Validator.validateNumber(number) &&
+        Validator.validatePhone(phone) &&
         Validator.validateBirthday(birthday) &&
+        Validator.validateEmail(email) &&
         Validator.validatePassword(password)) {
       setState(() {
         _loadingInProgress = true;
@@ -495,6 +495,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             _globals.filePickerGlobal.uploadFile(_imagePath).then((url) async {
               User user = new User(
                   userID: uID,
+                  phone: phone,
                   email: email,
                   name: fullname,
                   birthday: birthday,

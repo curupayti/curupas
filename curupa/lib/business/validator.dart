@@ -4,8 +4,8 @@ class Validator {
         .contains(new RegExp(r"^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$"));
   }
 
-  static bool validateNumber(String text) {
-    Pattern pattern = r'^\D?(\d{3})\D?\D?(\d{3})\D?(\d{4})$';
+  static bool validatePhone(String text) {
+    Pattern pattern = r'^(?:[+0]9)?[0-9]{10}$';
     RegExp regex = new RegExp(pattern);
     return regex.hasMatch(text);
   }
@@ -14,7 +14,7 @@ class Validator {
     Pattern pattern = r'^\D?(\d{4})$';
     RegExp regex = new RegExp(pattern);
     return regex.hasMatch(text);
-  } 
+  }
 
   static bool validateEmail(String text) {
     Pattern pattern =

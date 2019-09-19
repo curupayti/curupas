@@ -4,6 +4,7 @@ import 'package:onboarding_flow/ui/screens/feed/feed_swiper_screen.dart';
 import 'package:onboarding_flow/ui/screens/group_screen.dart';
 import 'package:onboarding_flow/ui/screens/main_screen.dart';
 import 'package:onboarding_flow/ui/screens/sign_in_screen.dart';
+import 'package:onboarding_flow/ui/screens/video_scree.dart';
 import "package:onboarding_flow/ui/screens/walk_screen.dart";
 import 'package:onboarding_flow/ui/screens/root_screen.dart';
 import 'package:onboarding_flow/ui/screens/sign_up_screen.dart';
@@ -41,7 +42,6 @@ class CurupaApp extends StatelessWidget {
         '/signup': (BuildContext context) => new SignUpScreen(),
         '/group': (BuildContext context) => new GroupScreen(),
         '/main': (BuildContext context) => new MainScreen(),
-        //'/feedswipe': (BuildContext context) => new FeedSwipeScreen(),
       },
       theme: ThemeData(
         primaryColor: Colors.white,
@@ -81,9 +81,17 @@ class RouteGenerator {
         if (args is Feed) {
           return MaterialPageRoute(
             builder: (_) => FeedSwipeScreen(
-              feed: args,
+              feed: settings.arguments,
             ),
           );
+        }
+        break;
+      case '/videoplayer':
+        if (args is Feed) {
+          return MaterialPageRoute(
+              builder: (_) => VideoPlayerScreen(
+                    streaming: settings.arguments,
+                  ));
         }
         return _errorRoute();
       default:

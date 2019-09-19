@@ -236,6 +236,7 @@ class _MainScreenState extends State<MainScreen> {
       print(error.toString());
     }
     if (ytResult.length > 0) {
+      _globals.streamingReachable = true;
       _globals.setYoutubeApi(ytResult);
       for (var i = 0; i < ytResult.length; i++) {
         Streaming streaming = new Streaming();

@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
+import 'package:onboarding_flow/ui/screens/friend_screen.dart';
 
 var currentUserEmail;
 var _scaffoldContext;
@@ -144,14 +145,22 @@ class UpperSection extends StatelessWidget {
                                 fontSize: 50.0,
                               )),
                           SizedBox(width: 30.0),
-                          new CircleAvatar(
-                            backgroundColor: Colors.grey,
-                            radius: 30.0,
-                            child: new Icon(
-                              Icons.group,
-                              color: Colors.white,
-                            ),
-                          )
+                          new GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => FriendsListPage()),
+                                );
+                              },
+                              child: new CircleAvatar(
+                                backgroundColor: Colors.grey,
+                                radius: 30.0,
+                                child: new Icon(
+                                  Icons.group,
+                                  color: Colors.white,
+                                ),
+                              )),
                         ],
                       )),
                 ]),
@@ -213,8 +222,8 @@ class MiddleSection extends StatelessWidget {
                                               fontWeight: FontWeight.bold)),
                                       TextSpan(
                                           text:
-                                              "En este espacio vas a poder compartir imagenes y videos, organizar juntadas y contar anegdotas que quedaran en la historia del club. Coming soon..",
-                                          style: TextStyle(fontSize: 15.0)),
+                                              "Vas a poder compartir imagenes y videos, organizar juntadas y contar anegdotas que quedaran en la historia del club. Coming soon..",
+                                          style: TextStyle(fontSize: 18.0)),
                                     ],
                                   ),
                                 ),

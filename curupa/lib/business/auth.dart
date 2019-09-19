@@ -149,6 +149,21 @@ class Auth {
     });
   }
 
+  static Future<List<User>> getFriends() async {
+    List<DocumentSnapshot> templist;
+    List<User> list = new List();
+    DocumentReference groupRef = _globals.user.groupRef;
+    QuerySnapshot collectionSnapshot = await Firestore.instance
+        .collection("users")
+        .where("groupRef", isEqualTo: groupRef)
+        .getDocuments();
+    templist = collectionSnapshot.documents;
+    list = await templist.map((DocumentSnapshot docSnapshot) {
+      return User.fromDocument(docSnapshot);
+    }).toList();
+    return list;
+  }
+
   static Future<List<Feed>> getFeed() async {
     List<DocumentSnapshot> templist;
     List<Feed> list = new List();
