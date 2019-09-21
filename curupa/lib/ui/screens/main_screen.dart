@@ -166,15 +166,29 @@ class _MainScreenState extends State<MainScreen> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
-              DrawerHeader(
+              /*DrawerHeader(
                 child: Text('Drawer Header'),
-              ),
-              ListTile(
-                title: Text('Log Out'),
+              ),*/
+              _createHeader(),
+              _createDrawerItem(icon: Icons.info_outline, text: 'Acerca de'),
+              Divider(),
+              _createDrawerItem(
+                  icon: Icons.highlight, text: 'Como mejorar la app'),
+              Divider(),
+              _createDrawerItem(
+                  icon: Icons.bug_report, text: 'Reportar un bug'),
+              Divider(),
+              _createDrawerItem(
+                icon: Icons.exit_to_app,
+                text: 'Salir',
                 onTap: () {
                   _logOut();
                   _scaffoldKey.currentState.openEndDrawer();
                 },
+              ),
+              ListTile(
+                title: Text('0.0.1'),
+                onTap: () {},
               ),
             ],
           ),
@@ -186,15 +200,13 @@ class _MainScreenState extends State<MainScreen> {
                 child: currentPage,
                 bucket: bucket,
               ),
-              padding: EdgeInsets.only(
-                  bottom:
-                      0.0), //bottomNavBarHeight), //Modificar esto o sacar padding.
+              padding: EdgeInsets.only(bottom: 0.0),
             ),
           ],
         ),
         bottomNavigationBar: FancyBottomNavigation(
           tabs: tabItems,
-          circleColor: Color.fromRGBO(223, 0, 9, 1), //,Color(0xFF0bf0411),
+          circleColor: Color.fromRGBO(223, 0, 9, 1),
           inactiveIconColor: Color(0xFF0bf0411),
           initialSelection: 0,
           key: bottomNavigationKey,
@@ -207,6 +219,52 @@ class _MainScreenState extends State<MainScreen> {
         ),
       );
     }
+  }
+
+  Widget _createHeader() {
+    return DrawerHeader(
+        margin: EdgeInsets.zero,
+        padding: EdgeInsets.zero,
+        decoration: new BoxDecoration(
+          color: Color.fromRGBO(191, 4, 17, 1),
+          gradient: new LinearGradient(colors: [
+            Color.fromRGBO(0, 29, 126, 1),
+            Color.fromRGBO(191, 4, 17, 1)
+          ], begin: Alignment.centerRight, end: new Alignment(-1.0, -1.0)),
+        ),
+        //Color.fromRGBO(0, 29, 126, 1)
+        //Color.fromRGBO(215, 203, 13, 1) amarillo
+        //Color.fromRGBO(191, 4, 17, 1)
+        /*decoration: BoxDecoration(
+            image: DecorationImage(
+                fit: BoxFit.fill,
+                image: AssetImage('images/curupa_anexo.png'))),*/
+        child: Stack(children: <Widget>[
+          Positioned(
+              bottom: 12.0,
+              left: 16.0,
+              child: Text("Comunidad",
+                  style: TextStyle(
+                      color: Color.fromRGBO(215, 203, 13, 1),
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.w500))),
+        ]));
+  }
+
+  Widget _createDrawerItem(
+      {IconData icon, String text, GestureTapCallback onTap}) {
+    return ListTile(
+      title: Row(
+        children: <Widget>[
+          Icon(icon),
+          Padding(
+            padding: EdgeInsets.only(left: 8.0),
+            child: Text(text),
+          )
+        ],
+      ),
+      onTap: onTap,
+    );
   }
 
   void getDescription() async {

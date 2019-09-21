@@ -62,6 +62,8 @@ SpeedDial buildSpeedDial() {
     animatedIcon: AnimatedIcons.menu_close,
     animatedIconTheme: IconThemeData(size: 22.0),
     visible: true,
+    // If true user is forced to close dial manually
+    // by tapping main button and overlay is not rendered.
     closeManually: false,
     curve: Curves.bounceIn,
     overlayColor: Colors.black,

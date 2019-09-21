@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:onboarding_flow/models/group.dart';
+import 'package:onboarding_flow/ui/draw/line.dart';
 import 'package:onboarding_flow/ui/screens/feed/feed_card.dart';
 import 'dart:ui' as ui;
 
@@ -45,16 +47,74 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          Image.asset(_globals.dataFeed.backdropPhoto, fit: BoxFit.cover),
-          BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-            child: Container(
-              color: Colors.black.withOpacity(0.5),
-              child: _buildContent(),
+          Padding(
+            padding: EdgeInsets.only(bottom: 110.0),
+            child:
+                Image.asset(_globals.dataFeed.backdropPhoto, fit: BoxFit.cover),
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 110.0),
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: _buildContent(),
+              ),
             ),
+          ),
+          CustomPaint(
+            painter: CurvePainter(0, null),
+          ),
+          CustomPaint(
+            painter: CurvePainter(null, 110),
           ),
         ],
       ),
+      floatingActionButton: buildSpeedDial(),
+    );
+  }
+
+  SpeedDial buildSpeedDial() {
+    return SpeedDial(
+      marginRight: 25,
+      marginBottom: 30,
+      animatedIcon: AnimatedIcons.menu_close,
+      animatedIconTheme: IconThemeData(size: 22.0),
+      visible: true,
+      closeManually: false,
+      curve: Curves.bounceIn,
+      overlayColor: Colors.black,
+      overlayOpacity: 0.5,
+      onOpen: () => print('OPENING DIAL'),
+      onClose: () => print('DIAL CLOSED'),
+      tooltip: 'Menu',
+      heroTag: 'speed-dial-hero-tag',
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
+      elevation: 8.0,
+      shape: CircleBorder(),
+      children: [
+        SpeedDialChild(
+            child: Icon(Icons.poll, color: Colors.white),
+            backgroundColor: Color.fromRGBO(0, 29, 126, 1),
+            label: 'Encuesta',
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: () => print('FIRST CHILD')),
+        /*SpeedDialChild(
+          child: Icon(Icons.video_label, color: Colors.white),
+          backgroundColor: Color.fromRGBO(0, 29, 126, 1),
+          label: 'Subir Video',
+          labelStyle: TextStyle(fontSize: 18.0),
+          onTap: () => print('SECOND CHILD'),
+        ),
+        SpeedDialChild(
+          child: Icon(Icons.calendar_today),
+          backgroundColor: Colors.white,
+          label: 'Proponer juntada',
+          labelStyle: TextStyle(fontSize: 18.0),
+          onTap: () => print('THIRD CHILD'),
+        ),*/
+      ],
     );
   }
 
@@ -66,7 +126,7 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
           _buildAvatar(),
           _buildInfo(),
           _buildFeedScroller(),
-          _buildGroupButton(),
+          //_buildGroupButton(),
         ],
       ),
     );
@@ -140,30 +200,6 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
             var feed = _globals.dataFeed.feeds[index];
             return FeedCard(feed);
           },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGroupButton() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0, left: 50.0, right: 50.0),
-      child: Center(
-        child: FlatButton(
-          child: Text(
-            _globals.group.year,
-            style: new TextStyle(
-              fontSize: 20.0,
-              color: Colors.white,
-            ),
-          ),
-          onPressed: () {},
-          color: Color.fromRGBO(0, 29, 126, 1),
-          colorBrightness: Brightness.dark,
-          disabledColor: Colors.blueGrey,
-          highlightColor: Colors.red,
-          padding: EdgeInsets.symmetric(
-              horizontal: 8.0, vertical: 5.0), // gives padding to the button
         ),
       ),
     );
