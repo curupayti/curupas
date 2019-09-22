@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'models/feeds.dart';
+import 'models/streaming.dart';
 
 void main() {
   Firestore.instance.settings(timestampsInSnapshotsEnabled: true);
@@ -76,6 +77,8 @@ class CurupaApp extends StatelessWidget {
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     final args = settings.arguments;
+    String set = settings.name;
+    print(set);
     switch (settings.name) {
       case '/feedswipe':
         if (args is Feed) {
@@ -87,7 +90,7 @@ class RouteGenerator {
         }
         break;
       case '/videoplayer':
-        if (args is Feed) {
+        if (args is Streaming) {
           return MaterialPageRoute(
               builder: (_) => VideoPlayerScreen(
                     streaming: settings.arguments,

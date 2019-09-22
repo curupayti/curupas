@@ -47,6 +47,7 @@ class CustomAlertDialog extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 10.0),
               child: CustomFlatButton(
+                enabled: true,
                 title: "OK",
                 fontSize: 16,
                 fontWeight: FontWeight.w700,

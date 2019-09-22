@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:onboarding_flow/globals.dart' as _globals;
+import 'package:onboarding_flow/models/streaming.dart';
 
 class StreamingPage extends StatefulWidget {
   StreamingPage({Key key}) : super(key: key);
@@ -114,8 +115,10 @@ class HomeScreeTopPart extends StatelessWidget {
                 ]),
                 child: Stack(
                   children: <Widget>[
-                    Image.network(_globals.streammer.streamings[0].thumnailUrl,
-                        fit: BoxFit.cover, width: double.infinity),
+                    Image.network(
+                        _globals.streammer.activeStreaming.thumnailUrl,
+                        fit: BoxFit.cover,
+                        width: double.infinity),
                     Container(
                       height: double.infinity,
                       width: double.infinity,
@@ -138,7 +141,7 @@ class HomeScreeTopPart extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              _globals.streammer.streamings[0].title,
+                              _globals.streammer.activeStreaming.title,
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 40.0,
@@ -164,8 +167,8 @@ class HomeScreeTopPart extends StatelessWidget {
                       onPressed: () {
                         Navigator.pushNamed(
                           context,
-                          '/feedswipe',
-                          arguments: _globals.streammer.streamings[0],
+                          '/videoplayer',
+                          arguments: _globals.streammer.activeStreaming,
                         );
                       },
                       child: Icon(
@@ -224,43 +227,49 @@ class HomeScreenBottomPart extends StatelessWidget {
     for (int i = 0; i < 3; i++) {
       var movieitem = Padding(
         padding: EdgeInsets.symmetric(vertical: 25.0, horizontal: 12.0),
-        child: Container(
-          height: 220.0,
-          width: 135.0,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10.0,
-                    offset: Offset(0.0, 10.0))
-              ]),
-          child: Column(
-            children: <Widget>[
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20.0),
-                    topRight: Radius.circular(20.0)),
-                child: Image.network(
-                  _globals.streammer.streamings[i].thumnailUrl,
-                  width: double.infinity,
-                  height: 130.0,
-                  fit: BoxFit.cover,
+        child: new GestureDetector(
+          onTap: () {
+            //print("Container clicked");
+          },
+          child: Container(
+            height: 220.0,
+            width: 135.0,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.0),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10.0,
+                      offset: Offset(0.0, 10.0))
+                ]),
+            child: Column(
+              children: <Widget>[
+                ClipRRect(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20.0),
+                      topRight: Radius.circular(20.0)),
+                  child: Image.network(
+                    _globals.streammer.streamings[i].thumnailUrl,
+                    width: double.infinity,
+                    height: 130.0,
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 4.0, left: 8.0, right: 8.0),
-                child: Text(_globals.streammer.streamings[i].title,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 16.0, fontFamily: "SF-Pro-Display-Bold")),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 3.0),
-                child: Text(i == 0 ? "Season 2" : ""),
-              )
-            ],
+                Padding(
+                  padding:
+                      const EdgeInsets.only(top: 4.0, left: 8.0, right: 8.0),
+                  child: Text(_globals.streammer.streamings[i].title,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 16.0, fontFamily: "SF-Pro-Display-Bold")),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 3.0),
+                  child: Text(i == 0 ? "Season 2" : ""),
+                )
+              ],
+            ),
           ),
         ),
       );

@@ -15,11 +15,17 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _email = new TextEditingController();
+  FocusNode emailFocusNodeSignUp = new FocusNode();
   final TextEditingController _password = new TextEditingController();
+
   CustomTextField _emailField;
   CustomTextField _passwordField;
   bool _blackVisible = false;
   VoidCallback onBackPress;
+
+  CustomFlatButton _loginButton;
+
+  FocusNode passwordFocusNodeSignUp = new FocusNode();
 
   @override
   void initState() {
@@ -37,6 +43,7 @@ class _SignInScreenState extends State<SignInScreen> {
       hint: "Dirección de E-mail",
       inputType: TextInputType.emailAddress,
       validator: Validator.validateEmail,
+      focusNode: emailFocusNodeSignUp,
     );
     _passwordField = CustomTextField(
       baseColor: Colors.grey,
@@ -46,6 +53,40 @@ class _SignInScreenState extends State<SignInScreen> {
       obscureText: true,
       hint: "Contraseña",
       validator: Validator.validatePassword,
+      focusNode: passwordFocusNodeSignUp,
+    );
+
+    passwordFocusNodeSignUp.addListener(() {
+      bool hasFocus = passwordFocusNodeSignUp.hasFocus;
+      if (!hasFocus) {
+        int length = _email.text.length;
+        print(length);
+        if (length > 0) {
+          setState(() {
+            _createLoginButton(true, Colors.white);
+          });
+        }
+      }
+    });
+
+    _createLoginButton(false, Colors.black54);
+  }
+
+  void _createLoginButton(bool enabled, Color textColor) {
+    _loginButton = CustomFlatButton(
+      title: "Ingresa",
+      fontSize: 22,
+      fontWeight: FontWeight.w700,
+      textColor: textColor, //Colors.white,
+      onPressed: () {
+        _emailLogin(
+            email: _email.text, password: _password.text, context: context);
+      },
+      splashColor: Colors.black12,
+      borderColor: Color.fromRGBO(212, 20, 15, 1.0),
+      borderWidth: 0,
+      color: Color.fromRGBO(212, 20, 15, 1.0),
+      enabled: enabled,
     );
   }
 
@@ -90,22 +131,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           vertical: 14.0, horizontal: 40.0),
-                      child: CustomFlatButton(
-                        title: "Ingresa",
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        textColor: Colors.white,
-                        onPressed: () {
-                          _emailLogin(
-                              email: _email.text,
-                              password: _password.text,
-                              context: context);
-                        },
-                        splashColor: Colors.black12,
-                        borderColor: Color.fromRGBO(212, 20, 15, 1.0),
-                        borderWidth: 0,
-                        color: Color.fromRGBO(212, 20, 15, 1.0),
-                      ),
+                      child: _loginButton,
                     ),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
@@ -126,6 +152,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 14.0, horizontal: 40.0),
                       child: CustomFlatButton(
+                        enabled: true,
                         title: "Facebook",
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
@@ -172,7 +199,10 @@ class _SignInScreenState extends State<SignInScreen> {
 
   void _changeBlackVisible() {
     setState(() {
+      _email.clear();
+      _password.clear();
       _blackVisible = !_blackVisible;
+      FocusScope.of(context).requestFocus(emailFocusNodeSignUp);
     });
   }
 
@@ -180,12 +210,25 @@ class _SignInScreenState extends State<SignInScreen> {
       {String email, String password, BuildContext context}) async {
     if (Validator.validateEmail(email) &&
         Validator.validatePassword(password)) {
-      try {
-        SystemChannels.textInput.invokeMethod('TextInput.hide');
-        _changeBlackVisible();
-        await Auth.signIn(email, password)
-            .then((uid) => Navigator.of(context).pop());
-      } catch (e) {
+      //try {
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+      _changeBlackVisible();
+      await Auth.signIn(email, password).then((ResutlLogin resutl) {
+        if (resutl.error) {
+          print("Error in email sign in: $resutl.result");
+          _globals.showErrorAlert(
+            context: context,
+            title: "Error de autentificación",
+            content: resutl.result,
+            onPressed: _changeBlackVisible,
+          );
+        } else {
+          String uid = resutl.result;
+          Auth.setUserFrefs(uid);
+          Navigator.of(context).pop();
+        }
+      });
+      /*} catch (e) {
         print("Error in email sign in: $e");
         String exception = Auth.getExceptionText(e);
         _globals.showErrorAlert(
@@ -194,7 +237,7 @@ class _SignInScreenState extends State<SignInScreen> {
           content: exception,
           onPressed: _changeBlackVisible,
         );
-      }
+      }*/
     }
   }
 

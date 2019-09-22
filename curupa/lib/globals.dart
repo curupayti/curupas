@@ -54,6 +54,7 @@ class Streammer {
   bool _isLiveStreaming = false;
   IconData videoIcon;
   String showLivestreamingMessage;
+  Streaming activeStreaming;
 
   Streammer() {
     setIsLiveStreaming(false);
@@ -75,6 +76,7 @@ class Streammer {
   }
 
   void serStreamings(List<Streaming> _streamings) {
+    activeStreaming = _streamings[0];
     streamings = _streamings;
   }
 }
