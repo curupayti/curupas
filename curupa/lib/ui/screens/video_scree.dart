@@ -126,6 +126,7 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
                     onTap: () {
                       setState(() {
                         _videoId = _idController.text;
+                        print(_videoId);
                         // If text is link then converting to corresponding id.
                         if (_videoId.contains("http"))
                           _videoId = YoutubePlayer.convertUrlToId(_videoId);

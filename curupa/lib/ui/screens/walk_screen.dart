@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import "package:flutter_swiper/flutter_swiper.dart";
 import "package:onboarding_flow/models/walkthrough.dart";
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,18 +29,22 @@ class WalkthroughScreen extends StatefulWidget {
 class _WalkthroughScreenState extends State<WalkthroughScreen> {
   @override
   Widget build(BuildContext context) {
+    ScreenUtil.instance =
+        ScreenUtil(width: 640, height: 1136, allowFontScaling: true)
+          ..init(context);
     return Scaffold(
       body: Swiper.children(
         autoplay: false,
         index: 0,
         loop: false,
         pagination: new SwiperPagination(
-          margin: new EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 40.0),
+          margin: new EdgeInsets.fromLTRB(
+              0.0, 0.0, 0.0, ScreenUtil().setHeight(10.0)),
           builder: new DotSwiperPaginationBuilder(
-              color: Colors.white30,
-              activeColor: Colors.white,
-              size: 6.5,
-              activeSize: 8.0),
+              color: Colors.grey,
+              activeColor: Colors.black,
+              size: 7.0,
+              activeSize: 10.0),
         ),
         control: SwiperControl(
           iconPrevious: null,
@@ -55,28 +60,25 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
     for (int i = 0; i < widget.pages.length; i++) {
       Walkthrough page = widget.pages[i];
 
-      double _width = 0;
-
-      if (i == 0) {
-        _width = 400.0;
-      } else if (i == 1) {
-        _width = 300.0;
-      }
-
       widgets.add(
         new Container(
           color: Colors.white,
           child: ListView(
             children: <Widget>[
               Padding(
-                padding:
-                    const EdgeInsets.only(top: 100.0, left: 30.0, right: 30.0),
+                padding: EdgeInsets.only(
+                    top: ScreenUtil().setHeight(100.0),
+                    left: ScreenUtil().setWidth(30.0),
+                    right: ScreenUtil().setWidth(30.0)),
                 child: new Image.asset(page.image,
-                    height: _width, width: 100.0, fit: BoxFit.cover),
+                    height: ScreenUtil().setHeight(400.0),
+                    fit: BoxFit.fitHeight),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.only(top: 50.0, right: 15.0, left: 15.0),
+                padding: EdgeInsets.only(
+                    top: ScreenUtil().setHeight(50.0),
+                    right: ScreenUtil().setWidth(15.0),
+                    left: ScreenUtil().setWidth(15.0)),
                 child: Text(
                   page.title,
                   softWrap: true,
@@ -84,14 +86,18 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
                   style: TextStyle(
                     color: Colors.grey,
                     decoration: TextDecoration.none,
-                    fontSize: 50.0,
+                    fontSize: ScreenUtil().setSp(100.0),
                     fontWeight: FontWeight.w700,
                     fontFamily: "OpenSans",
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.only(
+                  top: ScreenUtil().setHeight(40.0),
+                  left: ScreenUtil().setWidth(40.0),
+                  right: ScreenUtil().setWidth(40.0),
+                ),
                 child: Text(
                   page.description,
                   softWrap: true,
@@ -99,7 +105,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
                   style: TextStyle(
                     color: Colors.grey,
                     decoration: TextDecoration.none,
-                    fontSize: 20.0,
+                    fontSize: ScreenUtil().setSp(45.0),
                     fontWeight: FontWeight.w300,
                     fontFamily: "OpenSans",
                   ),

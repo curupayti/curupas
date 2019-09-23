@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notifier/notifier_provider.dart';
 import 'package:onboarding_flow/ui/screens/feed/feed_swiper_screen.dart';
 import 'package:onboarding_flow/ui/screens/group_screen.dart';
@@ -15,8 +16,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'models/feeds.dart';
 import 'models/streaming.dart';
 
-void main() {
+Future main() async {
   Firestore.instance.settings(timestampsInSnapshotsEnabled: true);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SharedPreferences.getInstance().then((prefs) {
     runApp(
       NotifierProvider(
