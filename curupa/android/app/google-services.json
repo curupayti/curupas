@@ -1,163 +1,52 @@
 {
   "project_info": {
-    "project_number": "706061484183",
-    "firebase_url": "https://ios-app-templates.firebaseio.com",
-    "project_id": "ios-app-templates",
-    "storage_bucket": "ios-app-templates.appspot.com"
+    "project_number": "800678725459",
+    "firebase_url": "https://curupa-d830b.firebaseio.com",
+    "project_id": "curupa-d830b",
+    "storage_bucket": "curupa-d830b.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:706061484183:android:2d2dba50de144d81",
+        "mobilesdk_app_id": "1:800678725459:android:b3e8ad9542ffbdb61c83a6",
         "android_client_info": {
-          "package_name": "com.instaflutter.onboarding.android"
+          "package_name": "com.curupayti.curupa"
         }
       },
       "oauth_client": [
         {
-          "client_id": "706061484183-l0l58dds4kg329fh1trbiha1ci5rqm5n.apps.googleusercontent.com",
+          "client_id": "800678725459-vjla2c4qr33di9kvert4am05varn3n15.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.curupayti.curupa",
+            "certificate_hash": "8295ea54b448945b3eb3c5474a11df5560f31b2e"
+          }
+        },
+        {
+          "client_id": "800678725459-p4809k71a76pc6k4h0gkbk3cmhcbn8om.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDfUhwskZ_-VrNfeJ51o1IawY1DjbWFp-Y"
+          "current_key": "AIzaSyAwxNKOxhNBVXwkWeD325q2CdxqjRQMpvg"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:706061484183:android:75277ea79fec2179",
-        "android_client_info": {
-          "package_name": "com.listingapp"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "706061484183-l0l58dds4kg329fh1trbiha1ci5rqm5n.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDfUhwskZ_-VrNfeJ51o1IawY1DjbWFp-Y"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:706061484183:android:36a9299534d1ef8c",
-        "android_client_info": {
-          "package_name": "com.messenger"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "706061484183-l0l58dds4kg329fh1trbiha1ci5rqm5n.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDfUhwskZ_-VrNfeJ51o1IawY1DjbWFp-Y"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:706061484183:android:3f4fa551d34cc26f",
-        "android_client_info": {
-          "package_name": "com.restaurantapp"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "706061484183-l0l58dds4kg329fh1trbiha1ci5rqm5n.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDfUhwskZ_-VrNfeJ51o1IawY1DjbWFp-Y"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:706061484183:android:43820dc9f598d053",
-        "android_client_info": {
-          "package_name": "io.instamobile.rnrealestateapp"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "706061484183-l0l58dds4kg329fh1trbiha1ci5rqm5n.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDfUhwskZ_-VrNfeJ51o1IawY1DjbWFp-Y"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "800678725459-p4809k71a76pc6k4h0gkbk3cmhcbn8om.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "800678725459-oansn867gpo7s1hr7qnue28lq55nau7u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.curupayti.curupa"
+              }
+            }
+          ]
         }
       }
     }

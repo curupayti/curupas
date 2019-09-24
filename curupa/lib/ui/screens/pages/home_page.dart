@@ -146,13 +146,17 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
       children: [
         new Expanded(
           child: Padding(
-            padding: EdgeInsets.only(left: ScreenUtil().setWidth(16.0)),
+            padding: EdgeInsets.only(
+              top: ScreenUtil().setWidth(10.0),
+              left: ScreenUtil().setWidth(16.0),
+            ),
             child: _buildHeader(),
           ),
         ),
         Padding(
-          padding: EdgeInsets.only(right: ScreenUtil().setWidth(16.0),
-          top: ScreenUtil().setWidth(16.0)),
+          padding: EdgeInsets.only(
+              right: ScreenUtil().setWidth(16.0),
+              top: ScreenUtil().setWidth(16.0)),
           child: _buildAvatar(),
         ),
       ],
@@ -208,8 +212,13 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
         border: Border.all(color: Colors.white30),
       ),
       margin: EdgeInsets.only(
-          top: ScreenUtil().setWidth(32.0), left: ScreenUtil().setWidth(16.0)),
-      padding: const EdgeInsets.all(3.0),
+          top: ScreenUtil().setWidth(10.0), left: ScreenUtil().setWidth(25.0)),
+      padding: EdgeInsets.only(
+        top: ScreenUtil().setWidth(20.0),
+        left: ScreenUtil().setWidth(20.0),
+        right: ScreenUtil().setWidth(20.0),
+        bottom: ScreenUtil().setWidth(20.0),
+      ),
       child: ClipOval(
         child: Image.asset(_globals.dataFeed.avatar),
       ),
