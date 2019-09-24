@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:onboarding_flow/models/group.dart';
@@ -48,12 +49,12 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
         fit: StackFit.expand,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.only(bottom: 110.0),
+            padding: EdgeInsets.only(bottom: ScreenUtil.statusBarHeight),
             child:
                 Image.asset(_globals.dataFeed.backdropPhoto, fit: BoxFit.cover),
           ),
           Padding(
-            padding: EdgeInsets.only(bottom: 110.0),
+            padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(90.0)),
             child: BackdropFilter(
               filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
               child: Container(
@@ -95,6 +96,12 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
       shape: CircleBorder(),
       children: [
         SpeedDialChild(
+            child: Icon(Icons.calendar_today, color: Colors.white),
+            backgroundColor: Color.fromRGBO(0, 29, 126, 1),
+            label: 'Calendario',
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: () => print('FIRST CHILD')),
+        SpeedDialChild(
             child: Icon(Icons.poll, color: Colors.white),
             backgroundColor: Color.fromRGBO(0, 29, 126, 1),
             label: 'Encuesta',
@@ -123,8 +130,10 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _buildAvatar(),
-          _buildInfo(),
+          //_buildAvatar(),
+          //_buildHeader(),
+          //_buildHeaderOnce(),
+          _buildLayout(),
           _buildFeedScroller(),
           //_buildGroupButton(),
         ],
@@ -132,57 +141,77 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
     );
   }
 
-  Widget _buildAvatar() {
-    return Container(
-      width: 110.0,
-      height: 110.0,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white30),
-      ),
-      margin: const EdgeInsets.only(top: 32.0, left: 16.0),
-      padding: const EdgeInsets.all(3.0),
-      child: ClipOval(
-        child: Image.asset(_globals.dataFeed.avatar),
-      ),
+  Widget _buildLayout() {
+    return new Row(
+      children: [
+        new Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(left: ScreenUtil().setWidth(16.0)),
+            child: _buildHeader(),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(right: ScreenUtil().setWidth(16.0),
+          top: ScreenUtil().setWidth(16.0)),
+          child: _buildAvatar(),
+        ),
+      ],
     );
   }
 
-  Widget _buildInfo() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            _globals.dataFeed.name,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 30.0,
-            ),
+  Widget _buildHeader() {
+    return new Column(
+      children: <Widget>[
+        Text(
+          _globals.dataFeed.name,
+          textAlign: TextAlign.left,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: ScreenUtil().setSp(80.0),
           ),
-          Text(
+        ),
+        Padding(
+          padding: EdgeInsets.only(
+              top: ScreenUtil().setHeight(16.0),
+              right: ScreenUtil().setWidth(16.0)),
+          child: Text(
             _globals.dataFeed.location,
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
               fontWeight: FontWeight.w500,
             ),
           ),
-          Container(
+        ),
+        Container(
+          color: Colors.white.withOpacity(0.85),
+          margin: const EdgeInsets.symmetric(vertical: 16.0),
+          width: ScreenUtil().setWidth(350.0),
+          height: 1.0,
+        ),
+        Text(
+          _globals.dataFeed.biography,
+          style: TextStyle(
             color: Colors.white.withOpacity(0.85),
-            margin: const EdgeInsets.symmetric(vertical: 16.0),
-            width: 225.0,
-            height: 1.0,
           ),
-          Text(
-            _globals.dataFeed.biography,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.85),
-              height: 1.4,
-            ),
-          ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAvatar() {
+    return Container(
+      width: ScreenUtil().setWidth(210.0),
+      height: ScreenUtil().setHeight(210.0),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white30),
+      ),
+      margin: EdgeInsets.only(
+          top: ScreenUtil().setWidth(32.0), left: ScreenUtil().setWidth(16.0)),
+      padding: const EdgeInsets.all(3.0),
+      child: ClipOval(
+        child: Image.asset(_globals.dataFeed.avatar),
       ),
     );
   }

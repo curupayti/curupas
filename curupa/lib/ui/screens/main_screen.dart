@@ -241,13 +241,6 @@ class _MainScreenState extends State<MainScreen> {
             Color.fromRGBO(191, 4, 17, 1)
           ], begin: Alignment.centerRight, end: new Alignment(-1.0, -1.0)),
         ),
-        //Color.fromRGBO(0, 29, 126, 1)
-        //Color.fromRGBO(215, 203, 13, 1) amarillo
-        //Color.fromRGBO(191, 4, 17, 1)
-        /*decoration: BoxDecoration(
-            image: DecorationImage(
-                fit: BoxFit.fill,
-                image: AssetImage('images/curupa_anexo.png'))),*/
         child: Stack(children: <Widget>[
           Positioned(
               bottom: 12.0,

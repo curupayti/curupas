@@ -8,7 +8,6 @@ import 'package:onboarding_flow/ui/screens/main_screen.dart';
 import 'package:onboarding_flow/ui/screens/sign_in_screen.dart';
 import 'package:onboarding_flow/ui/screens/video_scree.dart';
 import "package:onboarding_flow/ui/screens/walk_screen.dart";
-import 'package:onboarding_flow/ui/screens/root_screen.dart';
 import 'package:onboarding_flow/ui/screens/sign_up_screen.dart';
 import 'package:onboarding_flow/ui/screens/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,7 +40,6 @@ class CurupaApp extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         '/walkthrough': (BuildContext context) => new WalkthroughScreen(),
         '/welcomeScreen': (BuildContext context) => new WelcomeScreen(),
-        '/root': (BuildContext context) => new RootScreen(),
         '/signin': (BuildContext context) => new SignInScreen(),
         '/signup': (BuildContext context) => new SignUpScreen(),
         '/group': (BuildContext context) => new GroupScreen(),
