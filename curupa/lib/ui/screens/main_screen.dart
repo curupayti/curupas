@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onboarding_flow/business/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:onboarding_flow/models/description.dart';
@@ -92,6 +93,9 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ScreenUtil.instance =
+        ScreenUtil(width: 640, height: 1136, allowFontScaling: true)
+          ..init(context);
     if (_loadingInProgress) {
       return Stack(children: <Widget>[
         new Container(
@@ -107,13 +111,18 @@ class _MainScreenState extends State<MainScreen> {
             children: <Widget>[
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 50.0, bottom: 50.0),
+                  padding: EdgeInsets.only(
+                      top: ScreenUtil().setHeight(30.0),
+                      bottom: ScreenUtil().setWidth(50.0),
+                      left: ScreenUtil().setWidth(30.0),
+                      right: ScreenUtil().setWidth(30.0)),
                   child: new Image.asset("assets/images/escudo.png",
-                      height: 100.0, width: 100.0, fit: BoxFit.cover),
+                      height: ScreenUtil().setHeight(350.0),
+                      fit: BoxFit.fitHeight),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 50.0),
+                padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(50.0)),
                 child: new Text(
                   "Cargando datos",
                   softWrap: true,
@@ -121,7 +130,7 @@ class _MainScreenState extends State<MainScreen> {
                   style: TextStyle(
                     color: Colors.grey,
                     decoration: TextDecoration.none,
-                    fontSize: 15.0,
+                    fontSize: ScreenUtil().setSp(50.0),
                     fontWeight: FontWeight.w300,
                     fontFamily: "OpenSans",
                   ),
@@ -133,7 +142,7 @@ class _MainScreenState extends State<MainScreen> {
                 child: new CircularProgressIndicator(),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 50.0),
+                padding: EdgeInsets.only(top: ScreenUtil().setHeight(50.0)),
                 child: new Text(
                   "Un momento por favor",
                   softWrap: true,
@@ -141,7 +150,7 @@ class _MainScreenState extends State<MainScreen> {
                   style: TextStyle(
                     color: Colors.grey,
                     decoration: TextDecoration.none,
-                    fontSize: 15.0,
+                    fontSize: ScreenUtil().setSp(35.0),
                     fontWeight: FontWeight.w300,
                     fontFamily: "OpenSans",
                   ),

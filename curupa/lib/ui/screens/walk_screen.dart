@@ -39,7 +39,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
         loop: false,
         pagination: new SwiperPagination(
           margin: new EdgeInsets.fromLTRB(
-              0.0, 0.0, 0.0, ScreenUtil().setHeight(10.0)),
+              0.0, 0.0, 0.0, ScreenUtil().setHeight(20.0)),
           builder: new DotSwiperPaginationBuilder(
               color: Colors.grey,
               activeColor: Colors.black,
