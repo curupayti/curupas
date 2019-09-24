@@ -60,16 +60,15 @@ class CurupaApp extends StatelessWidget {
     bool seen = (prefs.getBool('seen') ?? false);
     bool registered = (prefs.getBool('registered') ?? false);
     bool group = (prefs.getBool('group') ?? false);
-
     if (seen) {
       if (registered) {
         if (group) {
-          return new RootScreen();
+          return new MainScreen();
         } else {
           return new GroupScreen();
         }
       } else {
-        return new RootScreen();
+        return new WelcomeScreen();
       }
     } else {
       return new WalkthroughScreen(prefs: prefs);

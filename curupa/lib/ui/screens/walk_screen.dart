@@ -159,7 +159,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
                   textColor: Colors.grey,
                   onPressed: () {
                     widget.prefs.setBool('seen', true);
-                    Navigator.of(context).pushNamed("/root");
+                    Navigator.of(context).pushNamed("/welcomeScreen");
                   },
                   splashColor: Colors.black12,
                   borderColor: Colors.white,

@@ -225,7 +225,8 @@ class _SignInScreenState extends State<SignInScreen> {
         } else {
           String uid = resutl.result;
           Auth.setUserFrefs(uid);
-          Navigator.of(context).pop();
+          //Navigator.of(context).pop();
+          Navigator.of(context).pushNamed("/main");
         }
       });
       /*} catch (e) {
