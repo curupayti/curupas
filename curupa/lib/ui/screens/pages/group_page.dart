@@ -19,8 +19,14 @@ class GroupPage extends StatefulWidget {
 class _GroupPageState extends State<GroupPage> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: new GroupBody(),
+    double height = MediaQuery.of(context).size.height;
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[Container(height: height, child: GroupBody())],
+        ),
+      ),
+      floatingActionButton: buildSpeedDial(),
     );
   }
 
@@ -43,7 +49,6 @@ class GroupBody extends StatelessWidget {
           MiddleSection(),
         ],
       ),
-      floatingActionButton: buildSpeedDial(),
     );
   }
 }

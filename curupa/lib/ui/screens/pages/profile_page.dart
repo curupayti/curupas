@@ -43,6 +43,21 @@ class _ProfilePageState extends State<ProfilePage> {
 class ProfilePageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height + 100;
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[Container(height: height, child: ProfileBody())],
+        ),
+      ),
+      floatingActionButton: buildSpeedDial(),
+    );
+  }
+}
+
+class ProfileBody extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -50,7 +65,6 @@ class ProfilePageScreen extends StatelessWidget {
           MiddleSection(),
         ],
       ),
-      floatingActionButton: buildSpeedDial(),
     );
   }
 }
