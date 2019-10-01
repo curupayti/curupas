@@ -26,7 +26,7 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   int selectedPos = 0;
-  double bottomNavBarHeight = 80;
+  //double bottomNavBarHeight = 80;
   GlobalKey bottomNavigationKey = GlobalKey();
   List<TabData> tabItems;
 

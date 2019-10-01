@@ -223,13 +223,12 @@ class HomeScreeTopPart extends StatelessWidget {
 class HomeScreenBottomPart extends StatelessWidget {
   List<Widget> movies() {
     List<Widget> movieList = new List();
-
     for (int i = 0; i < 3; i++) {
       var movieitem = Padding(
         padding: EdgeInsets.symmetric(vertical: 25.0, horizontal: 12.0),
         child: new GestureDetector(
           onTap: () {
-            //print("Container clicked");
+            print("Container clicked");
           },
           child: Container(
             height: 220.0,

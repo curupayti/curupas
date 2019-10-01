@@ -26,6 +26,7 @@ Data dataFeed;
 Streammer streammer;
 bool streamingReachable = false;
 FilePickerGlobal filePickerGlobal;
+//double bottomNavBarHeight = 80;
 
 void getUserData(String userId, bool hasGroup) async {
   if (userId != null) {

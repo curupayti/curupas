@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
-import 'package:onboarding_flow/models/streaming.dart';
 import 'package:onboarding_flow/ui/draw/line.dart';
 import 'dart:ui' as ui;
 
@@ -19,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: HomeStream(),
-      floatingActionButton: buildSpeedDial(),
+      //floatingActionButton: buildSpeedDial(),
     );
   }
 
@@ -228,7 +227,7 @@ Widget _buildFeedScroller() {
         itemCount: _globals.dataFeed.feeds.length,
         itemBuilder: (BuildContext context, int index) {
           var feed = _globals.dataFeed.feeds[index];
-          return FeedCard(feed);
+          return new FeedCard(feed);
         },
       ),
     ),
