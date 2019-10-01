@@ -9,7 +9,12 @@ class FeedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        print("tab");
+        print(feed.title);
+        Navigator.pushNamed(
+          context,
+          '/feedswipe',
+          arguments: feed,
+        );
       },
       child: Container(
         padding: const EdgeInsets.all(8.0),

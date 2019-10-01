@@ -111,11 +111,11 @@ class HomeBackground extends StatelessWidget {
             ),
           ),
           CustomPaint(
-            painter: CurvePainter(0, null, 10),
-          ),
+              //painter: CurvePainter(0, null, 10),
+              ),
           CustomPaint(
-            painter: CurvePainter(null, bottomPadding, 5),
-          ),
+              //painter: CurvePainter(null, bottomPadding, 5),
+              ),
         ],
       ),
       //floatingActionButton: buildSpeedDial(),
@@ -227,7 +227,7 @@ Widget _buildFeedScroller() {
         itemCount: _globals.dataFeed.feeds.length,
         itemBuilder: (BuildContext context, int index) {
           var feed = _globals.dataFeed.feeds[index];
-          return new FeedCard(feed);
+          return FeedCard(feed);
         },
       ),
     ),
