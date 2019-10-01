@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CurvePainter extends CustomPainter {
-  double _b, _y;
+  double _b, _y, strokeWidth;
 
-  CurvePainter(this._y, this._b);
+  CurvePainter(this._y, this._b, this.strokeWidth);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -16,7 +16,7 @@ class CurvePainter extends CustomPainter {
     }
     var paint = Paint();
     paint.color = Colors.amber;
-    paint.strokeWidth = 10;
+    paint.strokeWidth = strokeWidth;
     canvas.drawLine(
       Offset(0, top),
       Offset(size.width, top),

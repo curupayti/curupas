@@ -28,3 +28,10 @@ subprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+// Bug
+// flutter The library com.google.firebase:firebase-iid is being requested by various other libraries at [[20.0.0,20.0.0]], but resolves to 17.1.2. Disable the plugin and check your dependencies tree using ./gradlew :app:dependencies.
+// https://github.com/flutter/flutter/issues/19868#issuecomment-408550356
+com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true
+
+
