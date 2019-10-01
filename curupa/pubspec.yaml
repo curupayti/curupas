@@ -39,6 +39,8 @@ dependencies:
   flutter_speed_dial: ^1.2.1
   flutter_screenutil: ^0.5.3
   flutter_launcher_icons: "^0.7.3"
+  zefyr: ^0.8.0
+  notus: ^0.1.4
 
   #flutter_icons:
   #  image_path: "assets/images/escudo.png"
