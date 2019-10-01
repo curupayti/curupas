@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:onboarding_flow/models/streaming.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:flutter/services.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   Streaming streaming;
@@ -38,6 +39,21 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
     super.initState();
     _videoId = widget.streaming.id;
     print(_videoId);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
+  }
+
+  @override
+  dispose() {
+    SystemChrome.setPreferredOrientations([
+      //DeviceOrientation.landscapeRight,
+      //DeviceOrientation.landscapeLeft,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
   }
 
   @override
@@ -105,7 +121,7 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
                 _controller.addListener(listener);
               },
             ),
-            SizedBox(
+            /*SizedBox(
               height: 10.0,
             ),
             Padding(
@@ -249,7 +265,7 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
                   ),
                 ],
               ),
-            ),
+            ),*/
           ],
         ),
       ),
