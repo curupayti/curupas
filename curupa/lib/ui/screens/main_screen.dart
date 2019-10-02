@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,9 +12,11 @@ import 'package:onboarding_flow/ui/screens/pages/group_page.dart';
 import 'package:onboarding_flow/ui/screens/pages/home_page.dart';
 import 'package:onboarding_flow/ui/screens/pages/profile_page.dart';
 import 'package:onboarding_flow/ui/screens/pages/streaming_page.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:youtube_api/youtube_api.dart';
+import 'dart:convert';
 
 class MainScreen extends StatefulWidget {
   MainScreen({Key key, this.title, FirebaseUser firebaseUser})
@@ -302,11 +305,19 @@ class _MainScreenState extends State<MainScreen> {
       print(error.toString());
     }
     if (ytResult.length > 0) {
+      print(ytResult.toString());
       _globals.streamingReachable = true;
       _globals.setYoutubeApi(ytResult);
+
+      //String nameString = jsonEncode(ytResult);
+      //print("________");
+      //print(nameString);
+      //print("________");
+
       for (var i = 0; i < ytResult.length; i++) {
         Streaming streaming = new Streaming();
         YT_API ytapi = ytResult[i];
+        //writeYoutubeLog(i, ytapi.toString());
         streaming.id = ytapi.id;
         streaming.title = ytapi.title;
         streaming.kind = ytapi.kind;
@@ -314,7 +325,8 @@ class _MainScreenState extends State<MainScreen> {
         String thubnailUrl = _default['url'];
         streaming.thumnailUrl = thubnailUrl;
         streaming.videoUrl = ytapi.url;
-        if (ytapi.kind == "live") {
+        String kind = ytapi.kind;
+        if (kind == "live") {
           streaming.isLive = true;
           _globals.streammer.setIsLiveStreaming(true);
         } else {
@@ -325,6 +337,24 @@ class _MainScreenState extends State<MainScreen> {
       _globals.streammer.serStreamings(streamingList);
     }
     updeteWidget();
+  }
+
+  Future<File> writeYoutubeLog(int counter, String content) async {
+    final file = await _localFile;
+
+    // Write the file.
+    return file.writeAsString('$content');
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/log_youtube.txt');
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
   }
 
   void updeteWidget() {
@@ -368,6 +398,10 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _logOut() async {
+    prefs.setBool('registered', false);
+    prefs.setBool('group', false);
+    prefs.setString('userId', null);
     Auth.signOut();
+    Navigator.of(context).pushNamed("/signin");
   }
 }
