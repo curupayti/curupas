@@ -155,7 +155,6 @@ class FilePickerGlobal {
 
   Future<String> uploadFile(String _imagePath, String fileName) async {
     String extension = p.extension(_imagePath);
-    //Random().nextInt(1000000).toString()
     String fileFolderExtension = fileName + '$extension';
     StorageReference storageRef =
         FirebaseStorage.instance.ref().child(fileFolderExtension);
@@ -167,6 +166,14 @@ class FilePickerGlobal {
     StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
     String url = (await downloadUrl.ref.getDownloadURL());
     streamSubscription.cancel();
+    return url;
+  }
+
+  Future<String> getStorageFileUrl(String childReference) async {
+    StorageReference storageRef =
+        FirebaseStorage.instance.ref().child(childReference);
+    String url = await storageRef.getDownloadURL();
+
     return url;
   }
 }

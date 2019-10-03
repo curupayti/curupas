@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:core';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
@@ -479,11 +480,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       String email,
       String password,
       BuildContext context}) async {
-    if (Validator.validateName(fullname) &&
+    if ( //Validator.validateName(fullname) &&
         Validator.validatePhone(phone) &&
-        Validator.validateBirthday(birthday) &&
-        Validator.validateEmail(email) &&
-        Validator.validatePassword(password)) {
+            Validator.validateBirthday(birthday) &&
+            Validator.validateEmail(email) &&
+            Validator.validatePassword(password)) {
       setState(() {
         _loadingInProgress = true;
       });
@@ -516,34 +517,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
             } else {
               String loweName = fullname.toLowerCase();
               String toUnderscore = loweName.replaceAll(" ", "_");
-              String imageName = "/users/${toUnderscore}";
-              _globals.filePickerGlobal
-                  .uploadFile(_imagePath, imageName)
-                  .then((url) async {
-                User user = new User(
-                    userID: uID,
-                    phone: phone,
-                    email: email,
-                    name: fullname,
-                    birthday: birthday,
-                    profilePictureURL: url);
-                bool added = await Auth.addUser(user);
-                if (added) {
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  prefs.setBool('registered', true);
-                  prefs.setString('userId', uID);
-                  if (inputDoneSignUp != null) {
-                    phoneNumberFocusNodeSignUp = null;
-                    inputDoneSignUp = null;
-                  }
-                  setState(() {
-                    _loadingInProgress = false;
-                  });
-                  _globals.user = user;
-                  Navigator.of(context).pushNamed("/group");
+              String toNonSpecial = removeDiacritics(toUnderscore);
+              User user = new User(
+                  userID: uID,
+                  phone: phone,
+                  email: email,
+                  name: fullname,
+                  birthday: birthday);
+              bool added = await Auth.addUser(user);
+
+              if (added) {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setString('toNonSpecial', toNonSpecial);
+                prefs.setString('_imagePath', _imagePath);
+                prefs.setBool('registered', true);
+                prefs.setString('userId', uID);
+                if (inputDoneSignUp != null) {
+                  phoneNumberFocusNodeSignUp = null;
+                  inputDoneSignUp = null;
                 }
-              });
+                setState(() {
+                  _loadingInProgress = false;
+                });
+                _globals.user = user;
+                Navigator.of(context).pushNamed("/group");
+              }
+              //});
             }
           }
         });
@@ -579,7 +578,7 @@ class InputDoneSignUp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: Colors.grey, //Color(Const.doneButtonBg),
+      color: Colors.black, //Color(Const.doneButtonBg),
       child: Align(
         alignment: Alignment.topRight,
         child: Padding(
@@ -592,7 +591,7 @@ class InputDoneSignUp extends StatelessWidget {
             },
             child: Text("Cerrar",
                 style: TextStyle(
-                    color: Colors.blue, //Color(Const.colorPrimary),
+                    color: Colors.white, //Color(Const.colorPrimary),
                     fontWeight: FontWeight.bold,
                     fontSize: 20.0)),
           ),

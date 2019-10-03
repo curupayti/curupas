@@ -126,7 +126,7 @@ class UpperSection extends StatelessWidget {
                           shape: BoxShape.circle,
                           image: new DecorationImage(
                             image: new NetworkImage(
-                                _globals.user.profilePictureURL),
+                                _globals.user.thumbnailPictureURL),
                             fit: BoxFit.cover,
                           )),
                     ),

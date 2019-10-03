@@ -8,6 +8,7 @@ class User {
   final String birthday;
   final String email;
   final String profilePictureURL;
+  final String thumbnailPictureURL;
   DocumentReference groupRef;
   DocumentReference userRef;
   Group group;
@@ -19,6 +20,7 @@ class User {
     this.birthday,
     this.email,
     this.profilePictureURL,
+    this.thumbnailPictureURL,
     this.groupRef,
     this.group,
   });
@@ -31,6 +33,7 @@ class User {
       'birthday': birthday,
       'email': email == null ? '' : email,
       'profilePictureURL': profilePictureURL,
+      'thumbnailPictureURL': thumbnailPictureURL,
       'groupRef': groupRef,
       'group': group,
     };
@@ -44,6 +47,7 @@ class User {
       birthday: doc['birthday'],
       email: doc['email'],
       profilePictureURL: doc['profilePictureURL'],
+      thumbnailPictureURL: doc['thumbnailPictureURL'],
       groupRef: doc['groupRef'],
     );
     return user;

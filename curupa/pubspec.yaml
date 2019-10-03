@@ -42,6 +42,7 @@ dependencies:
   zefyr: ^0.8.0
   notus: ^0.1.4
   path_provider: ^1.3.0
+  diacritic: ^0.1.1
 
   #flutter_icons:
   #  image_path: "assets/images/escudo.png"

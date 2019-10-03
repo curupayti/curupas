@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:core';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
@@ -7,10 +8,10 @@ import 'package:flutter/rendering.dart';
 import 'package:onboarding_flow/business/auth.dart';
 import 'package:onboarding_flow/business/validator.dart';
 import 'package:onboarding_flow/models/group.dart';
-import 'package:onboarding_flow/ui/widgets/custom_alert_dialog.dart';
 import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
 import "package:onboarding_flow/ui/widgets/custom_text_field.dart";
 import 'package:onboarding_flow/globals.dart' as _globals;
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GroupScreen extends StatefulWidget {
@@ -42,7 +43,7 @@ class _GroupScreenState extends State<GroupScreen> {
   CustomFlatButton _saveGroupButton;
 
   Text _newGroupText;
-
+  bool _isNewGroupVisible = true;
   SharedPreferences prefs;
 
   void _rebuild() {
@@ -136,6 +137,9 @@ class _GroupScreenState extends State<GroupScreen> {
       fontWeight: FontWeight.w700,
       textColor: textColor,
       onPressed: () {
+        setState(() {
+          _loadingInProgress = true;
+        });
         _saveGroup(context);
       },
       splashColor: Colors.black12,
@@ -240,7 +244,10 @@ class _GroupScreenState extends State<GroupScreen> {
                     Padding(
                       padding:
                           EdgeInsets.only(top: 20.0, left: 50.0, right: 50.0),
-                      child: _newGroupField,
+                      child: Visibility(
+                        visible: _isNewGroupVisible,
+                        child: _newGroupField,
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(
@@ -273,6 +280,7 @@ class _GroupScreenState extends State<GroupScreen> {
     setState(() {
       _createNewTextGroup(
           "Elegiste la camada ${selected}, pulsa el boton de guardar");
+      _isNewGroupVisible = false;
       _enableButton();
     });
   }
@@ -372,15 +380,39 @@ class _GroupScreenState extends State<GroupScreen> {
     DocumentReference groupRef =
         Firestore.instance.collection('groups').document(groupId);
 
-    Firestore.instance.collection('users').document(userId).updateData(
-        {'groupRef': groupRef, "group": year}).then((userUpdated) async {
-      _globals.user.groupRef = groupRef;
-      _globals.showErrorAlert(
-        context: context,
-        title: "Registración completa",
-        content: "Has completado la registraciónc on éxito. ",
-        onPressed: _closeDialog,
-      );
+    //Upload image
+    String toNonSpecial = prefs.getString('toNonSpecial');
+    String _imagePath = prefs.getString('_imagePath');
+    String imageName = "/users/${year}/${toNonSpecial}";
+    String thumbImageName = "/users/${year}/thumb_${toNonSpecial}";
+
+    String _extension = p.extension(_imagePath);
+    print(_extension);
+    String thumbImageNameExtension = thumbImageName + '$_extension';
+    print(thumbImageNameExtension);
+
+    _globals.filePickerGlobal
+        .uploadFile(_imagePath, imageName)
+        .then((url) async {
+      sleep(const Duration(seconds: 1));
+      _globals.filePickerGlobal
+          .getStorageFileUrl(thumbImageNameExtension)
+          .then((thumbnailPictureURL) async {
+        Firestore.instance.collection('users').document(userId).updateData({
+          'groupRef': groupRef,
+          "group": year,
+          "profilePictureURL": url,
+          "thumbnailPictureURL": thumbnailPictureURL,
+        }).then((userUpdated) async {
+          _globals.user.groupRef = groupRef;
+          _globals.showErrorAlert(
+            context: context,
+            title: "Registración completa",
+            content: "Has completado la registraciónc on éxito. ",
+            onPressed: _closeDialog,
+          );
+        });
+      });
     });
   }
 

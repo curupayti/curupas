@@ -33,7 +33,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
       leading: new Hero(
         tag: index,
         child: new CircleAvatar(
-          backgroundImage: new NetworkImage(friend.profilePictureURL),
+          backgroundImage: new NetworkImage(friend.thumbnailPictureURL),
         ),
       ),
       title: new Text(friend.name),
