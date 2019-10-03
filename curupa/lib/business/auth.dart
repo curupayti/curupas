@@ -52,20 +52,20 @@ class Auth {
     } catch (e) {
       authProblems errorType;
       //if (Platform.isAndroid) {
-        switch (e.message) {
-          case 'There is no user record corresponding to this identifier. The user may have been deleted.':
-            errorType = authProblems.UserNotFound;
-            break;
-          case 'The password is invalid or the user does not have a password.':
-            errorType = authProblems.PasswordNotValid;
-            break;
-          case 'A network error (such as timeout, interrupted connection or unreachable host) has occurred.':
-            errorType = authProblems.NetworkError;
-            break;
-          // ...
-          default:
-            print('Case ${e.message} is not yet implemented');
-        }
+      switch (e.message) {
+        case 'There is no user record corresponding to this identifier. The user may have been deleted.':
+          errorType = authProblems.UserNotFound;
+          break;
+        case 'The password is invalid or the user does not have a password.':
+          errorType = authProblems.PasswordNotValid;
+          break;
+        case 'A network error (such as timeout, interrupted connection or unreachable host) has occurred.':
+          errorType = authProblems.NetworkError;
+          break;
+        // ...
+        default:
+          print('Case ${e.message} is not yet implemented');
+      }
       //} else if (Platform.isIOS) {
       /*  switch (e.code) {
           case 'Error 17011':
@@ -124,10 +124,19 @@ class Auth {
   }
 
   static Future<String> signUp(String email, String password) async {
-    final FirebaseUser user = (await _auth.createUserWithEmailAndPassword(
-            email: email, password: password))
-        .user;
-
+    FirebaseUser user;
+    try {
+      user = (await _auth.createUserWithEmailAndPassword(
+              email: email, password: password))
+          .user;
+    } on Exception catch (exception) {
+      String _e = exception.toString();
+      if (_e.contains(_globals.error_email_already_in_use)) {
+        return _globals.error_email_already_in_use;
+      } else {
+        return _globals.error_unknown;
+      }
+    }
     return user.uid;
   }
 

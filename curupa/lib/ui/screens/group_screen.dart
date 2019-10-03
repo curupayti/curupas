@@ -387,6 +387,7 @@ class _GroupScreenState extends State<GroupScreen> {
   void _closeDialog() {
     int count = 0;
     Navigator.of(context).popUntil((_) => count++ >= 2);
+    //Navigator.of(context).pushNamed("/main");
   }
 
   void makeRoutePage({BuildContext context, Widget pageRef}) {

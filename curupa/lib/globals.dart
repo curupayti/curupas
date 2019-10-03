@@ -28,6 +28,12 @@ bool streamingReachable = false;
 FilePickerGlobal filePickerGlobal;
 //double bottomNavBarHeight = 80;
 
+String error_email_already_in_use = "ERROR_EMAIL_ALREADY_IN_USE";
+String error_unknown = "ERROR_UNKNOWN";
+
+String register_error_title = "Error en el registro";
+String signin_error_title = "Error de autentificación";
+
 void getUserData(String userId, bool hasGroup) async {
   if (userId != null) {
     Stream<User> userStream = Auth.getUser(userId);

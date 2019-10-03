@@ -38,8 +38,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   //https://medium.com/flutterpub/flutter-keyboard-actions-and-next-focus-field-3260dc4c694
 
-  FocusNode inputOne = FocusNode();
-  FocusNode inputTwo = FocusNode();
+  FocusNode _emailFocus = FocusNode();
 
   bool _blackVisible = false;
   VoidCallback onBackPress;
@@ -124,6 +123,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       inputType: TextInputType.emailAddress,
       validator: Validator.validateEmail,
       inputAction: TextInputAction.done,
+      focusNode: _emailFocus,
     );
 
     _passwordField = CustomTextField(
@@ -143,7 +143,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     phoneNumberFocusNodeSignUp.addListener(() {
       bool hasFocus = phoneNumberFocusNodeSignUp.hasFocus;
       if (hasFocus) {
-        showOverlay(context);
+        showKeyboardOverlayButton(context);
       } else {
         removeOverlay();
       }
@@ -443,7 +443,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  showOverlay(BuildContext context) {
+  //For numeric keyboard "Cerrar" button
+  showKeyboardOverlayButton(BuildContext context) {
     if (overlayEntry != null) return;
     OverlayState overlayState = Overlay.of(context);
     overlayEntry = OverlayEntry(builder: (context) {
@@ -489,38 +490,61 @@ class _SignUpScreenState extends State<SignUpScreen> {
       try {
         SystemChannels.textInput.invokeMethod('TextInput.hide');
         _changeBlackVisible();
-
         await Auth.signUp(email, password).then((uID) async {
           if (_imageSelected) {
-            String loweName = _globals.user.name.toLowerCase();
-            String toUnderscore = loweName.replaceAll(" ", "_");
-            String imageName = "${_globals.group.year}/users/${toUnderscore}";
-            _globals.filePickerGlobal
-                .uploadFile(_imagePath, imageName)
-                .then((url) async {
-              User user = new User(
-                  userID: uID,
-                  phone: phone,
-                  email: email,
-                  name: fullname,
-                  birthday: birthday,
-                  profilePictureURL: url);
-              bool added = await Auth.addUser(user);
-              if (added) {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.setBool('registered', true);
-                prefs.setString('userId', uID);
-                if (inputDoneSignUp != null) {
-                  phoneNumberFocusNodeSignUp = null;
-                  inputDoneSignUp = null;
+            if (uID == _globals.error_email_already_in_use) {
+              _globals.showErrorAlert(
+                context: context,
+                title: _globals.register_error_title,
+                content: "Tu mail yo se encuentra registrado.",
+                onPressed: () {
+                  setState(() {
+                    _email.clear();
+                    FocusScope.of(context).requestFocus(_emailFocus);
+                    _blackVisible = !_blackVisible;
+                    _loadingInProgress = false;
+                  });
+                },
+              );
+            } else if (uID == _globals.error_unknown) {
+              _globals.showErrorAlert(
+                context: context,
+                title: _globals.register_error_title,
+                content: "Error desconocido, contacta al adinistrador.",
+                onPressed: _changeBlackVisible,
+              );
+            } else {
+              String loweName = fullname.toLowerCase();
+              String toUnderscore = loweName.replaceAll(" ", "_");
+              String imageName = "/users/${toUnderscore}";
+              _globals.filePickerGlobal
+                  .uploadFile(_imagePath, imageName)
+                  .then((url) async {
+                User user = new User(
+                    userID: uID,
+                    phone: phone,
+                    email: email,
+                    name: fullname,
+                    birthday: birthday,
+                    profilePictureURL: url);
+                bool added = await Auth.addUser(user);
+                if (added) {
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  prefs.setBool('registered', true);
+                  prefs.setString('userId', uID);
+                  if (inputDoneSignUp != null) {
+                    phoneNumberFocusNodeSignUp = null;
+                    inputDoneSignUp = null;
+                  }
+                  setState(() {
+                    _loadingInProgress = false;
+                  });
+                  _globals.user = user;
+                  Navigator.of(context).pushNamed("/group");
                 }
-                setState(() {
-                  _loadingInProgress = false;
-                });
-                _globals.user = user;
-                Navigator.of(context).pushNamed("/group");
-              }
-            });
+              });
+            }
           }
         });
       } catch (e) {
@@ -528,7 +552,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         String exception = Auth.getExceptionText(e);
         _globals.showErrorAlert(
           context: context,
-          title: "Signup failed",
+          title: _globals.register_error_title,
           content: exception,
           onPressed: _changeBlackVisible,
         );
