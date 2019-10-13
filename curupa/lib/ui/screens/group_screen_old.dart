@@ -3,9 +3,9 @@ import 'dart:core';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onboarding_flow/business/auth.dart';
 import 'package:onboarding_flow/business/validator.dart';
 import 'package:onboarding_flow/models/group.dart';
@@ -14,7 +14,6 @@ import "package:onboarding_flow/ui/widgets/custom_text_field.dart";
 import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class GroupScreen extends StatefulWidget {
   @override
@@ -48,15 +47,11 @@ class _GroupScreenState extends State<GroupScreen> {
   bool _isNewGroupVisible = true;
   SharedPreferences prefs;
 
-  String curupasUrl = 'https://curupas.com.ar/';
+  bool _blackVisible = false;
+  bool _showMessage = false;
+  bool _goToMain = false;
 
-  TextStyle linkStyle = const TextStyle(
-    color: Colors.blue,
-    decoration: TextDecoration.underline,
-    fontSize: 25.0,
-  );
-
-  TapGestureRecognizer _flutterTapRecognizer;
+  BuildContext mainContext;
 
   void _rebuild() {
     setState(() {});
@@ -66,12 +61,11 @@ class _GroupScreenState extends State<GroupScreen> {
   void initState() {
     super.initState();
 
+    if (_globals.filePickerGlobal == null) {
+      _globals.setFilePickerGlobal();
+    }
+
     isUserId();
-
-    _flutterTapRecognizer = new TapGestureRecognizer()
-      ..onTap = () => _openUrl(curupasUrl);
-
-    setButtonEnabled(false);
 
     phoneNumberFocusNodeGroup.addListener(() {
       bool hasFocus = phoneNumberFocusNodeGroup.hasFocus;
@@ -82,7 +76,7 @@ class _GroupScreenState extends State<GroupScreen> {
     });
 
     _createNewTextGroup("Si tu camada no esta en el menu crea una nueva");
-    _setButtonEnabled(false);
+    setButtonEnabled(true);
 
     _newGroupField = new CustomTextField(
       baseColor: Colors.grey,
@@ -156,6 +150,7 @@ class _GroupScreenState extends State<GroupScreen> {
           _loadingInProgress = true;
         });
         _saveGroup(context);
+        //Navigator.of(context).pushNamed("/main");
       },
       splashColor: Colors.black12,
       borderColor: borderColor,
@@ -168,7 +163,7 @@ class _GroupScreenState extends State<GroupScreen> {
     List<DropdownMenuItem<String>> items = new List();
     QuerySnapshot querySnapshot =
         await Firestore.instance.collection("groups").getDocuments();
-    items.add(new DropdownMenuItem(value: null, child: new Text("----")));
+    items.add(new DropdownMenuItem(value: null, child: new Text("")));
     for (var doc in querySnapshot.documents) {
       String year = doc['year'];
       String documentID = doc.documentID;
@@ -181,19 +176,137 @@ class _GroupScreenState extends State<GroupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    mainContext = context;
+    double _height = MediaQuery.of(context).size.height + 300;
     return WillPopScope(
       onWillPop: onBackPress,
       child: Scaffold(
-        body: _buildBody(),
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[Container(height: _height, child: _buildBody())],
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildBody() {
     if (_loadingInProgress) {
-      return new Center(
-        child: new CircularProgressIndicator(),
-      );
+      if (_showMessage) {
+        return Stack(children: <Widget>[
+          new Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: Colors.white,
+            ),
+            child: new Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding:
+                      EdgeInsets.only(bottom: ScreenUtil().setHeight(50.0)),
+                  child: new Flexible(
+                    child: new Text(
+                      "La registración ha sido exitosa, ya podes utilizar la aplicación. \n\n Muchas gracias",
+                      softWrap: true,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey,
+                        decoration: TextDecoration.none,
+                        fontSize: ScreenUtil().setSp(80.0),
+                        fontWeight: FontWeight.w300,
+                        fontFamily: "OpenSans",
+                      ),
+                    ),
+                  ),
+                ),
+                CustomFlatButton(
+                  title: "Ir a la aplicación",
+                  enabled: true,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  textColor: Colors.white,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed("/main");
+                  },
+                  splashColor: Colors.black12,
+                  borderColor: Colors.black,
+                  borderWidth: 0,
+                  color: Colors.blue, //
+                ),
+              ],
+            ),
+          ),
+        ]);
+      } else {
+        return Stack(children: <Widget>[
+          new Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: Colors.white,
+            ),
+            child: new Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                        top: ScreenUtil().setHeight(30.0),
+                        bottom: ScreenUtil().setWidth(50.0),
+                        left: ScreenUtil().setWidth(30.0),
+                        right: ScreenUtil().setWidth(30.0)),
+                    child: new Image.asset("assets/images/escudo.png",
+                        height: ScreenUtil().setHeight(350.0),
+                        fit: BoxFit.fitHeight),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      EdgeInsets.only(bottom: ScreenUtil().setHeight(50.0)),
+                  child: new Text(
+                    "Guardando datos",
+                    softWrap: true,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey,
+                      decoration: TextDecoration.none,
+                      fontSize: ScreenUtil().setSp(50.0),
+                      fontWeight: FontWeight.w300,
+                      fontFamily: "OpenSans",
+                    ),
+                  ),
+                ),
+                new Container(
+                  width: 60,
+                  height: 60,
+                  child: new CircularProgressIndicator(),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: ScreenUtil().setHeight(50.0)),
+                  child: new Text(
+                    "Un momento por favor",
+                    softWrap: true,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey,
+                      decoration: TextDecoration.none,
+                      fontSize: ScreenUtil().setSp(35.0),
+                      fontWeight: FontWeight.w300,
+                      fontFamily: "OpenSans",
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ]);
+      }
     } else {
       print(_currentItem);
       print(_groupMenuItems.length);
@@ -232,7 +345,7 @@ class _GroupScreenState extends State<GroupScreen> {
                           children: <Widget>[
                             new Text("Selecciona tu camada",
                                 style: TextStyle(
-                                    fontSize: 40.0, color: Colors.grey),
+                                    fontSize: 30.0, color: Colors.grey),
                                 textAlign: TextAlign.center),
                             new Container(
                               padding: new EdgeInsets.only(top: 20.0),
@@ -279,6 +392,21 @@ class _GroupScreenState extends State<GroupScreen> {
                 ),
               ],
             ),
+            Offstage(
+              offstage: !_blackVisible,
+              child: GestureDetector(
+                onTap: () {},
+                child: AnimatedOpacity(
+                  opacity: _blackVisible ? 1.0 : 0.0,
+                  duration: Duration(milliseconds: 400),
+                  curve: Curves.ease,
+                  child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       );
@@ -287,7 +415,7 @@ class _GroupScreenState extends State<GroupScreen> {
 
   void _createNewTextGroup(String text) {
     _newGroupText = new Text(text,
-        style: TextStyle(fontSize: 26.0, color: Colors.grey),
+        style: TextStyle(fontSize: 20.0, color: Colors.grey),
         textAlign: TextAlign.center);
   }
 
@@ -296,11 +424,11 @@ class _GroupScreenState extends State<GroupScreen> {
       _createNewTextGroup(
           "Elegiste la camada ${selected}, pulsa el boton de guardar");
       _isNewGroupVisible = false;
-      _enableButton();
+      //_enableButton();
     });
   }
 
-  void _setButtonEnabled(bool enabled) {
+  /*void _setButtonEnabled(bool enabled) {
     Color color, borderColor, textColor;
     if (enabled) {
       color = Color.fromRGBO(59, 89, 152, 1.0);
@@ -325,7 +453,7 @@ class _GroupScreenState extends State<GroupScreen> {
       borderWidth: 0,
       color: color,
     );
-  }
+  }*/
 
   void _changedGroupItem(String selected) {
     setState(() {
@@ -361,7 +489,7 @@ class _GroupScreenState extends State<GroupScreen> {
           title: "La camada ya existe",
           content:
               "La camada que intentas agregar ya existe, seleccionala en el menu.",
-          onPressed: _closeDialog,
+          onPressed: _changeBlackVisible,
         );
         setState(() {
           _newGroup.clear();
@@ -387,7 +515,6 @@ class _GroupScreenState extends State<GroupScreen> {
   }
 
   void _saveGroup(BuildContext context) async {
-    prefs.setBool('group', true);
     String userId = _globals.user.userID;
     String groupId = _currentGroup.documentID;
     String year = _currentGroup.year;
@@ -408,121 +535,34 @@ class _GroupScreenState extends State<GroupScreen> {
 
     _globals.filePickerGlobal
         .uploadFile(_imagePath, imageName)
-        .then((url) async {
-      sleep(const Duration(seconds: 3));
-      _globals.filePickerGlobal
-          .getStorageFileUrl(thumbImageNameExtension)
-          .then((thumbnailPictureURL) async {
-        Firestore.instance.collection('users').document(userId).updateData({
-          'groupRef': groupRef,
-          "group": year,
-          "profilePictureURL": url,
-          "thumbnailPictureURL": thumbnailPictureURL,
-        }).then((userUpdated) async {
-          _globals.user.groupRef = groupRef;
-          showDialog(
-            context: context,
-            builder: (BuildContext context) => _buildAboutDialog(context),
-          );
-        });
-      });
+        .then((profilePictureURL) async {
+      prefs.setString('groupId', groupId);
+      prefs.setString('year', year);
+      prefs.setString('profilePictureURL', profilePictureURL);
+      _globals.showErrorAlert(
+          context: context,
+          title: "Registración completa",
+          content: "Has completado la registraciónc on éxito. ",
+          onPressed: () {
+            int count = 0;
+            Navigator.of(context).popUntil((_) => count++ >= 2);
+            //Navigator.of(context).pushNamed("/main");
+          });
     });
   }
 
-  void _openUrl(String url) async {
-    // Close the about dialog.
-    //Navigator.pop(context);
-
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  Widget _buildAboutDialog(BuildContext context) {
-    return new AlertDialog(
-      title: const Text('Registración exitosa'),
-      content: new Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _buildAboutText(),
-          SizedBox(
-            height: 16.0,
-          ),
-          _buildLogoAttribution(),
-        ],
-      ),
-      actions: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 5.0, right: 15.0, left: 15.0),
-          child: new FlatButton(
-            onPressed: () {
-              exit(0);
-            },
-            textColor: Colors.white,
-            child: Text(
-              'Leí y entendi el mensaje, cerrar',
-              style: TextStyle(color: Colors.blue, fontSize: 20.0),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAboutText() {
-    return new RichText(
-      text: new TextSpan(
-        text:
-            'Resta que un referente de tu camada apruebe tu ingreso. Te va a llegar una notificación cuando lo haga.\n\n',
-        style: TextStyle(color: Colors.black87, fontSize: 20.0),
-        children: <TextSpan>[
-          new TextSpan(
-              text:
-                  'Mientras tanto, podes ver mas información del proyecto en ',
-              style: TextStyle(color: Colors.black87, fontSize: 20.0)),
-          new TextSpan(
-            text: 'Curupas',
-            recognizer: _flutterTapRecognizer,
-            style: linkStyle,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLogoAttribution() {
-    return new Padding(
-      padding: const EdgeInsets.only(top: 16.0),
-      child: new Row(
-        children: <Widget>[
-          new Padding(
-            padding: const EdgeInsets.only(top: 0.0),
-            child: new Image.asset(
-              "assets/images/escudo.png",
-              width: 50.0,
-            ),
-          ),
-          const Expanded(
-            child: const Padding(
-              padding: const EdgeInsets.only(left: 20.0),
-              child: const Text(
-                'El regreso virtual es crecimiento',
-                style: const TextStyle(fontSize: 20.0),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _closeDialog() {
-    int count = 0;
-    Navigator.of(context).popUntil((_) => count++ >= 2);
+    //int count = 0;
+    //Navigator.of(context).popUntil((_) => count++ >= 2);
+    Navigator.popUntil(context, ModalRoute.withName('/main'));
     //Navigator.of(context).pushNamed("/main");
+    //Navigator.of(context).pushNamed("/main");
+  }
+
+  void _changeBlackVisible() {
+    setState(() {
+      _blackVisible = !_blackVisible;
+    });
   }
 
   void makeRoutePage({BuildContext context, Widget pageRef}) {
@@ -566,34 +606,52 @@ class InputDoneGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: Colors.grey,
+      color: Colors.black,
       child: Align(
         alignment: Alignment.topRight,
         child: Padding(
           padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
-          child: CupertinoButton(
-            padding: EdgeInsets.only(right: 24.0, top: 8.0, bottom: 8.0),
-            onPressed: () {
-              FocusScope.of(context).requestFocus(new FocusNode());
-              String year = this.parent._newGroup.text;
-              if (year.length != 4) {
-                _globals.showErrorAlert(
-                    context: context,
-                    title: "Error de formato",
-                    content: "Debes cargar el años con cuatro digitos",
-                    onPressed: () {
-                      this.parent._closeDialog;
-                      this.parent._newGroup.clear();
-                    });
-              } else {
-                this.parent._createNewGroup();
-              }
-            },
-            child: Text("CREAR CAMADA",
-                style: TextStyle(
-                    color: Colors.blue, //Color(Const.colorPrimary),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25.0)),
+          child: Row(
+            children: <Widget>[
+              CupertinoButton(
+                padding: EdgeInsets.only(left: 5.0, top: 8.0, bottom: 8.0),
+                onPressed: () {
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                },
+                child: Text("CERRAR",
+                    style: TextStyle(
+                        color: Colors.blue, //Color(Const.colorPrimary),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0)),
+              ),
+              SizedBox(
+                width: 80.0,
+              ),
+              CupertinoButton(
+                padding: EdgeInsets.only(right: 5.0, top: 8.0, bottom: 8.0),
+                onPressed: () {
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                  String year = this.parent._newGroup.text;
+                  if (year.length != 4) {
+                    _globals.showErrorAlert(
+                        context: context,
+                        title: "Error de formato",
+                        content: "Debes cargar el años con cuatro digitos",
+                        onPressed: () {
+                          this.parent._changeBlackVisible;
+                          this.parent._newGroup.clear();
+                        });
+                  } else {
+                    this.parent._createNewGroup();
+                  }
+                },
+                child: Text("CREAR CAMADA",
+                    style: TextStyle(
+                        color: Colors.blue, //Color(Const.colorPrimary),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0)),
+              ),
+            ],
           ),
         ),
       ),
