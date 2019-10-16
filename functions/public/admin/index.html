@@ -50,10 +50,15 @@
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-    
+ 
     <!-- Firebase -->    
     <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-analytics.js"></script>
+
+    <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-database.js"></script>
 
     <script>
         // firebase config
@@ -71,13 +76,15 @@
 
         /////////////////////////////////////
 
-        var Blog = firebase.database().ref('Entry').orderByChild('updatedAt');
+        var Feeds = firebase.database().ref('feeds').orderByChild('updatedAt');
 
-        Blog.on('value', function (r) {
+        Feeds.on('value', function (resutl) {
+
+            var s = resutl.length;
 
             $('#entries').html('Loading...');
             var html = '';
-            r.forEach(function (item) {
+            resutl.forEach(function (item) {
                 entry = item.val()
                 html = '<div class="col-md-4">' +
                     '<a href="entry.html?id=' + item.getKey() + '" style="text-decoration:none!important;">' +
