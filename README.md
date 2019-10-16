@@ -1,15 +1,11 @@
-# Project Title
+# Curupas
 
-One Paragraph of project description goes here
+Proyecto mobile camadas con Flutter y Firebase
 
-## Getting Started
+## Functions
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-### Prerequisites
-
-What things you need to install the software and how to install them
+Para inicializar las funciones es necesario clonar el branch 'functions' e instalar la linea de comandos firebase siguiendo [esta guia](https://firebase.google.com/docs/functions/local-emulator) y correr el comando
 
 ```
-Give examples
+firebase init
 ```
