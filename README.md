@@ -9,3 +9,8 @@ Para inicializar las funciones es necesario clonar el branch 'functions' e insta
 ```
 firebase init
 ```
+
+
+git remote update
+git fetch 
+git checkout --track origin/<BRANCH-NAME>
