@@ -10,7 +10,16 @@ Para inicializar las funciones es necesario clonar el branch 'functions' e insta
 firebase init
 ```
 
+To checkout branch when not found
 
+```sh
 git remote update
 git fetch 
 git checkout --track origin/<BRANCH-NAME>
+```
+
+To run Visual Studio Code with root access command
+
+```sh
+sudo code --user-data-dir="~/.vscode-root"
+```
