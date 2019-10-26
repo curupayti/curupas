@@ -23,3 +23,11 @@ To run Visual Studio Code with root access command
 ```sh
 sudo code --user-data-dir="~/.vscode-root"
 ```
+
+Start emulators
+
+```sh
+sudo firebase emulators:start
+```
+
+curl -X POST -H "Content-Type: application/json"  -d '{"data":{"name":"YOUR_NAME"}}'  http://localhost:5000/curupa-d830b/us-central1/helloWorld
