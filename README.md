@@ -25,8 +25,10 @@ firebase init
 ```
 
 1,3,5
-Y, Y, Javascript, Y, N, N, N, Y, public, Y, Y, Y
 
+```sh
+Y, Y, Javascript, Y, N, N, N, Y, public, Y, Y, Y
+```
 
 To run Visual Studio Code with root access command
 
