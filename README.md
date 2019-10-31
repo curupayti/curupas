@@ -49,3 +49,16 @@ sudo firebase deploy
 ```
 
 curl -X POST -H "Content-Type: application/json"  -d '{"data":{"name":"YOUR_NAME"}}'  http://localhost:5000/curupa-d830b/us-central1/helloWorld
+
+
+# Create new project
+
+Create new project.
+
+Enable database and storage, allow permission on both rules. Read write true.
+
+In order to use firestore on functions you need to initilize the app with "Firebase Admin SDK" certificate 
+
+Settings -> Service Account -> Firebase Admin SDK -> Node.js
+
+
