@@ -119,16 +119,22 @@ $(document).ready(function () {
             }
             return thisRef.put(file, metadata);                    
         })       
-        .then(function(snapshot) {            
-            //downloadURL = snapshot.downloadURL;
-            //return thisRef.put(file);            
-            /*var files = document.getElementById("imgInp").files;
-            for(var i=0; i<files.length; i++) {
-                var _file = files[i];                
-                var filePath =  title + ".png";        
-                var thisRef = storageRef.child(filePath);
-            }*/
-            console.error("termino");
+        .then(function(snapshot) {                        
+            var metadataFiles = {
+                customMetadata: {
+                    'thumbnail': 'false',
+                    'type' : '2',
+                    'postId' : postId                   
+                }
+            }
+            var input = document.getElementById("proImage");
+            for (var i = 0; i < input.files.length; ++i) {                            
+                var _file = input.files.item(i);                                                  
+                var filePathPost = title + "_" + i + "_ori.png";        
+                var postRef = storageRef.child(filePathPost);
+                postRef.put(_file, metadataFiles); 
+            }
+            console.log("termino");
         })        
         .catch(function(error) {
             console.error("Error adding document: ", error);
@@ -273,7 +279,7 @@ $(document).ready(function () {
     //-- Image Picker
     //--   
 
-    document.getElementById('pro-image').addEventListener('change', readImage, false);        
+    document.getElementById('proImage').addEventListener('change', readImage, false);        
     
     $(document).on('click', '.image-cancel', function() {
         let no = $(this).data('no');
@@ -312,12 +318,10 @@ $(document).ready(function () {
 
     function readURL(input) {
         if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            
+            var reader = new FileReader();            
             reader.onload = function (e) {
                 $('#avatar-preview').attr('src', e.target.result);
-            }
-            
+            }            
             reader.readAsDataURL(input.files[0]);
         }
     }
@@ -354,4 +358,5 @@ $(document).ready(function () {
     $(window).on("resize", function () {
         $('.modal:visible').each(centerModal);
     });
+    
 }(jQuery));

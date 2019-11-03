@@ -43,79 +43,50 @@ const THUMB_PREFIX = 'thumb_';
  * After the thumbnail has been generated and uploaded to Cloud Storage,
  * we write the public URL to the Firebase Realtime Database.
  */
-exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(async (object) => {
+exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(async (object) => {  
   
-  // File and directory paths.
   const filePath = object.name;
   const customMetadata = object.metadata;
-
-  //const myObjStr = JSON.stringify(customMetadata);  
-
-  var isThumbnail = (customMetadata.thumbnail == 'true'); 
-
+  var isThumbnail = (customMetadata.thumbnail == 'true');
   var customMetadataType = parseInt(customMetadata.type);
-
   var postId = customMetadata.postId;
+  console.log('postId: '+ postId);                  
 
-  console.log('postId: '+ postId);      
+  const contentType = object.contentType; // This is the image MIME type
+  const fileDir = path.dirname(filePath);
+  const fileName = path.basename(filePath);
+  const thumbFilePath = path.normalize(path.join(fileDir, `${THUMB_PREFIX}${fileName}`));
+  const tempLocalFile = path.join(os.tmpdir(), filePath);
+  const tempLocalDir = path.dirname(tempLocalFile);
+  const tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
 
-  /*if (customMetadataType == 1) {
-    console.log('customMetadataType == 1');
-  } else {
-    console.log('customMetadataType NOT');
-  }*/
-
-  /*if (isThumbnail) {
-    console.log('isThumbnail true');
-  } else {
-    console.log('isThumbnail false');
+  // Exit if this is triggered on a file that is not an image.
+  if (!contentType.startsWith('image/')) {
+    return console.log('This is not an image.');
   }
 
-  var isThumbnail2 = (customMetadata['thumbnail'] == 'true'); 
+  // Exit if the image is already a thumbnail.
+  if (fileName.startsWith(THUMB_PREFIX)) {
+    return console.log('Already a Thumbnail.');
+  }
 
-  if (isThumbnail2) {
-    console.log('isThumbnail2 true');
-  } else {
-    console.log('isThumbnail2 false');
-  }*/
+  // Cloud Storage files.
+  const bucket = admin.storage().bucket(object.bucket);
+  const file = bucket.file(filePath);
+  const thumbFile = bucket.file(thumbFilePath);
+  const metadata = {
+    contentType: contentType,
+    // To enable Client-side caching you can set the Cache-Control headers here. Uncomment below.
+    // 'Cache-Control': 'public,max-age=3600',
+  };
 
-  /*console.log('customMetadata: ' + customMetadata);
-  const customMetadaThumbnail = customMetadata.thumbnail;
+  //
+  const config = {
+    action: 'read',
+    expires: '03-01-2500',
+  }; 
 
-  var isThumbnail = (customMetadaThumbnail == 'true'); 
-  console.log('isThumbnail: ' + isThumbnail);
-  const customMetadataType = parseInt(customMetadata.type);
-  console.log('customMetadataType: ' + customMetadataType);*/
-  
-  if (isThumbnail == true) {        
-
-    const contentType = object.contentType; // This is the image MIME type
-    const fileDir = path.dirname(filePath);
-    const fileName = path.basename(filePath);
-    const thumbFilePath = path.normalize(path.join(fileDir, `${THUMB_PREFIX}${fileName}`));
-    const tempLocalFile = path.join(os.tmpdir(), filePath);
-    const tempLocalDir = path.dirname(tempLocalFile);
-    const tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
-
-    // Exit if this is triggered on a file that is not an image.
-    if (!contentType.startsWith('image/')) {
-      return console.log('This is not an image.');
-    }
-
-    // Exit if the image is already a thumbnail.
-    if (fileName.startsWith(THUMB_PREFIX)) {
-      return console.log('Already a Thumbnail.');
-    }
-
-    // Cloud Storage files.
-    const bucket = admin.storage().bucket(object.bucket);
-    const file = bucket.file(filePath);
-    const thumbFile = bucket.file(thumbFilePath);
-    const metadata = {
-      contentType: contentType,
-      // To enable Client-side caching you can set the Cache-Control headers here. Uncomment below.
-      // 'Cache-Control': 'public,max-age=3600',
-    };
+  if (isThumbnail == true) {    
     
     // Create the temp directory where the storage file will be downloaded.
     await mkdirp(tempLocalDir)
@@ -131,19 +102,8 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
     // Once the image has been uploaded delete the local files to free up disk space.
     fs.unlinkSync(tempLocalFile);
     fs.unlinkSync(tempLocalThumbFile);
-
-    console.log('LLEGA'); 
-    
     
     // Get the Signed URLs for the thumbnail and original image.
-    const config = {
-      action: 'read',
-      expires: '03-01-2500',
-    };
-    console.log('1'); 
-    console.log('thumbFile: '+thumbFile); 
-    console.log('file: '+file); 
-
     const results = await Promise.all([
       thumbFile.getSignedUrl(config),
       file.getSignedUrl(config),
@@ -153,23 +113,33 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
     const thumbResult = results[0];
     const originalResult = results[1];
     const thumbFileUrl = thumbResult[0];
-    const fileUrl = originalResult[0];
+    const fileUrl = originalResult[0];    
 
-    console.log('thumbFileUrl: ' + thumbFileUrl); 
-
-    if (customMetadataType == 1) {
-      console.log('UPDATE POST');     
+    //Save Post
+    if (customMetadataType == 1) {      
       await db.collection("posts").doc(postId).update({thumbnailSmallUrl: thumbFileUrl});
+    }    
+
+  } else {
+
+     // Get the Signed URLs for the thumbnail and original image.
+    const results = await Promise.all([      
+      file.getSignedUrl(config)
+    ]);   
+    
+    const originalResult = results[0];
+    const fileUrl = originalResult[0];   
+
+    //Save Post
+    if (customMetadataType == 2) {      
+      await db.collection("posts").doc(postId).set(
+      { images : [fileUrl] },{ merge: true });
     }
-
-    console.log('PASA'); 
-
-    // Add the URLs to the Database
-    await admin.database().ref('images').push({path: fileUrl, thumbnail: thumbFileUrl});
     
-    
-    return console.log('Thumbnail URLs saved to database.');
+    console.log('non metadata saved : ' + fileUrl);
+
   }
+
 });
 
 /*exports.sendNewPostNotification = functions.database.ref('/post/').onWrite(event=>{

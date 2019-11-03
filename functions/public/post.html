@@ -114,8 +114,8 @@
                         </div>	
                         <div class="form-group">                                                                                   
                             <fieldset class="form-group">
-                                <a href="javascript:void(0)" onclick="$('#pro-image').click()">Agregar Imágen</a>
-                                <input type="file" id="pro-image" name="pro-image" style="display: none;" class="form-control" multiple name="files[]">
+                                <a href="javascript:void(0)" onclick="$('#proImage').click()">Agregar Imágen</a>
+                                <input type="file" id="proImage" name="proImage" style="display: none;" class="form-control" multiple name="files[]">
                             </fieldset>
                             <div class="preview-images-zone"></div>
                         </div>				
@@ -201,9 +201,11 @@
     <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"></script>
-
-
-	<script>		
+    
+    <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-auth.js"></script>
+    
+    <script>		
+    
         var firebaseConfig = {
             apiKey: "AIzaSyCNW0DWuH4U-4Fa8IQLNiZc5Fxlvov0G_Y",
             authDomain: "curupas-backen.firebaseapp.com",
@@ -214,9 +216,18 @@
             appId: "1:464846058000:web:f1c764fb76fcc6455e5095",
             measurementId: "G-PBMTQWBJ6X"
         }; 
-		firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
+    
+
+        /*firebase.auth().onAuthStateChanged(function (user) {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });*/
+
 		const db = firebase.firestore();
         const storage = firebase.storage();
+
     </script>
     
     <script src="js/script_post.js"></script>

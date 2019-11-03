@@ -16,23 +16,17 @@
 'use strict';
 
 const functions = require('firebase-functions');
-const mkdirp = require('mkdirp-promise');
 const admin = require('firebase-admin');
+admin.initializeApp(functions.config().firebase);
+const mkdirp = require('mkdirp-promise');
 
-var serviceAccount = require("../key/curupa-d830b-b213a4458f49.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://app.firebaseio.com"
-});
+const db = admin.firestore();
 
 //admin.initializeApp();
 const spawn = require('child-process-promise').spawn;
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-
-const db = admin.firestore();
 
 // Max height and width of the thumbnail in pixels.
 const THUMB_MAX_HEIGHT = 200;
@@ -47,7 +41,7 @@ const THUMB_PREFIX = 'thumb_';
  * After the thumbnail has been generated and uploaded to Cloud Storage,
  * we write the public URL to the Firebase Realtime Database.
  */
-exports.generateThumbnail = functions.storage.object().onFinalize(async (object) => {
+exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(async (object) => {
   
   // File and directory paths.
   const filePath = object.name;
@@ -176,7 +170,7 @@ exports.generateThumbnail = functions.storage.object().onFinalize(async (object)
   }
 });
 
-exports.sendNewPostNotification = functions.database.ref('/post/').onWrite(event=>{
+/*exports.sendNewPostNotification = functions.database.ref('/post/').onWrite(event=>{
   const uuid = event.params.uid;
 
   console.log('User to send notification', uuid);
@@ -195,7 +189,7 @@ exports.sendNewPostNotification = functions.database.ref('/post/').onWrite(event
   }, function (errorObject) {
       console.log("The read failed: " + errorObject.code);
   });
-})
+})*/
 
 /*exports.helloWorld = functions.https.onRequest((request, response) => {
   response.send({
