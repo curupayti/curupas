@@ -24,7 +24,7 @@ Init commands
 firebase init
 ```
 
-1,3,5
+Mark all options, DO NOT OVERRIDE RULES!
 
 ```sh
 Y, Y, Javascript, Y, N, N, N, Y, public, Y, Y, Y
