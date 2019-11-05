@@ -344,7 +344,13 @@ table.table .avatar {
     height: 110px;
 }
 
+.avatar-preview-list {
+    width: 60px;
+    height: 60px;
+}
+
 /*Spinner*/
+/*https://loading.io/css/*/
 
 .bd-example-modal-lg .modal-dialog{
     display: table;
@@ -369,3 +375,32 @@ table.table .avatar {
     background-color: transparent;
     border: none;
   }
+
+  /*Spinner*/
+
+  .lds-dual-ring {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    margin-left: 30px;
+  }
+  .lds-dual-ring:after {
+    content: " ";
+    display: block;
+    width: 46px;
+    height: 46px;
+    margin: 1px;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    border-color: #afafaf transparent #afafaf transparent;
+    animation: lds-dual-ring 1.2s linear infinite;
+  }
+  @keyframes lds-dual-ring {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  

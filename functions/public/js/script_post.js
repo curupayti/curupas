@@ -1,9 +1,11 @@
 $(document).ready(function () {
+    
     let deleteIDs = [];
     let lastVisible;
     let firstVisible;
+
     // REAL TIME LISTENER
-    /*db.collection('employees').onSnapshot(snapshot => {
+    db.collection('posts').onSnapshot(snapshot => {
         let size = snapshot.size;
         $('.count').text(size);
         if (size == 0) {
@@ -14,20 +16,20 @@ $(document).ready(function () {
         let changes = snapshot.docChanges();
         changes.forEach(change => {
             if (change.type == 'added') {
-                renderEmployee(change.doc);
+                renderPost(change.doc);
             } else if (change.type == 'modified') {
                 $('tr[data-id=' + change.doc.id + ']').remove();
-                renderEmployee(change.doc);
+                renderPost(change.doc);
             } else if (change.type == 'removed') {
                 $('tr[data-id=' + change.doc.id + ']').remove();
             }
         });
-    });*/
+    });
 
     // db.collection('employees').startAt("abc").endAt("abc\uf8ff").get()
     // .then(function (documentSnapshots) {
     //     documentSnapshots.docs.forEach(doc => {
-    //         renderEmployee(doc);
+    //         renderPost(doc);
     //     });
     // });
 
@@ -39,14 +41,14 @@ $(document).ready(function () {
 
     // first.get().then(function (documentSnapshots) {
     //     documentSnapshots.docs.forEach(doc => {
-    //         renderEmployee(doc);
+    //         renderPost(doc);
     //     });
     //     lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
     //     console.log(documentSnapshots.docs.length - 1);
     // });
 
 
-    function renderEmployee(document) {
+    function renderPost(document) {
         let item = `<tr data-id="${document.id}">
         <td>
             <span class="custom-checkbox">
@@ -54,17 +56,19 @@ $(document).ready(function () {
                 <label for="${document.id}"></label>
             </span>
         </td>
-        <td>${document.data().name}</td>
-        <td>${document.data().email}</td>
-        <td>${document.data().address}</td>
-        <td>${document.data().phone}</td>
+        <td>${document.data().title}</td>
+        <td>${document.data().description}</td>
         <td>
-            <a href="#" id="${document.id}" class="edit js-edit-employee"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
+            <img id="image_${document.id}" class="avatar-preview-list" src="${document.data().thumbnailSmallUrl}" alt="your image" />            
+        </td>
+        <td>${document.data().time}</td>        
+        <td>
+            <a href="#" id="${document.id}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
             </a>
-            <a href="#" id="${document.id}" class="delete js-delete-employee"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+            <a href="#" id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
             </a>
         </td>
-    </tr>`;
+        </tr>`;
         $('#employee-table').append(item);
         // Activate tooltip
         $('[data-toggle="tooltip"]').tooltip();
@@ -91,9 +95,8 @@ $(document).ready(function () {
     }
 
     // ADD EMPLOYEE
-    $("#add-employee-form").submit(function (event) {
-        event.preventDefault();
-        //modal();
+    $("#add-post-form").submit(function (event) {
+        event.preventDefault();       
         var title = $('#title').val();
         var description = $('#description').val();
 
@@ -102,7 +105,9 @@ $(document).ready(function () {
         var filePath =  title + ".png";        
         var thisRef = storageRef.child(filePath);          
         
-        var downloadURL, postId;
+        var postId;       
+        
+        $('.lds-dual-ring').css('visibility', 'visible');
 
         db.collection("posts").add({
             title: title,
@@ -119,7 +124,7 @@ $(document).ready(function () {
             }
             return thisRef.put(file, metadata);                    
         })       
-        .then(function(snapshot) {                        
+        .then(function(snapshot) {                                    
             var metadataFiles = {
                 customMetadata: {
                     'thumbnail': 'false',
@@ -127,61 +132,65 @@ $(document).ready(function () {
                     'postId' : postId                   
                 }
             }
+            var prefArray = [];
             var input = document.getElementById("proImage");
-            for (var i = 0; i < input.files.length; ++i) {                            
+            var j=0, k=0;
+            var length = input.files.length;
+            for (var i = 0; i < length; ++i) {            
                 var _file = input.files.item(i);                                                  
-                var filePathPost = title + "_" + i + "_ori.png";        
-                var postRef = storageRef.child(filePathPost);
-                postRef.put(_file, metadataFiles); 
+                var filePathPost = title + "_" + i + "_original.png";        
+                const postRef = storageRef.child(filePathPost);
+                const putRef = postRef.put(_file, metadataFiles);  
+                prefArray.push(putRef);  
+                putRef.on('state_changed', function(snapshot) {
+                    var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload is ' + progress + '% done');
+                    switch (snapshot.state) {
+                      case firebase.storage.TaskState.PAUSED: // or 'paused'
+                        console.log('Upload is paused');
+                        break;
+                      case firebase.storage.TaskState.RUNNING: // or 'running'
+                        console.log('Upload is running');
+                        break;
+                    }
+                  }, function(error) {
+                    // Handle unsuccessful uploads
+                  }, function() {                                        
+                    var putRefFromArray = prefArray[j];
+                    putRefFromArray.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
+                        db.collection("posts").doc(postId).collection("images").add({downloadURL});
+                        if (k==(length-1)){
+                            $('#editEmployeeModal').modal('hide');
+                        }
+                        k++;
+                    });
+                    j++;
+                });   
             }
             console.log("termino");
         })        
         .catch(function(error) {
             console.error("Error adding document: ", error);
         });
-        
-       
-       
-       
-      
-
-       /* uploadThumbnail(title, function(downloadURL) {
-
-            var files = document.getElementById("imgInp").files;       
-            
-        });*/
-        
-        /*event.preventDefault();
-        db.collection('employees').add({
-                name: $('#employee-name').val(),
-                email: $('#employee-email').val(),
-                address: $('#employee-address').val(),
-                phone: $('#employee-phone').val()
-            }).then(function () {
-                console.log("Document successfully written!");
-                $("#addEmployeeModal").modal('hide');
-            })
-            .catch(function (error) {
-                console.error("Error writing document: ", error);
-            });*/
+   
     });
 
 
-    // DELETE EMPLOYEE
-    $(document).on('click', '.js-delete-employee', function () {
+    // DELETE POST
+    $(document).on('click', '.js-delete-post', function () {
         let id = $(this).attr('id');
-        $('#delete-employee-form').attr('delete-id', id);
-        $('#deleteEmployeeModal').modal('show');
+        $('#delete-post-form').attr('delete-id', id);
+        $('#deletePostModal').modal('show');
     });
 
-    $("#delete-employee-form").submit(function (event) {
+    $("#delete-post-form").submit(function (event) {
         event.preventDefault();
         let id = $(this).attr('delete-id');
         if (id != undefined) {
             db.collection('employees').doc(id).delete()
                 .then(function () {
                     console.log("Document successfully delete!");
-                    $("#deleteEmployeeModal").modal('hide');
+                    $("#deletePostModal").modal('hide');
                 })
                 .catch(function (error) {
                     console.error("Error deleting document: ", error);
@@ -197,12 +206,12 @@ $(document).ready(function () {
                         console.error("Error deleting document: ", error);
                     });
             });
-            $("#deleteEmployeeModal").modal('hide');
+            $("#deletePostModal").modal('hide');
         }
     });
 
     // UPDATE EMPLOYEE
-    $(document).on('click', '.js-edit-employee', function () {
+    $(document).on('click', '.js-edit-post', function () {
         let id = $(this).attr('id');
         $('#edit-employee-form').attr('edit-id', id);
         db.collection('employees').doc(id).get().then(function (document) {
@@ -233,7 +242,7 @@ $(document).ready(function () {
     });
 
     $("#addEmployeeModal").on('hidden.bs.modal', function () {
-        $('#add-employee-form .form-control').val('');
+        $('#add-post-form .form-control').val('');
     });
 
     $("#editEmployeeModal").on('hidden.bs.modal', function () {
@@ -249,7 +258,7 @@ $(document).ready(function () {
             .limit(3);
         previous.get().then(function (documentSnapshots) {
             documentSnapshots.docs.forEach(doc => {
-                renderEmployee(doc);
+                renderPost(doc);
             });
         });
     });
@@ -264,7 +273,7 @@ $(document).ready(function () {
             .limit(3);
         next.get().then(function (documentSnapshots) {
             documentSnapshots.docs.forEach(doc => {
-                renderEmployee(doc);
+                renderPost(doc);
             });
             lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
             firstVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];

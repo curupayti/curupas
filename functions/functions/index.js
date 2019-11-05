@@ -117,28 +117,12 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
 
     //Save Post
     if (customMetadataType == 1) {      
-      await db.collection("posts").doc(postId).update({thumbnailSmallUrl: thumbFileUrl});
+      var _time = db.FieldValue.serverTimestamp();
+      await db.collection("posts").doc(postId).update({thumbnailSmallUrl: thumbFileUrl, time:_time});
     }    
 
-  } else {
-
-     // Get the Signed URLs for the thumbnail and original image.
-    const results = await Promise.all([      
-      file.getSignedUrl(config)
-    ]);   
-    
-    const originalResult = results[0];
-    const fileUrl = originalResult[0];   
-
-    //Save Post
-    if (customMetadataType == 2) {      
-      await db.collection("posts").doc(postId).set(
-      { images : [fileUrl] },{ merge: true });
-    }
-    
-    console.log('non metadata saved : ' + fileUrl);
-
-  }
+  } 
+  
 
 });
 
