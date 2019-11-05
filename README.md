@@ -26,10 +26,10 @@ Init commands
 firebase init
 ```
 
-Mark all options, DO NOT OVERRIDE RULES!
+Mark all options, OVERRIDE RULES! Allways bring them from the server.
 
 ```sh
-Y, Y, Javascript, Y, N, N, N, Y, public, Y, Y, Y
+N, N, Javascript, Y, N, N, N, Y, public, Y, Y, Y
 ```
 
 To run Visual Studio Code with root access command
