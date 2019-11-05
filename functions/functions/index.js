@@ -113,12 +113,13 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
     const thumbResult = results[0];
     const originalResult = results[1];
     const thumbFileUrl = thumbResult[0];
-    const fileUrl = originalResult[0];    
+    //const fileUrl = originalResult[0];    
 
     //Save Post
-    if (customMetadataType == 1) {      
-      var _time = db.FieldValue.serverTimestamp();
-      await db.collection("posts").doc(postId).update({thumbnailSmallUrl: thumbFileUrl, time:_time});
+    if (customMetadataType == 1) {          
+      let _time = admin.firestore.FieldValue.serverTimestamp();
+      console.log("_time: " + _time);
+      await db.collection("posts").doc(postId).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
     }    
 
   } 

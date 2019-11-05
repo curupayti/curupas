@@ -160,7 +160,7 @@ $(document).ready(function () {
                     putRefFromArray.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
                         db.collection("posts").doc(postId).collection("images").add({downloadURL});
                         if (k==(length-1)){
-                            $('#editEmployeeModal').modal('hide');
+                            $('#addEmployeeModal').modal('hide');
                         }
                         k++;
                     });
