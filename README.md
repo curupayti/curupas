@@ -13,6 +13,8 @@ firebase init
 To checkout branch when not found
 
 ```sh
+git checkout git@gitlab.com:JoseVigil/curupa.git
+cd curupa
 git remote update
 git fetch 
 git checkout --track origin/<BRANCH-NAME>
