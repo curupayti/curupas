@@ -13,7 +13,7 @@ firebase init
 To checkout branch when not found
 
 ```sh
-git checkout git@gitlab.com:JoseVigil/curupa.git
+git clone git@gitlab.com:JoseVigil/curupa.git
 cd curupa
 git remote update
 git fetch 
