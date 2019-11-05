@@ -48,50 +48,69 @@ $(document).ready(function () {
     // });
 
 
-    function renderPost(document) {
-        let item = `<tr data-id="${document.id}">
-        <td>
-            <span class="custom-checkbox">
-                <input type="checkbox" id="${document.id}" name="options[]" value="${document.id}">
-                <label for="${document.id}"></label>
-            </span>
-        </td>
-        <td>${document.data().title}</td>
-        <td>${document.data().description}</td>
-        <td>
-            <img id="image_${document.id}" class="avatar-preview-list" src="${document.data().thumbnailSmallUrl}" alt="your image" />            
-        </td>
-        <td>${document.data().time}</td>        
-        <td>
-            <a href="#" id="${document.id}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
-            </a>
-            <a href="#" id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
-            </a>
-        </td>
-        </tr>`;
-        $('#employee-table').append(item);
-        // Activate tooltip
-        $('[data-toggle="tooltip"]').tooltip();
-        // Select/Deselect checkboxes
-        var checkbox = $('table tbody input[type="checkbox"]');
-        $("#selectAll").click(function () {
-            if (this.checked) {
-                checkbox.each(function () {
-                    console.log(this.id);
-                    deleteIDs.push(this.id);
-                    this.checked = true;
-                });
-            } else {
-                checkbox.each(function () {
-                    this.checked = false;
-                });
-            }
-        });
-        checkbox.click(function () {
-            if (!this.checked) {
-                $("#selectAll").prop("checked", false);
-            }
-        });
+    function renderPost(document) {        
+        let _time = formatDate(Date(document.data().timeStamp));        
+        document.ref.collection("images").get().then(function(imagesSnapshot) {
+            let _size =  imagesSnapshot.size;
+            let item = `<tr data-id="${document.id}">
+            <td>
+                <span class="custom-checkbox">
+                    <input type="checkbox" id="${document.id}" name="options[]" value="${document.id}">
+                    <label for="${document.id}"></label>
+                </span>
+            </td>
+            <td>${document.data().title}</td>
+            <td>${document.data().description}</td>
+            <td>
+                <img id="image_${document.id}" class="avatar-preview-list" src="${document.data().thumbnailSmallUrl}" alt="your image" />            
+            </td>
+            <td>${_time}</td>  
+            <td>${_size}</td>        
+            <td>
+                <a href="#" id="${document.id}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
+                </a>
+                <a href="#" id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                </a>
+            </td>
+            </tr>`;
+            $('#employee-table').append(item);
+            // Activate tooltip
+            $('[data-toggle="tooltip"]').tooltip();
+            // Select/Deselect checkboxes
+            var checkbox = $('table tbody input[type="checkbox"]');
+            $("#selectAll").click(function () {
+                if (this.checked) {
+                    checkbox.each(function () {
+                        console.log(this.id);
+                        deleteIDs.push(this.id);
+                        this.checked = true;
+                    });
+                } else {
+                    checkbox.each(function () {
+                        this.checked = false;
+                    });
+                }
+            });
+            checkbox.click(function () {
+                if (!this.checked) {
+                    $("#selectAll").prop("checked", false);
+                }
+            });
+        });        
+    }
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+    
+        if (month.length < 2) 
+            month = '0' + month;
+        if (day.length < 2) 
+            day = '0' + day;
+    
+        return [day, month, year].join('-');
     }
 
     // ADD EMPLOYEE
@@ -171,8 +190,7 @@ $(document).ready(function () {
         })        
         .catch(function(error) {
             console.error("Error adding document: ", error);
-        });
-   
+        });   
     });
 
 
