@@ -1,4 +1,7 @@
 $(document).ready(function () {
+
+    let _documents = {};
+    let _imageSnapshot = {};
     
     let deleteIDs = [];
     let lastVisible;
@@ -48,9 +51,11 @@ $(document).ready(function () {
     // });
 
 
-    function renderPost(document) {        
+    function renderPost(document) {  
+        _documents[document.id] = document;      
         let _time = formatDate(Date(document.data().timeStamp));        
         document.ref.collection("images").get().then(function(imagesSnapshot) {
+            _imageSnapshot[document.id] = imagesSnapshot;
             let _size =  imagesSnapshot.size;
             let item = `<tr data-id="${document.id}">
             <td>
@@ -65,7 +70,7 @@ $(document).ready(function () {
                 <img id="image_${document.id}" class="avatar-preview-list" src="${document.data().thumbnailSmallUrl}" alt="your image" />            
             </td>
             <td>${_time}</td>  
-            <td>${_size}</td>        
+            <td><a href="#" id="${document.id}" class="js-view-images">${_size}</a></td>        
             <td>
                 <a href="#" id="${document.id}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                 </a>
@@ -99,6 +104,11 @@ $(document).ready(function () {
         });        
     }
 
+    // VIEW IMAGES
+    $(document).on('click', '.js-view-images', function () {
+       
+    });
+
     function formatDate(date) {
         var d = new Date(date),
             month = '' + (d.getMonth() + 1),
@@ -130,7 +140,8 @@ $(document).ready(function () {
 
         db.collection("posts").add({
             title: title,
-            description: description
+            description: description,
+            author: user.email
         })
         .then(function(docRef) {
             postId = docRef.id;            
@@ -193,7 +204,6 @@ $(document).ready(function () {
         });   
     });
 
-
     // DELETE POST
     $(document).on('click', '.js-delete-post', function () {
         let id = $(this).attr('id');
@@ -203,30 +213,61 @@ $(document).ready(function () {
 
     $("#delete-post-form").submit(function (event) {
         event.preventDefault();
-        let id = $(this).attr('delete-id');
-        if (id != undefined) {
-            db.collection('employees').doc(id).delete()
-                .then(function () {
-                    console.log("Document successfully delete!");
-                    $("#deletePostModal").modal('hide');
-                })
-                .catch(function (error) {
-                    console.error("Error deleting document: ", error);
-                });
+        let id = $(this).attr('delete-id');        
+        deleteAllImagesOnPost(id);
+        if (id != undefined) {            
+            let _path = "posts/" + id;
+            deleteDocumentAtPath(_path);
         } else {
             let checkbox = $('table tbody input:checked');
             checkbox.each(function () {
-                db.collection('employees').doc(this.value).delete()
-                    .then(function () {
-                        console.log("Document successfully delete!");
-                    })
-                    .catch(function (error) {
-                        console.error("Error deleting document: ", error);
-                    });
+                let _path = "posts/" + this.value;
+                deleteDocumentAtPath(_path);               
             });
             $("#deletePostModal").modal('hide');
         }
     });
+
+    function deleteAllImagesOnPost(id){        
+        //Delete Thumbnail
+        
+        //let _SelectedDocument = _documents[id];
+        //deleteImageByUrl(_SelectedDocument.data().thumbnailSmallUrl);
+        
+        let _images = _imageSnapshot[id];
+
+        _images.docs.forEach(doc => {
+            //doc.data()
+            let _url = doc.data().downloadURL;
+            deleteImageByUrl(_url);
+
+        });          
+    }
+
+    function deleteImageByUrl(url) {
+        // Create a reference to the file to delete
+        var desertRef = firebase.storage().refFromURL("gs://" + url);
+        // Delete the file
+        desertRef.delete().then(function() {
+        // File deleted successfully
+        }).catch(function(error) {
+        // Uh-oh, an error occurred!
+        });
+    }
+
+    function deleteDocumentAtPath(path) {
+        var deleteFn = firebase.functions().httpsCallable('recursiveDelete');
+        deleteFn({ path: path })
+            .then(function(result) {
+                console.log('Delete success: ' + JSON.stringify(result));
+                $("#deletePostModal").modal('hide');
+            })
+            .catch(function(err) {
+                console.log('Delete failed, see console,');
+                console.warn(err);
+            });
+    }
+    
 
     // UPDATE EMPLOYEE
     $(document).on('click', '.js-edit-post', function () {

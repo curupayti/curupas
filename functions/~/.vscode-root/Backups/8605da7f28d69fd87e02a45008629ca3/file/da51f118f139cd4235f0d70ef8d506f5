@@ -1,3 +1,4 @@
+file:///home/jose/repos/curupa/functions/functions/index.js {"mtime":1572981303327,"size":6990,"etag":"345d2fkfe78f","orphaned":false}
 /**
  * Copyright 2016 Google Inc. All Rights Reserved.
  *
@@ -183,7 +184,7 @@ exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(even
 
   var ref = admin.database().ref('Users/${uuid}/token');
 
-  return ref.once("value", function(snapshot){
+  return ref.once("value", function(snapshot) {
     
     const payload = {
         notification: {
@@ -191,7 +192,7 @@ exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(even
             body: 'Tap here to check it out!'
         }
     };
-    
+
     admin.messaging().sendToDevice(snapshot.val(), payload);
 
   }, function (errorObject) {
