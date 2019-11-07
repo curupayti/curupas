@@ -48,7 +48,9 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
   const filePath = object.name;
   const customMetadata = object.metadata;
   var isThumbnail = (customMetadata.thumbnail == 'true');
-  var customMetadataType = parseInt(customMetadata.type);                  
+  var customMetadataType = parseInt(customMetadata.type);       
+  
+  console.log("=============== customMetadataType:" + customMetadataType);
 
   const contentType = object.contentType; // This is the image MIME type
   const fileDir = path.dirname(filePath);
@@ -127,10 +129,10 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
       const fileUrl = originalResult[0];    
       var userId = customMetadata.userId;
       var year = customMetadata.year;
-      console.log('userId: '+ userId);          
+      console.log('year: '+ year);          
       let _time = admin.firestore.FieldValue.serverTimestamp();
       console.log("_time: " + _time);
-      await db.collection(year).doc(userId).update(
+      await db.collection("users").doc(userId).update(
         { profilePictureURL : fileUrl,
           thumbnailPictureURL: thumbFileUrl, timeStamp:_time});
 
