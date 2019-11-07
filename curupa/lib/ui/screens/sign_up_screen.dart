@@ -77,6 +77,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _globals.setFilePickerGlobal();
     }
 
+    //testUser();
+
     onBackPress = () {
       Navigator.of(context).pop();
     };
@@ -172,6 +174,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }
       }
     });
+  }
+
+  void testUser() async {
+    User user = new User(
+        userID: "",
+        phone: "",
+        email: "",
+        name: "JoseVigil",
+        birthday: "",
+        group: null,
+        yearRef: null,
+        locationData: null,
+        profilePictureURL: "",
+        nonSpName: "");
+    bool added = await Auth.addUser(user, "1973");
+    print(added);
   }
 
   void enableButton() {
@@ -518,31 +536,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
               String loweName = fullname.toLowerCase();
               String toUnderscore = loweName.replaceAll(" ", "_");
               String toNonSpecial = removeDiacritics(toUnderscore);
-              User user = new User(
-                  userID: uID,
-                  phone: phone,
-                  email: email,
-                  name: fullname,
-                  birthday: birthday);
-              bool added = await Auth.addUser(user);
 
-              if (added) {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.setString('toNonSpecial', toNonSpecial);
-                prefs.setString('_imagePath', _imagePath);
-                prefs.setBool('registered', true);
-                prefs.setString('userId', uID);
-                if (inputDoneSignUp != null) {
-                  phoneNumberFocusNodeSignUp = null;
-                  inputDoneSignUp = null;
-                }
-                setState(() {
-                  _loadingInProgress = false;
-                });
-                _globals.user = user;
-                Navigator.of(context).pushNamed("/group");
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              prefs.setBool('registered', true);
+              prefs.setString('userId', uID);
+              prefs.setString('phone', phone);
+              prefs.setString('email', email);
+              prefs.setString('fullname', fullname);
+              prefs.setString('birthday', birthday);
+              prefs.setString('toNonSpecial', toNonSpecial);
+              prefs.setString('_imagePath', _imagePath);
+
+              if (inputDoneSignUp != null) {
+                phoneNumberFocusNodeSignUp = null;
+                inputDoneSignUp = null;
               }
-              //});
+              setState(() {
+                _loadingInProgress = false;
+              });
+
+              Navigator.of(context).pushNamed("/group");
             }
           }
         });

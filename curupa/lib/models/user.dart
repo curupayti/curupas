@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:location/location.dart';
 import 'package:onboarding_flow/models/group.dart';
 
 class User {
@@ -9,9 +10,11 @@ class User {
   final String email;
   final String profilePictureURL;
   final String thumbnailPictureURL;
-  DocumentReference groupRef;
+  final LocationData locationData;
+  DocumentReference yearRef;
   DocumentReference userRef;
   Group group;
+  final String nonSpName;
 
   User({
     this.userID,
@@ -21,8 +24,10 @@ class User {
     this.email,
     this.profilePictureURL,
     this.thumbnailPictureURL,
-    this.groupRef,
+    this.locationData,
+    this.yearRef,
     this.group,
+    this.nonSpName,
   });
 
   Map<String, Object> toJson() {
@@ -34,12 +39,19 @@ class User {
       'email': email == null ? '' : email,
       'profilePictureURL': profilePictureURL,
       'thumbnailPictureURL': thumbnailPictureURL,
-      'groupRef': groupRef,
-      'group': group,
+      'yearRef': yearRef,
+      'location': GeoPoint(locationData.latitude, locationData.longitude),
+      'group': group.year,
+      'nonSpName': nonSpName,
     };
   }
 
   factory User.fromJson(Map<String, Object> doc) {
+    Map _lm = doc['location'];
+    GeoPoint _gp = _lm['geopoint'];
+    Map _locationMap = new Map();
+    _locationMap['latitude'] = _gp.latitude;
+    _locationMap['longitude'] = _gp.longitude;
     User user = new User(
       userID: doc['userID'],
       phone: doc['phone'],
@@ -48,7 +60,10 @@ class User {
       email: doc['email'],
       profilePictureURL: doc['profilePictureURL'],
       thumbnailPictureURL: doc['thumbnailPictureURL'],
-      groupRef: doc['groupRef'],
+      locationData: new LocationData.fromMap(_locationMap),
+      yearRef: doc['yearRef'],
+      group: doc['group'],
+      nonSpName: doc['nonSpName'],
     );
     return user;
   }
@@ -57,8 +72,8 @@ class User {
     return User.fromJson(doc.data);
   }
 
-  void setGroupReference(DocumentReference ref) {
-    groupRef = ref;
+  void setyearReference(DocumentReference ref) {
+    yearRef = ref;
   }
 
   void setUserReference(DocumentReference ref) {

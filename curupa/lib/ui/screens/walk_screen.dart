@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import "package:flutter_swiper/flutter_swiper.dart";
+import 'package:onboarding_flow/business/auth.dart';
+import 'package:onboarding_flow/models/user.dart';
 import "package:onboarding_flow/models/walkthrough.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';

@@ -1,27 +1,31 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Description {
-  final String desc;
+  final String title;
+  final String description;
   final String documentID;
 
   Description({
-    this.desc,
+    this.title,
+    this.description,
     this.documentID,
   });
 
   Map<String, Object> toJson() {
     return {
-      'desc': desc,
+      'title': title,
+      'description': description,
       'documentID': documentID,
     };
   }
 
   factory Description.fromJson(Map<String, Object> doc, String documentID) {
-    Description title = new Description(
-      desc: doc['desc'],
+    Description description = new Description(
+      title: doc['title'],
+      description: doc['description'],
       documentID: documentID,
     );
-    return title;
+    return description;
   }
 
   factory Description.fromDocument(DocumentSnapshot doc) {

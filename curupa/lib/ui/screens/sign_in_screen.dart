@@ -284,13 +284,13 @@ class _SignInScreenState extends State<SignInScreen> {
         case FacebookLoginStatus.loggedIn:
           Auth.signInWithFacebok(result.accessToken.token).then((uid) {
             Auth.getCurrentFirebaseUser().then((firebaseUser) {
-              User user = new User(
+              /*User user = new User(
                 name: firebaseUser.displayName,
                 userID: firebaseUser.uid,
                 email: firebaseUser.email ?? '',
                 profilePictureURL: firebaseUser.photoUrl ?? '',
               );
-              Auth.addUser(user);
+              Auth.addUser(user);*/
               Navigator.of(context).pop();
             });
           });

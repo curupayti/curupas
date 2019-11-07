@@ -1,14 +1,21 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'package:location/location.dart';
 import 'package:onboarding_flow/business/auth.dart';
 import 'package:onboarding_flow/business/validator.dart';
 import 'package:onboarding_flow/models/group.dart';
+import 'package:onboarding_flow/models/user.dart';
 import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
 import "package:onboarding_flow/ui/widgets/custom_text_field.dart";
 import 'package:onboarding_flow/globals.dart' as _globals;
@@ -58,6 +65,15 @@ class _GroupScreenState extends State<GroupScreen> {
 
   TapGestureRecognizer _flutterTapRecognizer;
 
+  LocationData currentLocation;
+  Location location = new Location();
+  //GeoFirePoint point;
+  //Geoflutterfire geo = Geoflutterfire();
+
+  LocationData _locationData;
+
+  final FirebaseMessaging _fcm = FirebaseMessaging();
+
   void _rebuild() {
     setState(() {});
   }
@@ -67,6 +83,13 @@ class _GroupScreenState extends State<GroupScreen> {
     super.initState();
 
     isUserId();
+
+    _getLocaton();
+
+    location.onLocationChanged().listen((LocationData currentLocation) {
+      print(currentLocation.latitude);
+      print(currentLocation.longitude);
+    });
 
     _flutterTapRecognizer = new TapGestureRecognizer()
       ..onTap = () => _openUrl(curupasUrl);
@@ -116,17 +139,44 @@ class _GroupScreenState extends State<GroupScreen> {
     };
   }
 
-  void isUserId() async {
-    String userId = await getUserId();
-    if (userId != "" && userId != null) {
-      _globals.getUserData(userId, false);
+  void _getLocaton() async {
+    try {
+      _locationData = await location.getLocation();
+      //var pos = await location.getLocation();
+      //point = geo.point(latitude: pos.latitude, longitude: pos.longitude);
+    } on Exception catch (error) {
+      print(error.toString());
+      currentLocation = null;
     }
   }
 
-  Future<String> getUserId() async {
+  void isUserId() async {
+    List<String> userIdYear = await getUserIdAndYear();
+    if (userIdYear.length > 0) {
+      _globals.getUserData(userIdYear[0], userIdYear[1], userIdYear[2]);
+    }
+  }
+
+  Future<List<String>> getUserIdAndYear() async {
     prefs = await SharedPreferences.getInstance();
     String userId = prefs.getString('userId');
-    return userId;
+    String year = prefs.getString('year');
+    String name = prefs.getString('name');
+    List<String> list = new List<String>();
+    if ((userId != "" && userId != null) &&
+        (year != "" && year != null) &&
+        (name != "" && name != null)) {
+      list[0] = userId;
+      list[1] = year;
+      list[2] = name;
+    }
+    return list;
+  }
+
+  Future<String> getGroupYear() async {
+    prefs = await SharedPreferences.getInstance();
+    String year = prefs.getString('userId');
+    return year;
   }
 
   void _enableButton() {
@@ -154,8 +204,8 @@ class _GroupScreenState extends State<GroupScreen> {
       onPressed: () {
         setState(() {
           _loadingInProgress = true;
+          _saveGroup(context);
         });
-        _saveGroup(context);
       },
       splashColor: Colors.black12,
       borderColor: borderColor,
@@ -167,7 +217,7 @@ class _GroupScreenState extends State<GroupScreen> {
   Future<List<DropdownMenuItem<String>>> getGroupsList() async {
     List<DropdownMenuItem<String>> items = new List();
     QuerySnapshot querySnapshot =
-        await Firestore.instance.collection("groups").getDocuments();
+        await Firestore.instance.collection("years").getDocuments();
     items.add(new DropdownMenuItem(value: null, child: new Text("----")));
     for (var doc in querySnapshot.documents) {
       String year = doc['year'];
@@ -191,9 +241,69 @@ class _GroupScreenState extends State<GroupScreen> {
 
   Widget _buildBody() {
     if (_loadingInProgress) {
-      return new Center(
-        child: new CircularProgressIndicator(),
-      );
+      return Stack(children: <Widget>[
+        new Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            color: Colors.white,
+          ),
+          child: new Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      top: ScreenUtil().setHeight(30.0),
+                      bottom: ScreenUtil().setWidth(50.0),
+                      left: ScreenUtil().setWidth(30.0),
+                      right: ScreenUtil().setWidth(30.0)),
+                  child: new Image.asset("assets/images/pelota_small.png",
+                      height: ScreenUtil().setHeight(200.0),
+                      fit: BoxFit.fitHeight),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(50.0)),
+                child: new Text(
+                  "Guardando datos",
+                  softWrap: true,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    decoration: TextDecoration.none,
+                    fontSize: ScreenUtil().setSp(50.0),
+                    fontWeight: FontWeight.w300,
+                    fontFamily: "OpenSans",
+                  ),
+                ),
+              ),
+              new Container(
+                width: 60,
+                height: 60,
+                child: new CircularProgressIndicator(),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: ScreenUtil().setHeight(50.0)),
+                child: new Text(
+                  "Un momento por favor",
+                  softWrap: true,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    decoration: TextDecoration.none,
+                    fontSize: ScreenUtil().setSp(35.0),
+                    fontWeight: FontWeight.w300,
+                    fontFamily: "OpenSans",
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ]);
     } else {
       print(_currentItem);
       print(_groupMenuItems.length);
@@ -352,9 +462,9 @@ class _GroupScreenState extends State<GroupScreen> {
     return g;
   }
 
-  void _createNewGroup() async {
+  void _createNewYear() async {
     String year = _newGroup.text;
-    Auth.checkGroupExist(year).then((result) {
+    Auth.checkYearExist(year).then((result) {
       if (result) {
         _globals.showErrorAlert(
           context: context,
@@ -367,12 +477,14 @@ class _GroupScreenState extends State<GroupScreen> {
           _newGroup.clear();
         });
       } else {
-        Auth.addGroup(year).then((groupRef) async {
-          DocumentSnapshot docsnapshot = await groupRef.get();
+        Auth.addYear(year).then((yearRef) async {
+          DocumentSnapshot docsnapshot = await yearRef.get();
           if (docsnapshot.exists) {
             String year = docsnapshot['year'];
             String documentID = docsnapshot.documentID;
-            _loadingInProgress = true;
+            setState(() {
+              _loadingInProgress = true;
+            });
             _groups = new List();
             getGroupsList().then((val) {
               _newGroup.clear();
@@ -387,46 +499,67 @@ class _GroupScreenState extends State<GroupScreen> {
   }
 
   void _saveGroup(BuildContext context) async {
-    prefs.setBool('group', true);
-    String userId = _globals.user.userID;
+    prefs = await SharedPreferences.getInstance();
+    String userId = prefs.getString('userId');
     String groupId = _currentGroup.documentID;
     String year = _currentGroup.year;
 
-    DocumentReference groupRef =
-        Firestore.instance.collection('groups').document(groupId);
+    DocumentReference yearRef =
+        Firestore.instance.collection('years').document(groupId);
 
     //Upload image
     String toNonSpecial = prefs.getString('toNonSpecial');
     String _imagePath = prefs.getString('_imagePath');
-    String imageName = "/users/${year}/${toNonSpecial}";
-    String thumbImageName = "/users/${year}/thumb_${toNonSpecial}";
+    String imageName = "${year}/${toNonSpecial}";
+    String thumbImageName = "${year}/thumb_${toNonSpecial}";
 
     String _extension = p.extension(_imagePath);
     print(_extension);
     String thumbImageNameExtension = thumbImageName + '$_extension';
-    print(thumbImageNameExtension);
+    prefs.setString('thumbImageNameExtension', thumbImageNameExtension);
 
-    _globals.filePickerGlobal
-        .uploadFile(_imagePath, imageName)
-        .then((url) async {
-      sleep(const Duration(seconds: 3));
+    String phone = prefs.getString('phone');
+    String email = prefs.getString('email');
+    String fullname = prefs.getString('fullname');
+    String birthday = prefs.getString('birthday');
+    User user = new User(
+        userID: userId,
+        phone: phone,
+        email: email,
+        name: fullname,
+        birthday: birthday,
+        group: _currentGroup,
+        yearRef: yearRef,
+        locationData: _locationData,
+        //profilePictureURL: url,
+        nonSpName: toNonSpecial);
+    bool added = await Auth.addUser(user, year);
+    if (added) {
+      _fcm.subscribeToTopic('users');
+      _fcm.subscribeToTopic(year);
+
+      Map<String, String> meta = new Map<String, String>();
+      meta["thumbnail"] = "true";
+      meta["type"] = "2";
+      meta["userId"] = "${userId}";
+      meta["year"] = "${year}";
+
+      StorageMetadata metadata = new StorageMetadata(
+        customMetadata: meta,
+      );
       _globals.filePickerGlobal
-          .getStorageFileUrl(thumbImageNameExtension)
-          .then((thumbnailPictureURL) async {
-        Firestore.instance.collection('users').document(userId).updateData({
-          'groupRef': groupRef,
-          "group": year,
-          "profilePictureURL": url,
-          "thumbnailPictureURL": thumbnailPictureURL,
-        }).then((userUpdated) async {
-          _globals.user.groupRef = groupRef;
-          showDialog(
-            context: context,
-            builder: (BuildContext context) => _buildAboutDialog(context),
-          );
-        });
+          .uploadFile(_imagePath, imageName, metadata)
+          .then((url) async {
+        _globals.user = user;
+        prefs.setBool('group', true);
+        prefs.setString('year', year);
+        _globals.user.yearRef = yearRef;
+        showDialog(
+          context: context,
+          builder: (BuildContext context) => _buildAboutDialog(context),
+        );
       });
-    });
+    }
   }
 
   void _openUrl(String url) async {
@@ -442,7 +575,9 @@ class _GroupScreenState extends State<GroupScreen> {
 
   Widget _buildAboutDialog(BuildContext context) {
     return new AlertDialog(
-      title: const Text('Registración exitosa'),
+      title: Text('Registración exitosa',
+          style: TextStyle(
+              color: Colors.blue, fontSize: ScreenUtil().setSp(40.0))),
       content: new Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,8 +598,9 @@ class _GroupScreenState extends State<GroupScreen> {
             },
             textColor: Colors.white,
             child: Text(
-              'Leí y entendi el mensaje, cerrar',
-              style: TextStyle(color: Colors.blue, fontSize: 20.0),
+              'CERRAR APLICACIÓN',
+              style: TextStyle(
+                  color: Colors.blue, fontSize: ScreenUtil().setSp(40.0)),
             ),
           ),
         ),
@@ -477,12 +613,14 @@ class _GroupScreenState extends State<GroupScreen> {
       text: new TextSpan(
         text:
             'Resta que un referente de tu camada apruebe tu ingreso. Te va a llegar una notificación cuando lo haga.\n\n',
-        style: TextStyle(color: Colors.black87, fontSize: 20.0),
+        style: TextStyle(
+            color: Colors.black87, fontSize: ScreenUtil().setSp(30.0)),
         children: <TextSpan>[
           new TextSpan(
               text:
                   'Mientras tanto, podes ver mas información del proyecto en ',
-              style: TextStyle(color: Colors.black87, fontSize: 20.0)),
+              style: TextStyle(
+                  color: Colors.black87, fontSize: ScreenUtil().setSp(30.0))),
           new TextSpan(
             text: 'Curupas',
             recognizer: _flutterTapRecognizer,
@@ -586,7 +724,7 @@ class InputDoneGroup extends StatelessWidget {
                       this.parent._newGroup.clear();
                     });
               } else {
-                this.parent._createNewGroup();
+                this.parent._createNewYear();
               }
             },
             child: Text("CREAR CAMADA",

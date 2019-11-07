@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onboarding_flow/business/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:onboarding_flow/business/messaging.dart';
 import 'package:onboarding_flow/models/description.dart';
 import 'package:onboarding_flow/models/feeds.dart';
 import 'package:onboarding_flow/models/streaming.dart';
+import 'package:onboarding_flow/models/user.dart';
 import 'package:onboarding_flow/ui/screens/pages/group_page.dart';
 import 'package:onboarding_flow/ui/screens/pages/home_page.dart';
 import 'package:onboarding_flow/ui/screens/pages/profile_page.dart';
@@ -17,6 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:youtube_api/youtube_api.dart';
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen({Key key, this.title, FirebaseUser firebaseUser})
@@ -68,14 +71,15 @@ class _MainScreenState extends State<MainScreen> {
       if (result) {
         _globals.setFilePickerGlobal();
         String userId = prefs.getString('userId');
-        bool group = prefs.getBool('group');
-        if (group == null) {
-          group = false;
-        }
-        _globals.getUserData(userId, group);
+        String year = prefs.getString('year');
+        String name = prefs.getString('name');
+        _globals.getUserData(userId, year, name);
         getDescription();
       }
     });
+
+    new MessagingWidget();
+
     super.initState();
   }
 
@@ -119,7 +123,7 @@ class _MainScreenState extends State<MainScreen> {
                       bottom: ScreenUtil().setWidth(50.0),
                       left: ScreenUtil().setWidth(30.0),
                       right: ScreenUtil().setWidth(30.0)),
-                  child: new Image.asset("assets/images/escudo.png",
+                  child: new Image.asset("assets/images/pelota_small.png",
                       height: ScreenUtil().setHeight(350.0),
                       fit: BoxFit.fitHeight),
                 ),
@@ -282,14 +286,14 @@ class _MainScreenState extends State<MainScreen> {
     Stream<Description> descStream = Auth.getDescription();
     descStream.listen((Description _desc) async {
       _globals.description = _desc;
-      getFeed(_desc.desc);
+      getPosts(_desc.title, _desc.description);
     });
   }
 
-  void getFeed(String description) async {
-    await Auth.getFeed().then((listFeed) {
+  void getPosts(String title, String description) async {
+    await Auth.getPosts().then((listFeed) {
       List<Feed> newFeed = listFeed;
-      _globals.setDataFeed(description, newFeed);
+      _globals.setDataPosts(description, newFeed);
       getStreamingData();
     });
   }

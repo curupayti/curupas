@@ -149,23 +149,25 @@ class Auth {
     return user;
   }
 
-  static Future<bool> addUser(User user) async {
-    bool check = await checkUserExist(user.userID);
-    if (!check) {
-      print("user ${user.name} ${user.email} added");
-      Firestore.instance
-          .document("users/${user.userID}")
-          .setData(user.toJson());
+  static Future<bool> addUser(User user, String year) async {
+    String userId = user.userID;
+    bool checkUser = await checkUserExist(userId);
+    if (!checkUser) {
+      Firestore.instance.document("users/${userId}").setData(user.toJson());
+      /*bool checkMedia = await checkMediaExist(year);
+      if (!checkMedia) {
+        addGroupMedia(year);
+      }*/
       return true;
     } else {
       return false;
     }
   }
 
-  static Future<bool> checkUserExist(String userID) async {
+  static Future<bool> checkUserExist(String userId) async {
     bool exists = false;
     try {
-      await Firestore.instance.document("users/$userID").get().then((doc) {
+      await Firestore.instance.document("users/${userId}").get().then((doc) {
         if (doc.exists)
           exists = true;
         else
@@ -177,15 +179,15 @@ class Auth {
     }
   }
 
-  static Future<DocumentReference> addGroup(String group) async {
-    DocumentReference groupRef =
-        await Firestore.instance.collection('groups').add({'year': group});
-    return groupRef;
+  static Future<DocumentReference> addYear(String year) async {
+    DocumentReference yearRef =
+        await Firestore.instance.collection('years').add({'year': year});
+    return yearRef;
   }
 
-  static Future<bool> checkGroupExist(String year) async {
+  static Future<bool> checkYearExist(String year) async {
     QuerySnapshot querySnapshot =
-        await Firestore.instance.collection("groups").getDocuments();
+        await Firestore.instance.collection("years").getDocuments();
     for (var doc in querySnapshot.documents) {
       String docYear = doc['year'];
       if (year == docYear) {
@@ -195,9 +197,42 @@ class Auth {
     return false;
   }
 
+  /*static void addGroupMedia(String year) async {
+    await Firestore.instance
+        .collection('groups/${year}')
+        .document("media")
+        .collection("videos")
+        .add({"desc": "Bienvenidos a camadas", "url": "videoUrl"});
+    await Firestore.instance
+        .collection('groups/${year}')
+        .document("media")
+        .collection("images")
+        .add({"desc": "Bienvenidos a camadas", "url": "videoUrl"});
+    await Firestore.instance
+        .collection('groups/${year}')
+        .document("media")
+        .collection("text")
+        .add({"desc": "Contar anécdotas", "text": "Podras"});
+  }*/
+
+  /*static Future<bool> checkMediaExist(String year) async {
+    bool exists = false;
+    try {
+      await Firestore.instance.document("${year}/media").get().then((doc) {
+        if (doc.exists)
+          exists = true;
+        else
+          exists = false;
+      });
+      return exists;
+    } catch (e) {
+      return false;
+    }
+  }*/
+
   static Stream<Group> getGroupByYear(String year) {
     return Firestore.instance
-        .collection("groups")
+        .collection("years")
         .where("year", isEqualTo: year)
         .snapshots()
         .map((QuerySnapshot snapshot) {
@@ -207,22 +242,23 @@ class Auth {
     });
   }
 
-  static Stream<User> getUser(String userID) {
+  static Stream<User> getUser(String userID, String year, String name) {
     return Firestore.instance
         .collection("users")
         .where("userID", isEqualTo: userID)
         .snapshots()
         .map((QuerySnapshot snapshot) {
       return snapshot.documents.map((doc) {
+        print(doc.toString);
         return User.fromDocument(doc);
       }).first;
     });
   }
 
   static Future<DocumentReference> getUserDocumentReference(
-      String userID) async {
+      String userID, String year) async {
     DocumentReference document =
-        await Firestore.instance.collection('users').document(userID);
+        await Firestore.instance.collection('groups/${year}').document(userID);
     return document;
   }
 
@@ -237,13 +273,43 @@ class Auth {
     });
   }
 
+  static Future<List<User>> getUserById(String userId) async {
+    List<DocumentSnapshot> templist;
+    List<User> list = new List();
+    DocumentReference yearRef = _globals.user.yearRef;
+    QuerySnapshot collectionSnapshot =
+        await Firestore.instance.collection("users").getDocuments();
+    templist = collectionSnapshot.documents;
+    list = await templist.map((DocumentSnapshot docSnapshot) {
+      return User.fromDocument(docSnapshot);
+    }).toList();
+    return list;
+  }
+
+  /*static Future<bool> getUserById(String userId) async {
+    QuerySnapshot querySnapshot =
+        await Firestore.instance.collection("users").getDocuments();
+    for (CollectionReference collectionRef in querySnapshot.documents) {      
+        QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
+    templist = collectionSnapshot.documents;
+
+      //DocumentReference yearRef
+
+      String docYear = doc['year'];
+      if (year == docYear) {
+        return true;
+      }
+    }
+    return false;
+  }*/
+
   static Future<List<User>> getFriends() async {
     List<DocumentSnapshot> templist;
     List<User> list = new List();
-    DocumentReference groupRef = _globals.user.groupRef;
+    DocumentReference yearRef = _globals.user.yearRef;
     QuerySnapshot collectionSnapshot = await Firestore.instance
         .collection("users")
-        .where("groupRef", isEqualTo: groupRef)
+        .where("yearRef", isEqualTo: yearRef)
         .getDocuments();
     templist = collectionSnapshot.documents;
     list = await templist.map((DocumentSnapshot docSnapshot) {
@@ -252,10 +318,10 @@ class Auth {
     return list;
   }
 
-  static Future<List<Feed>> getFeed() async {
+  static Future<List<Feed>> getPosts() async {
     List<DocumentSnapshot> templist;
     List<Feed> list = new List();
-    CollectionReference collectionRef = Firestore.instance.collection("feeds");
+    CollectionReference collectionRef = Firestore.instance.collection("posts");
     QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
     templist = collectionSnapshot.documents;
 

@@ -34,21 +34,34 @@ String error_unknown = "ERROR_UNKNOWN";
 String register_error_title = "Error en el registro";
 String signin_error_title = "Error de autentificación";
 
-void getUserData(String userId, bool hasGroup) async {
+void getUserData(String userId, String year, String name) async {
   if (userId != null) {
-    Stream<User> userStream = Auth.getUser(userId);
+    Stream<User> userStream = Auth.getUser(userId, year, name);
     userStream.listen((User _user) async {
-      Auth.getUserDocumentReference(_user.userID).then((doc) async {
+      Auth.getUserDocumentReference(_user.userID, year).then((doc) async {
         _user.userRef = doc;
         user = _user;
-        if (hasGroup) {
-          DocumentReference groupRef = _user.groupRef;
-          DocumentSnapshot docsnapshot = await groupRef.get();
-          if (docsnapshot.exists) {
-            String year = docsnapshot['year'];
-            String documentID = docsnapshot.documentID;
-            group = new Group(year: year, documentID: documentID);
-          }
+        DocumentReference yearRef = _user.yearRef;
+        DocumentSnapshot docsnapshot = await yearRef.get();
+        if (docsnapshot.exists) {
+          String year = docsnapshot['year'];
+          String documentID = docsnapshot.documentID;
+          group = new Group(year: year, documentID: documentID);
+        }
+        if (_user.thumbnailPictureURL == null) {
+          String thumbImageNameExtension =
+              prefs.getString('thumbImageNameExtension');
+          String year = prefs.getString('thumbImageNameExtension');
+          filePickerGlobal
+              .getStorageFileUrl(thumbImageNameExtension)
+              .then((thumbnailPictureURL) async {
+            Firestore.instance
+                .collection('groups/${year}')
+                .document(userId)
+                .updateData({
+              "thumbnailPictureURL": thumbnailPictureURL,
+            }).then((userUpdated) async {});
+          });
         }
       });
     });
@@ -97,7 +110,7 @@ void setYoutubeApi(List<YT_API> _ytResult) {
   streammer.setYtResutl(_ytResult);
 }
 
-void setDataFeed(String desc, List<Feed> feeds) {
+void setDataPosts(String desc, List<Feed> feeds) {
   dataFeed = new Data(
     name: 'Curupa',
     avatar: 'assets/images/escudo.png',
@@ -153,12 +166,14 @@ class FilePickerGlobal {
     return _path;
   }
 
-  Future<String> uploadFile(String _imagePath, String fileName) async {
+  Future<String> uploadFile(
+      String _imagePath, String fileName, StorageMetadata metadata) async {
     String extension = p.extension(_imagePath);
     String fileFolderExtension = fileName + '$extension';
     StorageReference storageRef =
         FirebaseStorage.instance.ref().child(fileFolderExtension);
-    StorageUploadTask uploadTask = storageRef.putFile(File(_imagePath));
+    StorageUploadTask uploadTask =
+        storageRef.putFile(File(_imagePath), metadata);
     StreamSubscription<StorageTaskEvent> streamSubscription =
         uploadTask.events.listen((event) {
       print('EVENT ${event.type}');
