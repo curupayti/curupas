@@ -48,9 +48,7 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
   const filePath = object.name;
   const customMetadata = object.metadata;
   var isThumbnail = (customMetadata.thumbnail == 'true');
-  var customMetadataType = parseInt(customMetadata.type);
-  var postId = customMetadata.postId;
-  console.log('postId: '+ postId);                  
+  var customMetadataType = parseInt(customMetadata.type);                  
 
   const contentType = object.contentType; // This is the image MIME type
   const fileDir = path.dirname(filePath);
@@ -112,18 +110,33 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
     console.log('Got Signed URLs.');
     const thumbResult = results[0];
     const originalResult = results[1];
-    const thumbFileUrl = thumbResult[0];
-    //const fileUrl = originalResult[0];    
+    const thumbFileUrl = thumbResult[0];    
 
-    //Save Post
-    if (customMetadataType == 1) {          
+    //Save Post Thumbnail
+    if (customMetadataType == 1) {  
+   
+      var postId = customMetadata.postId;
+      console.log('postId: '+ postId);          
       let _time = admin.firestore.FieldValue.serverTimestamp();
       console.log("_time: " + _time);
       await db.collection("posts").doc(postId).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
-    }    
+   
+    //Save User Thumbnail
+    } else if (customMetadataType == 2) {  
 
-  } 
-  
+      const fileUrl = originalResult[0];    
+      var userId = customMetadata.userId;
+      var year = customMetadata.year;
+      console.log('userId: '+ userId);          
+      let _time = admin.firestore.FieldValue.serverTimestamp();
+      console.log("_time: " + _time);
+      await db.collection(year).doc(userId).update(
+        { profilePictureURL : fileUrl,
+          thumbnailPictureURL: thumbFileUrl, timeStamp:_time});
+
+    }
+    
+  }  
 
 });
 

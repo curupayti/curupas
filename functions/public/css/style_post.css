@@ -1,3 +1,7 @@
+#main {
+    padding-top: 50px;
+}
+
 .table-wrapper {
     background: #fff;
     padding: 20px 25px;
@@ -8,10 +12,10 @@
 
 .table-title {
     padding-bottom: 15px;
-    background: #435d7d;
+    background: #5A6268;
     color: #fff;
     padding: 16px 30px;
-    margin: -20px -25px 10px;
+    /*margin: -20px -25px 10px;*/
     border-radius: 3px 3px 0 0;
 }
 
@@ -341,6 +345,7 @@ table.table .avatar {
     width: 60px;
     height: 60px;
 }
+
 
 /*Spinner*/
 /*https://loading.io/css/*/

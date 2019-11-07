@@ -78,9 +78,7 @@ $(document).ready(function () {
                 </a>
             </td>
             </tr>`;
-            $('#employee-table').append(item);
-            // Activate tooltip
-            $('[data-toggle="tooltip"]').tooltip();
+            $('#post-table').append(item);            
             // Select/Deselect checkboxes
             var checkbox = $('table tbody input[type="checkbox"]');
             $("#selectAll").click(function () {
@@ -141,7 +139,7 @@ $(document).ready(function () {
         db.collection("posts").add({
             title: title,
             description: description,
-            author: user.email
+            //author: user.email
         })
         .then(function(docRef) {
             postId = docRef.id;            
@@ -157,9 +155,9 @@ $(document).ready(function () {
         .then(function(snapshot) {                                    
             var metadataFiles = {
                 customMetadata: {
-                    'thumbnail': 'false',
-                    'type' : '2',
-                    'postId' : postId                   
+                    'thumbnail': 'false'
+                    //'type' : '2',
+                    //'postId' : postId                   
                 }
             }
             var prefArray = [];
@@ -190,7 +188,7 @@ $(document).ready(function () {
                     putRefFromArray.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
                         db.collection("posts").doc(postId).collection("images").add({downloadURL});
                         if (k==(length-1)){
-                            $('#addEmployeeModal').modal('hide');
+                            $('#addPostModal').modal('hide');
                         }
                         k++;
                     });
@@ -300,7 +298,7 @@ $(document).ready(function () {
         $('#editEmployeeModal').modal('hide');
     });
 
-    $("#addEmployeeModal").on('hidden.bs.modal', function () {
+    $("#addPostModal").on('hidden.bs.modal', function () {
         $('#add-post-form .form-control').val('');
     });
 
@@ -310,7 +308,7 @@ $(document).ready(function () {
 
     // PAGINATION
     $("#js-previous").on('click', function () {
-        $('#employee-table tbody').html('');
+        $('#post-table tbody').html('');
         var previous = db.collection("employees")
             .orderBy(firebase.firestore.FieldPath.documentId(), "desc")
             .startAt(firstVisible)
@@ -326,7 +324,7 @@ $(document).ready(function () {
         if ($(this).closest('.page-item').hasClass('disabled')) {
             return false;
         }
-        $('#employee-table tbody').html('');
+        $('#post-table tbody').html('');
         var next = db.collection("employees")
             .startAfter(lastVisible)
             .limit(3);
