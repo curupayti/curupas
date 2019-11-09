@@ -1,3 +1,4 @@
+file:///home/jose/repos/curupa/functions/public/login.html {"mtime":1573222385158,"size":4058,"etag":"345oobgd246s","orphaned":false}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -23,7 +24,7 @@
             <div class="container"> 
                 <div id="firebaseui-auth-container"></div>     
             </div><!--Container-->
-      </main>
+        </main>
         
         <footer></footer>
 

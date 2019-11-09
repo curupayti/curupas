@@ -215,11 +215,11 @@
         firebase.initializeApp(firebaseConfig);
     
 
-        /*firebase.auth().onAuthStateChanged(function (user) {
+        firebase.auth().onAuthStateChanged(function (user) {
             if (!user) {
                 window.location.href = 'login.html';
             }
-        });*/
+        });
 
 		const db = firebase.firestore();
         const storage = firebase.storage();

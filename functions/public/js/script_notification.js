@@ -15,7 +15,7 @@ $(document).ready(function () {
         console.log("Error getting documents: ", error);
     });      
     
-    $("#destiny").append($('<option>').text("hola").attr('value', -1));
+    $("#destiny").append($('<option>').text("1973").attr('value', -1));
 
     $("#destiny").change(function() {
 
