@@ -24,6 +24,8 @@ Keep generated json
 
 Go to Authentication -> Signe-in methods -> Enable email and facebook
 
+# Facebook login
+
 Facebook Developers https://developers.facebook.com/apps/911713599192029 Curupas App
 
 AppId: 911713599192029 
