@@ -6,6 +6,26 @@ Proyecto mobile camadas con Flutter y Firebase
 
 Creado en base a la cuenta curupasdev@gmail.com
 
+# Create new project
+
+Create new project.
+
+Enable database and storage, allow permission on both rules. Read write true.
+
+# Initialize SDK
+
+In order to use firestore on functions you need to initilize the app with "Firebase Admin SDK" certificate 
+
+Settings -> Service Account -> Firebase Admin SDK -> Node.js
+
+Keep generated json
+
+# Enable Authentication
+
+Go to Authentication -> Signe-in methods -> Enable email and facebook
+
+# Login
+
 ```sh
 firebase login
 ```
@@ -51,7 +71,7 @@ firebase init
 Mark all options, OVERRIDE RULES! Allways bring them from the server.
 
 ```sh
-N, N, Javascript, Y, N, N, N, Y, public, Y, Y, Y
+ENTER, N, ENTER, N, ENTER, N, Javascript, ENTER, N, N, N, ENTER, public, ENTER, N, N, ENTER
 ```
 
 To run Visual Studio Code with root access command
@@ -75,14 +95,6 @@ sudo firebase deploy
 curl -X POST -H "Content-Type: application/json"  -d '{"data":{"name":"YOUR_NAME"}}'  http://localhost:5000/curupa-d830b/us-central1/helloWorld
 
 
-# Create new project
 
-Create new project.
-
-Enable database and storage, allow permission on both rules. Read write true.
-
-In order to use firestore on functions you need to initilize the app with "Firebase Admin SDK" certificate 
-
-Settings -> Service Account -> Firebase Admin SDK -> Node.js
 
 
