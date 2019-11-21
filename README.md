@@ -10,7 +10,7 @@ Creado en base a la cuenta curupasdev@gmail.com
 
 Create new project.
 
-Enable database and storage, allow permission on both rules. Read write true.
+Enable database and storage, allow permission on both rules for testing. Read write true.
 
 # Initialize SDK
 
