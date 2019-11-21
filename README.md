@@ -41,6 +41,8 @@ Package name: com.curupayti.curupas
 
 # Login
 
+Para poder vincular una cuenta local con una de firebase hay que inicializar firebase estando en la web un proyecto activo elegirlo. 
+
 ```sh
 firebase login
 ```
