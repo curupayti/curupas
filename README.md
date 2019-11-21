@@ -24,6 +24,19 @@ Keep generated json
 
 Go to Authentication -> Signe-in methods -> Enable email and facebook
 
+Facebook Developers https://developers.facebook.com/apps/911713599192029 Curupas App
+
+AppId: 911713599192029 
+App Secret: 9d176aecb3e71f48479a16990faddb94
+
+URI: https://curupas-app.firebaseapp.com/__/auth/handler
+
+Product -> Facebook Login -> Valid OAuth Redirect URIs -> Pegar URI
+
+**Add Application iOS and Android**
+
+Package name: com.curupayti.curupas
+
 # Login
 
 ```sh
