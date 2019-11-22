@@ -2,6 +2,12 @@
 
 Proyecto mobile camadas con Flutter y Firebase
 
+## Flutter
+
+```sh
+flutter create --androidx  --org com.curupayti curupas
+```
+
 ## Firebase 
 
 Creado en base a la cuenta curupasdev@gmail.com
