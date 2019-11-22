@@ -10,7 +10,7 @@ Create a new flutter project
 flutter create --androidx --org com.curupayti curupas
 ```
 
-Notice the final package name is com.curupayti.curupas
+Notice the final package name is com.curupayti.curupas. If the project already existed migrate lib folder by creating the folders manually and moving the files also manually. 
 
 ## Firebase 
 
