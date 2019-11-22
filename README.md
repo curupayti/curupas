@@ -4,9 +4,13 @@ Proyecto mobile camadas con Flutter y Firebase
 
 ## Flutter
 
+Create a new flutter project
+
 ```sh
-flutter create --androidx  --org com.curupayti curupas
+flutter create --androidx --org com.curupayti curupas
 ```
+
+Notice the final package name is com.curupayti.curupas
 
 ## Firebase 
 
