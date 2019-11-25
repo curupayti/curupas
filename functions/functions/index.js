@@ -215,7 +215,40 @@ exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(even
 
 });
 
+exports.sendSMS = functions.https.onRequest((req, response) => {
+  
+  const phone = req.body.data.phone;
+  const text = req.body.data.message;
 
+  var params = {
+    recipient: phone, 
+    message: text,
+    headers: {
+      'Authorization': 'Bearer 7FA7ED241142E7BE36671CE0FEC9E84F'
+    }
+  };
+
+  console.log(JSON.stringify(params));
+
+  // make the request
+  request('https://api.notimation.com/api/v1/sms', params,  function (error, response, body) {
+      
+    console.log("error: " + error);
+
+    console.log("response: " + JSON.stringify(response));
+
+    console.log("body: " + JSON.stringify(body));
+
+
+    if (!error && response.statusCode == 200) {                
+      response.send({sms_id:body.sms_id, sms_status:body.sms_status});
+    } else {
+      response.send({error:response.error});
+    }   
+
+  });
+
+});
 
 /*exports.helloWorld = functions.https.onRequest((request, response) => {
   response.send({

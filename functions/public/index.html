@@ -1,86 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+
+    <html lang="es">
 
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>CRUD Firebase</title>
+        <title>Curupas</title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
         <link rel="stylesheet" href="css/vendor/font-awesome.min.css">
-        <link rel="stylesheet" href="css/vendor/bootstrap.min.css">
-        <link rel="stylesheet" href="css/signin.css">        
-        <link rel="icon" type="image/x-icon" href="https://vigil.com.ar/favicons/curupa.ico" />    
-    </head>     
+        <link rel="stylesheet" href="css/vendor/bootstrap.min.css">             
+        <link rel="icon" type="image/x-icon" href="https://vigil.com.ar/favicons/curupa.ico"/>                
+        <link type="text/css" rel="stylesheet" href="html/loading_indicator/jquery.loading-indicator.css" />
+    </head>
 
-   
+    <body>
 
-    <body style=" background-color: #343A40;">
-        
+        <header></header>  
 
-        <form class="form-signin">
-          <img class="mb-4" src="/images/escudo.png" alt="" width="150" height="180">
-          <h1 class="h3 mb-3 font-weight-normal text-white">Ingresar</h1>
-          <label for="inputEmail" class="sr-only">Email</label>
-          <input type="email" id="inputEmail" class="form-control" placeholder="Dirección de email" required autofocus>
-          <label for="inputPassword" class="sr-only">Contraseña</label>
-          <input type="password" id="inputPassword" class="form-control" placeholder="Contraseña" required>
-          <div class="checkbox mb-3">
-            <label style="color:grey">
-              <input type="checkbox" value="recordar-me"> recordar-me
-            </label>
-          </div>
-          <button class="btn btn-secondary" type="submit">Ingresar App Curupas Contenidos</button>
-          <p class="mt-5 mb-3 text-muted">&copy; Copyright 2019 Curupas </p>
-        </form>
-    
-    
+        <content>></content>
+
+        <footer></footer>        
+
         <script src="js/vendor/jquery.min.js"></script>
         <script src="js/vendor/bootstrap.min.js"></script>    
-    
+        <script src="html/loading_indicator/jquery.loading-indicator.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-firestore.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"></script>
-        
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"></script>        
         <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-auth.js"></script>
-    
         <script src="https://cdn.ckeditor.com/4.5.10/standard/ckeditor.js"></script>
-    
-         <!-- member plugins -->
-        <script src="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.js"></script>
-        <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.css" />
-        <!-- End - member plugins -->
 
+    </body>
 
-        <script>      
-        
-        var firebaseConfig = {
-                apiKey: "AIzaSyCNW0DWuH4U-4Fa8IQLNiZc5Fxlvov0G_Y",
-                authDomain: "curupas-backen.firebaseapp.com",
-                databaseURL: "https://curupas-backen.firebaseio.com",
-                projectId: "curupas-backen",
-                storageBucket: "curupas-backen.appspot.com",
-                messagingSenderId: "464846058000",
-                appId: "1:464846058000:web:f1c764fb76fcc6455e5095",
-                measurementId: "G-PBMTQWBJ6X"
-            }; 
-            firebase.initializeApp(firebaseConfig);  
+    <script>                
 
-            /**********************\
-             * Check login status *
-            \**********************/
+        var homeLoader = $('body').loadingIndicator({ useImage: false,}).data("loadingIndicator");
 
-            /*firebase.auth().onAuthStateChanged(function (user) {
-                if (user) { // if already logged in
-                    window.location.href = 'index.html';
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg",
+            authDomain: "curupas-app.firebaseapp.com",
+            databaseURL: "https://curupas-app.firebaseio.com",
+            projectId: "curupas-app",
+            storageBucket: "curupas-app.appspot.com",
+            messagingSenderId: "813267916846",
+            appId: "1:813267916846:web:529f9c18a84b6b45aa67bf",
+            measurementId: "G-2RRZXWLMTL"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        var getUrlParameter = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
                 }
-            });*/
+            }
+        };
 
-          
-          
-        </script>
+        var pagename = getUrlParameter('page');
+        
+        switch (pagename) {
 
-</body>
+            case undefined:
 
-</html>
+            firebase.auth().onAuthStateChanged(function (user) {
+
+                if (user) {
+
+                
+                    window.location.href = 'login.html';
+                
+                } else {
+
+                    homeLoader.hide();
+
+                    $("<link/>", {
+                        rel: "stylesheet",
+                        type: "text/css",
+                        href: "/css/signin.css"
+                    }).appendTo("head");
+
+                    fetch("../html/content/signin.html")
+                    .then(response => {
+                        return response.text();
+                    })
+                    .then(data => {
+                        document.querySelector("content").innerHTML = data;    
+                    });              
+
+                }
+            });                              
+
+            break;
+
+            case 'post':
+
+                $.getScript("js/loader.js");
+
+                $("<link/>", {
+                    rel: "stylesheet",
+                    type: "text/css",
+                    href: "/css/style.css"
+                }).appendTo("head");
+
+                $("<link/>", {
+                    rel: "stylesheet",
+                    type: "text/css",
+                    href: "/css/post.css"
+                }).appendTo("head");
+                    
+                fetch("../html/content/post_content.html")
+                .then(response => {
+                    return response.text();
+                })
+                .then(data => {
+                    document.querySelector("content").innerHTML = data;    
+                });
+
+             break;
+           
+        }      
+
+        
+    
+    </script>
+
+    </html>

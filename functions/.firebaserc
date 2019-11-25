@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "curupas-backen"
+    "default": "curupas-app",
+    "curupas": "curupas-app"
   }
 }
