@@ -1,0 +1,115 @@
+name: onboarding_flow
+description: Curupas App project.
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# Read more about versioning at semver.org.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_swiper: any
+  firebase_core: ^0.4.0+9
+  firebase_auth: ^0.14.0+5
+  firebase_storage: ^3.0.8
+  firebase_database: ^3.1.0
+  firebase_messaging: ^5.1.6
+  firebase_analytics: ^5.0.2
+  flutter_facebook_login: ^3.0.0
+  shared_preferences: any
+  cloud_firestore: ^0.12.10+2
+  file_picker: ^1.3.8
+  flutter_datetime_picker: ^1.2.6
+  intl: ^0.15.8
+  #circular_bottom_navigation: ^1.0.1
+  #url_launcher: ^3.0.2
+  notifier: ^1.0.2
+  cached_network_image: ^1.1.1
+  youtube_api: ^0.7.2
+  youtube_player_flutter: ^4.1.0
+  fancy_bottom_navigation: ^0.3.2
+  keyboard_actions: "^2.1.2"
+  keyboard_visibility: any
+  flutter_speed_dial: ^1.2.1
+  flutter_screenutil: ^0.5.3
+  flutter_launcher_icons: "^0.7.3"
+  zefyr: ^0.8.0
+  notus: ^0.1.4
+  path_provider: ^1.3.0
+  diacritic: ^0.1.1
+  url_launcher: ^5.1.6
+  location: ^2.3.5
+  geolocator: ^5.1.4+2
+  cloud_functions: ^0.4.1+4
+  #geoflutterfire: ^2.0.3+5
+  #geoflutterfire:
+  #git: https://github.com/felipecesar42/GeoFlutterFire.git
+
+  #flutter_icons:
+  #  image_path: "assets/images/escudo.png"
+  #  image_path_android: "assets/images/escudo.png"
+  #  image_path_ios: "assets/images/escudo.png"
+  #  android: true
+  # ios: true
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^0.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+# For information on the generic Dart part of this file, see the
+# following page: https://www.dartlang.org/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/images/default.png
+    - assets/images/escudo.png
+    - assets/images/curupa_anexo.png
+    - assets/images/cancha.png
+    - assets/images/test.png
+    - assets/images/camadas.png
+    - assets/images/not_available.png
+    - assets/images/icon-710x599-android.png
+    - assets/images/icon-710x599-ios.png
+    - assets/images/pelota_small.png
+  #  - images/a_dot_ham.jpeg
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.io/assets-and-images/#resolution-aware.
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.io/assets-and-images/#from-packages
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.io/custom-fonts/#from-packages
