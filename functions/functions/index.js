@@ -24,6 +24,8 @@ admin.initializeApp({
 });
 const mkdirp = require('mkdirp-promise');
 const db = admin.firestore();
+//const rp = require('request-promise');
+const request = require('request');
 
 const spawn = require('child-process-promise').spawn;
 const path = require('path');
@@ -154,7 +156,7 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
  * 
  * @param {string} data.path the document or collection path to delete.
  */
-exports.recursiveDelete = functions
+/*exports.recursiveDelete = functions
   .runWith({
     timeoutSeconds: 540,
     memory: '2GB'
@@ -188,7 +190,7 @@ exports.recursiveDelete = functions
           path: path 
         };
       });
-  });
+  });*/
 
 
 exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(event => {
@@ -215,39 +217,83 @@ exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(even
 
 });
 
-exports.sendSMS = functions.https.onRequest((req, response) => {
+exports.sendSMS = functions.https.onRequest((req, res) => {
   
   const phone = req.body.data.phone;
-  const text = req.body.data.message;
+  const payload = req.body.data.payload;
+  const userId = req.body.data.userId;
 
-  var params = {
-    recipient: phone, 
-    message: text,
-    headers: {
+  var headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
       'Authorization': 'Bearer 7FA7ED241142E7BE36671CE0FEC9E84F'
-    }
   };
 
-  console.log(JSON.stringify(params));
+  var dataString = '{"recipient":' + phone + ',"message":"' + payload + '"}';  
 
-  // make the request
-  request('https://api.notimation.com/api/v1/sms', params,  function (error, response, body) {
+  var options = {
+      url: 'https://api.notimation.com/api/v1/sms',
+      method: 'POST',
+      headers: headers,
+      body: dataString
+  };
+
+  function callback(error, response, body) {      
+      //if (!error && response.statusCode == 200) {
+      //    console.log(body);
+      //}
+      if (!error) {
+
+        var sms_id = body.data.sms_id;         
+        
+        db.collection("users").doc(userId).update({smsId: sms_id})
+        
+      } 
+  }
+
+  request(options, callback);
+ 
+
+  /*console.log("phone: " + phone);
+  console.log("payload: " + payload);
+
+  const postBody = { 
+    recipient: parseInt(phone),
+    message: payload 
+  };
+
+  console.log("postBody: " + JSON.stringify(postBody));
+
+  const options = {
+    url: 'https://api.notimation.com/api/v1/sms',
+    headers: {
+        'Content-Type' : 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer 7FA7ED241142E7BE36671CE0FEC9E84F'
+    },
+    json: true,
+    body: postBody
+  };
+ 
+   
+  console.log("options: " + JSON.stringify(options));
+
+  rp(options)
+    .then(response => {
       
-    console.log("error: " + error);
+      console.log('Good response: ' + JSON.stringify(response.data));
+      
+      res.send({
+        smresponses_id : response.data.sms_id, 
+        response : response.data.sms_status
+      });
 
-    console.log("response: " + JSON.stringify(response));
-
-    console.log("body: " + JSON.stringify(body));
-
-
-    if (!error && response.statusCode == 200) {                
-      response.send({sms_id:body.sms_id, sms_status:body.sms_status});
-    } else {
-      response.send({error:response.error});
-    }   
-
-  });
-
+    })
+    .catch(err => {
+      // API call failed...
+      res.status(500).send(err);
+    });*/
+    
 });
 
 /*exports.helloWorld = functions.https.onRequest((request, response) => {

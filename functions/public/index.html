@@ -19,7 +19,7 @@
 
         <header></header>  
 
-        <content>></content>
+        <div id="content"></div>
 
         <footer></footer>        
 
@@ -34,7 +34,8 @@
 
     </body>
 
-    <script>                
+    <script>    
+        
 
         var homeLoader = $('body').loadingIndicator({ useImage: false,}).data("loadingIndicator");
 
@@ -49,6 +50,8 @@
             measurementId: "G-2RRZXWLMTL"
         };
         firebase.initializeApp(firebaseConfig);
+
+        var db = firebase.firestore();
 
         var getUrlParameter = function getUrlParameter(sParam) {
             var sPageURL = window.location.search.substring(1),
@@ -71,37 +74,107 @@
 
             case undefined:
 
-            firebase.auth().onAuthStateChanged(function (user) {
+                firebase.auth().onAuthStateChanged(function (user) {
 
-                if (user) {
+                    if (user) {
 
-                
-                    window.location.href = 'login.html';
-                
-                } else {
+                        console.log(user.email);
 
-                    homeLoader.hide();
+                        var previous = db.collection("users").where("email", "==", user.email)
+                        .get()
+                        .then(function(querySnapshot) {
+                            querySnapshot.forEach(function(doc) {
+                                // doc.data() is never undefined for query doc snapshots
+                                console.log(doc.id, " => ", doc.data());
 
-                    $("<link/>", {
-                        rel: "stylesheet",
-                        type: "text/css",
-                        href: "/css/signin.css"
-                    }).appendTo("head");
+                                var types =  doc.data().type;
+                            
+                                var type = types[0];
 
-                    fetch("../html/content/signin.html")
-                    .then(response => {
-                        return response.text();
-                    })
-                    .then(data => {
-                        document.querySelector("content").innerHTML = data;    
-                    });              
+                                switch (type) {
+                                    //Guest
+                                    case 0:
+                                        window.location.href = 'index.html?page=guest';
+                                        break;
+                                    //Admin
+                                    case 1:
+                                        window.location.href = 'index.html?page=admin';
+                                        break;
+                                    //Referent
+                                    case 2:
+                                        window.location.href = 'index.html?page=referent';
+                                        break;
+                                    //Group
+                                    case 3:
+                                        
+                                        break;                                    
+                                }
 
-                }
-            });                              
+
+                            });
+                        })
+                        .catch(function(error) {
+                            console.log("Error getting documents: ", error);
+                        });
+                    
+                    } else {
+
+                        homeLoader.hide();
+
+                        $("<link/>", {
+                            rel: "stylesheet",
+                            type: "text/css",
+                            href: "/css/login.css"
+                        }).appendTo("head");
+
+                        fetch("../html/content/login.html")
+                        .then(response => {
+                            return response.text();
+                        })
+                        .then(data => {
+                        
+                            $("#content").html(data);    
+                        
+                            $('#btn-login').click(function(e) {                            
+                                e.preventDefault(); 
+
+                                var inputEmail = $("#inputEmail").val();
+                                var inputPassword = $("#inputPassword").val();                        
+
+                                firebase.auth().signInWithEmailAndPassword(inputEmail, inputPassword).catch(function(error) {  
+                                    var errorCode = error.code;
+                                    var errorMessage = error.message;  
+                                });
+
+                            });
+                        }); 
+                        
+                        firebase.auth().onAuthStateChanged(function(user) {
+                            if (user) {
+                                // User is signed in.
+                                var displayName = user.displayName;
+                                var email = user.email;
+                                var emailVerified = user.emailVerified;
+                                var photoURL = user.photoURL;
+                                var isAnonymous = user.isAnonymous;
+                                var uid = user.uid;
+                                var providerData = user.providerData;
+                                // ...
+                            } else {
+                                // User is signed out.
+                                // ...
+                            }
+                        });
+
+
+                    }
+                });                              
 
             break;
 
             case 'post':
+
+                homeLoader.hide();
 
                 $.getScript("js/loader.js");
 
@@ -117,17 +190,18 @@
                     href: "/css/post.css"
                 }).appendTo("head");
                     
-                fetch("../html/content/post_content.html")
+                fetch("../html/content/post.html")
                 .then(response => {
                     return response.text();
                 })
                 .then(data => {
-                    document.querySelector("content").innerHTML = data;    
+                    $("#content").html(data);                        
                 });
 
              break;
            
-        }      
+        }         
+     
 
         
     
