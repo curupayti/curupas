@@ -68,142 +68,207 @@
             }
         };
 
-        var pagename = getUrlParameter('page');
-        
-        switch (pagename) {
+        var role = getUrlParameter('role');
 
-            case undefined:
+        if (role==undefined) {   
 
-                firebase.auth().onAuthStateChanged(function (user) {
+            firebase.auth().onAuthStateChanged(function (user) {
 
-                    if (user) {
+                if (user) {
 
-                        console.log(user.email);
+                    console.log(user.email);
 
-                        var previous = db.collection("users").where("email", "==", user.email)
-                        .get()
-                        .then(function(querySnapshot) {
-                            querySnapshot.forEach(function(doc) {
-                                // doc.data() is never undefined for query doc snapshots
-                                console.log(doc.id, " => ", doc.data());
-
-                                var types =  doc.data().type;
-                            
-                                var type = types[0];
-
-                                switch (type) {
-                                    //Guest
-                                    case 0:
-                                        window.location.href = 'index.html?page=guest';
-                                        break;
-                                    //Admin
-                                    case 1:
-                                        window.location.href = 'index.html?page=admin';
-                                        break;
-                                    //Referent
-                                    case 2:
-                                        window.location.href = 'index.html?page=referent';
-                                        break;
-                                    //Group
-                                    case 3:
-                                        
-                                        break;                                    
-                                }
-
-
-                            });
-                        })
-                        .catch(function(error) {
-                            console.log("Error getting documents: ", error);
+                    var previous = db.collection("users").where("email", "==", user.email)
+                    .get()
+                    .then(function(querySnapshot) {
+                        querySnapshot.forEach(function(doc) {                        
+                            var types =  doc.data().type;
+                            window.location.href = 'index.html?role=' + types;
                         });
+                    })
+                    .catch(function(error) {
+                        console.log("Error getting documents: ", error);
+                    });
+
+                } else {
+
+                    homeLoader.hide();
+
+                    $("<link/>", {
+                        rel: "stylesheet",
+                        type: "text/css",
+                        href: "/css/login.css"
+                    }).appendTo("head");
+
+                    fetch("../html/content/login.html")
+                    .then(response => {
+                        return response.text();
+                    })
+                    .then(data => {
                     
-                    } else {
+                        $("#content").html(data);    
+                    
+                        $('#btn-login').click(function(e) {                            
+                            e.preventDefault(); 
 
-                        homeLoader.hide();
+                            var inputEmail = $("#inputEmail").val();
+                            var inputPassword = $("#inputPassword").val();                        
 
-                        $("<link/>", {
-                            rel: "stylesheet",
-                            type: "text/css",
-                            href: "/css/login.css"
-                        }).appendTo("head");
-
-                        fetch("../html/content/login.html")
-                        .then(response => {
-                            return response.text();
-                        })
-                        .then(data => {
-                        
-                            $("#content").html(data);    
-                        
-                            $('#btn-login').click(function(e) {                            
-                                e.preventDefault(); 
-
-                                var inputEmail = $("#inputEmail").val();
-                                var inputPassword = $("#inputPassword").val();                        
-
-                                firebase.auth().signInWithEmailAndPassword(inputEmail, inputPassword).catch(function(error) {  
-                                    var errorCode = error.code;
-                                    var errorMessage = error.message;  
-                                });
-
+                            firebase.auth().signInWithEmailAndPassword(inputEmail, inputPassword).catch(function(error) {  
+                                var errorCode = error.code;
+                                var errorMessage = error.message;  
                             });
-                        }); 
-                        
-                        firebase.auth().onAuthStateChanged(function(user) {
-                            if (user) {
-                                // User is signed in.
-                                var displayName = user.displayName;
-                                var email = user.email;
-                                var emailVerified = user.emailVerified;
-                                var photoURL = user.photoURL;
-                                var isAnonymous = user.isAnonymous;
-                                var uid = user.uid;
-                                var providerData = user.providerData;
-                                // ...
-                            } else {
-                                // User is signed out.
-                                // ...
-                            }
+
                         });
+                    });
+                }
 
+            });
+                
+        } else {            
+                      
+            $("<link/>", {
+                rel: "stylesheet",
+                type: "text/css",
+                href: "/css/style.css"
+            }).appendTo("head");            
 
-                    }
-                });                              
+            var roleArray = [];
+            
+            if (role.indexOf(',') == -1) {
+                
+                roleArray.push(parseInt(role));
 
-            break;
+            } else {
 
-            case 'post':
+                roleArray = role.split(',');                
+            }
+
+            // Build Header
+            var navBarArray = [];
+
+            for (var i=0; i<roleArray.length; i++) {
+
+                var r = roleArray[i];
+
+                switch (r) {
+                    //Guest
+                    case 0:                        
+                        break;
+                    //Admin
+                    case 1:
+                        navBarArray.push({html:"title.html", css:"title.css", desc: "Titulo"});
+                        navBarArray.push({html:"post.html", css:"post.css", desc: "Posts"});                 
+                        break;
+                    //Referent
+                    case 2:
+                        
+                        break;
+                    //Group
+                    case 3:
+                        
+                        break;
+                    //Museum
+                    case 4:
+                        
+                        break;                                    
+                    //Calendar
+                    case 5:
+                        
+                        break;                                    
+                }
+
+            } 
+            
+            fetch("../html/header.html")
+            .then(response => {
+                return response.text()
+            })
+            .then(data => {
+                
+                $("header").html(data);   
+                
+                for (var j=0;j<navBarArray.length; j++) {
+                    
+                    var html = navBarArray[j].html;
+                    var css = navBarArray[j].css;
+                    var desc = navBarArray[j].desc;
+
+                    $("#navbar").append('<li class="nav-item"><a class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + html + '\', \'' + css + '\'); return false;">' + desc + '</a></li>');           
+                }
 
                 homeLoader.hide();
+            });
+            
+            fetch("../html/footer.html")
+            .then(response => {
+                return response.text()
+            })
+            .then(data => {
+                document.querySelector("footer").innerHTML = data;
+            });
 
-                $.getScript("js/loader.js");
+            function loadPage(html, css) {
+
+                homeLoader.show();
 
                 $("<link/>", {
                     rel: "stylesheet",
                     type: "text/css",
-                    href: "/css/style.css"
+                    href: "/css/" + css
                 }).appendTo("head");
 
-                $("<link/>", {
-                    rel: "stylesheet",
-                    type: "text/css",
-                    href: "/css/post.css"
-                }).appendTo("head");
-                    
-                fetch("../html/content/post.html")
+                fetch("../html/content/" + html)
                 .then(response => {
                     return response.text();
                 })
-                .then(data => {
-                    $("#content").html(data);                        
+                .then(data => {                
+                    $("#content").html(data);     
+                    homeLoader.hide();                                  
                 });
 
-             break;
-           
-        }         
-     
-
+            }
+                                         
+        }    
         
+
+      /*  } else {
+            
+            homeLoader.hide();
+
+            //$.getScript("js/loader.js");
+
+            fetch("../html/header.html")
+            .then(response => {
+                return response.text()
+            })
+            .then(data => {
+                //document.querySelector("header").innerHTML = data;  
+                $("header").html(data);   
+                $("#navbar").append('<li class="nav-item"><a class="nav-link" href="nuseum.html">Museum</a></li>')   
+            });
+
+            $("<link/>", {
+                rel: "stylesheet",
+                type: "text/css",
+                href: "/css/style.css"
+            }).appendTo("head");
+
+            $("<link/>", {
+                rel: "stylesheet",
+                type: "text/css",
+                href: "/css/post.css"
+            }).appendTo("head");
+                
+            fetch("../html/content/post.html")
+            .then(response => {
+                return response.text();
+            })
+            .then(data => {
+                $("#content").html(data);                        
+            });  
+
+        }   */
     
     </script>
 
