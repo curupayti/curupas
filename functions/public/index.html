@@ -24,18 +24,19 @@
         <footer></footer>        
 
         <script src="js/vendor/jquery.min.js"></script>
-        <script src="js/vendor/bootstrap.min.js"></script>    
+        <script src="js/vendor/bootstrap.min.js"></script> 
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@beta/dist/js.cookie.min.js"></script>   
         <script src="html/loading_indicator/jquery.loading-indicator.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-firestore.js"></script>
         <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"></script>        
-        <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-auth.js"></script>
-        <script src="https://cdn.ckeditor.com/4.5.10/standard/ckeditor.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-auth.js"></script>        
 
     </body>
 
     <script>    
         
+        var roleWebArray = [];
 
         var homeLoader = $('body').loadingIndicator({ useImage: false,}).data("loadingIndicator");
 
@@ -80,10 +81,45 @@
 
                     var previous = db.collection("users").where("email", "==", user.email)
                     .get()
-                    .then(function(querySnapshot) {
-                        querySnapshot.forEach(function(doc) {                        
-                            var types =  doc.data().type;
-                            window.location.href = 'index.html?role=' + types;
+                    .then(function(querySnapshotUser) {
+                        querySnapshotUser.forEach(function(docUser) {                        
+                            var roleReference =  docUser.data().role;
+
+                            roleReference.get()
+                            .then(function(docPage) {                     
+
+                                var json = docPage.data();                                
+                                
+                                var count = Object.keys(json).length;
+                                var c = 0;
+                                
+                                Object.keys(json).forEach((name) => {
+                                    var reference = json[name];
+
+                                    var promises = [];
+
+                                    promises.push(reference.get());
+                                  
+                                    Promise.all(promises).then(function(responses) {        
+
+                                        for (var i=0; i<responses.length; i++) {
+                                            let page = responses[i].data(); 
+                                            var _id   =  page.id;
+                                            var _name =  page.name;
+                                            var _html =  page.html;
+                                            var _js =  page.js;
+                                            var _css  =   page.css; 
+                                            roleWebArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
+                                        }
+
+                                        if (c == (count-1)) {
+                                            renderNavbar(roleWebArray);
+                                        }
+                                        c++;
+                                        
+                                    });                               
+                                });
+                            });                    
                         });
                     })
                     .catch(function(error) {
@@ -107,7 +143,7 @@
                     .then(data => {
                     
                         $("#content").html(data);    
-                    
+                        roleArray
                         $('#btn-login').click(function(e) {                            
                             e.preventDefault(); 
 
@@ -122,63 +158,17 @@
                         });
                     });
                 }
-
             });
                 
-        } else {            
+        } 
+        
+        function renderNavbar (navBar)  {
                       
             $("<link/>", {
                 rel: "stylesheet",
                 type: "text/css",
                 href: "/css/style.css"
-            }).appendTo("head");            
-
-            var roleArray = [];
-            
-            if (role.indexOf(',') == -1) {
-                
-                roleArray.push(parseInt(role));
-
-            } else {
-
-                roleArray = role.split(',');                
-            }
-
-            // Build Header
-            var navBarArray = [];
-
-            for (var i=0; i<roleArray.length; i++) {
-
-                var r = roleArray[i];
-
-                switch (r) {
-                    //Guest
-                    case 0:                        
-                        break;
-                    //Admin
-                    case 1:
-                        navBarArray.push({html:"title.html", css:"title.css", desc: "Titulo"});
-                        navBarArray.push({html:"post.html", css:"post.css", desc: "Posts"});                 
-                        break;
-                    //Referent
-                    case 2:
-                        
-                        break;
-                    //Group
-                    case 3:
-                        
-                        break;
-                    //Museum
-                    case 4:
-                        
-                        break;                                    
-                    //Calendar
-                    case 5:
-                        
-                        break;                                    
-                }
-
-            } 
+            }).appendTo("head");                    
             
             fetch("../html/header.html")
             .then(response => {
@@ -188,14 +178,28 @@
                 
                 $("header").html(data);   
                 
-                for (var j=0;j<navBarArray.length; j++) {
+                for (var j=0;j<navBar.length; j++) {
                     
-                    var html = navBarArray[j].html;
-                    var css = navBarArray[j].css;
-                    var desc = navBarArray[j].desc;
+                    var id = navBar[j].id;
+                    var desc = navBar[j].desc;
+                    var html = navBar[j].html;
+                    var js = navBar[j].js;
+                    var css = navBar[j].css;                   
 
-                    $("#navbar").append('<li class="nav-item"><a class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + html + '\', \'' + css + '\'); return false;">' + desc + '</a></li>');           
+                    $("#navbar").append('<li class="nav-item"><a id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + id + '\', \'' + html + '\', \'' + js + '\', \'' + css + '\'); return false;">' + desc + '</a></li>');           
                 }
+                
+                loadPage(navBar[0].id, navBar[0].html, navBar[0].js, navBar[0].css);
+
+                //Levanta la ultima pagina navegada sino Home
+                /*let cookie = Cookies.get('html');
+                if (cookie === undefined) {
+                    loadPage(navBar[0].html, navBar[0].css);
+                } else {
+                    let html =  Cookies.get('html', html);
+                    let cee = Cookies.set('html', css);
+                    loadPage(html, css)
+                }*/
 
                 homeLoader.hide();
             });
@@ -206,70 +210,39 @@
             })
             .then(data => {
                 document.querySelector("footer").innerHTML = data;
-            });
+            });           
 
-            function loadPage(html, css) {
+        }
 
-                homeLoader.show();
+        function loadPage(id, html, js, css) {
 
-                $("<link/>", {
-                    rel: "stylesheet",
-                    type: "text/css",
-                    href: "/css/" + css
-                }).appendTo("head");
+            $("#"+id).addClass('active');
 
-                fetch("../html/content/" + html)
-                .then(response => {
-                    return response.text();
-                })
-                .then(data => {                
-                    $("#content").html(data);     
-                    homeLoader.hide();                                  
-                });
+            Cookies.set('id', id);
+            Cookies.set('html', html);
+            Cookies.set('css', css);
 
-            }
-                                         
-        }    
-        
-
-      /*  } else {
-            
-            homeLoader.hide();
-
-            //$.getScript("js/loader.js");
-
-            fetch("../html/header.html")
-            .then(response => {
-                return response.text()
-            })
-            .then(data => {
-                //document.querySelector("header").innerHTML = data;  
-                $("header").html(data);   
-                $("#navbar").append('<li class="nav-item"><a class="nav-link" href="nuseum.html">Museum</a></li>')   
-            });
+            homeLoader.show();
 
             $("<link/>", {
                 rel: "stylesheet",
                 type: "text/css",
-                href: "/css/style.css"
-            }).appendTo("head");
+                href: "/css/" + css
+            }).appendTo("head");            
 
-            $("<link/>", {
-                rel: "stylesheet",
-                type: "text/css",
-                href: "/css/post.css"
-            }).appendTo("head");
-                
-            fetch("../html/content/post.html")
+            fetch("../html/content/" + html)
             .then(response => {
                 return response.text();
             })
-            .then(data => {
-                $("#content").html(data);                        
-            });  
+            .then(data => {                
+                $("#content").html(data);     
+                $.getScript("js/" + js);
+                homeLoader.hide();                                  
+            });
 
-        }   */
-    
+        }        
+
+   
     </script>
 
     </html>
