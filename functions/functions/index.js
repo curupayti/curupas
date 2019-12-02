@@ -242,13 +242,18 @@ exports.sendSMS = functions.https.onRequest((req, res) => {
       //if (!error && response.statusCode == 200) {
       //    console.log(body);
       //}
-      if (!error) {
+     /* if (!error) {
 
         var sms_id = body.data.sms_id;         
         
         db.collection("users").doc(userId).update({smsId: sms_id})
         
-      } 
+      }*/
+      
+      JSON.stringify("response_callback: " + response);
+      JSON.stringify("body_callback: " + body);
+      JSON.stringify("error_callback: " + error);
+
   }
 
   request(options, callback);

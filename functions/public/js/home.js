@@ -6,4 +6,6 @@ $(document).ready(function () {
     $('#welcome').html("Bienvenido " +name);
     $('#role').html(role_desc);
 
+    //# sourceURL=home.js   
+
 });

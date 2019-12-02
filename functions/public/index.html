@@ -87,7 +87,7 @@
                     .get()
                     .then(function(querySnapshotUser) {
                         querySnapshotUser.forEach(function(docUser) {                        
-                            var roleReference =  docUser.data().role;
+                            var roleReference =  docUser.data().roleRef;
 
                             _user.name = docUser.data().name;
                             _user.profilePictureURL = docUser.data().profilePictureURL;
@@ -167,23 +167,10 @@
                     .then(response => {
                         return response.text();
                     })
-                    .then(data => {
-                    
-                        $("#content").html(data);    
-                        roleArray
-                        $('#btn-login').click(function(e) {                            
-                            e.preventDefault(); 
-
-                            var inputEmail = $("#inputEmail").val();
-                            var inputPassword = $("#inputPassword").val();                        
-
-                            firebase.auth().signInWithEmailAndPassword(inputEmail, inputPassword).catch(function(error) {  
-                                var errorCode = error.code;
-                                var errorMessage = error.message;  
-                            });
-
-                        });
-                    });
+                    .then(data => {                    
+                        $("#content").html(data);                        
+                        $.getScript("js/login.js");
+                    });                         
                 }
             });
                 
@@ -285,9 +272,7 @@
                 }
             });
         }       
-
-
-        //# sourceURL=chrome.js    
+ 
    
     </script>
 
