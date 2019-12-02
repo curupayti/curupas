@@ -30,12 +30,15 @@
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-firestore.js"></script>
         <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"></script>        
-        <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-auth.js"></script>        
+        <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-auth.js"></script>            
 
     </body>
 
     <script>    
         
+        var _user = {};
+        var _role = {};
+
         var roleWebArray = [];
 
         var homeLoader = $('body').loadingIndicator({ useImage: false,}).data("loadingIndicator");
@@ -52,7 +55,8 @@
         };
         firebase.initializeApp(firebaseConfig);
 
-        var db = firebase.firestore();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
         var getUrlParameter = function getUrlParameter(sParam) {
             var sPageURL = window.location.search.substring(1),
@@ -85,39 +89,62 @@
                         querySnapshotUser.forEach(function(docUser) {                        
                             var roleReference =  docUser.data().role;
 
+                            _user.name = docUser.data().name;
+                            _user.profilePictureURL = docUser.data().profilePictureURL;
+
+                            downloadImage(_user.profilePictureURL, function(data) {
+
+                            });
+
                             roleReference.get()
                             .then(function(docPage) {                     
 
-                                var json = docPage.data();                                
+                                var json = docPage.data();  
+                                
+                                let type = typeof json;
                                 
                                 var count = Object.keys(json).length;
-                                var c = 0;
+                                var c = 1;
                                 
-                                Object.keys(json).forEach((name) => {
-                                    var reference = json[name];
+                                Object.keys(json).forEach((id) => {
 
-                                    var promises = [];
+                                    let isNumeric = $.isNumeric(id);
 
-                                    promises.push(reference.get());
-                                  
-                                    Promise.all(promises).then(function(responses) {        
+                                    if (isNumeric) {
 
-                                        for (var i=0; i<responses.length; i++) {
-                                            let page = responses[i].data(); 
-                                            var _id   =  page.id;
-                                            var _name =  page.name;
-                                            var _html =  page.html;
-                                            var _js =  page.js;
-                                            var _css  =   page.css; 
-                                            roleWebArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
-                                        }
+                                        var reference = json[id];
 
-                                        if (c == (count-1)) {
-                                            renderNavbar(roleWebArray);
-                                        }
-                                        c++;
-                                        
-                                    });                               
+                                        var promises = [];
+
+                                        promises.push(reference.get());
+                                    
+                                        Promise.all(promises).then(function(responses) {        
+
+                                            for (var i=0; i<responses.length; i++) {                                           
+
+                                                let page = responses[i].data();                                         
+
+                                                var _id   =  page.id;
+                                                var _name =  page.name;
+                                                var _html =  page.html;
+                                                var _js =  page.js;
+                                                var _css  =   page.css; 
+                                                roleWebArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
+                                            }
+
+                                            if (c == (count-1)) {
+                                                _role.roles = roleWebArray;
+                                                renderNavbar(roleWebArray);
+                                            }
+                                            c++;
+                                            
+                                        });        
+
+                                    } else {
+
+                                        _role.desc = json.role;
+
+                                    }                           
                                 });
                             });                    
                         });
@@ -190,6 +217,7 @@
                 }
                 
                 loadPage(navBar[0].id, navBar[0].html, navBar[0].js, navBar[0].css);
+                //loadPage(navBar[1].id, navBar[1].html, navBar[1].js, navBar[1].css);
 
                 //Levanta la ultima pagina navegada sino Home
                 /*let cookie = Cookies.get('html');
@@ -214,7 +242,9 @@
 
         }
 
-        function loadPage(id, html, js, css) {
+        function loadPage(id, html, js, css) {            
+
+            $("#navbar").find("li.active").removeClass("active");
 
             $("#"+id).addClass('active');
 
@@ -235,13 +265,29 @@
                 return response.text();
             })
             .then(data => {                
-                $("#content").html(data);     
-                $.getScript("js/" + js);
-                homeLoader.hide();                                  
+                $("#content").html(data);
+                let html = "js/" + js;
+                $.getScript(html);                    
+                          
             });
 
-        }        
+        }   
+        
+        function downloadImage(_url, callback) {
+            $.ajax({
+                type: 'GET',
+                url: _url,
+                dataType: 'image/jpg',
+                async: true,
+                success: function (data) {
+                    callback(data);
+                    //$("#" + i).attr("src", 'data:image/png;base64,'+data);
+                }
+            });
+        }       
 
+
+        //# sourceURL=chrome.js    
    
     </script>
 
