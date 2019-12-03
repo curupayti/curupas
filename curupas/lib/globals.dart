@@ -36,7 +36,7 @@ String error_unknown = "ERROR_UNKNOWN";
 String register_error_title = "Error en el registro";
 String signin_error_title = "Error de autentificación";
 
-Future<User> getUserData(String userId, String year) async {
+Future<User> getUserData(String userId) async {
   if (userId != null) {
     User user = new User();
     await Auth.getUserDocumentReference(userId)
@@ -45,20 +45,26 @@ Future<User> getUserData(String userId, String year) async {
         if (userSnapshot.exists) {
           DocumentReference yearDocumentReference =
               userSnapshot.data["yearRef"];
-          await yearDocumentReference.get().then((yearSnapshot) async {
-            if (yearSnapshot.exists) {
-              user.userRef = userDocumentReference;
-              try {
-                group = await Group.fromDocument(yearSnapshot);
-                userSnapshot.data["group"] = group;
-                user = await User.fromDocument(userSnapshot);
-              } on Exception catch (exception) {
-                print(exception.toString());
-              } catch (error) {
-                print(error.toString());
+          if (yearDocumentReference != null) {
+            await yearDocumentReference.get().then((yearSnapshot) async {
+              if (yearSnapshot.exists) {
+                user.userRef = userDocumentReference;
+                try {
+                  group = await Group.fromDocument(yearSnapshot);
+                  userSnapshot.data["group"] = group;
+                  user = await User.fromDocument(userSnapshot);
+                  return user;
+                } on Exception catch (exception) {
+                  print(exception.toString());
+                } catch (error) {
+                  print(error.toString());
+                }
               }
-            }
-          });
+            });
+          } else {
+            user = await User.fromDocument(userSnapshot);
+            return user;
+          }
         }
       });
     });

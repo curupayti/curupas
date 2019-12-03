@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
 
+import 'dialogs/sms_dialog.dart';
+
 class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -55,7 +57,8 @@ class WelcomeScreen extends StatelessWidget {
               fontWeight: FontWeight.w700,
               textColor: Colors.white,
               onPressed: () {
-                Navigator.of(context).pushNamed("/signin");
+                //Navigator.of(context).pushNamed("/signin");
+                new SMSDialog();
               },
               splashColor: Colors.black12,
               borderColor: Color.fromRGBO(173, 163, 1, 1.0),

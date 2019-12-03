@@ -14,12 +14,13 @@ class User {
   final LocationData locationData;
   DocumentReference yearRef;
   DocumentReference userRef;
+  final DocumentReference roleRef;
   Group group;
   final String nonSpName;
   final bool approved;
-  final List<int> type;
   final int smsCode;
   final int smsId;
+  final bool smsChecked;
 
   User(
       {this.userID,
@@ -34,17 +35,36 @@ class User {
       this.group,
       this.nonSpName,
       this.approved,
-      this.type,
+      this.roleRef,
       this.smsCode,
-      this.smsId});
+      this.smsId,
+      this.smsChecked});
 
   Map<String, Object> toJson() {
     GeoPoint geo = GeoPoint(locationData.latitude, locationData.longitude);
-    String year = "";
+    String year;
     if (group != null) {
       year = group.year;
     }
     return {
+      'userID': userID,
+      'name': name,
+      'phone': phone,
+      'birthday': birthday,
+      'email': email,
+      'profilePictureURL': profilePictureURL,
+      'thumbnailPictureURL': thumbnailPictureURL,
+      'yearRef': yearRef,
+      'location': geo,
+      'group': year,
+      'nonSpName': nonSpName,
+      'approved': approved,
+      'roleRef': roleRef,
+      'smsCode': smsCode,
+      'smsId': smsId,
+      'smsChecked': smsChecked,
+    };
+    /*return {
       'userID': userID,
       'name': name,
       'phone': phone,
@@ -60,7 +80,8 @@ class User {
       'type': type,
       'smsCode': smsCode,
       'smsId': smsId,
-    };
+      'smsChecked': smsChecked,
+    };*/
   }
 
   factory User.fromJson(Map<String, Object> doc) {
@@ -91,7 +112,8 @@ class User {
       group: doc['group'],
       nonSpName: doc['nonSpName'],
       approved: doc['approved'],
-      type: doc['type'],
+      roleRef: doc['roleRef'],
+      smsChecked: doc['smsChecked'],
     );
     return user;
   }

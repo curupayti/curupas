@@ -22,6 +22,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:location/location.dart';
 
+import 'dialogs/sms_dialog.dart';
+
 class SignUpScreen extends StatefulWidget {
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
@@ -572,6 +574,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SharedPreferences prefs = await SharedPreferences.getInstance();
               prefs.setString('userId', uID);
               prefs.setString('_imagePath', _imagePath);
+
               //prefs.setString('phone', phone);
               //prefs.setString('email', email);
               //prefs.setString('fullname', fullname);
@@ -586,6 +589,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               List<int> userType = new List<int>();
               userType.add(2);
 
+              DocumentReference roleRef = await Auth.getRoleGroupReference();
+
               User user = new User(
                   userID: uID,
                   phone: phone,
@@ -593,7 +598,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   name: fullname,
                   birthday: birthday,
                   nonSpName: toNonSpecial,
-                  type: userType,
+                  roleRef: roleRef,
                   smsCode: code,
                   approved: false,
                   locationData: _locationData);
@@ -602,6 +607,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               bool added = await Auth.addUser(user);
               if (added) {
+                prefs.setBool('registered', true);
                 _globals.sendUserSMSVerification(phone, message, uID, code);
                 if (inputDoneSignUp != null) {
                   phoneNumberFocusNodeSignUp = null;
@@ -613,7 +619,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) =>
-                      _buildSendSMSDialog(context),
+                      //_buildSendSMSDialog(context),
+                      new SMSDialog(),
                 );
               }
             }

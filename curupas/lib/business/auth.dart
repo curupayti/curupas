@@ -161,12 +161,18 @@ class Auth {
   }
 
   static Future<User> updateUser(
-      String userId, String year, Map<String, dynamic> data) async {
+      String userId, Map<String, dynamic> data) async {
     Firestore.instance.document("users/${userId}").setData(data);
-    await _globals.getUserData(userId, year).then((user) {
+    await _globals.getUserData(userId).then((user) {
       return user;
     });
     return null;
+  }
+
+  static Future<DocumentReference> getRoleGroupReference() async {
+    DocumentReference roleRef =
+        await Firestore.instance.document("roles/group");
+    return roleRef;
   }
 
   static Future<bool> checkUserExist(String userId) async {
@@ -201,39 +207,6 @@ class Auth {
     }
     return false;
   }
-
-  /*static void addGroupMedia(String year) async {
-    await Firestore.instance
-        .collection('groups/${year}')
-        .document("media")
-        .collection("videos")
-        .add({"desc": "Bienvenidos a camadas", "url": "videoUrl"});
-    await Firestore.instance
-        .collection('groups/${year}')
-        .document("media")
-        .collection("images")
-        .add({"desc": "Bienvenidos a camadas", "url": "videoUrl"});
-    await Firestore.instance
-        .collection('groups/${year}')
-        .document("media")
-        .collection("text")
-        .add({"desc": "Contar anécdotas", "text": "Podras"});
-  }*/
-
-  /*static Future<bool> checkMediaExist(String year) async {
-    bool exists = false;
-    try {
-      await Firestore.instance.document("${year}/media").get().then((doc) {
-        if (doc.exists)
-          exists = true;
-        else
-          exists = false;
-      });
-      return exists;
-    } catch (e) {
-      return false;
-    }
-  }*/
 
   static Stream<Group> getGroupByYear(String year) {
     return Firestore.instance
@@ -290,23 +263,6 @@ class Auth {
     }).toList();
     return list;
   }
-
-  /*static Future<bool> getUserById(String userId) async {
-    QuerySnapshot querySnapshot =
-        await Firestore.instance.collection("users").getDocuments();
-    for (CollectionReference collectionRef in querySnapshot.documents) {      
-        QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
-    templist = collectionSnapshot.documents;
-
-      //DocumentReference yearRef
-
-      String docYear = doc['year'];
-      if (year == docYear) {
-        return true;
-      }
-    }
-    return false;
-  }*/
 
   static Future<List<User>> getFriends() async {
     List<DocumentSnapshot> templist;

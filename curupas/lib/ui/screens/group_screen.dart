@@ -22,6 +22,8 @@ import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'dialogs/sms_dialog.dart';
+
 class GroupScreen extends StatefulWidget {
   @override
   _GroupScreenState createState() => _GroupScreenState();
@@ -74,7 +76,13 @@ class _GroupScreenState extends State<GroupScreen> {
   void initState() {
     super.initState();
 
-    isUserId();
+    _loadingInProgress = true;
+
+    getUserDataForSMS().then((user) {
+      if (!user.smsChecked) {
+        new SMSDialog();
+      }
+    });
 
     _flutterTapRecognizer = new TapGestureRecognizer()
       ..onTap = () => _openUrl(curupasUrl);
@@ -110,8 +118,6 @@ class _GroupScreenState extends State<GroupScreen> {
       focusNode: phoneNumberFocusNodeGroup,
     );
 
-    _loadingInProgress = true;
-
     getGroupsList().then((val) => setState(() {
           _loadingInProgress = false;
           _groupMenuItems = val;
@@ -124,11 +130,12 @@ class _GroupScreenState extends State<GroupScreen> {
     };
   }
 
-  void isUserId() async {
-    List<String> userIdYear = await getUserIdAndYear();
-    if (userIdYear.length > 0) {
-      _globals.getUserData(userIdYear[0], userIdYear[1]);
-    }
+  Future<User> getUserDataForSMS() async {
+    prefs = await SharedPreferences.getInstance();
+    String userId = prefs.getString('userId');
+    await _globals.getUserData(userId).then((user) {
+      return user;
+    });
   }
 
   Future<List<String>> getUserIdAndYear() async {
@@ -523,9 +530,8 @@ class _GroupScreenState extends State<GroupScreen> {
     data["group"] = _currentGroup;
     data["yearRef"] = yearRef;
 
-    Auth.updateUser(userId, year, data).then((user) async {
+    Auth.updateUser(userId, data).then((user) async {
       if (user != null) {
-        prefs.setBool('registered', true);
         _fcm.subscribeToTopic('users');
         _fcm.subscribeToTopic(year);
 

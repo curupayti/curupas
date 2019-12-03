@@ -85,8 +85,7 @@ class _MainScreenState extends State<MainScreen> {
         new MessagingWidget();
         _globals.setFilePickerGlobal();
         String userId = prefs.getString('userId');
-        String year = prefs.getString('year');
-        _globals.getUserData(userId, year).then((user) {
+        _globals.getUserData(userId).then((user) {
           if (!user.approved) {
             showDialog(
               context: context,
