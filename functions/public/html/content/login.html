@@ -1,16 +1,33 @@
-<form class="form-signin">
-    <p class="mb-3"><a target="_blank" href="https://www.curupas.com.ar/" style="font-size: 25px; color:grey;">Descarga la app</a></p>    
-    <img class="mb-4" src="/images/escudo.png" alt="" width="150" height="180">    
-    <h1 class="h3 mb-3 font-weight-normal text-white">Ingresar</h1>
-    <label for="inputEmail" class="sr-only">Email</label>
-    <input type="email" id="inputEmail" class="form-control" placeholder="Dirección de email" required autofocus>
-    <label for="inputPassword" class="sr-only">Contraseña</label>
-    <input type="password" id="inputPassword" class="form-control" placeholder="Contraseña" required>
-    <div class="checkbox mb-3">
-        <label style="color:grey">
-        <input type="checkbox" value="recordar-me"> recordar-me
-        </label>
-    </div>
-    <button type="button" id="btn-login" class="btn btn-secondary" >Ingresar</button>        
-    <p class="mt-5 mb-3 text-muted">&copy; Copyright 2019 Curupas </p>
-</form>
+
+<main role="main" id="main">
+
+    <form class="form-signin" id ="loginForm">
+
+        <p class="mb-3"><a target="_blank" href="https://www.curupas.com.ar/" style="font-size: 25px; color:grey;">Descarga la app</a></p>    
+        <img class="mb-4" src="/images/escudo.png" alt="" width="150" height="180">    
+        <h1 class="h3 mb-3 font-weight-normal text-white">Ingresar</h1>
+        
+        <label for="inputEmail" class="sr-only">Email</label>
+        <input type="email" id="inputEmail" class="form-control" placeholder="Dirección de email" required autofocus>    
+        
+
+        <label for="inputPassword" class="sr-only">Contraseña</label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="Contraseña" required>
+        <!--<div class="invalid-feedback">That didn't work.</div>-->
+        <div id="message" class="invalid-feedback">
+            Completá tu password
+        </div>  
+
+        
+
+        <div class="checkbox mb-3">
+            <label style="color:grey">
+            <input type="checkbox" value="recordar-me"> recordar-me
+            </label>
+        </div>
+        <button type="button" id="btn-login" class="btn btn-secondary" >Ingresar</button>        
+        <p class="mt-5 mb-3 text-muted">&copy; Copyright 2019 Curupas </p>
+
+    </form>
+    
+</main>

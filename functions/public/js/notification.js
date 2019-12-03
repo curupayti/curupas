@@ -60,28 +60,6 @@ $(document).ready(function () {
         });
     });
 
-    // db.collection('employees').startAt("abc").endAt("abc\uf8ff").get()
-    // .then(function (documentSnapshots) {
-    //     documentSnapshots.docs.forEach(doc => {
-    //         renderNotification(doc);
-    //     });
-    // });
-
-    // db.collection('employees').startAt('bos').endAt('bos\uf8ff').on("value", function(snapshot) {
-    //     console.log(snapshot);
-    // });
-    // var first = db.collection("employees")
-    //     .limit(3);
-
-    // first.get().then(function (documentSnapshots) {
-    //     documentSnapshots.docs.forEach(doc => {
-    //         renderNotification(doc);
-    //     });
-    //     lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-    //     console.log(documentSnapshots.docs.length - 1);
-    // });
-
-
     function renderNotification(document) {        
         let _time = formatDate(Date(document.data().timeStamp));         
         let item = `<tr data-id="${document.id}">        
@@ -196,6 +174,10 @@ $(document).ready(function () {
     
         return [day, month, year].join('-');
     }
+
+
+    //# sourceURL=notification.js 
+    
 });
 
 (function ($) {
@@ -214,6 +196,6 @@ $(document).ready(function () {
     $(document).on('show.bs.modal', '.modal', centerModal);
     $(window).on("resize", function () {
         $('.modal:visible').each(centerModal);
-    });
+    });      
     
 }(jQuery));
