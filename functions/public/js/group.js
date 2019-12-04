@@ -8,7 +8,7 @@ $(document).ready(function () {
     let firstVisible;
 
     // REAL TIME LISTENER
-    db.collection('posts').onSnapshot(snapshot => {
+    db.collection('groups').onSnapshot(snapshot => {
         let size = snapshot.size;
         $('.count').text(size);
         if (size == 0) {
@@ -19,17 +19,17 @@ $(document).ready(function () {
         let changes = snapshot.docChanges();
         changes.forEach(change => {
             if (change.type == 'added') {
-                renderPost(change.doc);
+                renderGroup(change.doc);
             } else if (change.type == 'modified') {
                 $('tr[data-id=' + change.doc.id + ']').remove();
-                renderPost(change.doc);
+                renderGroup(change.doc);
             } else if (change.type == 'removed') {
                 $('tr[data-id=' + change.doc.id + ']').remove();
             }
         });
     });
 
-    function renderPost(document) {  
+    function renderGroup(document) {  
         _documents[document.id] = document;      
         let _time = formatDate(Date(document.data().timeStamp));        
         document.ref.collection("images").get().then(function(imagesSnapshot) {
@@ -50,13 +50,13 @@ $(document).ready(function () {
             <td>${_time}</td>  
             <td><a href="#" id="${document.id}" class="js-view-images">${_size}</a></td>        
             <td>
-                <a href="#" id="${document.id}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
+                <a href="#" id="${document.id}" class="edit js-edit-group"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                 </a>
-                <a href="#" id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                <a href="#" id="${document.id}" class="delete js-delete-group"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
                 </a>
             </td>
             </tr>`;
-            $('#post-table').append(item);            
+            $('#group-table').append(item);            
             // Select/Deselect checkboxes
             var checkbox = $('table tbody input[type="checkbox"]');
             $("#selectAll").click(function () {
@@ -100,32 +100,32 @@ $(document).ready(function () {
     }
 
     // ADD EMPLOYEE
-    $("#add-post-form").submit(function (event) {
+    $("#add-group-form").submit(function (event) {
         event.preventDefault();       
         var title = $('#title').val();
         var description = $('#description').val();
 
-        var storageRef = storage.ref("/posts");        
+        var storageRef = storage.ref("/groups");        
         var file = document.getElementById("imgInp").files[0];       
         var filePath =  title + ".png";        
         var thisRef = storageRef.child(filePath);          
         
-        var postId;       
+        var groupId;       
         
         $('.lds-dual-ring').css('visibility', 'visible');
 
-        db.collection("posts").add({
+        db.collection("groups").add({
             title: title,
             description: description,
             //author: user.email
         })
         .then(function(docRef) {
-            postId = docRef.id;            
+            groupId = docRef.id;            
             var metadata = {
                 customMetadata: {
                     'thumbnail': 'true',
                     'type' : '1',
-                    'postId' : postId                   
+                    'groupId' : groupId                   
                 }
             }
             return thisRef.put(file, metadata);                    
@@ -135,7 +135,7 @@ $(document).ready(function () {
                 customMetadata: {
                     'thumbnail': 'false'
                     //'type' : '2',
-                    //'postId' : postId                   
+                    //'groupId' : groupId                   
                 }
             }
             var prefArray = [];
@@ -144,9 +144,9 @@ $(document).ready(function () {
             var length = input.files.length;
             for (var i = 0; i < length; ++i) {            
                 var _file = input.files.item(i);                                                  
-                var filePathPost = title + "_" + i + "_original.png";        
-                const postRef = storageRef.child(filePathPost);
-                const putRef = postRef.put(_file, metadataFiles);  
+                var filePathGroup = title + "_" + i + "_original.png";        
+                const groupRef = storageRef.child(filePathgroup);
+                const putRef = groupRef.put(_file, metadataFiles);  
                 prefArray.push(putRef);  
                 putRef.on('state_changed', function(snapshot) {
                     var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -164,9 +164,9 @@ $(document).ready(function () {
                   }, function() {                                        
                     var putRefFromArray = prefArray[j];
                     putRefFromArray.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
-                        db.collection("posts").doc(postId).collection("images").add({downloadURL});
+                        db.collection("groups").doc(groupId).collection("images").add({downloadURL});
                         if (k==(length-1)){
-                            $('#addPostModal').modal('hide');
+                            $('#addGroupModal').modal('hide');
                         }
                         k++;
                     });
@@ -180,31 +180,31 @@ $(document).ready(function () {
         });   
     });
 
-    // DELETE POST
-    $(document).on('click', '.js-delete-post', function () {
+    // DELETE GROUP
+    $(document).on('click', '.js-delete-group', function () {
         let id = $(this).attr('id');
-        $('#delete-post-form').attr('delete-id', id);
-        $('#deletePostModal').modal('show');
+        $('#delete-group-form').attr('delete-id', id);
+        $('#deleteGroupModal').modal('show');
     });
 
-    $("#delete-post-form").submit(function (event) {
+    $("#delete-group-form").submit(function (event) {
         event.preventDefault();
         let id = $(this).attr('delete-id');        
-        deleteAllImagesOnPost(id);
+        deleteAllImagesOnGroup(id);
         if (id != undefined) {            
-            let _path = "posts/" + id;
+            let _path = "groups/" + id;
             deleteDocumentAtPath(_path);
         } else {
             let checkbox = $('table tbody input:checked');
             checkbox.each(function () {
-                let _path = "posts/" + this.value;
+                let _path = "groups/" + this.value;
                 deleteDocumentAtPath(_path);               
             });
-            $("#deletePostModal").modal('hide');
+            $("#deleteGroupModal").modal('hide');
         }
     });
 
-    function deleteAllImagesOnPost(id){        
+    function deleteAllImagesOnGroup(id){        
         //Delete Thumbnail
         
         //let _SelectedDocument = _documents[id];
@@ -236,7 +236,7 @@ $(document).ready(function () {
         deleteFn({ path: path })
             .then(function(result) {
                 console.log('Delete success: ' + JSON.stringify(result));
-                $("#deletePostModal").modal('hide');
+                $("#deleteGroupModal").modal('hide');
             })
             .catch(function(err) {
                 console.log('Delete failed, see console,');
@@ -246,7 +246,7 @@ $(document).ready(function () {
     
 
     // UPDATE EMPLOYEE
-    $(document).on('click', '.js-edit-post', function () {
+    $(document).on('click', '.js-edit-group', function () {
         let id = $(this).attr('id');
         $('#edit-employee-form').attr('edit-id', id);
         db.collection('employees').doc(id).get().then(function (document) {
@@ -276,8 +276,8 @@ $(document).ready(function () {
         $('#editEmployeeModal').modal('hide');
     });
 
-    $("#addPostModal").on('hidden.bs.modal', function () {
-        $('#add-post-form .form-control').val('');
+    $("#addGroupModal").on('hidden.bs.modal', function () {
+        $('#add-group-form .form-control').val('');
     });
 
     $("#editEmployeeModal").on('hidden.bs.modal', function () {
@@ -286,14 +286,14 @@ $(document).ready(function () {
 
     // PAGINATION
     $("#js-previous").on('click', function () {
-        $('#post-table tbody').html('');
+        $('#group-table tbody').html('');
         var previous = db.collection("employees")
             .orderBy(firebase.firestore.FieldPath.documentId(), "desc")
             .startAt(firstVisible)
             .limit(3);
         previous.get().then(function (documentSnapshots) {
             documentSnapshots.docs.forEach(doc => {
-                renderPost(doc);
+                renderGroup(doc);
             });
         });
     });
@@ -302,13 +302,13 @@ $(document).ready(function () {
         if ($(this).closest('.page-item').hasClass('disabled')) {
             return false;
         }
-        $('#post-table tbody').html('');
+        $('#group-table tbody').html('');
         var next = db.collection("employees")
             .startAfter(lastVisible)
             .limit(3);
         next.get().then(function (documentSnapshots) {
             documentSnapshots.docs.forEach(doc => {
-                renderPost(doc);
+                renderGroup(doc);
             });
             lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
             firstVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];

@@ -73,108 +73,108 @@
             }
         };
 
-        var role = getUrlParameter('role');
+        //var role = getUrlParameter('role');
 
-        if (role==undefined) {   
+        //if (role==undefined) {   
 
-            firebase.auth().onAuthStateChanged(function (user) {
+        firebase.auth().onAuthStateChanged(function (user) {
 
-                if (user) {
+            if (user) {
 
-                    console.log(user.email);
+                console.log(user.email);
 
-                    var previous = db.collection("users").where("email", "==", user.email)
-                    .get()
-                    .then(function(querySnapshotUser) {
-                        querySnapshotUser.forEach(function(docUser) {                        
-                            var roleReference =  docUser.data().roleRef;
+                var previous = db.collection("users").where("email", "==", user.email)
+                .get()
+                .then(function(querySnapshotUser) {
+                    querySnapshotUser.forEach(function(docUser) {                        
+                        var roleReference =  docUser.data().roleRef;
 
-                            _user.name = docUser.data().name;
-                            _user.profilePictureURL = docUser.data().profilePictureURL;
+                        _user.name = docUser.data().name;
+                        _user.profilePictureURL = docUser.data().profilePictureURL;
 
-                            downloadImage(_user.profilePictureURL, function(data) {
+                        downloadImage(_user.profilePictureURL, function(data) {
 
-                            });
-
-                            roleReference.get()
-                            .then(function(docPage) {                     
-
-                                var json = docPage.data();  
-                                
-                                let type = typeof json;
-                                
-                                var count = Object.keys(json).length;
-                                var c = 1;
-                                
-                                Object.keys(json).forEach((id) => {
-
-                                    let isNumeric = $.isNumeric(id);
-
-                                    if (isNumeric) {
-
-                                        var reference = json[id];
-
-                                        var promises = [];
-
-                                        promises.push(reference.get());
-                                    
-                                        Promise.all(promises).then(function(responses) {        
-
-                                            for (var i=0; i<responses.length; i++) {                                           
-
-                                                let page = responses[i].data();                                         
-
-                                                var _id   =  page.id;
-                                                var _name =  page.name;
-                                                var _html =  page.html;
-                                                var _js =  page.js;
-                                                var _css  =   page.css; 
-                                                roleWebArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
-                                            }
-
-                                            if (c == (count-1)) {
-                                                _role.roles = roleWebArray;
-                                                renderNavbar(roleWebArray);
-                                            }
-                                            c++;
-                                            
-                                        });        
-
-                                    } else {
-
-                                        _role.desc = json.role;
-
-                                    }                           
-                                });
-                            });                    
                         });
-                    })
-                    .catch(function(error) {
-                        console.log("Error getting documents: ", error);
+
+                        roleReference.get()
+                        .then(function(docPage) {                     
+
+                            var json = docPage.data();  
+                            
+                            let type = typeof json;
+                            
+                            var count = Object.keys(json).length;
+                            var c = 1;
+                            
+                            Object.keys(json).forEach((id) => {
+
+                                let isNumeric = $.isNumeric(id);
+
+                                if (isNumeric) {
+
+                                    var reference = json[id];
+
+                                    var promises = [];
+
+                                    promises.push(reference.get());
+                                
+                                    Promise.all(promises).then(function(responses) {        
+
+                                        for (var i=0; i<responses.length; i++) {                                           
+
+                                            let page = responses[i].data();                                         
+
+                                            var _id   =  page.id;
+                                            var _name =  page.name;
+                                            var _html =  page.html;
+                                            var _js =  page.js;
+                                            var _css  =   page.css; 
+                                            roleWebArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
+                                        }
+
+                                        if (c == (count-1)) {
+                                            _role.roles = roleWebArray;
+                                            renderNavbar(roleWebArray);
+                                        }
+                                        c++;
+                                        
+                                    });        
+
+                                } else {
+
+                                    _role.desc = json.role;
+
+                                }                           
+                            });
+                        });                    
                     });
+                })
+                .catch(function(error) {
+                    console.log("Error getting documents: ", error);
+                });
 
-                } else {
+            } else {
 
-                    homeLoader.hide();
+                homeLoader.hide();
 
-                    $("<link/>", {
-                        rel: "stylesheet",
-                        type: "text/css",
-                        href: "/css/login.css"
-                    }).appendTo("head");
+                $("<link/>", {
+                    rel: "stylesheet",
+                    type: "text/css",
+                    href: "/css/login.css"
+                }).appendTo("head");
 
-                    fetch("../html/content/login.html")
-                    .then(response => {
-                        return response.text();
-                    })
-                    .then(data => {                    
-                        $("#content").html(data);                        
-                        $.getScript("js/login.js");
-                    });                         
-                }
-            });
+                fetch("../html/content/login.html")
+                .then(response => {
+                    return response.text();
+                })
+                .then(data => {                    
+                    $("#content").html(data);                        
+                    $.getScript("js/login.js");
+                });                         
+            }
+        });
                 
-        } 
+        //} 
         
         function renderNavbar (navBar)  {
                       

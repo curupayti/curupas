@@ -42,7 +42,14 @@ $(document).ready(function () {
         } else {
 
 
-            firebase.auth().signInWithEmailAndPassword(inputEmail, inputPassword).catch(function(error) {  
+            firebase.auth().signInWithEmailAndPassword(inputEmail, inputPassword).then(function(user) {
+            
+                // user signed in
+
+                window.location.href = 'index.html';
+             
+            
+            }).catch(function(error) {  
                 
                 //var errorCode = error.code;
                 var errorMessage = error.message;  

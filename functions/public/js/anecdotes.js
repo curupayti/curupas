@@ -8,7 +8,7 @@ $(document).ready(function () {
     let firstVisible;
 
     // REAL TIME LISTENER
-    db.collection('museums').onSnapshot(snapshot => {
+    db.collection('anecdotes').onSnapshot(snapshot => {
         let size = snapshot.size;
         $('.count').text(size);
         if (size == 0) {
@@ -19,17 +19,17 @@ $(document).ready(function () {
         let changes = snapshot.docChanges();
         changes.forEach(change => {
             if (change.type == 'added') {
-                renderMuseum(change.doc);
+                renderAnecdote(change.doc);
             } else if (change.type == 'modified') {
                 $('tr[data-id=' + change.doc.id + ']').remove();
-                renderMuseum(change.doc);
+                renderAnecdote(change.doc);
             } else if (change.type == 'removed') {
                 $('tr[data-id=' + change.doc.id + ']').remove();
             }
         });
     });
 
-    function renderMuseum(document) {  
+    function renderAnecdote(document) {  
         _documents[document.id] = document;      
         let _time = formatDate(Date(document.data().timeStamp));        
         document.ref.collection("images").get().then(function(imagesSnapshot) {
@@ -50,13 +50,13 @@ $(document).ready(function () {
             <td>${_time}</td>  
             <td><a href="#" id="${document.id}" class="js-view-images">${_size}</a></td>        
             <td>
-                <a href="#" id="${document.id}" class="edit js-edit-museum"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
+                <a href="#" id="${document.id}" class="edit js-edit-anecdote"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                 </a>
-                <a href="#" id="${document.id}" class="delete js-delete-museum"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                <a href="#" id="${document.id}" class="delete js-delete-anecdote"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
                 </a>
             </td>
             </tr>`;
-            $('#museum-table').append(item);            
+            $('#anecdote-table').append(item);            
             // Select/Deselect checkboxes
             var checkbox = $('table tbody input[type="checkbox"]');
             $("#selectAll").click(function () {
@@ -100,32 +100,32 @@ $(document).ready(function () {
     }
 
     // ADD EMPLOYEE
-    $("#add-museum-form").submit(function (event) {
+    $("#add-anecdote-form").submit(function (event) {
         event.preventDefault();       
         var title = $('#title').val();
         var description = $('#description').val();
 
-        var storageRef = storage.ref("/museums");        
+        var storageRef = storage.ref("/anecdotes");        
         var file = document.getElementById("imgInp").files[0];       
         var filePath =  title + ".png";        
         var thisRef = storageRef.child(filePath);          
         
-        var museumId;       
+        var anecdoteId;       
         
         $('.lds-dual-ring').css('visibility', 'visible');
 
-        db.collection("museums").add({
+        db.collection("anecdotes").add({
             title: title,
             description: description,
             //author: user.email
         })
         .then(function(docRef) {
-            museumId = docRef.id;            
+            anecdoteId = docRef.id;            
             var metadata = {
                 customMetadata: {
                     'thumbnail': 'true',
                     'type' : '1',
-                    'museumId' : museumId                   
+                    'anecdoteId' : anecdoteId                   
                 }
             }
             return thisRef.put(file, metadata);                    
@@ -135,7 +135,7 @@ $(document).ready(function () {
                 customMetadata: {
                     'thumbnail': 'false'
                     //'type' : '2',
-                    //'museumId' : museumId                   
+                    //'anecdoteId' : anecdoteId                   
                 }
             }
             var prefArray = [];
@@ -144,9 +144,9 @@ $(document).ready(function () {
             var length = input.files.length;
             for (var i = 0; i < length; ++i) {            
                 var _file = input.files.item(i);                                                  
-                var filePathMuseum = title + "_" + i + "_original.png";        
-                const museumRef = storageRef.child(filePathMuseum);
-                const putRef = museumRef.put(_file, metadataFiles);  
+                var filePathAnecdote = title + "_" + i + "_original.png";        
+                const anecdoteRef = storageRef.child(filePathAnecdote);
+                const putRef = anecdoteRef.put(_file, metadataFiles);  
                 prefArray.push(putRef);  
                 putRef.on('state_changed', function(snapshot) {
                     var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -164,9 +164,9 @@ $(document).ready(function () {
                   }, function() {                                        
                     var putRefFromArray = prefArray[j];
                     putRefFromArray.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
-                        db.collection("museums").doc(museumId).collection("images").add({downloadURL});
+                        db.collection("anecdotes").doc(anecdoteId).collection("images").add({downloadURL});
                         if (k==(length-1)){
-                            $('#addMuseumModal').modal('hide');
+                            $('#addAnecdoteModal').modal('hide');
                         }
                         k++;
                     });
@@ -180,31 +180,31 @@ $(document).ready(function () {
         });   
     });
 
-    // DELETE MUSEUM
-    $(document).on('click', '.js-delete-museum', function () {
+    // DELETE ANECDOTE
+    $(document).on('click', '.js-delete-anecdote', function () {
         let id = $(this).attr('id');
-        $('#delete-museum-form').attr('delete-id', id);
-        $('#deleteMuseumModal').modal('show');
+        $('#delete-anecdote-form').attr('delete-id', id);
+        $('#deleteAnecdoteModal').modal('show');
     });
 
-    $("#delete-museum-form").submit(function (event) {
+    $("#delete-anecdote-form").submit(function (event) {
         event.preventDefault();
         let id = $(this).attr('delete-id');        
-        deleteAllImagesOnMuseum(id);
+        deleteAllImagesOnAnecdote(id);
         if (id != undefined) {            
-            let _path = "museums/" + id;
+            let _path = "anecdotes/" + id;
             deleteDocumentAtPath(_path);
         } else {
             let checkbox = $('table tbody input:checked');
             checkbox.each(function () {
-                let _path = "museums/" + this.value;
+                let _path = "anecdotes/" + this.value;
                 deleteDocumentAtPath(_path);               
             });
-            $("#deleteMuseumModal").modal('hide');
+            $("#deleteAnecdoteModal").modal('hide');
         }
     });
 
-    function deleteAllImagesOnMuseum(id){        
+    function deleteAllImagesOnAnecdote(id){        
         //Delete Thumbnail
         
         //let _SelectedDocument = _documents[id];
@@ -236,7 +236,7 @@ $(document).ready(function () {
         deleteFn({ path: path })
             .then(function(result) {
                 console.log('Delete success: ' + JSON.stringify(result));
-                $("#deleteMuseumModal").modal('hide');
+                $("#deleteAnecdoteModal").modal('hide');
             })
             .catch(function(err) {
                 console.log('Delete failed, see console,');
@@ -246,7 +246,7 @@ $(document).ready(function () {
     
 
     // UPDATE EMPLOYEE
-    $(document).on('click', '.js-edit-museum', function () {
+    $(document).on('click', '.js-edit-anecdote', function () {
         let id = $(this).attr('id');
         $('#edit-employee-form').attr('edit-id', id);
         db.collection('employees').doc(id).get().then(function (document) {
@@ -276,8 +276,8 @@ $(document).ready(function () {
         $('#editEmployeeModal').modal('hide');
     });
 
-    $("#addMuseumModal").on('hidden.bs.modal', function () {
-        $('#add-museum-form .form-control').val('');
+    $("#addAnecdoteModal").on('hidden.bs.modal', function () {
+        $('#add-anecdote-form .form-control').val('');
     });
 
     $("#editEmployeeModal").on('hidden.bs.modal', function () {
@@ -286,14 +286,14 @@ $(document).ready(function () {
 
     // PAGINATION
     $("#js-previous").on('click', function () {
-        $('#museum-table tbody').html('');
+        $('#anecdote-table tbody').html('');
         var previous = db.collection("employees")
             .orderBy(firebase.firestore.FieldPath.documentId(), "desc")
             .startAt(firstVisible)
             .limit(3);
         previous.get().then(function (documentSnapshots) {
             documentSnapshots.docs.forEach(doc => {
-                renderMuseum(doc);
+                renderAnecdote(doc);
             });
         });
     });
@@ -302,13 +302,13 @@ $(document).ready(function () {
         if ($(this).closest('.page-item').hasClass('disabled')) {
             return false;
         }
-        $('#museum-table tbody').html('');
+        $('#anecdote-table tbody').html('');
         var next = db.collection("employees")
             .startAfter(lastVisible)
             .limit(3);
         next.get().then(function (documentSnapshots) {
             documentSnapshots.docs.forEach(doc => {
-                renderMuseum(doc);
+                renderAnecdote(doc);
             });
             lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
             firstVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
@@ -385,7 +385,7 @@ $(document).ready(function () {
     }
 
 
-    //# sourceURL=museum.js 
+    //# sourceURL=anecdote.js 
 
 });
 
