@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onboarding_flow/business/auth.dart';
 import 'package:onboarding_flow/business/validator.dart';
 import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
 import 'package:onboarding_flow/ui/widgets/custom_text_field.dart';
@@ -20,9 +21,15 @@ class _SMSDialogState extends State<SMSDialog> {
   bool _isNewGroupVisible = true;
   SharedPreferences prefs;
 
+  int smsCode;
+
   @override
   void initState() {
     super.initState();
+
+    Auth.getUserDataForSMS("Pf64W2FdPmOONv5dIefw9lmFmVY2").then((code) {
+        smsCode = code;
+    });
 
     _smsGroupField = new CustomTextField(
       baseColor: Colors.grey,
@@ -81,7 +88,7 @@ class _SMSDialogState extends State<SMSDialog> {
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-      title: Text('Confirmación de numero',
+      title: Text('Confimá número',
           style: TextStyle(
               color: Colors.blue, fontSize: ScreenUtil().setSp(40.0))),
       content: new Column(
@@ -89,12 +96,13 @@ class _SMSDialogState extends State<SMSDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.only(top: 20.0, left: 50.0, right: 50.0),
+            padding: EdgeInsets.only(top: 20.0, left: 10.0, right: 10.0),
             child: Visibility(
               visible: _isNewGroupVisible,
               child: _smsGroupField,
             ),
           ),
+          Spacer(),
           _buildAboutText(),
         ],
       ),

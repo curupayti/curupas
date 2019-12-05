@@ -10,6 +10,8 @@ import 'package:onboarding_flow/ui/widgets/custom_alert_dialog.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:onboarding_flow/models/user.dart';
 
+import 'dialogs/sms_dialog.dart';
+
 class SignInScreen extends StatefulWidget {
   _SignInScreenState createState() => _SignInScreenState();
 }
@@ -60,7 +62,7 @@ class _SignInScreenState extends State<SignInScreen> {
       } else {
         removeOverlay();
       }
-    });*/
+    });*/   
 
     onBackPress = () {
       Navigator.of(context).pop();
@@ -189,7 +191,13 @@ class _SignInScreenState extends State<SignInScreen> {
                         fontWeight: FontWeight.w700,
                         textColor: Colors.white,
                         onPressed: () {
-                          _facebookLogin(context: context);
+                          //_facebookLogin(context: context);
+                           showDialog(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  //_buildSendSMSDialog(context),
+                                  new SMSDialog(),
+                            );
                         },
                         splashColor: Colors.black12,
                         borderColor: Color.fromRGBO(59, 89, 152, 1.0),

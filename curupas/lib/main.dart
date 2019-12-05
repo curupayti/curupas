@@ -57,7 +57,7 @@ class CurupaApp extends StatelessWidget {
 
   Widget _handleCurrentScreen() {
     bool seen = (prefs.getBool('seen') ?? false);
-    bool registered = true; //(prefs.getBool('registered') ?? false);
+    bool registered = (prefs.getBool('registered') ?? false);
     bool group = (prefs.getBool('group') ?? false);
     if (seen) {
       if (registered) {

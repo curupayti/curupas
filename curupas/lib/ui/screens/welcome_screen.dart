@@ -57,8 +57,7 @@ class WelcomeScreen extends StatelessWidget {
               fontWeight: FontWeight.w700,
               textColor: Colors.white,
               onPressed: () {
-                //Navigator.of(context).pushNamed("/signin");
-                new SMSDialog();
+                Navigator.of(context).pushNamed("/signin");                
               },
               splashColor: Colors.black12,
               borderColor: Color.fromRGBO(173, 163, 1, 1.0),

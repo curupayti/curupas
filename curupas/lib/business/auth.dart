@@ -35,16 +35,7 @@ class Auth {
   static Future<ResutlLogin> signIn(String email, String password) async {
     AuthResult authResult;
     String errorEsp;
-    /*try {
-      authResult = await _auth.signInWithEmailAndPassword(
-        email: email, password: password);
-    } on Exception catch (exception) {
-      print(exception.toString());
-    }
-    String uid = authResult.user.uid;
-    setUserFrefs(uid);
-    return uid;*/
-    try {
+       try {
       authResult = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -220,7 +211,7 @@ class Auth {
     });
   }
 
-  static Stream<User> getUser(String userID, String year, String name) {
+  static Stream<User> getUser(String userID) {
     return Firestore.instance
         .collection("users")
         .where("userID", isEqualTo: userID)
@@ -231,6 +222,16 @@ class Auth {
         return User.fromDocument(doc);
       }).first;
     });
+  }
+
+  static Future<int> getUserDataForSMS(String userID) async {
+      DocumentReference document = await Firestore.instance.collection("users").document("${userID}");
+      return await document.get().then((snapshot) async {
+        if (snapshot.exists) {
+          int smsCode = snapshot.data["smsCode"];
+          return smsCode;
+        }
+      });      
   }
 
   static Future<DocumentReference> getUserDocumentReference(

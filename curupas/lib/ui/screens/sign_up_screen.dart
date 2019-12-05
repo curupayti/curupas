@@ -619,8 +619,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) =>
-                      //_buildSendSMSDialog(context),
-                      new SMSDialog(),
+                      //_buildSendSMSDialog(context),                                                             
+                      SMSDialog(),
+                    
                 );
               }
             }

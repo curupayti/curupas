@@ -78,11 +78,11 @@ class _GroupScreenState extends State<GroupScreen> {
 
     _loadingInProgress = true;
 
-    getUserDataForSMS().then((user) {
+    /*getUserDataForSMS().then((user) {
       if (!user.smsChecked) {
         new SMSDialog();
       }
-    });
+    });*/
 
     _flutterTapRecognizer = new TapGestureRecognizer()
       ..onTap = () => _openUrl(curupasUrl);
@@ -130,13 +130,13 @@ class _GroupScreenState extends State<GroupScreen> {
     };
   }
 
-  Future<User> getUserDataForSMS() async {
+  /*Future<User> getUserDataForSMS() async {
     prefs = await SharedPreferences.getInstance();
     String userId = prefs.getString('userId');
     await _globals.getUserData(userId).then((user) {
       return user;
     });
-  }
+  }*/
 
   Future<List<String>> getUserIdAndYear() async {
     prefs = await SharedPreferences.getInstance();
