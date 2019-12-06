@@ -12,7 +12,7 @@ import 'package:onboarding_flow/models/description.dart';
 import 'package:onboarding_flow/models/feeds.dart';
 import 'package:onboarding_flow/models/group.dart';
 import 'package:onboarding_flow/models/user.dart';
-import 'package:onboarding_flow/ui/widgets/custom_alert_dialog.dart';
+import 'package:onboarding_flow/ui/screens/widgets/alert_dialog.dart';
 import 'package:youtube_api/youtube_api.dart';
 import 'package:file_picker/file_picker.dart';
 import 'business/auth.dart';

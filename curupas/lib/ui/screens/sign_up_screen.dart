@@ -10,19 +10,17 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:onboarding_flow/business/auth.dart';
-import "package:onboarding_flow/ui/widgets/custom_text_field.dart";
 import 'package:onboarding_flow/business/validator.dart';
 import 'package:flutter/services.dart';
 import 'package:onboarding_flow/models/user.dart';
-import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
-import 'package:onboarding_flow/ui/widgets/custom_alert_dialog.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:onboarding_flow/ui/screens/widgets/alert_sms_dialog.dart';
+import 'package:onboarding_flow/ui/screens/widgets/flat_button.dart';
+import 'package:onboarding_flow/ui/screens/widgets/text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:location/location.dart';
-
-import 'dialogs/sms_dialog.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -619,9 +617,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) =>
-                      //_buildSendSMSDialog(context),                                                             
+                      //_buildSendSMSDialog(context),
                       SMSDialog(),
-                    
                 );
               }
             }

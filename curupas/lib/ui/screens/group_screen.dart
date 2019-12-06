@@ -15,14 +15,12 @@ import 'package:onboarding_flow/business/auth.dart';
 import 'package:onboarding_flow/business/validator.dart';
 import 'package:onboarding_flow/models/group.dart';
 import 'package:onboarding_flow/models/user.dart';
-import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
-import "package:onboarding_flow/ui/widgets/custom_text_field.dart";
 import 'package:onboarding_flow/globals.dart' as _globals;
+import 'package:onboarding_flow/ui/screens/widgets/flat_button.dart';
+import 'package:onboarding_flow/ui/screens/widgets/text_field.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'dialogs/sms_dialog.dart';
 
 class GroupScreen extends StatefulWidget {
   @override
@@ -78,12 +76,6 @@ class _GroupScreenState extends State<GroupScreen> {
 
     _loadingInProgress = true;
 
-    /*getUserDataForSMS().then((user) {
-      if (!user.smsChecked) {
-        new SMSDialog();
-      }
-    });*/
-
     _flutterTapRecognizer = new TapGestureRecognizer()
       ..onTap = () => _openUrl(curupasUrl);
 
@@ -129,14 +121,6 @@ class _GroupScreenState extends State<GroupScreen> {
       Navigator.of(context).pop();
     };
   }
-
-  /*Future<User> getUserDataForSMS() async {
-    prefs = await SharedPreferences.getInstance();
-    String userId = prefs.getString('userId');
-    await _globals.getUserData(userId).then((user) {
-      return user;
-    });
-  }*/
 
   Future<List<String>> getUserIdAndYear() async {
     prefs = await SharedPreferences.getInstance();

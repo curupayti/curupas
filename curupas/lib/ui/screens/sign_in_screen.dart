@@ -1,16 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import "package:onboarding_flow/ui/widgets/custom_text_field.dart";
 import 'package:onboarding_flow/business/auth.dart';
 import 'package:onboarding_flow/business/validator.dart';
 import 'package:flutter/services.dart';
-import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
-import 'package:onboarding_flow/ui/widgets/custom_alert_dialog.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
 import 'package:onboarding_flow/models/user.dart';
-
-import 'dialogs/sms_dialog.dart';
+import 'package:onboarding_flow/ui/screens/widgets/alert_sms_dialog.dart';
+import 'package:onboarding_flow/ui/screens/widgets/flat_button.dart';
+import 'package:onboarding_flow/ui/screens/widgets/text_field.dart';
 
 class SignInScreen extends StatefulWidget {
   _SignInScreenState createState() => _SignInScreenState();
@@ -62,7 +60,7 @@ class _SignInScreenState extends State<SignInScreen> {
       } else {
         removeOverlay();
       }
-    });*/   
+    });*/
 
     onBackPress = () {
       Navigator.of(context).pop();
@@ -192,12 +190,12 @@ class _SignInScreenState extends State<SignInScreen> {
                         textColor: Colors.white,
                         onPressed: () {
                           //_facebookLogin(context: context);
-                           showDialog(
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  //_buildSendSMSDialog(context),
-                                  new SMSDialog(),
-                            );
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) =>
+                                //_buildSendSMSDialog(context),
+                                new SMSDialog(),
+                          );
                         },
                         splashColor: Colors.black12,
                         borderColor: Color.fromRGBO(59, 89, 152, 1.0),

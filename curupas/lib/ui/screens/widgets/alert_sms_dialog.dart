@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onboarding_flow/business/auth.dart';
 import 'package:onboarding_flow/business/validator.dart';
-import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
-import 'package:onboarding_flow/ui/widgets/custom_text_field.dart';
+import 'package:onboarding_flow/ui/screens/widgets/text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
+
+import 'flat_button.dart';
 
 class SMSDialog extends StatefulWidget {
   @override
@@ -16,7 +18,13 @@ class _SMSDialogState extends State<SMSDialog> {
   final TextEditingController _smsGroup = new TextEditingController();
   CustomTextField _smsGroupField;
   FocusNode phoneNumberFocusNodeGroup = new FocusNode();
-  CustomFlatButton _saveSMSButton;
+  CustomFlatButton _resendSMSButton;
+
+  TextSpan _messageText;
+  String _messageToShow;
+  TextStyle _messageStyle;
+  //bool _messageVisibility = true;
+  //bool _descriptionVisibility = true;
 
   bool _isNewGroupVisible = true;
   SharedPreferences prefs;
@@ -28,8 +36,30 @@ class _SMSDialogState extends State<SMSDialog> {
     super.initState();
 
     Auth.getUserDataForSMS("Pf64W2FdPmOONv5dIefw9lmFmVY2").then((code) {
-        smsCode = code;
+      smsCode = code;
     });
+
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (bool visible) {
+        setState(() {
+          if (visible) {
+            //_messageVisibility = false;
+            //_descriptionVisibility = true;
+          } else {
+            //_messageVisibility = true;
+            //_descriptionVisibility = false;
+          }
+        });
+      },
+    );
+
+    _messageStyle =
+        TextStyle(color: Colors.green, fontSize: ScreenUtil().setSp(50.0));
+
+    _messageText = new TextSpan(
+      text: "Ingresa numeros del sms",
+      style: _messageStyle,
+    );
 
     _smsGroupField = new CustomTextField(
       baseColor: Colors.grey,
@@ -47,6 +77,22 @@ class _SMSDialogState extends State<SMSDialog> {
       inputType: TextInputType.number,
       validator: Validator.validateShortNumber,
       focusNode: phoneNumberFocusNodeGroup,
+      onChanged: (int code) {
+        if (code.toString().length != null) {
+          setState(() {
+            //_messageVisibility = true;
+            if (code == smsCode) {
+              _messageToShow = "Validación correcta";
+              _messageStyle = TextStyle(
+                  color: Colors.green, fontSize: ScreenUtil().setSp(50.0));
+            } else {
+              _messageToShow = "Validación incorrecta";
+              _messageStyle = TextStyle(
+                  color: Colors.red, fontSize: ScreenUtil().setSp(50.0));
+            }
+          });
+        }
+      },
     );
 
     _setButtonEnabled(false);
@@ -63,8 +109,8 @@ class _SMSDialogState extends State<SMSDialog> {
       borderColor = Colors.black54;
       textColor = Colors.black26;
     }
-    _saveSMSButton = CustomFlatButton(
-      title: "Guardar Camada",
+    _resendSMSButton = CustomFlatButton(
+      title: "Reenviar codigo",
       enabled: enabled,
       fontSize: 22,
       fontWeight: FontWeight.w700,
@@ -88,22 +134,27 @@ class _SMSDialogState extends State<SMSDialog> {
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-      title: Text('Confimá número',
+      title: Text('Confimá código',
           style: TextStyle(
-              color: Colors.blue, fontSize: ScreenUtil().setSp(40.0))),
+              color: Colors.blue, fontSize: ScreenUtil().setSp(50.0))),
       content: new Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.only(top: 20.0, left: 10.0, right: 10.0),
-            child: Visibility(
-              visible: _isNewGroupVisible,
-              child: _smsGroupField,
+            padding: const EdgeInsets.only(top: 10.0),
+            child: new RichText(
+              text: _messageText,
             ),
           ),
-          Spacer(),
-          _buildAboutText(),
+          Padding(
+            padding: EdgeInsets.only(top: 20.0),
+            child: _smsGroupField,
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 30.0),
+            child: _resendSMSButton,
+          ),
         ],
       ),
       actions: <Widget>[
@@ -125,23 +176,23 @@ class _SMSDialogState extends State<SMSDialog> {
     );
   }
 
-  Widget _buildAboutText() {
-    return new RichText(
-      text: new TextSpan(
-        text:
-            'Un mensaje SMS se ha sido enviado con un ccodigo que debes ingresar en la próxima pantalla.\n\n',
-        style: TextStyle(
-            color: Colors.black87, fontSize: ScreenUtil().setSp(30.0)),
-        children: <TextSpan>[
-          new TextSpan(
-              text:
-                  'Si no lo recibiste por favor ponete en contacto con el referente de tu camada.',
+  /*Widget _buildDescriptionText() {
+    return Visibility(
+      visible: _descriptionVisibility,
+      child: Column(children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 10.0),
+          child: new RichText(
+            text: new TextSpan(
+              text: 'Ingresa el codigo del SMS.\n\n',
               style: TextStyle(
-                  color: Colors.black87, fontSize: ScreenUtil().setSp(30.0))),
-        ],
-      ),
+                  color: Colors.black87, fontSize: ScreenUtil().setSp(50.0)),
+            ),
+          ),
+        ),
+      ]),
     );
-  }
+  }*/
 
   void _saveGroup(BuildContext context) async {}
 }

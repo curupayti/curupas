@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:notifier/notifier_provider.dart';
-import 'package:onboarding_flow/ui/screens/dialogs/sms_dialog.dart';
 import 'package:onboarding_flow/ui/screens/feed/feed_swiper_screen.dart';
 import 'package:onboarding_flow/ui/screens/group_screen.dart';
 import 'package:onboarding_flow/ui/screens/main_screen.dart';

@@ -5,7 +5,8 @@ import 'package:onboarding_flow/business/auth.dart';
 import 'package:onboarding_flow/models/user.dart';
 import "package:onboarding_flow/models/walkthrough.dart";
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:onboarding_flow/ui/widgets/custom_flat_button.dart';
+
+import 'widgets/flat_button.dart';
 
 class WalkthroughScreen extends StatefulWidget {
   final SharedPreferences prefs;

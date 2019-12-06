@@ -48,6 +48,7 @@ dependencies:
   location: ^2.3.5
   geolocator: ^5.1.4+2
   cloud_functions: ^0.4.1+4
+
   #geoflutterfire: ^2.0.3+5
   #geoflutterfire:
   #git: https://github.com/felipecesar42/GeoFlutterFire.git
