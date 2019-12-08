@@ -238,6 +238,10 @@ Future<int> generateRandom() {
   return Future.value(resutl);
 }
 
+String getCodeMessgae(int code) {
+  return "Código de verificación: ${code}";
+}
+
 void sendUserSMSVerification(
     String phone, String message, String userId, int smsCode) async {
   try {
@@ -255,10 +259,4 @@ void sendUserSMSVerification(
     print('caught generic exception');
     print(e);
   }
-  /*on CloudFunctionsException catch (e) {
-      print('caught firebase functions exception');
-      print(e.code);
-      print(e.message);
-      print(e.details);
-    }*/
 }

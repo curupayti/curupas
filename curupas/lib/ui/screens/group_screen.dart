@@ -307,7 +307,7 @@ class _GroupScreenState extends State<GroupScreen> {
                           children: <Widget>[
                             new Text("Selecciona tu camada",
                                 style: TextStyle(
-                                    fontSize: 40.0, color: Colors.grey),
+                                    fontSize: 25.0, color: Colors.grey),
                                 textAlign: TextAlign.center),
                             new Container(
                               padding: new EdgeInsets.only(top: 20.0),
@@ -487,28 +487,6 @@ class _GroupScreenState extends State<GroupScreen> {
     String email = prefs.getString('email');
     String fullname = prefs.getString('fullname');
     String birthday = prefs.getString('birthday');
-
-    /*List<int> userType = new List<int>(2);
-    User user = new User(
-        userID: userId,
-        phone: phone,
-        email: email,
-        name: fullname,
-        birthday: birthday,
-        group: _currentGroup,
-        yearRef: yearRef,
-        locationData: _locationData,
-        nonSpName: toNonSpecial,
-        type: userType);
-    bool added = await Auth.addUser(user, year);*/
-
-    /*userID: uID,
-                  phone: phone,
-                  email: email,
-                  name: fullname,
-                  birthday: birthday,
-                  nonSpName: toNonSpecial,
-                  type: userType)*/
 
     Map<String, dynamic> data = new Map<String, dynamic>();
     data["group"] = _currentGroup;

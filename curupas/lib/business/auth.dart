@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onboarding_flow/models/description.dart';
 import 'package:onboarding_flow/models/feeds.dart';
 import 'package:onboarding_flow/models/group.dart';
+import 'package:onboarding_flow/models/sms.dart';
 import 'package:onboarding_flow/models/user.dart';
 import 'package:flutter/services.dart';
 import 'package:onboarding_flow/globals.dart' as _globals;
@@ -35,7 +36,7 @@ class Auth {
   static Future<ResutlLogin> signIn(String email, String password) async {
     AuthResult authResult;
     String errorEsp;
-       try {
+    try {
       authResult = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -153,7 +154,7 @@ class Auth {
 
   static Future<User> updateUser(
       String userId, Map<String, dynamic> data) async {
-    Firestore.instance.document("users/${userId}").setData(data);
+    Firestore.instance.collection("users").document("${userId}").setData(data);
     await _globals.getUserData(userId).then((user) {
       return user;
     });
@@ -224,14 +225,20 @@ class Auth {
     });
   }
 
-  static Future<int> getUserDataForSMS(String userID) async {
-      DocumentReference document = await Firestore.instance.collection("users").document("${userID}");
-      return await document.get().then((snapshot) async {
-        if (snapshot.exists) {
-          int smsCode = snapshot.data["smsCode"];
-          return smsCode;
-        }
-      });      
+  static Future<SMS> getUserDataForSMS(String userID) async {
+    DocumentReference document =
+        await Firestore.instance.collection("users").document("${userID}");
+    return await document.get().then((snapshot) async {
+      if (snapshot.exists) {
+        SMS sms = new SMS();
+        sms.smsCode = snapshot.data["smsCode"];
+        sms.smsId = snapshot.data["smsId"];
+        sms.smsChecked = snapshot.data["smsChecked"];
+        sms.phone = snapshot.data["phone"];
+        sms.userId = snapshot.data["userId"];
+        return sms;
+      }
+    });
   }
 
   static Future<DocumentReference> getUserDocumentReference(

@@ -192,9 +192,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           //_facebookLogin(context: context);
                           showDialog(
                             context: context,
-                            builder: (BuildContext context) =>
-                                //_buildSendSMSDialog(context),
-                                new SMSDialog(),
+                            builder: (BuildContext context) => new SMSDialog(),
                           );
                         },
                         splashColor: Colors.black12,

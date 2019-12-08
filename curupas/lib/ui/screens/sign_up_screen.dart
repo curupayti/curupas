@@ -573,12 +573,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               prefs.setString('userId', uID);
               prefs.setString('_imagePath', _imagePath);
 
-              //prefs.setString('phone', phone);
-              //prefs.setString('email', email);
-              //prefs.setString('fullname', fullname);
-              //prefs.setString('birthday', birthday);
-              //prefs.setString('toNonSpecial', toNonSpecial);
-
               int code = await _globals.generateRandom();
 
               Map<String, dynamic> data = new Map<String, dynamic>();
@@ -601,7 +595,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   approved: false,
                   locationData: _locationData);
 
-              var message = "Código de verificación: ${code}";
+              var message = _globals.getCodeMessgae(code);
 
               bool added = await Auth.addUser(user);
               if (added) {
@@ -616,9 +610,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 });
                 showDialog(
                   context: context,
-                  builder: (BuildContext context) =>
-                      //_buildSendSMSDialog(context),
-                      SMSDialog(),
+                  builder: (BuildContext context) => new SMSDialog(userId: uID),
                 );
               }
             }
