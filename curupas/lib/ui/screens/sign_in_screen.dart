@@ -189,11 +189,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         fontWeight: FontWeight.w700,
                         textColor: Colors.white,
                         onPressed: () {
-                          //_facebookLogin(context: context);
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) => new SMSDialog(),
-                          );
+                          _facebookLogin(context: context);
                         },
                         splashColor: Colors.black12,
                         borderColor: Color.fromRGBO(59, 89, 152, 1.0),
@@ -245,7 +241,6 @@ class _SignInScreenState extends State<SignInScreen> {
       {String email, String password, BuildContext context}) async {
     if (Validator.validateEmail(email) &&
         Validator.validatePassword(password)) {
-      //try {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
       _changeBlackVisible();
       await Auth.signIn(email, password).then((ResutlLogin resutl) {
@@ -260,20 +255,9 @@ class _SignInScreenState extends State<SignInScreen> {
         } else {
           String uid = resutl.result;
           Auth.setUserFrefs(uid);
-          //Navigator.of(context).pop();
           Navigator.of(context).pushNamed("/main");
         }
       });
-      /*} catch (e) {
-        print("Error in email sign in: $e");
-        String exception = Auth.getExceptionText(e);
-        _globals.showErrorAlert(
-          context: context,
-          title: "Login failed",
-          content: exception,
-          onPressed: _changeBlackVisible,
-        );
-      }*/
     }
   }
 

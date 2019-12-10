@@ -86,14 +86,16 @@ class _MainScreenState extends State<MainScreen> {
         _globals.setFilePickerGlobal();
         String userId = prefs.getString('userId');
         _globals.getUserData(userId).then((user) {
-          if (!user.approved) {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) =>
-                  _buildNotApprovedDialog(context),
-            );
-          } else {
-            getDescription();
+          if (!user.smsChecked) {
+            if (!user.approved) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) =>
+                    _buildNotApprovedDialog(context),
+              );
+            } else {
+              getDescription();
+            }
           }
         });
       }

@@ -187,7 +187,8 @@ class _GroupScreenState extends State<GroupScreen> {
     for (var doc in querySnapshot.documents) {
       String year = doc['year'];
       String documentID = doc.documentID;
-      _groups.add(new Group(year: year, documentID: documentID));
+      _groups.add(new Group(
+          year: year, documentID: documentID, yearRef: doc.reference));
       items.add(new DropdownMenuItem(value: documentID, child: new Text(year)));
     }
     print(items.length);
@@ -488,9 +489,10 @@ class _GroupScreenState extends State<GroupScreen> {
     String fullname = prefs.getString('fullname');
     String birthday = prefs.getString('birthday');
 
-    Map<String, dynamic> data = new Map<String, dynamic>();
-    data["group"] = _currentGroup;
-    data["yearRef"] = yearRef;
+    Map<String, dynamic> data = <String, dynamic>{
+      'year': _currentGroup.year,
+      'yearRef': yearRef
+    };
 
     Auth.updateUser(userId, data).then((user) async {
       if (user != null) {

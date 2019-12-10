@@ -189,29 +189,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }
       }
     });
+
+    setState(() {
+      _fullname.text = "Jose Vigil";
+      _number.text = "1169776624";
+      _birthday.text = "30/09/1973";
+      _email.text = "josemanuelvigil@gmail.com";
+    });
   }
-
-  /*void runRandom() async {
-    int rand = await _globals.generateRandom();
-    print(rand);
-  }*/
-
-  /*void testUser() async {
-    User user = new User(
-        userID: "",
-        phone: "",
-        email: "",
-        name: "JoseVigil",
-        birthday: "",
-        group: null,
-        yearRef: null,
-        locationData: null,
-        profilePictureURL: "",
-        nonSpName: "",
-        approved: false);
-    bool added = await Auth.addUser(user, "1973");
-    print(added);
-  }*/
 
   void _getLocaton() async {
     try {
@@ -572,6 +557,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SharedPreferences prefs = await SharedPreferences.getInstance();
               prefs.setString('userId', uID);
               prefs.setString('_imagePath', _imagePath);
+              prefs.setString('toNonSpecial', toNonSpecial);
 
               int code = await _globals.generateRandom();
 

@@ -33,15 +33,13 @@ class _SMSDialogState extends State<SMSDialog> {
   String _messageToShow;
   TextStyle _messageStyle;
   bool validated = false;
-  bool _resendVisibility = true;
+  bool _resendVisibility = false;
 
   bool _isNewGroupVisible = true;
-  bool _nextVisible = true;
+
   SharedPreferences prefs;
 
   SMS sms;
-
-  CustomFlatButton _nextButton;
 
   int countFails = 0;
 
@@ -62,15 +60,11 @@ class _SMSDialogState extends State<SMSDialog> {
         setState(() {
           if (visible) {
             _resendVisibility = false;
-            _nextVisible = false;
           } else {
             Duration d = new Duration();
             sleep(new Duration(seconds: 2));
-            if (validated) {
-              _nextVisible = true;
-            } else {
+            if (!validated) {
               _messageToShow = _messageInit;
-              _resendVisibility = true;
             }
             _messageStyle = TextStyle(
                 color: Colors.green, fontSize: ScreenUtil().setSp(50.0));
@@ -113,9 +107,12 @@ class _SMSDialogState extends State<SMSDialog> {
                   color: Colors.green, fontSize: ScreenUtil().setSp(50.0));
               initMessage();
               validated = true;
-              _resendButtonEnabled(false);
-              _setNextButtonEnabled(true);
               FocusScope.of(context).requestFocus(FocusNode());
+              prefs.setBool('smsvalidated', true);
+              Map<String, dynamic> data = <String, dynamic>{'smsChecked': true};
+              Auth.updateUser(sms.userId, data).then((user) async {
+                Navigator.of(context).pushNamed("/group");
+              });
             } else {
               _messageToShow = "Incorrecto";
               _messageStyle = TextStyle(
@@ -123,10 +120,10 @@ class _SMSDialogState extends State<SMSDialog> {
               initMessage();
               validated = false;
               if (countFails == 2) {
+                _resendVisibility = true;
                 _resendButtonEnabled(true);
                 _smsGroup.text = sms.phone;
               }
-              _setNextButtonEnabled(false);
               _smsGroup.clear();
               countFails++;
               FocusScope.of(context).requestFocus(FocusNode());
@@ -142,7 +139,7 @@ class _SMSDialogState extends State<SMSDialog> {
     );
 
     _resendButtonEnabled(false);
-    _setNextButtonEnabled(false);
+    //_setNextButtonEnabled(false);
 
     getPrefs();
   }
@@ -151,7 +148,7 @@ class _SMSDialogState extends State<SMSDialog> {
     prefs = await SharedPreferences.getInstance();
   }
 
-  void _setNextButtonEnabled(bool enabled) {
+  /*void _setNextButtonEnabled(bool enabled) {
     Color color, borderColor, textColor;
     if (enabled) {
       color = Color.fromRGBO(59, 89, 152, 1.0);
@@ -177,7 +174,7 @@ class _SMSDialogState extends State<SMSDialog> {
       borderWidth: 0,
       color: color,
     );
-  }
+  }*/
 
   void initMessage() {
     _messageText = new TextSpan(
@@ -222,35 +219,35 @@ class _SMSDialogState extends State<SMSDialog> {
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-      title: Text('Código SMS',
-          style: TextStyle(
-              color: Colors.blue, fontSize: ScreenUtil().setSp(50.0))),
-      content: new Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(top: 5.0),
-            child: new RichText(
-              text: _messageText,
+        title: Text('Código SMS',
+            style: TextStyle(
+                color: Colors.blue, fontSize: ScreenUtil().setSp(50.0))),
+        content: new Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 5.0),
+              child: new RichText(
+                text: _messageText,
+              ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 20.0),
-            child: _smsTextField,
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 30.0),
-            child: Visibility(
-              visible: _resendVisibility,
-              child: _resendSMSButton,
+            Padding(
+              padding: EdgeInsets.only(top: 20.0),
+              child: _smsTextField,
             ),
-          ),
-        ],
-      ),
-      actions: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(top: 30.0),
+              child: Visibility(
+                visible: _resendVisibility,
+                child: _resendSMSButton,
+              ),
+            ),
+          ],
+        ));
+    /*actions: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(
+          padding: const EdgeInsets,only(
               top: 5.0, right: 15.0, left: 15.0, bottom: 5.0),
           child: Visibility(
             visible: _nextVisible,
@@ -258,7 +255,7 @@ class _SMSDialogState extends State<SMSDialog> {
           ),
         ),
       ],
-    );
+    );*/
   }
 
   void _reSendSMS() async {

@@ -239,7 +239,14 @@ Future<int> generateRandom() {
 }
 
 String getCodeMessgae(int code) {
-  return "Código de verificación: ${code}";
+  String allcode = "Curupas ${code} - http://noti.ms";
+  /*String allcode;
+  allcode = "| Curupas |\r\n";
+  allcode += "|  ${code}  |\r\n";
+  allcode += "| noti.ms |";
+  int length = allcode.length;*/
+  print(allcode);
+  return allcode;
 }
 
 void sendUserSMSVerification(
@@ -254,7 +261,7 @@ void sendUserSMSVerification(
       "userId": userId,
       "smsCode": smsCode
     });
-    print(resp);
+    print(resp.toString());
   } catch (e) {
     print('caught generic exception');
     print(e);

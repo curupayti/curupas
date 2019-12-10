@@ -56,7 +56,7 @@ class User {
       'thumbnailPictureURL': thumbnailPictureURL,
       'yearRef': yearRef,
       'location': geo,
-      'group': year,
+      'year': year,
       'nonSpName': nonSpName,
       'approved': approved,
       'roleRef': roleRef,
@@ -64,24 +64,6 @@ class User {
       'smsId': smsId,
       'smsChecked': smsChecked,
     };
-    /*return {
-      'userID': userID,
-      'name': name,
-      'phone': phone,
-      'birthday': birthday,
-      'email': email == null ? '' : email,
-      'profilePictureURL': profilePictureURL,
-      'thumbnailPictureURL': thumbnailPictureURL,
-      'yearRef': yearRef == null ? '' : yearRef,
-      'location': geo == null ? '' : geo,
-      'group': year,
-      'nonSpName': nonSpName,
-      'approved': approved,
-      'type': type,
-      'smsCode': smsCode,
-      'smsId': smsId,
-      'smsChecked': smsChecked,
-    };*/
   }
 
   factory User.fromJson(Map<String, Object> doc) {

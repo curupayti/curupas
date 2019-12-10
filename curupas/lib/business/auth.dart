@@ -154,11 +154,11 @@ class Auth {
 
   static Future<User> updateUser(
       String userId, Map<String, dynamic> data) async {
-    Firestore.instance.collection("users").document("${userId}").setData(data);
-    await _globals.getUserData(userId).then((user) {
-      return user;
-    });
-    return null;
+    Firestore.instance
+        .collection("users")
+        .document("${userId}")
+        .updateData(data);
+    return await _globals.getUserData(userId);
   }
 
   static Future<DocumentReference> getRoleGroupReference() async {
@@ -235,7 +235,7 @@ class Auth {
         sms.smsId = snapshot.data["smsId"];
         sms.smsChecked = snapshot.data["smsChecked"];
         sms.phone = snapshot.data["phone"];
-        sms.userId = snapshot.data["userId"];
+        sms.userId = snapshot.documentID;
         return sms;
       }
     });
