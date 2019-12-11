@@ -40,6 +40,7 @@
         var _role = {};
 
         var roleWebArray = [];
+        var promisesRoles = [];
 
         var homeLoader = $('body').loadingIndicator({ useImage: false,}).data("loadingIndicator");
 
@@ -90,11 +91,8 @@
                         var roleReference =  docUser.data().roleRef;
 
                         _user.name = docUser.data().name;
-                        _user.profilePictureURL = docUser.data().profilePictureURL;
-
-                        downloadImage(_user.profilePictureURL, function(data) {
-
-                        });
+                        _user.profilePictureURL = docUser.data().profilePictureURL;            
+                        
 
                         roleReference.get()
                         .then(function(docPage) {                     
@@ -104,6 +102,7 @@
                             let type = typeof json;
                             
                             var count = Object.keys(json).length;
+                            var a = 1;
                             var c = 1;
                             
                             Object.keys(json).forEach((id) => {
@@ -112,33 +111,40 @@
 
                                 if (isNumeric) {
 
-                                    var reference = json[id];
+                                    var reference = json[id];                                    
 
-                                    var promises = [];
+                                    promisesRoles.push(reference.get());
 
-                                    promises.push(reference.get());
-                                
-                                    Promise.all(promises).then(function(responses) {        
+                                    if (a == (count-1)) {
 
-                                        for (var i=0; i<responses.length; i++) {                                           
+                                        Promise.all(promisesRoles).then(function(responses) {  
+                                            
+                                            let length = responses.length;
 
-                                            let page = responses[i].data();                                         
+                                            for (var i=0; i<length; i++) {                                           
 
-                                            var _id   =  page.id;
-                                            var _name =  page.name;
-                                            var _html =  page.html;
-                                            var _js =  page.js;
-                                            var _css  =   page.css; 
-                                            roleWebArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
-                                        }
+                                                let pageResponse = responses[i];
 
-                                        if (c == (count-1)) {
-                                            _role.roles = roleWebArray;
-                                            renderNavbar(roleWebArray);
-                                        }
-                                        c++;
+                                                let page = pageResponse.data();                                      
+
+                                                var _id   =  page.id;
+                                                var _name =  page.name;
+                                                var _html =  page.html;
+                                                var _js =  page.js;
+                                                var _css  =   page.css; 
+                                                roleWebArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
+                                            }
+
+                                            //if (c == (count-1)) {
+                                                _role.roles = roleWebArray;
+                                                renderNavbar(roleWebArray);
+                                            //}
+                                            //c++;
+                                            
+                                        });     
                                         
-                                    });        
+                                    }
+                                    a++;
 
                                 } else {
 
@@ -218,6 +224,8 @@
 
                 homeLoader.hide();
             });
+
+            $("#avatar").attr("src", _user.profilePictureURL);
             
             fetch("../html/footer.html")
             .then(response => {
