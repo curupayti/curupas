@@ -111,6 +111,12 @@ Start emulators
 
 ```sh
 sudo firebase emulators:start
+
+```
+Si el puerto esta ocupado errancar con
+
+```sh
+sudo firebase serve
 ```
 
 Deploy
