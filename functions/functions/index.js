@@ -17,11 +17,13 @@
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-var serviceAccount = require("./key/curupas-backen-firebase-adminsdk-b7mbc-613c592d37.json");
+
+var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-115547b9d9.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://curupas-backen.firebaseio.com"
+  databaseURL: "https://curupas-app.firebaseio.com"
 });
+
 const mkdirp = require('mkdirp-promise');
 const db = admin.firestore();
 //const rp = require('request-promise');
@@ -219,92 +221,58 @@ exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(even
 
 exports.sendSMS = functions.https.onRequest((req, res) => {
   
-  const phone = req.body.data.phone;
-  const payload = req.body.data.payload;
-  const userId = req.body.data.userId;
+    const phone = req.body.data.phone;
+    const payload = req.body.data.payload;
+    const userId = req.body.data.userId;
 
-  var headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer 7FA7ED241142E7BE36671CE0FEC9E84F'
-  };
-
-  var dataString = '{"recipient":' + phone + ',"message":"' + payload + '"}';  
-
-  var options = {
-      url: 'https://api.notimation.com/api/v1/sms',
-      method: 'POST',
-      headers: headers,
-      body: dataString
-  };
-
-  function callback(error, response, body) {      
-      //if (!error && response.statusCode == 200) {
-      //    console.log(body);
-      //}
-     /* if (!error) {
-
-        var sms_id = body.data.sms_id;         
-        
-        db.collection("users").doc(userId).update({smsId: sms_id})
-        
-      }*/
-      
-      JSON.stringify("response_callback: " + response);
-      JSON.stringify("body_callback: " + body);
-      JSON.stringify("error_callback: " + error);
-
-  }
-
-  request(options, callback);
- 
-
-  /*console.log("phone: " + phone);
-  console.log("payload: " + payload);
-
-  const postBody = { 
-    recipient: parseInt(phone),
-    message: payload 
-  };
-
-  console.log("postBody: " + JSON.stringify(postBody));
-
-  const options = {
-    url: 'https://api.notimation.com/api/v1/sms',
-    headers: {
-        'Content-Type' : 'application/json',
+    var headers = {
         'Accept': 'application/json',
+        'Content-Type': 'application/json',
         'Authorization': 'Bearer 7FA7ED241142E7BE36671CE0FEC9E84F'
-    },
-    json: true,
-    body: postBody
-  };
- 
-   
-  console.log("options: " + JSON.stringify(options));
+    };
 
-  rp(options)
-    .then(response => {
-      
-      console.log('Good response: ' + JSON.stringify(response.data));
-      
-      res.send({
-        smresponses_id : response.data.sms_id, 
-        response : response.data.sms_status
-      });
+    var dataString = '{"recipient":' + phone + ',"message":"' + payload + '"}';  
 
-    })
-    .catch(err => {
-      // API call failed...
-      res.status(500).send(err);
-    });*/
-    
-});
+    var options = {
+        url: 'https://api.notimation.com/api/v1/sms',
+        method: 'POST',
+        headers: headers,
+        body: dataString
+    };  
 
-/*exports.helloWorld = functions.https.onRequest((request, response) => {
-  response.send({
-      "data": {
-          "message": `Hello, ${request.body.data.name}!`
-      }
-  });
-});*/
+    request(options, function (error, response, body) {
+
+        if (!error) {
+
+            var body = JSON.parse(body);
+            console.log("body: " + JSON.stringify(body));
+            
+            var data = body["data"];
+            console.log("data: " + JSON.stringify(data)); 
+            
+            var smsid = data["sms_id"]; 
+                       
+            console.log("smsid: " + smsid);
+
+            var userRef = db.collection("users").doc(userId);
+            return userRef.update({
+              smsId: smsid
+            })
+            .then(function() {
+                res.send(body); 
+            })
+            .catch(function(e) {                
+                console.error("Error updating document: ", e);
+                res.send(e);
+            });
+            
+            
+        } else {
+
+            var _error = JSON.parse(error);
+
+            res.send(_error);
+        }
+    });  
+
+}); 
