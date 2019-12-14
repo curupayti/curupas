@@ -1,6 +1,7 @@
 {
   "projects": {
     "default": "curupas-app",
-    "curupas": "curupas-app"
+    "curupas": "curupas-app",
+    "staging": "curupas-app"
   }
 }

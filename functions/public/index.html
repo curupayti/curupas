@@ -39,8 +39,17 @@
         var _user = {};
         var _role = {};
 
-        var roleWebArray = [];
+        var roleWebArray = [];        
         var promisesRoles = [];
+        var profileArray = [];
+
+
+        let _id   =  "logout";
+        let _name = "Salir";
+        let _html =  "salir.html";
+        let _js =  "logout.js";
+        let _css  =  "logout.css";
+        profileArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
 
         var homeLoader = $('body').loadingIndicator({ useImage: false,}).data("loadingIndicator");
 
@@ -135,11 +144,8 @@
                                                 roleWebArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
                                             }
 
-                                            //if (c == (count-1)) {
-                                                _role.roles = roleWebArray;
-                                                renderNavbar(roleWebArray);
-                                            //}
-                                            //c++;
+                                            _role.roles = roleWebArray;
+                                            renderNavbar(roleWebArray);
                                             
                                         });     
                                         
@@ -183,11 +189,13 @@
         //} 
         
         function renderNavbar (navBar)  {
+
+           var random = Math.round(Math.random() * 10);
                       
             $("<link/>", {
                 rel: "stylesheet",
                 type: "text/css",
-                href: "/css/style.css"
+                href: "/css/style.css?v=" + random
             }).appendTo("head");                    
             
             fetch("../html/header.html")
@@ -207,12 +215,25 @@
                     var css = navBar[j].css;                   
 
                     $("#navbar").append('<li class="nav-item"><a id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + id + '\', \'' + html + '\', \'' + js + '\', \'' + css + '\'); return false;">' + desc + '</a></li>');           
+                }                              
+
+                var profileHjtml = '<li class="nav-item dropdown justify-content-end"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                profileHjtml += '<img id="avatar" src="' + _user.profilePictureURL + '" width="40" height="40" class="rounded-circle"></a>';
+                profileHjtml += '<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">';
+                for (let t=0; t<profileArray.length; t++) {
+                    var id = profileArray[t].id;
+                    var desc = profileArray[t].desc;
+                    var html = profileArray[t].html;
+                    var js = profileArray[t].js;
+                    var css = profileArray[t].css; 
+                    profileHjtml += '<a class="dropdown-item" id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + id + '\', \'' + html + '\', \'' + js + '\', \'' + css + '\'); return false;">' + desc + '</a>';                 
                 }
-                
+                profileHjtml += '</div></li>';
+
+                $("#navbarRight").append(profileHjtml);
+
                 loadPage(navBar[0].id, navBar[0].html, navBar[0].js, navBar[0].css);
-
-                //loadPage(navBar[1].id, navBar[1].html, navBar[1].js, navBar[1].css);
-
+                
                 //Levanta la ultima pagina navegada sino Home
                 /*let cookie = Cookies.get('html');
                 if (cookie === undefined) {
@@ -224,9 +245,7 @@
                 }*/
 
                 homeLoader.hide();
-            });
-
-            //$("#avatar").attr("src", _user.profilePictureURL);
+            });           
             
             fetch("../html/footer.html")
             .then(response => {
