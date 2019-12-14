@@ -14,7 +14,7 @@ Notice the final package name is com.curupayti.curupas. If the project already e
 
 ## Firebase 
 
-Creado en base a la cuenta curupasdev@gmail.com
+Creado en base a la cuenta curupasapp@gmail.com
 
 # Create new project
 
