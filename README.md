@@ -22,6 +22,22 @@ Create new project.
 
 Enable database and storage, allow permission on both rules for testing. Read write true.
 
+# Setup Firebase CLI reference
+
+https://firebase.google.com/docs/cli
+
+Install Node
+
+https://nodejs.org/
+
+Install Cli for Windows stand alone or run npm command
+
+https://firebase.tools/bin/win/instant/latest
+
+```sh
+npm install -g firebase-tools
+```
+
 # Initialize SDK
 
 In order to use firestore on functions you need to initilize the app with "Firebase Admin SDK" certificate 
