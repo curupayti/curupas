@@ -1,7 +1,6 @@
     $(document).ready(function () {
 
-        let _documents = {};
-        let _imageSnapshot = {};
+        let _documents = {};       
         
         let deleteIDs = [];
         let lastVisible;
@@ -42,7 +41,8 @@
                 id:document.id,
                 name:document.data().name,
                 year: document.data().year, 
-                phone: document.data().phone
+                phone: document.data().phone,
+                accepted: document.data().accepted
             };
 
             let item = `<tbody onclick="rowClick('` 
@@ -50,7 +50,8 @@
                 + itemObj.avatar + `','`               
                 + itemObj.name + `','` 
                 + itemObj.year + `','` 
-                + itemObj.phone + `');"><tr data-id="${itemObj.id}">
+                + itemObj.phone + `','` 
+                + itemObj.accepted + `');"><tr data-id="${itemObj.id}">
             <td>
                 <span class="custom-checkbox">
                     <input type="checkbox" id="${itemObj.id}" name="options[]" value="${itemObj.id}">
@@ -90,118 +91,26 @@
                 homeLoader.hide();
             }
             contLoded++;
-        }          
-        
+        }               
+
         // VIEW IMAGES
         $(document).on('click', '.js-view-images', function () {
             alert('clicked!');
-        });
-
-
-        function formatDate(date) {
-            var d = new Date(date),
-                month = '' + (d.getMonth() + 1),
-                day = '' + d.getDate(),
-                year = d.getFullYear();
-        
-            if (month.length < 2) 
-                month = '0' + month;
-            if (day.length < 2) 
-                day = '0' + day;
-        
-            return [day, month, year].join('-');
-        }
-
-        // ADD EMPLOYEE
-        $("#add-user-form").submit(function (event) {
-            event.preventDefault();       
-            var title = $('#title').val();
-            var description = $('#description').val();
-
-            var storageRef = storage.ref("/users");        
-            var file = document.getElementById("imgInp").files[0];       
-            var filePath =  title + ".png";        
-            var thisRef = storageRef.child(filePath);          
-            
-            var userId;       
-            
-            $('.lds-dual-ring').css('visibility', 'visible');
-
-            db.collection("users").add({
-                title: title,
-                description: description,
-                //author: user.email
-            })
-            .then(function(docRef) {
-                userId = docRef.id;            
-                var metadata = {
-                    customMetadata: {
-                        'thumbnail': 'true',
-                        'type' : '1',
-                        'userId' : userId                   
-                    }
-                }
-                return thisRef.put(file, metadata);                    
-            })       
-            .then(function(snapshot) {                                    
-                var metadataFiles = {
-                    customMetadata: {
-                        'thumbnail': 'false'
-                        //'type' : '2',
-                        //'userId' : userId                   
-                    }
-                }
-                var prefArray = [];
-                var input = document.getElementById("proImage");
-                var j=0, k=0;
-                var length = input.files.length;
-                for (var i = 0; i < length; ++i) {            
-                    var _file = input.files.item(i);                                                  
-                    var filePathUser = title + "_" + i + "_original.png";        
-                    const userRef = storageRef.child(filePathUser);
-                    const putRef = userRef.put(_file, metadataFiles);  
-                    prefArray.push(putRef);  
-                    putRef.on('state_changed', function(snapshot) {
-                        var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        console.log('Upload is ' + progress + '% done');
-                        switch (snapshot.state) {
-                        case firebase.storage.TaskState.PAUSED: // or 'paused'
-                            console.log('Upload is paused');
-                            break;
-                        case firebase.storage.TaskState.RUNNING: // or 'running'
-                            console.log('Upload is running');
-                            break;
-                        }
-                    }, function(error) {
-                        // Handle unsuccessful uploads
-                    }, function() {                                        
-                        var putRefFromArray = prefArray[j];
-                        putRefFromArray.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
-                            db.collection("users").doc(userId).collection("images").add({downloadURL});
-                            if (k==(length-1)){
-                                $('#addUserModal').modal('hide');
-                            }
-                            k++;
-                        });
-                        j++;
-                    });   
-                }
-                console.log("termino");
-            })        
-            .catch(function(error) {
-                console.error("Error adding document: ", error);
-            });   
-        });           
+        });               
 
         $("#edit-user-form").submit(function (event) {
             event.preventDefault();
-            let id = $(this).attr('edit-id');
+            /*let id = $(this).attr('edit-id');
             db.collection('employees').doc(id).update({
                 name: $('#edit-user-form #employee-name').val(),
                 email: $('#edit-user-form #employee-email').val(),
                 address: $('#edit-user-form #employee-address').val(),
                 phone: $('#edit-user-form  #employee-phone').val()
-            });
+            });*/
+
+            $(evt.target).is(':checked');
+
+
             $('#editUserModal').modal('hide');
         });
 
@@ -211,6 +120,9 @@
 
         $("#editUserModal").on('hidden.bs.modal', function () {
             $('#edit-user-form .form-control').val('');
+            //$('#edit-user-form .dropdown-menu').children().remove(); 
+            $("#dropdown-button").find('.appended').remove();
+            $("#dropdown-role").children().remove(); 
         });
 
         // PAGINATION
@@ -246,62 +158,7 @@
                     $('#js-next').closest('.page-item').addClass('disabled');
                 }
             });
-        });
-
-        //--
-        //-- Image Picker
-        //--   
-
-        //document.getElementById('proImage').addEventListener('change', readImage, false);        
-        
-        $(document).on('click', '.image-cancel', function() {
-            let no = $(this).data('no');
-            $(".preview-image.preview-show-"+no).remove();
-        });    
-        
-        var num = 4;
-        function readImage() {
-            if (window.File && window.FileList && window.FileReader) {
-                var files = event.target.files; //FileList object
-                //$( ".preview-images-zone" ).sortable();
-                var output = $(".preview-images-zone");    
-                for (let i = 0; i < files.length; i++) {
-                    var file = files[i];
-                    if (!file.type.match('image')) continue;                
-                    var picReader = new FileReader();                
-                    picReader.addEventListener('load', function (event) {
-                        var picFile = event.target;
-                        var html =  '<div class="preview-image preview-show-' + num + '">' +
-                                    '<div class="image-cancel" data-no="' + num + '">x</div>' +
-                                    '<div class="image-zone"><img id="pro-img-' + num + '" src="' + picFile.result + '"></div>' +
-                                    '<div class="tools-edit-image"><a href="javascript:void(0)" data-no="' + num + '" class="btn btn-light btn-edit-image">edit</a></div>' +
-                                    '</div>';
-        
-                        output.append(html);
-                        num = num + 1;
-                    });
-        
-                    picReader.readAsDataURL(file);
-                }
-                $("#pro-image").val('');
-            } else {
-                console.log('Browser not support');
-            }
-        }
-
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();            
-                reader.onload = function (e) {
-                    $('#avatar-preview').attr('src', e.target.result);
-                }            
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-        
-        $("#imgInp").change(function(){
-            readURL(this);
-        });
+        });       
 
         /*Spinner*/
 
@@ -313,19 +170,65 @@
             }, 3000);
         }
 
+        db.collection("roles").get().then(function(querySnapshotRole) {
+            querySnapshotRole.forEach(function(docRole) {                               
+                _roleSnapshot.push({
+                    id:docRole.id,
+                    role: docRole.data().role
+                });
+            });
+        });
+
+
         //# sourceURL=user.js 
 
     });
 
-    function rowClick(id, avatar, name, year, phone) {              
+    let _roleSnapshot = [];   
+
+    function rowClick(id, avatar, name, year, phone, accepted) {              
         $('#edit-user-form').attr('edit-id', id);
         $('#edit-user-form #avatar-preview').attr("src", avatar);        
         $('#edit-user-form #user-name').val(name);
         $('#edit-user-form #user-year').val(year);
         $('#edit-user-form #user-phone').val(phone);
-        $('#editUserModal').modal('show');      
+
+        if (accepted) {
+            $('#enableUser').attr('checked','checked');
+        }
+
+        let roleReference = _user.roleReference;
+        let activeRole = roleReference.id;
+        let length = _roleSnapshot.length;
+        for (var i=0; i<length;i++){
+            let _role = _roleSnapshot[i];
+            let id = _role.id;
+            let role = _role.role;
+            let _class = ' class="dropdown-item';
+            if (id==activeRole) {
+                _class += ' active"';
+                $("#dropdown-button").append('<span class="appended">' + role + '</span>');
+            } else {
+                _class += '"';
+            }            
+            let _html = '<a id="' + id + '"' + _class + ' href="#">' + role + '</a>';
+            $("#dropdown-role").append(_html);
+        }
+        $('#editUserModal').modal('show');                    
+
+        $(".dropdown-menu a").click(function() {
+
+            $(this).closest('.drop-group').find(".dropdown-menu a").removeClass('active');
+            $(this).addClass('active');
+          
+            $(this).closest('.drop-group').find('.appended').remove();
+            $(this).closest('.drop-group').find('button').append('<span class="appended">' + $(this).text() + '</span>');
+          
+        });
     }
 
+   
+      
 
     (function ($) {
         "use strict";

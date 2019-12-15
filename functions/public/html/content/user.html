@@ -9,18 +9,18 @@
                                 <div class="col-sm-6">
                                     <h2>Users</h2>
                                 </div>
-                                <div class="col-sm-6">
+                                <!--<div class="col-sm-6">
                                     <a href="#addUserModal" class="btn btn-success" data-toggle="modal"><i
                                             class="material-icons">&#xE147;</i> <span>Agregar User</span></a>
                                     <a href="#deleteUserModal" class="btn btn-danger" data-toggle="modal"><i
                                             class="material-icons">&#xE15C;</i> <span>Borrar</span></a>
-                                </div>
+                                </div>-->
                             </div>
                             <div class="row">
                                 <div class="col-sm-12">
                                     <label for="search-keyword"></label>
                                     <div class="form-group">
-                                        <input type="text" id="search-keyword" class="form-control" placeholder="Buscar por titulo">
+                                        <input type="text" id="search-keyword" class="form-control" placeholder="Buscar por nobre">
                                     </div>
                                 </div>
                             </div>
@@ -84,9 +84,19 @@
                                         <div class="form-group">
                                             <span class="custom-checkbox">
                                                 <input type="checkbox" id="enableUser">
-                                                <label>Autorizado</label>
+                                                <label>Aceptado</label>
                                             </span>
                                         </div>
+                                        <div class="drop-group">
+                                            <button id="dropdown-button" class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                                            <div id="dropdown-role" class="dropdown-menu">
+                                              <!--<a class="dropdown-item active" href="#">Most Recent</a>
+                                              <a class="dropdown-item" href="#">Popular</a>
+                                              <a class="dropdown-item" href="#">Trending</a>
+                                              <a class="dropdown-item" href="#">Acending</a>
+                                              <a class="dropdown-item" href="#">Decending</a>-->
+                                            </div>
+                                          </div>
                                     </div>
                                     <div class="modal-footer">
                                         <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
