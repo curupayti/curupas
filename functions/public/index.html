@@ -153,9 +153,7 @@
                                     a++;
 
                                 } else {
-
                                     _role.desc = json.role;
-
                                 }                           
                             });
                         });                    
@@ -190,6 +188,7 @@
         
         function renderNavbar (navBar)  {
 
+           //Uso este random para que me refresque el css 
            var random = Math.round(Math.random() * 10);
                       
             $("<link/>", {
@@ -269,10 +268,12 @@
 
             homeLoader.show();
 
+            var random = Math.round(Math.random() * 10);
+
             $("<link/>", {
                 rel: "stylesheet",
                 type: "text/css",
-                href: "/css/" + css
+                href: "/css/" + css + "?v=" + random
             }).appendTo("head");            
 
             fetch("../html/content/" + html)
