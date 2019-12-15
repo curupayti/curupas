@@ -87,15 +87,17 @@ class _MainScreenState extends State<MainScreen> {
         String userId = prefs.getString('userId');
         _globals.getUserData(userId).then((user) {
           if (!user.smsChecked) {
-            if (!user.approved) {
+            if (!user.accepted) {
               showDialog(
                 context: context,
                 builder: (BuildContext context) =>
-                    _buildNotApprovedDialog(context),
+                    _buildNotAcceptedDialog(context),
               );
             } else {
               getDescription();
             }
+          } else {
+            getDescription();
           }
         });
       }
@@ -433,7 +435,7 @@ class _MainScreenState extends State<MainScreen> {
     Navigator.of(context).pushNamed("/signin");
   }
 
-  Widget _buildNotApprovedDialog(BuildContext context) {
+  Widget _buildNotAcceptedDialog(BuildContext context) {
     return new AlertDialog(
       title: Text('Aprobación pendiente',
           style: TextStyle(
