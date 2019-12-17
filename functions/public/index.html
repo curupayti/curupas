@@ -40,7 +40,9 @@
         var _user = {};
         var _role = {};
 
-        var roleWebArray = [];        
+        var _rolePagesArray = [];
+        var _dropDownMenuObj = {};
+        
         var promisesRoles = [];
         var profileArray = [];
 
@@ -102,8 +104,7 @@
 
                         _user.name = docUser.data().name;
                         _user.profilePictureURL = docUser.data().profilePictureURL;            
-                        _user.roleReference = roleReference;
-                        
+                        _user.roleReference = roleReference;                        
 
                         roleReference.get()
                         .then(function(docPage) {                     
@@ -113,8 +114,7 @@
                             let type = typeof json;
                             
                             var count = Object.keys(json).length;
-                            var a = 1;
-                            var c = 1;
+                            var a = 0;                            
                             
                             Object.keys(json).forEach((id) => {
 
@@ -124,40 +124,59 @@
 
                                     var reference = json[id];                                    
 
-                                    promisesRoles.push(reference.get());
-
-                                    if (a == (count-1)) {
-
-                                        Promise.all(promisesRoles).then(function(responses) {  
-                                            
-                                            let length = responses.length;
-
-                                            for (var i=0; i<length; i++) {                                           
-
-                                                let pageResponse = responses[i];
-
-                                                let page = pageResponse.data();                                      
-
-                                                var _id   =  page.id;
-                                                var _name =  page.name;
-                                                var _html =  page.html;
-                                                var _js =  page.js;
-                                                var _css  =   page.css; 
-                                                roleWebArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
-                                            }
-
-                                            _role.roles = roleWebArray;
-                                            renderNavbar(roleWebArray);
-                                            
-                                        });     
-                                        
-                                    }
-                                    a++;
+                                    promisesRoles.push(reference.get());                                    
 
                                 } else {
-                                    _role.desc = json.role;
-                                }                           
+
+                                    let isArray = Array.isArray(json[id]);
+
+                                    if (!isArray) {
+                                  
+                                        _role.desc = json.role;
+                                  
+                                    } else {
+                                  
+                                        var arrayNav = json[id];                                            
+
+                                        for (var i=0; i<arrayNav.length; i++) {
+
+                                            let key = arrayNav[i];
+
+                                            _dropDownMenuObj[key] = id;
+                                        }  
+                                    }
+                                }                                  
+                                
+                                if (a == (count-1)) {
+
+                                    Promise.all(promisesRoles).then(function(responses) {  
+                                        
+                                        let length = responses.length;
+
+                                        for (var i=0; i<length; i++) {                                           
+
+                                            let pageResponse = responses[i];
+
+                                            let page = pageResponse.data();                                                
+                                            
+                                            var _id   =  page.id;
+                                            var _name =  page.name;
+                                            var _html =  page.html;
+                                            var _js =  page.js;
+                                            var _css  =   page.css; 
+                                            _rolePagesArray.push({key: i, id:_id, html:_html, js:_js, css:_css, desc:_name});
+                                            
+                                        }
+
+                                        _role.roles = _rolePagesArray;                                            
+                                        renderNavbar(_rolePagesArray);    
+
+                                    });                                    
+                                }
+                                a++;
+
                             });
+                            
                         });                    
                     });
                 })
@@ -205,33 +224,62 @@
             })
             .then(data => {
                 
-                $("header").html(data);   
+                $("header").html(data);                   
+
+                var _dropDownItems = [];
+
+                let _lastMenu;
                 
                 for (var j=0;j<navBar.length; j++) {
                     
+                    var key = navBar[j].key; 
                     var id = navBar[j].id;
                     var desc = navBar[j].desc;
                     var html = navBar[j].html;
                     var js = navBar[j].js;
-                    var css = navBar[j].css;                   
+                    var css = navBar[j].css; 
+                    
+                    if (key in _dropDownMenuObj) {                      
 
-                    $("#navbar").append('<li class="nav-item"><a id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + id + '\', \'' + html + '\', \'' + js + '\', \'' + css + '\'); return false;">' + desc + '</a></li>');           
-                }                              
+                        let menu = _dropDownMenuObj[key];
 
-                var profileHjtml = '<li class="nav-item dropdown justify-content-end"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-                profileHjtml += '<img id="avatar" src="' + _user.profilePictureURL + '" width="40" height="40" class="rounded-circle"></a>';
-                profileHjtml += '<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">';
-                for (let t=0; t<profileArray.length; t++) {
-                    var id = profileArray[t].id;
-                    var desc = profileArray[t].desc;
-                    var html = profileArray[t].html;
-                    var js = profileArray[t].js;
-                    var css = profileArray[t].css; 
-                    profileHjtml += '<a class="dropdown-item" id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + id + '\', \'' + html + '\', \'' + js + '\', \'' + css + '\'); return false;">' + desc + '</a>';                 
-                }
-                profileHjtml += '</div></li>';
+                        var profile = false;
+                        if (menu=="Perfil") {profile = true;}
+                        
+                        let item = '<a class="dropdown-item" id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + id + '\', \'' + html + '\', \'' + js + '\', \'' + css + '\'); return false;">' + desc + '</a>';                 
+                        _dropDownItems.push({"menu":menu, "item":item});
+                       
+                        if(_lastMenu != menu) {
+                          
+                            var dropDown = '<li class="nav-item dropdown ';
+                            if (profile) { dropDown += 'justify-content-end';}
+                            dropDown += '"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                            dropDown += menu;
+                            if (profile) { dropDown += '&nbsp;&nbsp;<img id="avatar" src="' + _user.profilePictureURL + '" width="40" height="40" class="rounded-circle">';}                                                        
+                            dropDown += '</a><div id="' + menu.toLowerCase() + '" class="dropdown-menu" aria-labelledby="navbarDropdown1"></div></li>';                                                                                                                  
 
-                $("#navbarRight").append(profileHjtml);
+                            if (profile) {                                
+                                $("#navbarRight").append(dropDown);
+                            } else {
+                                $("#navbar").append(dropDown);
+                            }                        
+
+                            _lastMenu = menu;
+                        }                        
+
+                    } else  {
+                        $("#navbar").append('<li class="nav-item"><a id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + id + '\', \'' + html + '\', \'' + js + '\', \'' + css + '\'); return false;">' + desc + '</a></li>');           
+                    }      
+                    
+                }           
+                
+                if (_dropDownItems.length>0) {
+                    for (var i=0; i<_dropDownItems.length;i++) {
+                        let menu = _dropDownItems[i].menu;
+                        let item = _dropDownItems[i].item;
+                        $('#'+menu.toLowerCase()).append(item);           
+                    }
+                }          
 
                 loadPage(navBar[0].id, navBar[0].html, navBar[0].js, navBar[0].css);
                 
