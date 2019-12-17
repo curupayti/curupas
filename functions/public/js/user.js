@@ -227,8 +227,6 @@
         });
     }
 
-   
-      
 
     (function ($) {
         "use strict";

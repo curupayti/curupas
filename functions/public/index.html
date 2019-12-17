@@ -46,7 +46,6 @@
         var promisesRoles = [];
         var profileArray = [];
 
-
         let _id   =  "logout";
         let _name = "Salir";
         let _html =  "salir.html";
@@ -296,7 +295,7 @@
                 homeLoader.hide();
             });           
             
-            fetch("../html/footer.html")
+            fetch("../html/footer.html?v=" + random)
             .then(response => {
                 return response.text()
             })
@@ -308,15 +307,15 @@
 
         function loadPage(id, html, js, css) {            
 
+            homeLoader.show();
+
             $("#navbar").find("li.active").removeClass("active");
 
             $("#"+id).addClass('active');
 
             Cookies.set('id', id);
             Cookies.set('html', html);
-            Cookies.set('css', css);
-
-            homeLoader.show();
+            Cookies.set('css', css);            
 
             var random = Math.round(Math.random() * 10);
 
@@ -326,14 +325,16 @@
                 href: "/css/" + css + "?v=" + random
             }).appendTo("head");            
 
-            fetch("../html/content/" + html)
+            fetch("../html/content/" + html +"?v=" + random)
             .then(response => {
                 return response.text();
             })
             .then(data => {                
                 $("#content").html(data);
                 let html = "js/" + js;
-                $.getScript(html);                    
+                $.getScript(html, function() {
+                    homeLoader.hide();                
+                });        
                           
             });
 
