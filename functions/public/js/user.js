@@ -100,6 +100,8 @@
 
         $("#edit-user-form").submit(function (event) {
             event.preventDefault();
+            
+            
             /*let id = $(this).attr('edit-id');
             db.collection('employees').doc(id).update({
                 name: $('#edit-user-form #employee-name').val(),

@@ -12,7 +12,7 @@
         <link rel="stylesheet" href="css/vendor/font-awesome.min.css">
         <link rel="stylesheet" href="css/vendor/bootstrap.min.css">             
         <link rel="icon" type="image/x-icon" href="https://vigil.com.ar/favicons/curupa.ico"/>                
-        <link type="text/css" rel="stylesheet" href="html/loading_indicator/jquery.loading-indicator.css" />
+        <link type="text/css" rel="stylesheet" href="js/vendor/loading_indicator/jquery.loading-indicator.css" />
     </head>
 
     <body>
@@ -27,7 +27,7 @@
         <script src="js/vendor/jquery.min.js"></script>
         <script src="js/vendor/bootstrap.min.js"></script> 
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@beta/dist/js.cookie.min.js"></script>   
-        <script src="html/loading_indicator/jquery.loading-indicator.js"></script>
+        <script src="js/vendor/loading_indicator/jquery.loading-indicator.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-firestore.js"></script>
         <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"></script>        
@@ -163,7 +163,23 @@
                                             var _html =  page.html;
                                             var _js =  page.js;
                                             var _css  =   page.css; 
-                                            _rolePagesArray.push({key: i, id:_id, html:_html, js:_js, css:_css, desc:_name});
+
+                                            var _jss = page.jss;
+                                            var _csss = page.csss;
+
+                                            var json = {key: i, id:_id, html:_html, js:_js, css:_css, desc:_name};
+
+                                            if (_jss!=undefined) {                                       
+                                                let jss = JSON.stringify(_jss);
+                                                json.jss = window.btoa(jss);
+                                            }
+
+                                            if (_csss!=undefined) {
+                                                let csss = JSON.stringify(_csss);
+                                                json.csss = window.btoa(csss);
+                                            }
+
+                                            _rolePagesArray.push(json);
                                             
                                         }
 
@@ -236,16 +252,29 @@
                     var desc = navBar[j].desc;
                     var html = navBar[j].html;
                     var js = navBar[j].js;
-                    var css = navBar[j].css; 
+                    var css = navBar[j].css;                    
                     
+                    var jss = navBar[j].jss;                    
+                    var csss = navBar[j].csss;                    
+
+                    var baseLoad = id + '\', \'' + html + '\', \'' + js + '\', \'' + css;
+
+                    if (jss!=undefined) {
+                        baseLoad = baseLoad + '\', \'' + jss;
+                    }
+                    
+                    if (csss!=undefined) {
+                        baseLoad = baseLoad + '\', \'' + csss;
+                    }
+
                     if (key in _dropDownMenuObj) {                      
 
                         let menu = _dropDownMenuObj[key];
 
                         var profile = false;
-                        if (menu=="Perfil") {profile = true;}
+                        if (menu=="Perfil") {profile = true;}                                              
                         
-                        let item = '<a class="dropdown-item" id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + id + '\', \'' + html + '\', \'' + js + '\', \'' + css + '\'); return false;">' + desc + '</a>';                 
+                        let item = '<a class="dropdown-item" id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + baseLoad + '\'); return false;">' + desc + '</a>';                 
                         _dropDownItems.push({"menu":menu, "item":item});
                        
                         if(_lastMenu != menu) {
@@ -266,8 +295,10 @@
                             _lastMenu = menu;
                         }                        
 
-                    } else  {
-                        $("#navbar").append('<li class="nav-item"><a id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + id + '\', \'' + html + '\', \'' + js + '\', \'' + css + '\'); return false;">' + desc + '</a></li>');           
+                    } else  {                                                
+
+                        $("#navbar").append('<li class="nav-item"><a id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + baseLoad + '\'); return false;">' + desc + '</a></li>');           
+                        
                     }      
                     
                 }           
@@ -305,7 +336,17 @@
 
         }
 
-        function loadPage(id, html, js, css) {            
+        function loadPage(id, html, js, css) {
+
+            loadPage(id, html, js, css, undefined, undefined);
+        }
+
+        function loadPage(id, html, js, css, jss) {
+
+            loadPage(id, html, js, css, jss, undefined);
+        }
+
+        function loadPage(id, html, js, css, jss, csss) {            
 
             homeLoader.show();
 
@@ -317,7 +358,7 @@
             Cookies.set('html', html);
             Cookies.set('css', css);            
 
-            var random = Math.round(Math.random() * 10);
+            var random = Math.round(Math.random() * 10);            
 
             $("<link/>", {
                 rel: "stylesheet",
@@ -325,20 +366,63 @@
                 href: "/css/" + css + "?v=" + random
             }).appendTo("head");            
 
+            if (csss!=undefined) { 
+                let _csss = window.atob(csss);
+                let _csss_ = JSON.parse(_csss);
+                loadCss(_csss_); 
+            }
+
             fetch("../html/content/" + html +"?v=" + random)
             .then(response => {
                 return response.text();
             })
             .then(data => {                
                 $("#content").html(data);
-                let html = "js/" + js;
+                let html = "js/" + js;                
                 $.getScript(html, function() {
-                    homeLoader.hide();                
-                });        
-                          
+                    if (jss!=undefined) {                        
+                        let _jss = JSON.parse(window.atob(jss));
+                        loadJss(_jss, function() {
+                            homeLoader.hide();    
+                        });
+                    } else {
+                        homeLoader.hide();                
+                    }                    
+                });                          
             });
-
         }   
+
+        function loadCss(csss, callback) {
+            let lengthcsss = csss.length;
+            for (let t=0; t<lengthcsss; t++) {
+                var random = Math.round(Math.random() * 10);    
+                $("<link/>", {
+                    rel: "stylesheet",
+                    type: "text/css",
+                    href: csss[t] + "?v=" + random
+                }).appendTo("head");                             
+            }            
+        }
+
+        function loadJss(jss, callback) {
+            let lengthjss = jss.length;
+
+            //$.getMultiScripts(jss).done(function() {
+            //    callback();
+            //});
+
+            for (let k=0; k < lengthjss; k++) {
+                var countLoaded = 0;
+                var random = Math.round(Math.random() * 100);    
+                let jsscript = jss[k] + "?v=" + random;
+                $.getScript(jsscript, function() {
+                    if (k==(countLoaded-1)){
+                        callback();
+                    }
+                    countLoaded++;
+                });                
+            }            
+        }
         
         function downloadImage(_url, callback) {
             $.ajax({
@@ -351,7 +435,19 @@
                     //$("#" + i).attr("src", 'data:image/png;base64,'+data);
                 }
             });
-        }       
+        }     
+        
+        $.getMultiScripts = function(arr) {
+            var _arr = $.map(arr, function(scr) {
+                return $.getScript( scr );
+            });
+
+            _arr.push($.Deferred(function( deferred ){
+                $( deferred.resolve );
+            }));
+
+            return $.when.apply($, _arr);
+        }
  
    
     </script>
