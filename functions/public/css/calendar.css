@@ -3,3 +3,8 @@
 #main {
   padding-top: 73px !important;
 }
+
+#calendar-module {
+  max-width: 900px;
+  margin: 0 auto;
+}

@@ -379,16 +379,18 @@
             .then(data => {                
                 $("#content").html(data);
                 let html = "js/" + js;                
-                $.getScript(html, function() {
-                    if (jss!=undefined) {                        
-                        let _jss = JSON.parse(window.atob(jss));
-                        loadJss(_jss, function() {
-                            homeLoader.hide();    
+                if (jss!=undefined) {                        
+                    let _jss = JSON.parse(window.atob(jss));
+                    loadJss(_jss, function() {                        
+                        $.getScript(html, function() {
+                            homeLoader.hide();                                  
                         });
-                    } else {
-                        homeLoader.hide();                
-                    }                    
-                });                          
+                    });
+                } else {                    
+                    $.getScript(html, function() {
+                        homeLoader.hide();                                  
+                    });
+                }                         
             });
         }   
 
@@ -404,24 +406,16 @@
             }            
         }
 
-        function loadJss(jss, callback) {
-            let lengthjss = jss.length;
-
-            //$.getMultiScripts(jss).done(function() {
-            //    callback();
-            //});
-
-            for (let k=0; k < lengthjss; k++) {
-                var countLoaded = 0;
-                var random = Math.round(Math.random() * 100);    
-                let jsscript = jss[k] + "?v=" + random;
-                $.getScript(jsscript, function() {
-                    if (k==(countLoaded-1)){
-                        callback();
-                    }
-                    countLoaded++;
-                });                
-            }            
+        function loadJss(jss, callback) {    
+            (async () => {
+                for (const path of jss) {
+                    await $.getScript(path);
+                }
+                callback();
+            })()
+            .catch((err) => {
+                Console.log("error: " + err);
+            });                
         }
         
         function downloadImage(_url, callback) {
@@ -435,20 +429,7 @@
                     //$("#" + i).attr("src", 'data:image/png;base64,'+data);
                 }
             });
-        }     
-        
-        $.getMultiScripts = function(arr) {
-            var _arr = $.map(arr, function(scr) {
-                return $.getScript( scr );
-            });
-
-            _arr.push($.Deferred(function( deferred ){
-                $( deferred.resolve );
-            }));
-
-            return $.when.apply($, _arr);
-        }
- 
+        } 
    
     </script>
 

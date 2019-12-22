@@ -1,6 +1,6 @@
-$("#calendar-module").ready(function () {       
+$(document).ready(function () {       
       
-    var calendarEl = document.getElementById('calendar');
+    var calendarEl = document.getElementById('calendar-module');
 
     var calendar = new FullCalendar.Calendar(calendarEl, {
       plugins: [ 'interaction', 'dayGrid', 'timeGrid', 'list' ],
