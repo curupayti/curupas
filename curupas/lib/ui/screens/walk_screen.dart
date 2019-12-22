@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import "package:flutter_swiper/flutter_swiper.dart";
-import 'package:onboarding_flow/business/auth.dart';
-import 'package:onboarding_flow/models/user.dart';
-import "package:onboarding_flow/models/walkthrough.dart";
+import 'package:curupas/business/auth.dart';
+import 'package:curupas/models/user.dart';
+import "package:curupas/models/walkthrough.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'widgets/flat_button.dart';

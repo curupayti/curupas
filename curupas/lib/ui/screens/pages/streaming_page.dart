@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
-import 'package:onboarding_flow/globals.dart' as _globals;
-import 'package:onboarding_flow/models/streaming.dart';
+import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/models/streaming.dart';
 
 class StreamingPage extends StatefulWidget {
   StreamingPage({Key key}) : super(key: key);

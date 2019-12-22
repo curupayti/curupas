@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:onboarding_flow/business/auth.dart';
-import 'package:onboarding_flow/business/validator.dart';
-import 'package:onboarding_flow/models/sms.dart';
-import 'package:onboarding_flow/ui/screens/widgets/text_field.dart';
+import 'package:curupas/business/auth.dart';
+import 'package:curupas/business/validator.dart';
+import 'package:curupas/models/sms.dart';
+import 'package:curupas/ui/screens/widgets/text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:onboarding_flow/globals.dart' as _globals;
+import 'package:curupas/globals.dart' as _globals;
 
 import 'flat_button.dart';
 

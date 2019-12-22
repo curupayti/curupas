@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:onboarding_flow/models/description.dart';
-import 'package:onboarding_flow/models/feeds.dart';
-import 'package:onboarding_flow/models/group.dart';
-import 'package:onboarding_flow/models/sms.dart';
-import 'package:onboarding_flow/models/user.dart';
+import 'package:curupas/models/description.dart';
+import 'package:curupas/models/feeds.dart';
+import 'package:curupas/models/group.dart';
+import 'package:curupas/models/sms.dart';
+import 'package:curupas/models/user.dart';
 import 'package:flutter/services.dart';
-import 'package:onboarding_flow/globals.dart' as _globals;
+import 'package:curupas/globals.dart' as _globals;
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum authProblems { UserNotFound, PasswordNotValid, NetworkError, UnknownError }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:onboarding_flow/models/feeds.dart';
+import 'package:curupas/models/feeds.dart';
 
 class FeedCard extends StatelessWidget {
   FeedCard(this.post);

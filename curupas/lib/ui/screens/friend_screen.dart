@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:onboarding_flow/business/auth.dart';
-import 'package:onboarding_flow/models/user.dart';
+import 'package:curupas/business/auth.dart';
+import 'package:curupas/models/user.dart';
 
 class FriendsListPage extends StatefulWidget {
   @override

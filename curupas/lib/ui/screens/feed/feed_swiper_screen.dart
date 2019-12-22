@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:flutter_page_indicator/flutter_page_indicator.dart';
-import 'package:onboarding_flow/models/feeds.dart';
+import 'package:curupas/models/feeds.dart';
 
 class FeedSwipeScreen extends StatefulWidget {
   Post post;

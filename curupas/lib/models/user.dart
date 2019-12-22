@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:location/location.dart';
-import 'package:onboarding_flow/business/auth.dart';
-import 'package:onboarding_flow/models/group.dart';
+import 'package:curupas/business/auth.dart';
+import 'package:curupas/models/group.dart';
 
 class User {
   final String userID;
@@ -17,7 +17,7 @@ class User {
   final DocumentReference roleRef;
   Group group;
   final String nonSpName;
-  final bool approved;
+  final bool accepted;
   final int smsCode;
   final int smsId;
   final bool smsChecked;
@@ -34,7 +34,7 @@ class User {
       this.yearRef,
       this.group,
       this.nonSpName,
-      this.approved,
+      this.accepted,
       this.roleRef,
       this.smsCode,
       this.smsId,
@@ -58,7 +58,7 @@ class User {
       'location': geo,
       'year': year,
       'nonSpName': nonSpName,
-      'approved': approved,
+      'accepted': accepted,
       'roleRef': roleRef,
       'smsCode': smsCode,
       'smsId': smsId,
@@ -93,7 +93,7 @@ class User {
       yearRef: yearReference,
       group: doc['group'],
       nonSpName: doc['nonSpName'],
-      approved: doc['approved'],
+      accepted: doc['accepted'],
       roleRef: doc['roleRef'],
       smsChecked: doc['smsChecked'],
     );

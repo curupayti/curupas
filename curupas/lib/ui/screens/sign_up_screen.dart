@@ -9,17 +9,17 @@ import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:onboarding_flow/business/auth.dart';
-import 'package:onboarding_flow/business/validator.dart';
+import 'package:curupas/business/auth.dart';
+import 'package:curupas/business/validator.dart';
 import 'package:flutter/services.dart';
-import 'package:onboarding_flow/models/user.dart';
+import 'package:curupas/models/user.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:onboarding_flow/ui/screens/widgets/alert_sms_dialog.dart';
-import 'package:onboarding_flow/ui/screens/widgets/flat_button.dart';
-import 'package:onboarding_flow/ui/screens/widgets/text_field.dart';
+import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
+import 'package:curupas/ui/screens/widgets/flat_button.dart';
+import 'package:curupas/ui/screens/widgets/text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:onboarding_flow/globals.dart' as _globals;
+import 'package:curupas/globals.dart' as _globals;
 import 'package:location/location.dart';
 
 class SignUpScreen extends StatefulWidget {

@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:onboarding_flow/business/auth.dart';
-import 'package:onboarding_flow/business/validator.dart';
+import 'package:curupas/business/auth.dart';
+import 'package:curupas/business/validator.dart';
 import 'package:flutter/services.dart';
-import 'package:onboarding_flow/globals.dart' as _globals;
-import 'package:onboarding_flow/models/user.dart';
-import 'package:onboarding_flow/ui/screens/widgets/alert_sms_dialog.dart';
-import 'package:onboarding_flow/ui/screens/widgets/flat_button.dart';
-import 'package:onboarding_flow/ui/screens/widgets/text_field.dart';
+import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/models/user.dart';
+import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
+import 'package:curupas/ui/screens/widgets/flat_button.dart';
+import 'package:curupas/ui/screens/widgets/text_field.dart';
 
 class SignInScreen extends StatefulWidget {
   _SignInScreenState createState() => _SignInScreenState();
