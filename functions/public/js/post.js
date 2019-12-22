@@ -102,7 +102,9 @@ $(document).ready(function () {
     // ADD EMPLOYEE
     $("#add-post-form").submit(function (event) {
         event.preventDefault();       
-        var title = $('#title').val();
+
+        var title = $('#post-title').val();
+        
         var description = $('#description').val();
 
         var storageRef = storage.ref("/posts");        

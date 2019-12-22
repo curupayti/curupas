@@ -102,7 +102,9 @@ $(document).ready(function () {
     // ADD EMPLOYEE
     $("#add-museum-form").submit(function (event) {
         event.preventDefault();       
-        var title = $('#title').val();
+
+        var title = $('#museum-title').val();
+        
         var description = $('#description').val();
 
         var storageRef = storage.ref("/museums");        
@@ -180,7 +182,7 @@ $(document).ready(function () {
         });   
     });
 
-    // DELETE MUSEUM
+    // DELETE POST
     $(document).on('click', '.js-delete-museum', function () {
         let id = $(this).attr('id');
         $('#delete-museum-form').attr('delete-id', id);
