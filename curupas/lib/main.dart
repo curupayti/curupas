@@ -1,3 +1,4 @@
+import 'package:curupas/ui/screens/widgets/youtube/player_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,7 +7,7 @@ import 'package:curupas/ui/screens/feed/feed_swiper_screen.dart';
 import 'package:curupas/ui/screens/group_screen.dart';
 import 'package:curupas/ui/screens/main_screen.dart';
 import 'package:curupas/ui/screens/sign_in_screen.dart';
-import 'package:curupas/ui/screens/video_scree.dart';
+import 'package:curupas/ui/screens/widgets/youtube/fullscreen_youtube_player.dart';
 import "package:curupas/ui/screens/walk_screen.dart";
 import 'package:curupas/ui/screens/sign_up_screen.dart';
 import 'package:curupas/ui/screens/welcome_screen.dart';
@@ -92,9 +93,13 @@ class RouteGenerator {
       case '/videoplayer':
         if (args is Streaming) {
           return MaterialPageRoute(
-              builder: (_) => VideoPlayerScreen(
-                    streaming: settings.arguments,
-                  ));
+              builder: (_) =>
+
+                  //_FullScreenYoutubePlayer(
+                  //  streaming: settings.arguments,
+                  //)
+              PlayerScreen(),
+          );
         }
         return _errorRoute();
       default:

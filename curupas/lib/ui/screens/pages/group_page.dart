@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/utils/globals.dart' as _globals;
 import 'package:curupas/ui/screens/friend_screen.dart';
 
 var currentUserEmail;

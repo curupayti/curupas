@@ -12,14 +12,13 @@ import 'package:curupas/models/description.dart';
 import 'package:curupas/models/feeds.dart';
 import 'package:curupas/models/streaming.dart';
 import 'package:curupas/models/user.dart';
-import 'package:curupas/ui/screens/pages/calendar_page.dart';
 import 'package:curupas/ui/screens/pages/group_page.dart';
 import 'package:curupas/ui/screens/pages/home_page.dart';
 import 'package:curupas/ui/screens/pages/profile_page.dart';
 import 'package:curupas/ui/screens/pages/streaming_page.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/utils/globals.dart' as _globals;
 import 'package:youtube_api/youtube_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
@@ -49,7 +48,6 @@ class _MainScreenState extends State<MainScreen> {
   final Key keyTwo = PageStorageKey('pageTwo');
   final Key keyThree = PageStorageKey('pageThree');
   final Key keyFour = PageStorageKey('pageFour');
-  final Key keyFive = PageStorageKey('pageFive');
 
   int currentTab = 0;
 
@@ -89,17 +87,15 @@ class _MainScreenState extends State<MainScreen> {
         String userId = prefs.getString('userId');
         _globals.getUserData(userId).then((user) {
           if (!user.smsChecked) {
-            if (!user.accepted) {
+            if (!user.approved) {
               showDialog(
                 context: context,
                 builder: (BuildContext context) =>
-                    _buildNotAcceptedDialog(context),
+                    _buildNotApprovedDialog(context),
               );
             } else {
               getDescription();
             }
-          } else {
-            getDescription();
           }
         });
       }
@@ -391,38 +387,32 @@ class _MainScreenState extends State<MainScreen> {
 
   void updeteWidget() {
     _group = _globals.group.year;
-    pageTitles = ["Home", "Calendario", "Streaming", _group, "Perfil"];
+    pageTitles = ["Home", "Streaming", _group, "Perfil"];
     pageTitle = pageTitles[0];
     tabItems = List.of([
       new TabData(iconData: Icons.home, title: pageTitles[0]),
-      new TabData(iconData: Icons.calendar_today, title: pageTitles[1]),
-      new TabData(iconData: Icons.videocam, title: pageTitles[2]),
-      new TabData(iconData: Icons.group_work, title: pageTitles[3]),
-      new TabData(iconData: Icons.account_circle, title: pageTitles[4]),
+      new TabData(iconData: Icons.videocam, title: pageTitles[1]),
+      new TabData(iconData: Icons.group_work, title: pageTitles[2]),
+      new TabData(iconData: Icons.account_circle, title: pageTitles[3]),
     ]);
 
     HomePage one = new HomePage(
       key: keyOne,
     );
-
-    CalendarPage two = new CalendarPage(
+    StreamingPage two = new StreamingPage(
       key: keyTwo,
     );
 
-    StreamingPage three = new StreamingPage(
+    GroupPage three = new GroupPage(
       key: keyThree,
     );
 
-    GroupPage four = new GroupPage(
+    ProfilePage four = new ProfilePage(
       key: keyFour,
     );
 
-    ProfilePage five = new ProfilePage(
-      key: keyFive,
-    );
-
     setState(() {
-      pages = [one, two, three, four, five];
+      pages = [one, two, three, four];
       currentPage = one;
       _loadingInProgress = false;
       _loaded = true;
@@ -443,7 +433,7 @@ class _MainScreenState extends State<MainScreen> {
     Navigator.of(context).pushNamed("/signin");
   }
 
-  Widget _buildNotAcceptedDialog(BuildContext context) {
+  Widget _buildNotApprovedDialog(BuildContext context) {
     return new AlertDialog(
       title: Text('Aprobación pendiente',
           style: TextStyle(

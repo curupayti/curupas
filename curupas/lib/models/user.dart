@@ -17,7 +17,7 @@ class User {
   final DocumentReference roleRef;
   Group group;
   final String nonSpName;
-  final bool accepted;
+  final bool approved;
   final int smsCode;
   final int smsId;
   final bool smsChecked;
@@ -34,7 +34,7 @@ class User {
       this.yearRef,
       this.group,
       this.nonSpName,
-      this.accepted,
+      this.approved,
       this.roleRef,
       this.smsCode,
       this.smsId,
@@ -58,7 +58,7 @@ class User {
       'location': geo,
       'year': year,
       'nonSpName': nonSpName,
-      'accepted': accepted,
+      'approved': approved,
       'roleRef': roleRef,
       'smsCode': smsCode,
       'smsId': smsId,
@@ -93,7 +93,7 @@ class User {
       yearRef: yearReference,
       group: doc['group'],
       nonSpName: doc['nonSpName'],
-      accepted: doc['accepted'],
+      approved: doc['approved'],
       roleRef: doc['roleRef'],
       smsChecked: doc['smsChecked'],
     );

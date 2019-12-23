@@ -28,10 +28,12 @@ dependencies:
   file_picker: ^1.3.8
   flutter_datetime_picker: ^1.2.6
   intl: ^0.15.8
+  #circular_bottom_navigation: ^1.0.1
+  #url_launcher: ^3.0.2
   notifier: ^1.0.2
-  cached_network_image: ^1.1.1
+  cached_network_image: ^2.0.0-rc
   youtube_api: ^0.7.2
-  youtube_player_flutter: ^4.1.0
+  youtube_player_flutter: ^6.0.3+2
   fancy_bottom_navigation: ^0.3.2
   keyboard_actions: "^2.1.2"
   keyboard_visibility: any
@@ -46,7 +48,6 @@ dependencies:
   location: ^2.3.5
   geolocator: ^5.1.4+2
   cloud_functions: ^0.4.1+4
-  date_picker_timeline: any
 
   #geoflutterfire: ^2.0.3+5
   #geoflutterfire:

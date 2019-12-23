@@ -9,7 +9,7 @@ import 'package:curupas/models/sms.dart';
 import 'package:curupas/ui/screens/widgets/text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/utils/globals.dart' as _globals;
 
 import 'flat_button.dart';
 

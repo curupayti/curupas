@@ -9,7 +9,7 @@ import 'package:curupas/models/group.dart';
 import 'package:curupas/models/sms.dart';
 import 'package:curupas/models/user.dart';
 import 'package:flutter/services.dart';
-import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/utils/globals.dart' as _globals;
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum authProblems { UserNotFound, PasswordNotValid, NetworkError, UnknownError }

@@ -15,7 +15,7 @@ import 'package:curupas/business/auth.dart';
 import 'package:curupas/business/validator.dart';
 import 'package:curupas/models/group.dart';
 import 'package:curupas/models/user.dart';
-import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/utils/globals.dart' as _globals;
 import 'package:curupas/ui/screens/widgets/flat_button.dart';
 import 'package:curupas/ui/screens/widgets/text_field.dart';
 import 'package:path/path.dart' as p;

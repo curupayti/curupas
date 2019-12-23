@@ -1,11 +1,11 @@
-import 'package:date_picker_timeline/date_picker_timeline.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:curupas/ui/screens/feed/feed_card.dart';
+import 'package:curupas/utils/globals.dart' as _globals;
 import 'package:curupas/ui/draw/line.dart';
 import 'dart:ui' as ui;
-import 'package:curupas/globals.dart' as _globals;
+
+import 'package:curupas/ui/screens/feed/feed_card.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -17,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: HomeStream(this),
+      body: HomeStream(),
       floatingActionButton: buildSpeedDial(),
     );
   }
@@ -65,8 +65,6 @@ SpeedDial buildSpeedDial() {
 }
 
 class HomeStream extends StatefulWidget {
-  _HomePageState parent;
-  HomeStream(this.parent);
   @override
   _HomeStreamState createState() => new _HomeStreamState();
 }
@@ -80,7 +78,7 @@ class _HomeStreamState extends State<HomeStream> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            Container(height: _height, child: HomeBackground(widget.parent))
+            Container(height: _height, child: HomeBackground())
           ],
         ),
       ),
@@ -89,8 +87,6 @@ class _HomeStreamState extends State<HomeStream> {
 }
 
 class HomeBackground extends StatelessWidget {
-  _HomePageState grad_parent;
-  HomeBackground(this.grad_parent);
   @override
   Widget build(BuildContext context) {
     double bottomPadding =
@@ -110,7 +106,7 @@ class HomeBackground extends StatelessWidget {
               filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
               child: Container(
                 color: Colors.black.withOpacity(0.5),
-                child: _buildContent(grad_parent),
+                child: _buildContent(),
               ),
             ),
           ),
@@ -127,14 +123,13 @@ class HomeBackground extends StatelessWidget {
   }
 }
 
-Widget _buildContent(_HomePageState parent) {
+Widget _buildContent() {
   return SingleChildScrollView(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _buildHeader(),
         _buildFeedScroller(),
-        _buildDateTimeline(parent),
       ],
     ),
   );
@@ -235,36 +230,6 @@ Widget _buildFeedScroller() {
           return FeedCard(feed);
         },
       ),
-    ),
-  );
-}
-
-Widget _buildDateTimeline(_HomePageState parent) {
-  DateTime _selectedValue = DateTime.now();
-  return Container(
-    padding: EdgeInsets.all(20.0),
-    color: Colors.blueGrey[100],
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text("You Selected:"),
-        Padding(
-          padding: EdgeInsets.all(10),
-        ),
-        Text(_selectedValue.toString()),
-        Padding(
-          padding: EdgeInsets.all(20),
-        ),
-        DatePickerTimeline(
-          _selectedValue,
-          onDateChange: (date) {
-            // New date selected
-            parent.setState(() {
-              _selectedValue = date;
-            });
-          },
-        ),
-      ],
     ),
   );
 }
