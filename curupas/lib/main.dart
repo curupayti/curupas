@@ -18,7 +18,7 @@ import 'models/feeds.dart';
 import 'models/streaming.dart';
 
 Future main() async {
-  Firestore.instance.settings(timestampsInSnapshotsEnabled: true);
+  Firestore.instance.settings();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SharedPreferences.getInstance().then((prefs) {
     runApp(
@@ -93,12 +93,12 @@ class RouteGenerator {
       case '/videoplayer':
         if (args is Streaming) {
           return MaterialPageRoute(
-              builder: (_) =>
+            builder: (_) =>
 
-                  //_FullScreenYoutubePlayer(
-                  //  streaming: settings.arguments,
-                  //)
-              PlayerScreen(),
+                //_FullScreenYoutubePlayer(
+                //  streaming: settings.arguments,
+                //)
+                PlayerScreen(),
           );
         }
         return _errorRoute();

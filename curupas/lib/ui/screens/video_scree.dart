@@ -12,17 +12,32 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerState extends State<VideoPlayerScreen> {
-  YoutubePlayerController _controller = YoutubePlayerController();
-  var _idController = TextEditingController();
-  var _seekToController = TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  YoutubePlayerController _controller;
+  TextEditingController _idController;
+  TextEditingController _seekToController;
+
+  PlayerState _playerState;
+  YoutubeMetaData _videoMetaData;
   double _volume = 100;
   bool _muted = false;
-  String _playerStatus = "";
-  String _errorCode = '0';
+  bool _isPlayerReady = false;
 
-  String _videoId; //= "iLnmTe5Q2Qw";
+  final List<String> _ids = [
+    'gQDByCdjUXw',
+    'iLnmTe5Q2Qw',
+    '_WoCV4c6XOE',
+    'KmzdUe0RSJo',
+    '6jZDSSZZxjQ',
+    'p2lYr3vM_1w',
+    '7QUtEmBT_-w',
+    '34_PXCzGw1M',
+  ];
+  int count = 0;
 
-  void listener() {
+  String _videoId;
+
+  /*void listener() {
     if (_controller.value.playerState == PlayerState.ENDED) {
       _showThankYouDialog();
     }
@@ -32,17 +47,47 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
         _errorCode = _controller.value.errorCode.toString();
       });
     }
-  }
+  }*/
 
   @override
   void initState() {
     super.initState();
+    _controller = YoutubePlayerController(
+      initialVideoId: 'QFlRzcZoNoA',
+      flags: YoutubePlayerFlags(
+        mute: false,
+        autoPlay: true,
+        disableDragSeek: false,
+        loop: false,
+        isLive: false,
+        forceHideAnnotation: true,
+      ),
+    )..addListener(listener);
+    _idController = TextEditingController();
+    _seekToController = TextEditingController();
+    _videoMetaData = YoutubeMetaData();
+    _playerState = PlayerState.unknown;
     _videoId = widget.streaming.id;
     print(_videoId);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
+  }
+
+  void listener() {
+    if (_isPlayerReady && mounted && !_controller.value.isFullScreen) {
+      setState(() {
+        _playerState = _controller.value.playerState;
+        _videoMetaData = _controller.metadata;
+      });
+    }
+  }
+
+  @override
+  void deactivate() {
+    _controller.pause();
+    super.deactivate();
   }
 
   @override
@@ -53,14 +98,10 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    _controller.dispose();
+    _idController.dispose();
+    _seekToController.dispose();
     super.dispose();
-  }
-
-  @override
-  void deactivate() {
-    // This pauses video while navigating to next page.
-    _controller.pause();
-    super.deactivate();
   }
 
   @override
@@ -76,49 +117,39 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
         child: Column(
           children: <Widget>[
             YoutubePlayer(
-              context: context,
-              videoId: widget.streaming.id,
-              flags: YoutubePlayerFlags(
-                mute: false,
-                autoPlay: true,
-                forceHideAnnotation: true,
-                showVideoProgressIndicator: true,
-                disableDragSeek: false,
-              ),
-              videoProgressIndicatorColor: Color(0xFFFF0000),
-              actions: <Widget>[
-                IconButton(
-                  icon: Icon(
-                    Icons.arrow_back_ios,
-                    color: Colors.white,
-                    size: 20.0,
-                  ),
-                  onPressed: () {},
-                ),
-                Text(
-                  'Hello! This is a test title.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.0,
+              controller: _controller,
+              showVideoProgressIndicator: true,
+              progressIndicatorColor: Colors.blueAccent,
+              topActions: <Widget>[
+                SizedBox(width: 8.0),
+                Expanded(
+                  child: Text(
+                    _controller.metadata.title,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
-                Spacer(),
                 IconButton(
                   icon: Icon(
                     Icons.settings,
                     color: Colors.white,
                     size: 25.0,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    _showSnackBar('Settings Tapped!');
+                  },
                 ),
               ],
-              progressColors: ProgressColors(
-                playedColor: Color(0xFFFF0000),
-                handleColor: Color(0xFFFF4433),
-              ),
-              onPlayerInitialized: (controller) {
-                _controller = controller;
-                _controller.addListener(listener);
+              onReady: () {
+                _isPlayerReady = true;
+              },
+              onEnded: (id) {
+                _controller.load(_ids[count++]);
+                _showSnackBar('Next Video Started!');
               },
             ),
             /*SizedBox(
@@ -267,6 +298,27 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
               ),
             ),*/
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showSnackBar(String message) {
+    _scaffoldKey.currentState.showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.w300,
+            fontSize: 16.0,
+          ),
+        ),
+        backgroundColor: Colors.blueAccent,
+        behavior: SnackBarBehavior.floating,
+        elevation: 1.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50.0),
         ),
       ),
     );
