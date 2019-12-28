@@ -341,12 +341,6 @@ class _MainScreenState extends State<MainScreen> {
       print(ytResult.toString());
       _globals.streamingReachable = true;
       _globals.setYoutubeApi(ytResult);
-
-      //String nameString = jsonEncode(ytResult);
-      //print("________");
-      //print(nameString);
-      //print("________");
-
       for (var i = 0; i < ytResult.length; i++) {
         Streaming streaming = new Streaming();
         YT_API ytapi = ytResult[i];

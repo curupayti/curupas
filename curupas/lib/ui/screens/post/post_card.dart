@@ -12,7 +12,7 @@ class PostCard extends StatelessWidget {
         print(post.title);
         Navigator.pushNamed(
           context,
-          '/feedswipe',
+          '/postswipe',
           arguments: post,
         );
       },
@@ -58,7 +58,7 @@ class PostCard extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(
                 context,
-                '/feedswipe',
+                '/postswipe',
                 arguments: feed,
               );
             },*/
@@ -77,7 +77,7 @@ class PostCard extends StatelessWidget {
         onTap: () async {
           Navigator.pushNamed(
             context,
-            '/feedswipe',
+            '/postswipe',
             arguments: feed,
           );
         },

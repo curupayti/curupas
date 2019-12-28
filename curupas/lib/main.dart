@@ -82,10 +82,10 @@ class RouteGenerator {
     String set = settings.name;
     print(set);
     switch (settings.name) {
-      case '/feedswipe':
+      case '/postswipe':
         if (args is Post) {
           return MaterialPageRoute(
-            builder: (_) => FeedSwipeScreen(
+            builder: (_) => PostSwipeScreen(
               post: settings.arguments,
             ),
           );

@@ -1,3 +1,4 @@
+import 'package:curupas/ui/screens/widgets/museum.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -129,7 +130,8 @@ Widget _buildContent() {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _buildHeader(),
-        _buildFeedScroller(),
+        _buildPostScroller(),
+        _buildPDatePickerTimeline(),
       ],
     ),
   );
@@ -216,7 +218,7 @@ Widget _buildAvatar() {
   );
 }
 
-Widget _buildFeedScroller() {
+Widget _buildPostScroller() {
   return Padding(
     padding: const EdgeInsets.only(top: 16.0),
     child: SizedBox.fromSize(
@@ -226,10 +228,20 @@ Widget _buildFeedScroller() {
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         itemCount: _globals.dataPost.posts.length,
         itemBuilder: (BuildContext context, int index) {
-          var feed = _globals.dataPost.posts[index];
-          return PostCard(feed);
+          var post = _globals.dataPost.posts[index];
+          return PostCard(post);
         },
       ),
+    ),
+  );
+}
+
+Widget _buildPDatePickerTimeline() {
+  return Padding(
+    padding: const EdgeInsets.only(top: 16.0),
+    child: SizedBox.fromSize(
+      size: Size.fromHeight(245.0),
+      child: MuseumWidget(),
     ),
   );
 }

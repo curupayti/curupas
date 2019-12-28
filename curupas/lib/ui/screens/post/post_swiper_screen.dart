@@ -3,16 +3,16 @@ import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:flutter_page_indicator/flutter_page_indicator.dart';
 import 'package:curupas/models/post.dart';
 
-class FeedSwipeScreen extends StatefulWidget {
+class PostSwipeScreen extends StatefulWidget {
   Post post;
 
-  FeedSwipeScreen({this.post});
+  PostSwipeScreen({this.post});
 
   @override
-  _FeedSwipeScreenState createState() => _FeedSwipeScreenState();
+  _PostSwipeScreenState createState() => _PostSwipeScreenState();
 }
 
-class _FeedSwipeScreenState extends State<FeedSwipeScreen> {
+class _PostSwipeScreenState extends State<PostSwipeScreen> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
