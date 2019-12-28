@@ -4,19 +4,19 @@ class Post {
   final String title;
   final String description;
   final List<String> images;
-  final String thumbnailUrl;
+  final String thumbnailSmallUrl;
 
   Post.fromMap(Map<dynamic, dynamic> data)
       : title = data["title"],
         description = data["description"],
-        thumbnailUrl = data["thumbnailUrl"],
+        thumbnailSmallUrl = data["thumbnailSmallUrl"],
         images = List.from(data['images']);
 
   Post({
     this.title,
     this.description,
     this.images,
-    this.thumbnailUrl,
+    this.thumbnailSmallUrl,
   });
 
   Map<String, Object> toJson() {
@@ -24,7 +24,7 @@ class Post {
       'title': title,
       'description': description,
       'imageUrl': images.toString(),
-      'thumbnailUrl': thumbnailUrl,
+      'thumbnailSmallUrl': thumbnailSmallUrl,
     };
   }
 
@@ -33,7 +33,7 @@ class Post {
       title: doc['title'],
       description: doc['description'],
       images: images,
-      thumbnailUrl: doc['thumbnailUrl'],
+      thumbnailSmallUrl: doc['thumbnailSmallUrl'],
     );
     return feed;
   }

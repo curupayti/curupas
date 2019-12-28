@@ -18,24 +18,36 @@ class MuseumWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(255, 0, 0, 0),
-      appBar: AppBar(
-        title: Text('Museo Curupas por año'),
+      appBar:
+      PreferredSize(
+          preferredSize: Size.fromHeight(40.0), // here the desired height
+          child:AppBar(
+            centerTitle: true,
+            backgroundColor: Color.fromRGBO(255, 0, 0, 0),
+            title: Text('Museo',
+              style: TextStyle(color: Colors.white,
+                fontSize: 29.0),),
+          ),
       ),
-      body: Center(
-        child: ListView(
-          padding: EdgeInsets.all(10.0),
-          scrollDirection: Axis.horizontal,
-          children: _alphabets
-              .map((data) => CircleAvatar(
-                    minRadius: 30.0,
-                    backgroundColor: Colors.red,
-                    child: Text(data,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 19.0,
-                        )),
-                  ))
-              .toList(),
+      body: Container(
+        height:100,
+        width: MediaQuery.of(context).size.width,
+        child: Center(
+          child: ListView(
+            padding: EdgeInsets.all(8.0),
+            scrollDirection: Axis.horizontal,
+            children: _alphabets
+                .map((data) => CircleAvatar(
+                      minRadius: 30.0,
+                      backgroundColor: Colors.red,
+                      child: Text(data,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 19.0,
+                          )),
+                    ))
+                .toList(),
+          ),
         ),
       ),
     );

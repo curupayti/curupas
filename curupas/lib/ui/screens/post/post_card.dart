@@ -62,7 +62,7 @@ class PostCard extends StatelessWidget {
                 arguments: feed,
               );
             },*/
-            child: Image.network(post.thumbnailUrl),
+            child: Image.network(post.thumbnailSmallUrl),
           ),
         ],
       ),

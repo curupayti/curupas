@@ -321,7 +321,6 @@ class Auth {
           .collection('images');
       QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
       templist = collectionSnapshot.documents; // <--- ERROR
-
       try {
         List<String> imageList = new List();
         templist.map((DocumentSnapshot docSnapshot) {
