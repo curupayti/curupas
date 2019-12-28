@@ -4,12 +4,12 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curupas/models/description.dart';
-import 'package:curupas/models/feeds.dart';
+import 'package:curupas/models/post.dart';
 import 'package:curupas/models/group.dart';
 import 'package:curupas/models/sms.dart';
 import 'package:curupas/models/user.dart';
 import 'package:flutter/services.dart';
-import 'package:curupas/utils/globals.dart' as _globals;
+import 'package:curupas/globals.dart' as _globals;
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum authProblems { UserNotFound, PasswordNotValid, NetworkError, UnknownError }
@@ -287,7 +287,7 @@ class Auth {
     return list;
   }
 
-  static Future<List<Post>> getPosts() async {
+  /*static Future<List<Post>> getPosts() async {
     List<DocumentSnapshot> templist;
     List<Post> list = new List();
     CollectionReference collectionRef = Firestore.instance.collection("posts");
@@ -295,32 +295,47 @@ class Auth {
     templist = collectionSnapshot.documents;
 
     list = await templist.map((DocumentSnapshot docSnapshot) {
-      getPostImages(docSnapshot.documentID).then((imagesList) {
-        return Post.fromDocument(docSnapshot, imagesList);
-      });
+      return Post.fromDocument(docSnapshot); //, imagesList);
+      //getPostImages(docSnapshot.documentID).then((imagesList) {
+      //});
     }).toList();
-
     return list;
+  }*/
+
+  static Future<List<DocumentSnapshot>> getPostSnapshots() async {
+    List<DocumentSnapshot> templist;
+    List<Post> list = new List();
+    CollectionReference collectionRef = Firestore.instance.collection("posts");
+    QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
+    return collectionSnapshot.documents;
   }
 
-  static Future<List<String>> getPostImages(String documentId) async {
+  static Future<List<Post>> getPost(List<DocumentSnapshot> snapshots) async {
+    var length = snapshots.length;
+    List<Post> posts = new List();
     List<DocumentSnapshot> templist;
-    List<String> imageList = new List();
-    CollectionReference collectionRef = Firestore.instance
-        .collection('posts')
-        .document(documentId)
-        .collection('images');
-    QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
+    for (var snapshot in snapshots) {
+      CollectionReference collectionRef = Firestore.instance
+          .collection('posts')
+          .document(snapshot.documentID)
+          .collection('images');
+      QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
+      templist = collectionSnapshot.documents; // <--- ERROR
 
-    templist = collectionSnapshot.documents; // <--- ERROR
-
-    imageList = templist.map((DocumentSnapshot docSnapshot) {
-      Map<String, Object> doc = docSnapshot.data;
-      String url = doc["downloadURL"];
-      imageList.add(url);
-    }).toList();
-
-    return imageList;
+      try {
+        List<String> imageList = new List();
+        templist.map((DocumentSnapshot docSnapshot) {
+          Map<String, Object> doc = docSnapshot.data;
+          String url = doc["downloadURL"];
+          imageList.add(url);
+        }).toList();
+        Post _post = Post.fromDocument(snapshot, imageList);
+        posts.add(_post);
+      } on Exception catch (_) {
+        print("Error: " + _.toString());
+      }
+    }
+    return posts;
   }
 
   static String getExceptionText(Exception e) {

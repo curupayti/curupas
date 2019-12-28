@@ -1,11 +1,11 @@
 import "package:flutter/material.dart";
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:curupas/utils/globals.dart' as _globals;
+import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/ui/draw/line.dart';
 import 'dart:ui' as ui;
 
-import 'package:curupas/ui/screens/feed/feed_card.dart';
+import 'package:curupas/ui/screens/post/post_card.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -98,7 +98,7 @@ class HomeBackground extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(bottom: bottomPadding),
             child:
-                Image.asset(_globals.dataFeed.backdropPhoto, fit: BoxFit.cover),
+                Image.asset(_globals.dataPost.backdropPhoto, fit: BoxFit.cover),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: bottomPadding),
@@ -160,7 +160,7 @@ Widget _buildHeaderText() {
       Padding(
         padding: EdgeInsets.only(left: ScreenUtil().setHeight(10.0)),
         child: Text(
-          _globals.dataFeed.name,
+          _globals.dataPost.name,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -172,7 +172,7 @@ Widget _buildHeaderText() {
       Padding(
         padding: EdgeInsets.only(top: ScreenUtil().setHeight(16.0)),
         child: Text(
-          _globals.dataFeed.location,
+          _globals.dataPost.location,
           style: TextStyle(
             color: Colors.white.withOpacity(0.85),
             fontWeight: FontWeight.w500,
@@ -186,7 +186,7 @@ Widget _buildHeaderText() {
         height: 1.0,
       ),
       Text(
-        _globals.dataFeed.biography,
+        _globals.dataPost.biography,
         style: TextStyle(
           color: Colors.white.withOpacity(0.85),
           fontSize: ScreenUtil().setSp(30.0),
@@ -212,7 +212,7 @@ Widget _buildAvatar() {
       right: ScreenUtil().setWidth(20.0),
       bottom: ScreenUtil().setWidth(20.0),
     ),
-    child: Image.asset(_globals.dataFeed.avatar),
+    child: Image.asset(_globals.dataPost.avatar),
   );
 }
 
@@ -224,10 +224,10 @@ Widget _buildFeedScroller() {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        itemCount: _globals.dataFeed.feeds.length,
+        itemCount: _globals.dataPost.posts.length,
         itemBuilder: (BuildContext context, int index) {
-          var feed = _globals.dataFeed.feeds[index];
-          return FeedCard(feed);
+          var feed = _globals.dataPost.posts[index];
+          return PostCard(feed);
         },
       ),
     ),

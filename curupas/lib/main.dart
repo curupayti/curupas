@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:notifier/notifier_provider.dart';
-import 'package:curupas/ui/screens/feed/feed_swiper_screen.dart';
+import 'package:curupas/ui/screens/post/post_swiper_screen.dart';
 import 'package:curupas/ui/screens/group_screen.dart';
 import 'package:curupas/ui/screens/main_screen.dart';
 import 'package:curupas/ui/screens/sign_in_screen.dart';
@@ -14,10 +14,11 @@ import 'package:curupas/ui/screens/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'models/feeds.dart';
+import 'models/post.dart';
 import 'models/streaming.dart';
 
 Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   Firestore.instance.settings();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SharedPreferences.getInstance().then((prefs) {

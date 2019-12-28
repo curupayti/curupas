@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:curupas/models/feeds.dart';
+import 'package:curupas/models/post.dart';
 
-class FeedCard extends StatelessWidget {
-  FeedCard(this.post);
+class PostCard extends StatelessWidget {
+  PostCard(this.post);
   final Post post;
 
   @override

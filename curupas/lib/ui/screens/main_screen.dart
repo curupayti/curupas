@@ -9,16 +9,17 @@ import 'package:curupas/business/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:curupas/business/messaging.dart';
 import 'package:curupas/models/description.dart';
-import 'package:curupas/models/feeds.dart';
+import 'package:curupas/models/post.dart';
 import 'package:curupas/models/streaming.dart';
 import 'package:curupas/models/user.dart';
+import 'package:curupas/ui/screens/pages/calendar_page.dart';
 import 'package:curupas/ui/screens/pages/group_page.dart';
 import 'package:curupas/ui/screens/pages/home_page.dart';
 import 'package:curupas/ui/screens/pages/profile_page.dart';
 import 'package:curupas/ui/screens/pages/streaming_page.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:curupas/utils/globals.dart' as _globals;
+import 'package:curupas/globals.dart' as _globals;
 import 'package:youtube_api/youtube_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
@@ -48,6 +49,7 @@ class _MainScreenState extends State<MainScreen> {
   final Key keyTwo = PageStorageKey('pageTwo');
   final Key keyThree = PageStorageKey('pageThree');
   final Key keyFour = PageStorageKey('pageFour');
+  final Key keyFive = PageStorageKey('pageFive');
 
   int currentTab = 0;
 
@@ -87,15 +89,17 @@ class _MainScreenState extends State<MainScreen> {
         String userId = prefs.getString('userId');
         _globals.getUserData(userId).then((user) {
           if (!user.smsChecked) {
-            if (!user.approved) {
+            if (!user.accepted) {
               showDialog(
                 context: context,
                 builder: (BuildContext context) =>
-                    _buildNotApprovedDialog(context),
+                    _buildNotAcceptedDialog(context),
               );
             } else {
               getDescription();
             }
+          } else {
+            getDescription();
           }
         });
       }
@@ -315,10 +319,11 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void getPosts(String title, String description) async {
-    await Auth.getPosts().then((listFeed) {
-      List<Post> newFeed = listFeed;
-      _globals.setDataPosts(description, newFeed);
-      getStreamingData();
+    await Auth.getPostSnapshots().then((templist) {
+      Auth.getPost(templist).then((posts) {
+        _globals.setDataPosts(description, posts);
+        getStreamingData();
+      });
     });
   }
 
@@ -387,32 +392,38 @@ class _MainScreenState extends State<MainScreen> {
 
   void updeteWidget() {
     _group = _globals.group.year;
-    pageTitles = ["Home", "Streaming", _group, "Perfil"];
+    pageTitles = ["Home", "Calendario", "Streaming", _group, "Perfil"];
     pageTitle = pageTitles[0];
     tabItems = List.of([
       new TabData(iconData: Icons.home, title: pageTitles[0]),
-      new TabData(iconData: Icons.videocam, title: pageTitles[1]),
-      new TabData(iconData: Icons.group_work, title: pageTitles[2]),
-      new TabData(iconData: Icons.account_circle, title: pageTitles[3]),
+      new TabData(iconData: Icons.calendar_today, title: pageTitles[1]),
+      new TabData(iconData: Icons.videocam, title: pageTitles[2]),
+      new TabData(iconData: Icons.group_work, title: pageTitles[3]),
+      new TabData(iconData: Icons.account_circle, title: pageTitles[4]),
     ]);
 
     HomePage one = new HomePage(
       key: keyOne,
     );
-    StreamingPage two = new StreamingPage(
+
+    CalendarPage two = new CalendarPage(
       key: keyTwo,
     );
 
-    GroupPage three = new GroupPage(
+    StreamingPage three = new StreamingPage(
       key: keyThree,
     );
 
-    ProfilePage four = new ProfilePage(
+    GroupPage four = new GroupPage(
       key: keyFour,
     );
 
+    ProfilePage five = new ProfilePage(
+      key: keyFive,
+    );
+
     setState(() {
-      pages = [one, two, three, four];
+      pages = [one, two, three, four, five];
       currentPage = one;
       _loadingInProgress = false;
       _loaded = true;
@@ -433,7 +444,7 @@ class _MainScreenState extends State<MainScreen> {
     Navigator.of(context).pushNamed("/signin");
   }
 
-  Widget _buildNotApprovedDialog(BuildContext context) {
+  Widget _buildNotAcceptedDialog(BuildContext context) {
     return new AlertDialog(
       title: Text('Aprobación pendiente',
           style: TextStyle(

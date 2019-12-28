@@ -9,7 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:curupas/models/description.dart';
-import 'package:curupas/models/feeds.dart';
+import 'package:curupas/models/post.dart';
 import 'package:curupas/models/group.dart';
 import 'package:curupas/models/user.dart';
 import 'package:curupas/ui/screens/widgets/alert_dialog.dart';
@@ -24,7 +24,7 @@ User user = new User();
 Group group = new Group();
 Description description = new Description();
 List<Post> feeds = new List<Post>();
-Data dataFeed;
+Data dataPost = new Data();
 Streammer streammer;
 bool streamingReachable = false;
 FilePickerGlobal filePickerGlobal;
@@ -114,15 +114,16 @@ void setYoutubeApi(List<YT_API> _ytResult) {
   streammer.setYtResutl(_ytResult);
 }
 
-void setDataPosts(String desc, List<Post> feeds) {
-  dataFeed = new Data(
+void setDataPosts(String desc, List<Post> posts) {
+  Data _dataPost = new Data(
     name: 'Curupa',
     avatar: 'assets/images/escudo.png',
     backdropPhoto: 'assets/images/cancha.png',
     location: 'Hurlingham, Buenos Aires',
     biography: desc,
-    feeds: feeds,
+    posts: posts,
   );
+  dataPost = _dataPost;
 }
 
 void showErrorAlert(
@@ -199,12 +200,12 @@ class FilePickerGlobal {
 
 class Data {
   Data({
-    @required this.name,
-    @required this.avatar,
-    @required this.backdropPhoto,
-    @required this.location,
-    @required this.biography,
-    @required this.feeds,
+    this.name,
+    this.avatar,
+    this.backdropPhoto,
+    this.location,
+    this.biography,
+    this.posts,
   });
 
   final String name;
@@ -212,7 +213,7 @@ class Data {
   final String backdropPhoto;
   final String location;
   final String biography;
-  final List<Post> feeds;
+  final List<Post> posts;
 }
 
 class Video {
