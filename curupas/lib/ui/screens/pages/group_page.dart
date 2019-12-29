@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/ui/screens/friend_screen.dart';
+import 'package:image_gallery/image_gallery.dart';
+
 
 var currentUserEmail;
 var _scaffoldContext;
@@ -37,6 +41,11 @@ class _GroupPageState extends State<GroupPage> {
 }
 
 class GroupBody extends StatelessWidget {
+
+  final _GroupPageState groupPageState;
+
+  GroupBody({Key key, @required this.groupPageState}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,6 +55,7 @@ class GroupBody extends StatelessWidget {
             height: 8.0,
           ),
           UpperSection(),
+          GridSection(parent: groupPageState),
           MiddleSection(),
         ],
       ),
@@ -159,7 +169,68 @@ class UpperSection extends StatelessWidget {
   }
 }
 
+class GridSection extends StatelessWidget {
+
+  final _GroupPageState parent;
+
+  GridSection({Key key, @required this.parent}) : super(key: key);
+
+  TextStyle defaultStyle = TextStyle(fontSize: 24, color: Colors.grey);
+  List<Object> allImage = new List();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        SizedBox(
+          height: 00.0,
+          child: _buildGrid(),
+        ),
+      ],
+    );
+  }
+
+  Future<void> loadImageList() async {
+    List allImageTemp;
+    allImageTemp = await FlutterGallaryPlugin.getAllImages;
+
+
+    parent.setState(() {
+      this.allImage = allImageTemp;
+    });
+  }
+
+
+  Widget _buildGrid() {
+    return new Flexible(child:
+        new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          GridView.extent(
+            maxCrossAxisExtent: 150.0,
+            // padding: const EdgeInsets.all(4.0),
+            mainAxisSpacing: 4.0,
+            crossAxisSpacing: 4.0,
+            children: _buildGridTileList(allImage.length),),
+        ],
+        ),
+      );
+  }
+
+  List<Container> _buildGridTileList(int count) {
+
+    return List<Container>.generate(
+        count,
+            (int index) =>
+            Container(child: Image.file(File(allImage[index].toString()),
+              width: 96.0,
+              height: 96.0,
+              fit: BoxFit.contain,)));
+  }
+}
+
 class MiddleSection extends StatelessWidget {
+
   MiddleSection({
     Key key,
   }) : super(key: key);

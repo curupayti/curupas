@@ -51,6 +51,7 @@ dependencies:
   location: ^2.3.5
   geolocator: ^5.1.4+2
   table_calendar: ^2.2.1
+  image_gallery: ^1.2.0
 
   #circular_bottom_navigation: ^1.0.1
   #url_launcher: ^3.0.2
