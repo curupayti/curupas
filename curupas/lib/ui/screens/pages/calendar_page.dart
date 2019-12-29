@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:curupas/globals.dart' as _globals;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class CalendarPage extends StatefulWidget {
   CalendarPage({Key key}) : super(key: key);
@@ -25,11 +27,11 @@ class _CalendarPageState extends State<CalendarPage> {
 class CalendarPageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height + 100;
+    double height = MediaQuery.of(context).size.height + 80;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
-          children: <Widget>[Container(height: height, child: ProfileBody())],
+          children: <Widget>[Container(height: height, child: CalendarBody())],
         ),
       ),
       floatingActionButton: buildSpeedDial(),
@@ -37,7 +39,7 @@ class CalendarPageScreen extends StatelessWidget {
   }
 }
 
-class ProfileBody extends StatelessWidget {
+class CalendarBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,64 +92,236 @@ class UpperSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.all(32.0),
-          child: Column(
-            children: <Widget>[
-              new Stack(fit: StackFit.loose, children: <Widget>[
-                new Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
+    double button_width = (MediaQuery.of(context).size.width / 3) - 10;
+    return new Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          new Container(
+            height:100,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.yellow,
+            child: Material(
+                elevation: 4.0,
+                borderRadius: BorderRadius.all(Radius.circular(6.0)),
+                child: Wrap(
+                  direction: Axis.horizontal,
                   children: <Widget>[
-                    new Container(
-                      width: 150.0,
-                      height: 150.0,
-                      decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: new DecorationImage(
-                            image: new NetworkImage(
-                                _globals.user.thumbnailPictureURL),
-                            fit: BoxFit.cover,
-                          )),
+                  SizedBox(
+                    height: 80.0,
+                    width: button_width,
+                    child:
+                      FlatButton(
+                        child: Text("Curupa"),
+                        onPressed: (){
+
+                        }
+                      ),
+                    ),
+                    SizedBox(
+                      height: 80.0,
+                      width: button_width,
+                      child:
+                        FlatButton(
+                            child: Text("Partidoss"),
+                            onPressed: (){
+
+                            }
+                        ),
+                    ),
+                    SizedBox(
+                      height: 80.0,
+                      width: button_width,
+                      child:
+                        FlatButton(
+                            child: Text("Camada"),
+                            onPressed: (){
+
+                            }
+                        ),
                     ),
                   ],
                 ),
-                Padding(
-                    padding: EdgeInsets.only(top: 110.0, right: 90.0),
-                    child: new Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        new CircleAvatar(
-                          backgroundColor: Colors.red,
-                          radius: 30.0,
-                          child: new Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                          ),
-                        )
-                      ],
-                    )),
-              ]),
-              SizedBox(
-                height: 16.0,
-              ),
-              Text(
-                _globals.user.name,
-                style: TextStyle(
-                  fontSize: 30.0,
-                ),
-              )
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-class CalendarSection extends StatelessWidget {
+//https://www.youtube.com/watch?v=jhtKTKn6PlI
+//https://github.com/lohanidamodar/flutter_calendar/tree/part2
+
+class CalendarSection extends StatefulWidget {
+  @override
+  _CalendarState createState() => _CalendarState();
+}
+
+class _CalendarState extends State<CalendarSection> {
+  CalendarController _controller;
+  Map<DateTime,List<dynamic>> _events;
+  List<dynamic> _selectedEvents;
+  TextEditingController _eventController;
+  SharedPreferences prefs;
+
+  final Map<DateTime, List> _holidays = {
+    DateTime(2019, 1, 1): ['New Year\'s Day'],
+    DateTime(2019, 1, 6): ['Epiphany'],
+    DateTime(2019, 2, 14): ['Valentine\'s Day'],
+    DateTime(2019, 4, 21): ['Easter Sunday'],
+    DateTime(2019, 4, 22): ['Easter Monday'],
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = CalendarController();
+    _eventController = TextEditingController();
+    _events = {};
+    _selectedEvents = [];
+    initPrefs();
+  }
+
+  initPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      final _selectedDay = DateTime.now();
+      _events = {
+        _selectedDay.subtract(Duration(days: 30)): ['Event A0', 'Event B0', 'Event C0'],
+        _selectedDay.subtract(Duration(days: 27)): ['Event A1'],
+        _selectedDay.subtract(Duration(days: 20)): ['Event A2', 'Event B2', 'Event C2', 'Event D2'],
+        _selectedDay.subtract(Duration(days: 16)): ['Event A3', 'Event B3'],
+        _selectedDay.subtract(Duration(days: 10)): ['Event A4', 'Event B4', 'Event C4'],
+        _selectedDay.subtract(Duration(days: 4)): ['Event A5', 'Event B5', 'Event C5'],
+        _selectedDay.subtract(Duration(days: 2)): ['Event A6', 'Event B6'],
+        _selectedDay: ['Event A7', 'Event B7', 'Event C7', 'Event D7'],
+        _selectedDay.add(Duration(days: 1)): ['Event A8', 'Event B8', 'Event C8', 'Event D8'],
+        _selectedDay.add(Duration(days: 3)): Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
+        _selectedDay.add(Duration(days: 7)): ['Event A10', 'Event B10', 'Event C10'],
+        _selectedDay.add(Duration(days: 11)): ['Event A11', 'Event B11'],
+        _selectedDay.add(Duration(days: 17)): ['Event A12', 'Event B12', 'Event C12', 'Event D12'],
+        _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
+        _selectedDay.add(Duration(days: 26)): ['Event A14', 'Event B14', 'Event C14'],
+      };
+    });
+  }
+
+  Map<String,dynamic> encodeMap(Map<DateTime,dynamic> map) {
+    Map<String,dynamic> newMap = {};
+    map.forEach((key,value) {
+      newMap[key.toString()] = map[key];
+    });
+    return newMap;
+  }
+
+  Map<DateTime,dynamic> decodeMap(Map<String,dynamic> map) {
+    Map<DateTime,dynamic> newMap = {};
+    map.forEach((key,value) {
+      newMap[DateTime.parse(key)] = map[key];
+    });
+    return newMap;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return
+      Expanded(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              TableCalendar(
+                events: _events,
+                initialCalendarFormat: CalendarFormat.week,
+                calendarStyle: CalendarStyle(
+                    canEventMarkersOverflow: true,
+                    todayColor: Colors.orange,
+                    selectedColor: Theme.of(context).primaryColor,
+                    todayStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18.0,
+                        color: Colors.white)),
+                headerStyle: HeaderStyle(
+                  centerHeaderTitle: true,
+                  formatButtonDecoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  formatButtonTextStyle: TextStyle(color: Colors.white),
+                  formatButtonShowsNext: false,
+                ),
+                startingDayOfWeek: StartingDayOfWeek.monday,
+                onDaySelected: (date, events) {
+                  setState(() {
+                    _selectedEvents = events;
+                  });
+                },
+                builders: CalendarBuilders(
+                  selectedDayBuilder: (context, date, events) => Container(
+                      margin: const EdgeInsets.all(4.0),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(10.0)),
+                      child: Text(
+                        date.day.toString(),
+                        style: TextStyle(color: Colors.white),
+                      )),
+                  todayDayBuilder: (context, date, events) => Container(
+                      margin: const EdgeInsets.all(4.0),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: Colors.orange,
+                          borderRadius: BorderRadius.circular(10.0)),
+                      child: Text(
+                        date.day.toString(),
+                        style: TextStyle(color: Colors.white),
+                      )),
+                ),
+                calendarController: _controller,
+              ),
+              ..._selectedEvents.map((event) => ListTile(
+                title: Text(event),
+              )),
+            ],
+          ),
+        ),
+      );
+  }
+
+  _showAddDialog() {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          content: TextField(
+            controller: _eventController,
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Save"),
+              onPressed: (){
+                if(_eventController.text.isEmpty) return;
+                setState(() {
+                  if(_events[_controller.selectedDay] != null) {
+                    _events[_controller.selectedDay].add(_eventController.text);
+                  }else{
+                    _events[_controller.selectedDay] = [_eventController.text];
+                  }
+                  //prefs.setString("events", json.encode(encodeMap(_events)));
+                  _eventController.clear();
+                  Navigator.pop(context);
+                });
+              },
+            )
+          ],
+        )
+    );
+  }
+}
+
+/*class CalendarSection extends StatelessWidget {
   const CalendarSection({
     Key key,
   }) : super(key: key);
@@ -158,8 +332,61 @@ class CalendarSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[],
+        children: <Widget>[
+          TableCalendar(
+          events: _events,
+          initialCalendarFormat: CalendarFormat.week,
+          calendarStyle: CalendarStyle(
+              canEventMarkersOverflow: true,
+              todayColor: Colors.orange,
+              selectedColor: Theme.of(context).primaryColor,
+              todayStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.0,
+                  color: Colors.white)),
+          headerStyle: HeaderStyle(
+            centerHeaderTitle: true,
+            formatButtonDecoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            formatButtonTextStyle: TextStyle(color: Colors.white),
+            formatButtonShowsNext: false,
+          ),
+          startingDayOfWeek: StartingDayOfWeek.monday,
+          onDaySelected: (date, events) {
+            setState(() {
+              _selectedEvents = events;
+            });
+          },
+          builders: CalendarBuilders(
+            selectedDayBuilder: (context, date, events) => Container(
+                margin: const EdgeInsets.all(4.0),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: BorderRadius.circular(10.0)),
+                child: Text(
+                  date.day.toString(),
+                  style: TextStyle(color: Colors.white),
+                )),
+            todayDayBuilder: (context, date, events) => Container(
+                margin: const EdgeInsets.all(4.0),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(10.0)),
+                child: Text(
+                  date.day.toString(),
+                  style: TextStyle(color: Colors.white),
+                )),
+          ),
+          calendarController: _controller,
+        ),
+          ..._selectedEvents.map((event) => ListTile(
+            title: Text(event),
+          )),],
       ),
     );
   }
-}
+}*/
