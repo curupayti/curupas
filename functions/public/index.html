@@ -12,7 +12,7 @@
         <link rel="stylesheet" href="css/vendor/font-awesome.min.css">
         <link rel="stylesheet" href="css/vendor/bootstrap.min.css">             
         <link rel="icon" type="image/x-icon" href="https://vigil.com.ar/favicons/curupa.ico"/>                
-        <link type="text/css" rel="stylesheet" href="js/vendor/loading_indicator/jquery.loading-indicator.css" />
+        <link type="text/css" rel="stylesheet" href="css/vendor/loading_indicator/jquery.loading-indicator.css" />
     </head>
 
     <body>
@@ -27,11 +27,12 @@
         <script src="js/vendor/jquery.min.js"></script>
         <script src="js/vendor/bootstrap.min.js"></script> 
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@beta/dist/js.cookie.min.js"></script>   
-        <script src="js/vendor/loading_indicator/jquery.loading-indicator.js"></script>
+        <script src="js/vendor/loading_indicator/jquery.loading-indicator.js"></script>        
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-firestore.js"></script>
         <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"></script>        
         <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-auth.js"></script>            
+        <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-database.js"></script>
 
     </body>
 
@@ -69,6 +70,8 @@
 
         const db = firebase.firestore();
         const storage = firebase.storage();
+        const database = firebase.database();
+
 
         var getUrlParameter = function getUrlParameter(sParam) {
             var sPageURL = window.location.search.substring(1),
@@ -101,6 +104,7 @@
                     querySnapshotUser.forEach(function(docUser) {                        
                         var roleReference =  docUser.data().roleRef;
 
+                        _user.userId = docUser.data().userID;
                         _user.name = docUser.data().name;
                         _user.profilePictureURL = docUser.data().profilePictureURL;            
                         _user.roleReference = roleReference;                        
@@ -378,7 +382,7 @@
             })
             .then(data => {                
                 $("#content").html(data);
-                let html = "js/" + js;                
+                let html = "js/" + js;  
                 if (jss!=undefined) {                        
                     let _jss = JSON.parse(window.atob(jss));
                     loadJss(_jss, function() {                        
