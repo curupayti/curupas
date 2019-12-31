@@ -4,7 +4,8 @@ $(document).ready(function () {
 
   var firepad = null, userList = null, codeMirror = null;
 
-  function joinFirepadForHash() {
+  //function joinFirepadForHash() {
+
     if (firepad) {
       // Clean up.
       firepad.dispose();
@@ -12,16 +13,27 @@ $(document).ready(function () {
       $('.CodeMirror').remove();
     }
 
-    var id = window.location.hash.replace(/#/g, '') || randomString(10);
+    //var id = window.location.hash.replace(/#/g, '') || randomString(10);
+    var url = window.location.toString().replace(/#.*/, '') + '#' + id;
+    //var firepadRef = new Firebase('https://firepad.firebaseio.com/demo').child(id);
+
+    var id =  _user.userId;
+    var firepadRef = database.ref(id);
+
+    //var id = window.location.hash.replace(/#/g, '') || randomString(10);
     var url = window.location.toString().replace(/#.*/, '') + '#' + id;
     var firepadRef = new Firebase('https://firepad.firebaseio.com/demo').child(id);
 
-    var userId = firepadRef.push().name(); // Just a random ID.
-    codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });
-    firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
-        { richTextToolbar: true, richTextShortcuts: true, userId: userId});
-    userList = FirepadUserList.fromDiv(firepadRef.child('users'),
-        document.getElementById('firepad-userlist'), userId);
+    var id = window.location.hash.replace(/#/g, '') || randomString(10);
+  //var url = window.location.toString().replace(/#.*/, '') + '#' + id;
+  var firepadRef = new Firebase(firebaseConfig.databaseURL).child(id);
+
+  var userId = firepadRef.push().name(); // Just a random ID.
+  codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });
+  firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
+      { richTextToolbar: true, richTextShortcuts: true, userId: userId});
+  userList = FirepadUserList.fromDiv(firepadRef.child('users'),
+      document.getElementById('firepad-userlist'), userId);
 
     firepad.on('ready', function() {
       if (firepad.isHistoryEmpty()) {
@@ -32,6 +44,7 @@ $(document).ready(function () {
       buildPadList();
     });
 
+
     codeMirror.focus();
 
     window.location = url;
@@ -41,7 +54,12 @@ $(document).ready(function () {
       e.preventDefault();
       return false;
     });
-  }
+
+    setTimeout(function() {
+      $(window).on('hashchange', joinFirepadForHash);
+    }, 0);
+
+  //}
 
   function padListEnabled() {
     return (typeof localStorage !== 'undefined' && typeof JSON !== 'undefined' && localStorage.setItem &&
@@ -98,12 +116,16 @@ $(document).ready(function () {
     return text;
   }
 
-  $(window).on('ready', function() {
+  /*$(window).on('ready', function() {
     joinFirepadForHash();
     setTimeout(function() {
       $(window).on('hashchange', joinFirepadForHash);
     }, 0);
-  });
+  });*/
+
+  function displayPads() {
+    $('#my-pads-list').toggle();
+  }
 
     //# sourceURL=textedit.js   
 
