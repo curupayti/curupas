@@ -1,13 +1,15 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curupas/ui/screens/widgets/gallery/galleryPhotoViewWrapper.dart';
+import 'package:curupas/ui/screens/widgets/gallery/gallery_example_item.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/ui/screens/friend_screen.dart';
-import 'package:image_gallery/image_gallery.dart';
-
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 
 var currentUserEmail;
 var _scaffoldContext;
@@ -41,7 +43,6 @@ class _GroupPageState extends State<GroupPage> {
 }
 
 class GroupBody extends StatelessWidget {
-
   final _GroupPageState groupPageState;
 
   GroupBody({Key key, @required this.groupPageState}) : super(key: key);
@@ -170,8 +171,9 @@ class UpperSection extends StatelessWidget {
 }
 
 class GridSection extends StatelessWidget {
-
   final _GroupPageState parent;
+
+  bool verticalGallery = false;
 
   GridSection({Key key, @required this.parent}) : super(key: key);
 
@@ -184,53 +186,86 @@ class GridSection extends StatelessWidget {
       children: <Widget>[
         SizedBox(
           height: 00.0,
-          child: _buildGrid(),
+          child: _buildGrid(context),
         ),
       ],
     );
   }
 
-  Future<void> loadImageList() async {
-    List allImageTemp;
-    allImageTemp = await FlutterGallaryPlugin.getAllImages;
-
-
-    parent.setState(() {
-      this.allImage = allImageTemp;
-    });
-  }
-
-
-  Widget _buildGrid() {
-    return new Flexible(child:
-        new Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildGrid(BuildContext context) {
+    return new Flexible(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          GridView.extent(
-            maxCrossAxisExtent: 150.0,
-            // padding: const EdgeInsets.all(4.0),
-            mainAxisSpacing: 4.0,
-            crossAxisSpacing: 4.0,
-            children: _buildGridTileList(allImage.length),),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      GalleryExampleItemThumbnail(
+                        galleryExampleItem: galleryItems[0],
+                        onTap: () {
+                          open(context, 0);
+                        },
+                      ),
+                      GalleryExampleItemThumbnail(
+                        galleryExampleItem: galleryItems[2],
+                        onTap: () {
+                          open(context, 2);
+                        },
+                      ),
+                      GalleryExampleItemThumbnail(
+                        galleryExampleItem: galleryItems[3],
+                        onTap: () {
+                          open(context, 3);
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Text("Vertical"),
+                      Checkbox(
+                        value: verticalGallery,
+                        onChanged: (value) {
+                          parent.setState(() {
+                            verticalGallery = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
-        ),
-      );
+      ),
+    );
   }
 
-  List<Container> _buildGridTileList(int count) {
-
-    return List<Container>.generate(
-        count,
-            (int index) =>
-            Container(child: Image.file(File(allImage[index].toString()),
-              width: 96.0,
-              height: 96.0,
-              fit: BoxFit.contain,)));
+  void open(BuildContext context, final int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GalleryPhotoViewWrapper(
+          galleryItems: galleryItems,
+          backgroundDecoration: const BoxDecoration(
+            color: Colors.black,
+          ),
+          initialIndex: index,
+          scrollDirection: verticalGallery ? Axis.vertical : Axis.horizontal,
+        ),
+      ),
+    );
   }
 }
 
 class MiddleSection extends StatelessWidget {
-
   MiddleSection({
     Key key,
   }) : super(key: key);
