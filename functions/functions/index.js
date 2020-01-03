@@ -26,13 +26,16 @@ admin.initializeApp({
 
 const mkdirp = require('mkdirp-promise');
 const db = admin.firestore();
-//const rp = require('request-promise');
 const request = require('request');
 
 const spawn = require('child-process-promise').spawn;
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const Firepad  = require('firepad');
+
+const database = firebase.database();
+
 
 // Max height and width of the thumbnail in pixels.
 const THUMB_MAX_HEIGHT = 200;
@@ -274,5 +277,21 @@ exports.sendSMS = functions.https.onRequest((req, res) => {
             res.send(_error);
         }
     });  
+
+}); 
+
+
+exports.getFirePadFromRef = functions.https.onRequest((req, res) => {
+
+  const refId = req.body.data.refId;
+
+  var firepadRef = database.ref(refId);
+
+  var headless = new Firepad.Headless(firepadRef);
+
+  headless.getText(function(text) {
+    //console.log("Contents of firepad retrieved: " + text);
+    res.send(text);
+  });
 
 }); 

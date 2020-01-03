@@ -22,24 +22,23 @@ $(document).ready(function () {
 
     //var id = window.location.hash.replace(/#/g, '') || randomString(10);
     var url = window.location.toString().replace(/#.*/, '') + '#' + id;
-    var firepadRef = new Firebase('https://firepad.firebaseio.com/demo').child(id);
+    //var firepadRef = new Firebase('https://firepad.firebaseio.com/demo').child(id);
 
-    var id = window.location.hash.replace(/#/g, '') || randomString(10);
-  //var url = window.location.toString().replace(/#.*/, '') + '#' + id;
-  var firepadRef = new Firebase(firebaseConfig.databaseURL).child(id);
+    //var id = window.location.hash.replace(/#/g, '') || randomString(10);
+    //var url = window.location.toString().replace(/#.*/, '') + '#' + id;
+    var firepadRef = new Firebase(firebaseConfig.databaseURL).child(id);
 
-  var userId = firepadRef.push().name(); // Just a random ID.
-  codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });
-  firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
+    var userId = firepadRef.push().name(); // Just a random ID.
+    codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });
+    firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
       { richTextToolbar: true, richTextShortcuts: true, userId: userId});
-  userList = FirepadUserList.fromDiv(firepadRef.child('users'),
-      document.getElementById('firepad-userlist'), userId);
+    userList = FirepadUserList.fromDiv(firepadRef.child('users'),
+    document.getElementById('firepad-userlist'), userId);
 
     firepad.on('ready', function() {
       if (firepad.isHistoryEmpty()) {
         firepad.setText('Welcome to your own private pad!\n\nShare the URL below and collaborate with your friends.');
       }
-
       ensurePadInList(id);
       buildPadList();
     });
