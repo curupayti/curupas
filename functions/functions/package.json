@@ -13,8 +13,11 @@
   },
   "dependencies": {
     "child-process-promise": "^2.2.1",
+    "cors": "^2.8.5",
     "firebase-admin": "^8.6.0",
     "firebase-functions": "^3.3.0",
+    "firepad": "^1.5.3",
+    "jsdom": "^15.2.1",
     "mkdirp-promise": "^5.0.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.5"

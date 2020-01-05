@@ -16,26 +16,42 @@
 'use strict';
 
 const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+var admin = require('firebase-admin');
 
-var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-115547b9d9.json");
+var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
+var db_url = "https://curupas-app.firebaseio.com";
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://curupas-app.firebaseio.com"
+  databaseURL: db_url
 });
+const firestore = admin.firestore();
+
+const firebase = require('firebase');
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg",
+  authDomain: "curupas-app.firebaseapp.com",
+  databaseURL: "https://curupas-app.firebaseio.com",
+  projectId: "curupas-app",
+  storageBucket: "curupas-app.appspot.com",
+  messagingSenderId: "813267916846",
+  appId: "1:813267916846:web:529f9c18a84b6b45aa67bf",
+  measurementId: "G-2RRZXWLMTL"
+};
+firebase.initializeApp(firebaseConfig);
+
+const Firepad  = require('firepad');
+const cors = require('cors')({origin: true});
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 const mkdirp = require('mkdirp-promise');
-const db = admin.firestore();
 const request = require('request');
 
 const spawn = require('child-process-promise').spawn;
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-const Firepad  = require('firepad');
-
-const database = firebase.database();
-
 
 // Max height and width of the thumbnail in pixels.
 const THUMB_MAX_HEIGHT = 200;
@@ -128,7 +144,7 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
       console.log('postId: '+ postId);          
       let _time = admin.firestore.FieldValue.serverTimestamp();
       console.log("_time: " + _time);
-      await db.collection("posts").doc(postId).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
+      await firestore.collection("posts").doc(postId).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
    
     //Save User Thumbnail
     } else if (customMetadataType == 2) {  
@@ -139,7 +155,7 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
       console.log('year: '+ year);          
       let _time = admin.firestore.FieldValue.serverTimestamp();
       console.log("_time: " + _time);
-      await db.collection("users").doc(userId).update(
+      await firestore.collection("users").doc(userId).update(
         { profilePictureURL : fileUrl,
           thumbnailPictureURL: thumbFileUrl, timeStamp:_time});
 
@@ -203,7 +219,7 @@ exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(even
 
   console.log('User to send notification', uuid);
 
-  var ref = admin.database().ref('Users/${uuid}/token');
+  var ref = admin.database.ref('Users/${uuid}/token');
 
   return ref.once("value", function(snapshot){
     
@@ -257,7 +273,7 @@ exports.sendSMS = functions.https.onRequest((req, res) => {
                        
             console.log("smsid: " + smsid);
 
-            var userRef = db.collection("users").doc(userId);
+            var userRef = firestore.collection("users").doc(userId);
             return userRef.update({
               smsId: smsid
             })
@@ -283,15 +299,74 @@ exports.sendSMS = functions.https.onRequest((req, res) => {
 
 exports.getFirePadFromRef = functions.https.onRequest((req, res) => {
 
-  const refId = req.body.data.refId;
+  const refId = req.body.data.refId; 
 
-  var firepadRef = database.ref(refId);
+  //console.log("refId: " + refId);
+
+  var rootRef = firebase.database().ref();
+  var firepadRef = rootRef.child(refId);
+
+  //console.log("firepadRef: " + JSON.stringify(firepadRef));
 
   var headless = new Firepad.Headless(firepadRef);
 
-  headless.getText(function(text) {
-    //console.log("Contents of firepad retrieved: " + text);
-    res.send(text);
+  //console.log("headless: " + headless);
+
+  headless.getHtml(function(html) {
+
+    console.log("html: " + html);    
+    
+    //const html = JSDOM(text);
+    //console.log("Html: " + html);    
+
+    //var docRef = firestore.collection("edits").doc(refId);
+
+    /*docRef.get().then(function(doc) {
+
+        if (doc.exists) {            
+            //console.log("Document data:", doc.data());
+            docRef.update({
+              content: text,
+              updatedAt: now
+            });  
+
+            res.send(text);
+            
+            headless.dispose();
+            
+        } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+            var now = firebase.firestore.FieldValue.serverTimestamp();
+            var edit = {
+              content: text, 
+              title: "Hola Mundo",            
+              updatedAt: now
+              //updatedBy : user.name
+            };
+            docRef.set(edit).then(()=>{        
+              console.log("GUARDADO: " + JSON.stringify(edit));
+            });  
+
+            res.send(text);
+
+            headless.dispose();
+
+        }*/
+
+    }).catch(function(error) {
+        console.log("Error getting document:", error);
+
+        headless.dispose();
+    });
+    
   });
 
-}); 
+  //res.send({result: true});
+  
+  /*headless.getHtml(function(text) {
+    console.log("HTML of firepad retrieved: " + text);
+    res.send(text);
+  });*/  
+
+//}); 
