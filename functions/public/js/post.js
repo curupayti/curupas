@@ -127,7 +127,8 @@ $(document).ready(function () {
                 customMetadata: {
                     'thumbnail': 'true',
                     'type' : '1',
-                    'postId' : postId                   
+                    'id' : postId,
+                    'collection' : 'posts'                   
                 }
             }
             return thisRef.put(file, metadata);                    
@@ -135,15 +136,15 @@ $(document).ready(function () {
         .then(function(snapshot) {                                    
             var metadataFiles = {
                 customMetadata: {
-                    'thumbnail': 'false'
-                    //'type' : '2',
-                    //'postId' : postId                   
+                    'thumbnail': 'false',
+                    'type' : '0'
                 }
             }
             var prefArray = [];
             var input = document.getElementById("proImage");
             var j=0, k=0;
             var length = input.files.length;
+
             for (var i = 0; i < length; ++i) {            
                 var _file = input.files.item(i);                                                  
                 var filePathPost = title + "_" + i + "_original.png";        

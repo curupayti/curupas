@@ -127,7 +127,8 @@ $(document).ready(function () {
                 customMetadata: {
                     'thumbnail': 'true',
                     'type' : '1',
-                    'museumId' : museumId                   
+                    'id' : museumId,
+                    'collection' : 'museums'                       
                 }
             }
             return thisRef.put(file, metadata);                    
@@ -135,9 +136,8 @@ $(document).ready(function () {
         .then(function(snapshot) {                                    
             var metadataFiles = {
                 customMetadata: {
-                    'thumbnail': 'false'
-                    //'type' : '2',
-                    //'museumId' : museumId                   
+                    'thumbnail': 'false',
+                    'type' : '0'                  
                 }
             }
             var prefArray = [];
