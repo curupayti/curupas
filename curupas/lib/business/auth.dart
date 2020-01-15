@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:curupas/models/content_html.dart';
+import 'package:curupas/models/drawer_content.dart';
+import 'package:curupas/models/museum.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -259,6 +262,31 @@ class Auth {
     });
   }
 
+  static Future<DrawerContent> getDrawers() async {
+    DrawerContent _drawerContent = DrawerContent();
+    await Firestore.instance.document("contents/drawer").get().then((document) async {
+      if (document.exists) {
+       await getContenHtmls(document).then((listContentHtml) {
+         _drawerContent = DrawerContent.fromDocument(document, listContentHtml);
+        });
+      }
+    });
+    return _drawerContent;
+  }
+
+
+  static Future<List<ContentHtml>> getContenHtmls(DocumentSnapshot document) async {
+    QuerySnapshot collectionSnapshot = await document.reference.collection("collection").getDocuments();
+    List<DocumentSnapshot> templist;
+    List<ContentHtml> listContentHtml = new List();
+    templist = collectionSnapshot.documents;
+    listContentHtml = await templist.map((DocumentSnapshot docSnapshot) {
+      return ContentHtml.fromDocument(docSnapshot);
+    }).toList();
+    return listContentHtml;
+  }
+
+
   static Future<List<User>> getUserById(String userId) async {
     List<DocumentSnapshot> templist;
     List<User> list = new List();
@@ -286,21 +314,6 @@ class Auth {
     }).toList();
     return list;
   }
-
-  /*static Future<List<Post>> getPosts() async {
-    List<DocumentSnapshot> templist;
-    List<Post> list = new List();
-    CollectionReference collectionRef = Firestore.instance.collection("posts");
-    QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
-    templist = collectionSnapshot.documents;
-
-    list = await templist.map((DocumentSnapshot docSnapshot) {
-      return Post.fromDocument(docSnapshot); //, imagesList);
-      //getPostImages(docSnapshot.documentID).then((imagesList) {
-      //});
-    }).toList();
-    return list;
-  }*/
 
   static Future<List<DocumentSnapshot>> getPostSnapshots() async {
     List<DocumentSnapshot> templist;
@@ -335,6 +348,44 @@ class Auth {
       }
     }
     return posts;
+  }
+
+  /////////////////////////
+
+
+  static Future<List<DocumentSnapshot>> getMuseumSnapshots() async {
+    List<DocumentSnapshot> templist;
+    List<Museum> list = new List();
+    CollectionReference collectionRef = Firestore.instance.collection("museums");
+    QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
+    return collectionSnapshot.documents;
+  }
+
+  static Future<List<Museum>> getMuseum(List<DocumentSnapshot> snapshots) async {
+    var length = snapshots.length;
+    List<Museum> museums = new List();
+    List<DocumentSnapshot> templist;
+    for (var snapshot in snapshots) {
+      CollectionReference collectionRef = Firestore.instance
+          .collection('museums')
+          .document(snapshot.documentID)
+          .collection('images');
+      QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
+      templist = collectionSnapshot.documents; // <--- ERROR
+      try {
+        List<String> imageList = new List();
+        templist.map((DocumentSnapshot docSnapshot) {
+          Map<String, Object> doc = docSnapshot.data;
+          String url = doc["downloadURL"];
+          imageList.add(url);
+        }).toList();
+        Museum _museum = Museum.fromDocument(snapshot, imageList);
+        museums.add(_museum);
+      } on Exception catch (_) {
+        print("Error: " + _.toString());
+      }
+    }
+    return museums;
   }
 
   static String getExceptionText(Exception e) {

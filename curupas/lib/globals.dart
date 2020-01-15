@@ -16,15 +16,18 @@ import 'package:curupas/ui/screens/widgets/alert_dialog.dart';
 import 'package:youtube_api/youtube_api.dart';
 import 'package:file_picker/file_picker.dart';
 import 'business/auth.dart';
+import 'models/drawer_content.dart';
+import 'models/museum.dart';
 import 'models/streaming.dart';
 import 'package:path/path.dart' as p;
 import 'dart:math' as math;
 
 User user = new User();
 Group group = new Group();
+DrawerContent drawerContent = new DrawerContent();
 Description description = new Description();
 List<Post> feeds = new List<Post>();
-Data dataPost = new Data();
+Data homeData = new Data();
 Streammer streammer;
 bool streamingReachable = false;
 FilePickerGlobal filePickerGlobal;
@@ -114,7 +117,7 @@ void setYoutubeApi(List<YT_API> _ytResult) {
   streammer.setYtResutl(_ytResult);
 }
 
-void setDataPosts(String desc, List<Post> posts) {
+void setData(String desc, List<Post> posts, List<Museum> museums) {
   Data _dataPost = new Data(
     name: 'Curupa',
     avatar: 'assets/images/escudo.png',
@@ -122,8 +125,9 @@ void setDataPosts(String desc, List<Post> posts) {
     location: 'Hurlingham, Buenos Aires',
     biography: desc,
     posts: posts,
+    museums: museums,
   );
-  dataPost = _dataPost;
+  homeData = _dataPost;
 }
 
 void showErrorAlert(
@@ -206,6 +210,7 @@ class Data {
     this.location,
     this.biography,
     this.posts,
+    this.museums,
   });
 
   final String name;
@@ -214,6 +219,7 @@ class Data {
   final String location;
   final String biography;
   final List<Post> posts;
+  final List<Museum> museums;
 }
 
 class Video {

@@ -49,12 +49,12 @@ SpeedDial buildSpeedDial() {
     elevation: 8.0,
     shape: CircleBorder(),
     children: [
-      SpeedDialChild(
+      /*SpeedDialChild(
           child: Icon(Icons.calendar_today, color: Colors.white),
           backgroundColor: Color.fromRGBO(0, 29, 126, 1),
           label: 'Calendario',
           labelStyle: TextStyle(fontSize: 18.0),
-          onTap: () => print('FIRST CHILD')),
+          onTap: () => print('FIRST CHILD')),*/
       SpeedDialChild(
           child: Icon(Icons.poll, color: Colors.white),
           backgroundColor: Color.fromRGBO(0, 29, 126, 1),
@@ -99,7 +99,7 @@ class HomeBackground extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(bottom: bottomPadding),
             child:
-                Image.asset(_globals.dataPost.backdropPhoto, fit: BoxFit.cover),
+                Image.asset(_globals.homeData.backdropPhoto, fit: BoxFit.cover),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: bottomPadding),
@@ -162,7 +162,7 @@ Widget _buildHeaderText() {
       Padding(
         padding: EdgeInsets.only(left: ScreenUtil().setHeight(10.0)),
         child: Text(
-          _globals.dataPost.name,
+          _globals.homeData.name,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -174,7 +174,7 @@ Widget _buildHeaderText() {
       Padding(
         padding: EdgeInsets.only(top: ScreenUtil().setHeight(16.0)),
         child: Text(
-          _globals.dataPost.location,
+          _globals.homeData.location,
           style: TextStyle(
             color: Colors.white.withOpacity(0.85),
             fontWeight: FontWeight.w500,
@@ -188,7 +188,7 @@ Widget _buildHeaderText() {
         height: 1.0,
       ),
       Text(
-        _globals.dataPost.biography,
+        _globals.homeData.biography,
         style: TextStyle(
           color: Colors.white.withOpacity(0.85),
           fontSize: ScreenUtil().setSp(30.0),
@@ -214,7 +214,7 @@ Widget _buildAvatar() {
       right: ScreenUtil().setWidth(20.0),
       bottom: ScreenUtil().setWidth(20.0),
     ),
-    child: Image.asset(_globals.dataPost.avatar),
+    child: Image.asset(_globals.homeData.avatar),
   );
 }
 
@@ -226,9 +226,9 @@ Widget _buildPostScroller() {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        itemCount: _globals.dataPost.posts.length,
+        itemCount: _globals.homeData.posts.length,
         itemBuilder: (BuildContext context, int index) {
-          var post = _globals.dataPost.posts[index];
+          var post = _globals.homeData.posts[index];
           return PostCard(post);
         },
       ),
@@ -241,7 +241,7 @@ Widget _buildPDatePickerTimeline() {
     padding: const EdgeInsets.only(top: 16.0),
     child: SizedBox.fromSize(
       size: Size.fromHeight(245.0),
-      child: MuseumWidget(),
+      child: new MuseumWidget(museums: _globals.homeData.museums),
     ),
   );
 }

@@ -1,7 +1,14 @@
+import 'package:circular_profile_avatar/circular_profile_avatar.dart';
+import 'package:curupas/models/museum.dart';
 import 'package:flutter/material.dart';
 
 class MuseumWidget extends StatelessWidget {
-  final List<String> _alphabets = [
+
+  final List<Museum> museums;
+
+  MuseumWidget({Key key, this.museums}) : super(key: key);
+
+  /*final List<Museum> _alphabets  = [
     "A",
     "B",
     "C",
@@ -13,7 +20,8 @@ class MuseumWidget extends StatelessWidget {
     "I",
     "J",
     "K",
-  ];
+  ];*/
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,9 +32,9 @@ class MuseumWidget extends StatelessWidget {
           child:AppBar(
             centerTitle: true,
             backgroundColor: Color.fromRGBO(255, 0, 0, 0),
-            title: Text('Museo',
+            title: Text('Museo plantel superior por año',
               style: TextStyle(color: Colors.white,
-                fontSize: 29.0),),
+                fontSize: 20.0),),
           ),
       ),
       body: Container(
@@ -34,19 +42,30 @@ class MuseumWidget extends StatelessWidget {
         width: MediaQuery.of(context).size.width,
         child: Center(
           child: ListView(
-            padding: EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(2.0),
             scrollDirection: Axis.horizontal,
-            children: _alphabets
-                .map((data) => CircleAvatar(
-                      minRadius: 30.0,
-                      backgroundColor: Colors.red,
-                      child: Text(data,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 19.0,
-                          )),
-                    ))
-                .toList(),
+            children: museums.map((museum) =>  CircularProfileAvatar (
+              museum.thumbnailSmallUrl,
+              radius: 50,
+              //backgroundColor: Colors.transparent,
+              borderWidth: 2,
+              initialsText: Text(
+                museum.title,
+                style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
+                ),
+              ),
+              borderColor: Colors.red,
+              elevation: 5.0,
+              //foregroundColor: Colors.white.withOpacity(0.9),
+              cacheImage: true,
+              onTap: () {
+                print('adil');
+              },
+              showInitialTextAbovePicture: true,
+            ),).toList(),
           ),
         ),
       ),

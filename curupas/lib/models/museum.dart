@@ -1,18 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Post {
+class Museum {
   final String title;
   final String description;
   final List<String> images;
   final String thumbnailSmallUrl;
 
-  Post.fromMap(Map<dynamic, dynamic> data)
+  Museum.fromMap(Map<dynamic, dynamic> data)
       : title = data["title"],
         description = data["description"],
         thumbnailSmallUrl = data["thumbnailSmallUrl"],
         images = List.from(data['images']);
 
-  Post({
+  Museum({
     this.title,
     this.description,
     this.images,
@@ -28,18 +28,18 @@ class Post {
     };
   }
 
-  factory Post.fromJson(Map<String, Object> doc, List<String> images) {
-    Post post = new Post(
+  factory Museum.fromJson(Map<String, Object> doc, List<String> images) {
+    Museum feed = new Museum(
       title: doc['title'],
       description: doc['description'],
       images: images,
       thumbnailSmallUrl: doc['thumbnailSmallUrl'],
     );
-    return post;
+    return feed;
   }
 
-  factory Post.fromDocument(DocumentSnapshot doc, List<String> images) {
-    return Post.fromJson(doc.data, images);
+  factory Museum.fromDocument(DocumentSnapshot doc, List<String> images) {
+    return Museum.fromJson(doc.data, images);
   }
 
   void setGroupReference(DocumentReference ref) {}

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:curupas/ui/screens/widgets/gallery/galleryPhotoViewWrapper.dart';
 import 'package:curupas/ui/screens/widgets/gallery/gallery_example_item.dart';
 import "package:flutter/material.dart";
@@ -39,6 +40,25 @@ class _GroupPageState extends State<GroupPage> {
   @override
   void initState() {
     super.initState();
+
+    getFirePadFromRef("ZAvWQjFab2fiv27g3Hu0kcpSCXP2");
+  }
+
+  void getFirePadFromRef(String refId) async {
+    try {
+      final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+        functionName: 'getFirePadFromRef',
+      );
+      HttpsCallableResult resp = await callable.call(<String, dynamic>{
+        "refId": refId,
+      });
+      String response = resp.toString();
+      print(response);
+
+    } catch (e) {
+      print('caught generic exception');
+      print(e);
+    }
   }
 }
 
@@ -56,7 +76,7 @@ class GroupBody extends StatelessWidget {
             height: 8.0,
           ),
           UpperSection(),
-          GridSection(parent: groupPageState),
+          //GridSection(parent: groupPageState),
           MiddleSection(),
         ],
       ),
@@ -168,6 +188,7 @@ class UpperSection extends StatelessWidget {
       ],
     );
   }
+
 }
 
 class GridSection extends StatelessWidget {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:curupas/models/drawer_content.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -96,10 +97,10 @@ class _MainScreenState extends State<MainScreen> {
                     _buildNotAcceptedDialog(context),
               );
             } else {
-              getDescription();
+              loadContent();
             }
           } else {
-            getDescription();
+            loadContent();
           }
         });
       }
@@ -109,6 +110,11 @@ class _MainScreenState extends State<MainScreen> {
       ..onTap = () => _openUrl(curupasUrl);
 
     super.initState();
+  }
+
+  void loadContent() {
+    getDescription();
+    getDrawers();
   }
 
   Future<bool> isRegistered() async {
@@ -214,7 +220,11 @@ class _MainScreenState extends State<MainScreen> {
                 child: Text('Drawer Header'),
               ),*/
               _createHeader(),
-              _createDrawerItem(icon: Icons.info_outline, text: 'Acerca de'),
+              _createDrawerItem(icon: Icons.info_outline, text: 'Acerca de',
+                onTap: () {
+                  _logOut();
+                  _scaffoldKey.currentState.openEndDrawer();
+                },),
               Divider(),
               _createDrawerItem(
                   icon: Icons.highlight, text: 'Como mejorar la app'),
@@ -318,10 +328,24 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  void getDrawers() async {
+    Auth.getDrawers().then((_drawer) {
+      _globals.drawerContent = _drawer as DrawerContent;
+    });
+  }
+
   void getPosts(String title, String description) async {
     await Auth.getPostSnapshots().then((templist) {
       Auth.getPost(templist).then((posts) {
-        _globals.setDataPosts(description, posts);
+        getMuseums(description, posts);
+      });
+    });
+  }
+
+  void getMuseums(String desc, List<Post> posts) async {
+    await Auth.getMuseumSnapshots().then((templist) {
+      Auth.getMuseum(templist).then((museums) {
+        _globals.setData(desc, posts, museums);
         getStreamingData();
       });
     });
