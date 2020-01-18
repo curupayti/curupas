@@ -118,7 +118,13 @@
                             let type = typeof json;
                             
                             var count = Object.keys(json).length;
-                            var a = 0;                            
+                            var a = 0;    
+                            
+                            _role.desc = json.role;         
+                            
+                            if (json.edit!=undefined) { 
+                                _role.edit_references = json.edit;    
+                            }   
                             
                             Object.keys(json).forEach((id) => {
 
@@ -134,11 +140,7 @@
 
                                     let isArray = Array.isArray(json[id]);
 
-                                    if (!isArray) {
-                                  
-                                        _role.desc = json.role;
-                                  
-                                    } else {
+                                    if (isArray) {                                           
                                   
                                         var arrayNav = json[id];                                            
 

@@ -49,7 +49,6 @@
                                     "id": "openRecentFolder",
                                     "uri": {
                                         "$mid": 1,
-                                        "fsPath": "/home/jose/repos/curupa/functions",
                                         "external": "file:///home/jose/repos/curupa/functions",
                                         "path": "/home/jose/repos/curupa/functions",
                                         "scheme": "file"
@@ -169,7 +168,7 @@
                     },
                     {
                         "id": "workbench.action.closeFolder",
-                        "label": "Close &&Folder"
+                        "label": "Close &&Workspace"
                     },
                     {
                         "id": "workbench.action.closeWindow",
