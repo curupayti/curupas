@@ -21,21 +21,22 @@ $(document).ready(function () {
 
         var _id = _doc.id;
 
-        let _name = data.name;       
+        let _name = data.name;  
+        
+        let _name =  data.last_update;
        
         //https://firebase.google.com/docs/firestore/solutions/presence?hl=es
 
         $("#edit-list").append('<li class="list-group-item"><a id="' + _id + '" class="nav-link" href="javascript:void(0);" onclick="loadEditsList(\'' + _id + '\'); return false;">' + _name + '</a></li>');           
 
-        if (length == (count-1)) {
-
-          loadEdits(); 
+        if (length == (count-1)) {         
 
           homeLoader.hide();
 
         }       
         count++;      
 
+        var jsonData = [];
         
         _doc.ref.collection("collection").get()
           .then(function(querySnapshotEdit) {
@@ -44,21 +45,18 @@ $(document).ready(function () {
 
             querySnapshotEdit.forEach(function(docEdit) {
 
-              var editData = docEdit.data();        
+              var editData = docEdit.data();     
+
+              let row = { "meta": { "Nombre": editData.name, "actualizado": } };   
 
               let database_ref = editData.database_ref;
 
+              //jsonData
+
               if (flag==0) {
-                loadEditsList(database_ref);
+                loadEdits(database_ref);
                 flag = 1;
-              }
-
-              /*countCollections++;
-
-              if (editLength==countCollections){
-                countCollections=0;
-              }*/
-          
+              }          
           });
 
         });          
@@ -71,14 +69,38 @@ $(document).ready(function () {
         });*/
       
     });    
+
  
   }
           
-    function loadEditsList(database_ref, html, js, css) {
+     function loadEditsList(jsonData) {
+
+      /*var jsonData = [
+        { "meta": { "version": 1, "type": "test" } },
+        { "meta": { "version": 1, "type": "test" } },
+        { "meta": { "version": 1, "type": "test" } },
+        { "meta": { "version": 1, "type": "test" } },
+        { "meta": { "version": 1, "type": "test" } },
+        { "meta": { "version": 1, "type": "test" } },
+        { "meta": { "version": 1, "type": "test" } }
+      ];*/
+
+      $('#grid-details').DataTable( {
+        "scrollY":        "150px",
+        "scrollCollapse": true,
+        "paging":         false,
+        "data": jsonData,
+        "columns": [
+          { "data": "meta.type" },
+          { "data": "meta.version" }
+        ]
+      } );
+
+      loadEdits(jsonData);
 
     }
   
-    function loadEdits() { 
+    function loadEdits(jsonData) { 
     
       var userId = _user.userId;
   
@@ -89,28 +111,9 @@ $(document).ready(function () {
         $('#edit-list li').click(function() { 
           $('li.list-group-item.active').removeClass("active"); 
           $(this).addClass("active"); 
-        }); 
+        });       
   
-        var jsonData = [
-          { "meta": { "version": 1, "type": "test" } },
-          { "meta": { "version": 1, "type": "test" } },
-          { "meta": { "version": 1, "type": "test" } },
-          { "meta": { "version": 1, "type": "test" } },
-          { "meta": { "version": 1, "type": "test" } },
-          { "meta": { "version": 1, "type": "test" } },
-          { "meta": { "version": 1, "type": "test" } }
-        ];
-  
-        $('#grid-details').DataTable( {
-            "scrollY":        "150px",
-            "scrollCollapse": true,
-            "paging":         false,
-            "data": jsonData,
-            "columns": [
-              { "data": "meta.type" },
-              { "data": "meta.version" }
-            ]
-        } );
+        
   
         //var table = $("#grid-edits").DataTable();
         //table.clear();
