@@ -6,12 +6,27 @@ class ContentHtml {
   final String html;
   final String name;
   final String database_ref;
+  final DocumentReference group_ref;
+  final String icon;
 
-
-  ContentHtml({this.documentID, this.html, this.name, this.database_ref});
+  ContentHtml({
+    this.documentID,
+    this.html,
+    this.name,
+    this.database_ref,
+    this.group_ref,
+    this.icon,
+  });
 
   Map<String, Object> toJson() {
-    return {'documentID': documentID, 'html': html, 'name': name, 'database_ref': database_ref};
+    return {
+      'documentID': documentID,
+      'html': html,
+      'name': name,
+      'database_ref': database_ref,
+      'group_ref': group_ref,
+      'icon': icon
+    };
   }
 
   factory ContentHtml.fromJson(Map<String, Object> doc) {
@@ -20,6 +35,8 @@ class ContentHtml {
       documentID: doc['documentID'],
       name: doc['name'],
       database_ref: doc['database_ref'],
+      group_ref: doc['group_ref'],
+      icon: doc['icon'],
     );
     return content_html;
   }

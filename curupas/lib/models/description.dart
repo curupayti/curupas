@@ -4,11 +4,13 @@ class Description {
   final String title;
   final String description;
   final String documentID;
+  final String version;
 
   Description({
     this.title,
     this.description,
     this.documentID,
+    this.version,
   });
 
   Map<String, Object> toJson() {
@@ -16,6 +18,7 @@ class Description {
       'title': title,
       'description': description,
       'documentID': documentID,
+      'version': version,
     };
   }
 
@@ -24,6 +27,7 @@ class Description {
       title: doc['title'],
       description: doc['description'],
       documentID: documentID,
+      version: doc['version'],
     );
     return description;
   }

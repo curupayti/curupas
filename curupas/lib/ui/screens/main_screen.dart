@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:curupas/models/content_html.dart';
 import 'package:curupas/models/drawer_content.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/gestures.dart';
@@ -62,7 +63,7 @@ class _MainScreenState extends State<MainScreen> {
   final PageStorageBucket bucket = PageStorageBucket();
 
   bool _loadingInProgress = true;
-  bool _loaded = false;
+
 
   SharedPreferences prefs;
 
@@ -83,6 +84,9 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
+
+    //_globals.queryDevice();
+
     isRegistered().then((result) {
       if (result) {
         new MessagingWidget();
@@ -112,9 +116,8 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
   }
 
-  void loadContent() {
+  Future<void> loadContent() async {
     getDescription();
-    getDrawers();
   }
 
   Future<bool> isRegistered() async {
@@ -202,6 +205,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ]);
     } else {
+      int _length = _globals.drawerContent.contents.length;
       return Scaffold(
         key: _scaffoldKey,
         appBar: new AppBar(
@@ -213,40 +217,41 @@ class _MainScreenState extends State<MainScreen> {
           centerTitle: true,
         ),
         drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              /*DrawerHeader(
-                child: Text('Drawer Header'),
-              ),*/
-              _createHeader(),
-              _createDrawerItem(icon: Icons.info_outline, text: 'Acerca de',
-                onTap: () {
-                  _logOut();
-                  _scaffoldKey.currentState.openEndDrawer();
-                },),
-              Divider(),
-              _createDrawerItem(
-                  icon: Icons.highlight, text: 'Como mejorar la app'),
-              Divider(),
-              _createDrawerItem(
-                  icon: Icons.bug_report, text: 'Reportar un bug'),
-              Divider(),
-              _createDrawerItem(
-                icon: Icons.exit_to_app,
-                text: 'Salir',
-                onTap: () {
-                  _logOut();
-                  _scaffoldKey.currentState.openEndDrawer();
+          child:
+            ListView.separated(
+                itemCount: _length,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return _createHeader();
+                  } else {
+                    ContentHtml contentHtml = _globals.drawerContent.contents[index];
+                    int icon = int.parse(contentHtml.icon);
+                    return _createDrawerItem(
+                        contentHtml : contentHtml,
+                        index: index,
+                        icon: getIconFromInt(icon),
+                        text: contentHtml.name,
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/contentviewer',
+                            arguments: contentHtml,
+                          );
+                          print(contentHtml.name);
+                        }
+                     );
+                  }
                 },
-              ),
-              ListTile(
-                title: Text('0.0.1'),
-                onTap: () {},
-              ),
-            ],
+                separatorBuilder: (context, index) {
+                  return Padding(
+                      padding: EdgeInsets.only(top: 0.0),
+                      child:
+                        Divider(),
+                  );
+                },
+
+            ),
           ),
-        ),
         body: Stack(
           children: <Widget>[
             Padding(
@@ -275,6 +280,10 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  IconData getIconFromInt(int id) {
+    return IconData(id, fontFamily: 'MaterialIcons');
+  }
+
   Widget _createHeader() {
     return DrawerHeader(
         margin: EdgeInsets.zero,
@@ -288,6 +297,13 @@ class _MainScreenState extends State<MainScreen> {
         ),
         child: Stack(children: <Widget>[
           Positioned(
+              top: 15.0,
+              right: 15.0,
+              child: Text("Versión ${_globals.description.version}",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.0))),
+          Positioned(
               bottom: 12.0,
               left: 16.0,
               child: Text("Comunidad",
@@ -299,23 +315,23 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _createDrawerItem(
-      {IconData icon, String text, GestureTapCallback onTap}) {
+      {ContentHtml contentHtml, int index, IconData icon, String text, GestureTapCallback onTap}) {
     return ListTile(
-      title: Row(
-        children: <Widget>[
-          Icon(icon),
-          Padding(
-            padding: EdgeInsets.only(left: 8.0),
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 18.0,
-                color: Colors.grey,
+      title:
+        Row(
+          children: <Widget>[            Icon(icon),
+            Padding(
+              padding: EdgeInsets.only(left: 8.0, top: 8.0),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: Colors.grey,
+                ),
               ),
             ),
-          )
-        ],
-      ),
+          ],
+        ),
       onTap: onTap,
     );
   }
@@ -325,12 +341,6 @@ class _MainScreenState extends State<MainScreen> {
     descStream.listen((Description _desc) async {
       _globals.description = _desc;
       getPosts(_desc.title, _desc.description);
-    });
-  }
-
-  void getDrawers() async {
-    Auth.getDrawers().then((_drawer) {
-      _globals.drawerContent = _drawer as DrawerContent;
     });
   }
 
@@ -346,8 +356,18 @@ class _MainScreenState extends State<MainScreen> {
     await Auth.getMuseumSnapshots().then((templist) {
       Auth.getMuseum(templist).then((museums) {
         _globals.setData(desc, posts, museums);
-        getStreamingData();
+        getDrawers();
       });
+    });
+  }
+
+  void getDrawers() async {
+    await Auth.getDrawers().then((_drawer) {
+      _globals.drawerContent = _drawer;
+      _globals.drawerContent.contents.sort((a, b) {
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      });
+      getStreamingData();
     });
   }
 
@@ -444,7 +464,6 @@ class _MainScreenState extends State<MainScreen> {
       pages = [one, two, three, four, five];
       currentPage = one;
       _loadingInProgress = false;
-      _loaded = true;
     });
   }
 

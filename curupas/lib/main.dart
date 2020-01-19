@@ -1,13 +1,13 @@
+import 'package:curupas/models/content_html.dart';
+import 'package:curupas/ui/screens/drawer/content_viewer.dart';
 import 'package:curupas/ui/screens/widgets/youtube/player_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:notifier/notifier_provider.dart';
 import 'package:curupas/ui/screens/post/post_swiper_screen.dart';
 import 'package:curupas/ui/screens/group_screen.dart';
 import 'package:curupas/ui/screens/main_screen.dart';
 import 'package:curupas/ui/screens/sign_in_screen.dart';
-import 'package:curupas/ui/screens/widgets/youtube/fullscreen_youtube_player.dart';
 import "package:curupas/ui/screens/walk_screen.dart";
 import 'package:curupas/ui/screens/sign_up_screen.dart';
 import 'package:curupas/ui/screens/welcome_screen.dart';
@@ -87,6 +87,15 @@ class RouteGenerator {
           return MaterialPageRoute(
             builder: (_) => PostSwipeScreen(
               post: settings.arguments,
+            ),
+          );
+        }
+        break;
+      case '/contentviewer':
+        if (args is ContentHtml) {
+          return MaterialPageRoute(
+            builder: (_) => ContentViewer(
+              contentHtml: settings.arguments,
             ),
           );
         }

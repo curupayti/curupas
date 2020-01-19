@@ -41,10 +41,10 @@ class _GroupPageState extends State<GroupPage> {
   void initState() {
     super.initState();
 
-    getFirePadFromRef("ZAvWQjFab2fiv27g3Hu0kcpSCXP2");
+    //getFirePadFromRef("ZAvWQjFab2fiv27g3Hu0kcpSCXP2");
   }
 
-  void getFirePadFromRef(String refId) async {
+  /*void getFirePadFromRef(String refId) async {
     try {
       final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
         functionName: 'getFirePadFromRef',
@@ -59,7 +59,7 @@ class _GroupPageState extends State<GroupPage> {
       print('caught generic exception');
       print(e);
     }
-  }
+  }*/
 }
 
 class GroupBody extends StatelessWidget {

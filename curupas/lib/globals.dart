@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:device_info/device_info.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -128,6 +129,21 @@ void setData(String desc, List<Post> posts, List<Museum> museums) {
     museums: museums,
   );
   homeData = _dataPost;
+}
+
+void queryDevice() async {
+
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+
+  IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+  print('Running on ${iosInfo.utsname.machine}');
+
+  AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+  print('Running on ${androidInfo.model}');  // e.g. "Moto G (4)"
+
+  // e.g. "iPod7,1"
+
+
 }
 
 void showErrorAlert(

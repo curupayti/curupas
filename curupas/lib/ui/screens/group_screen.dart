@@ -494,6 +494,8 @@ class _GroupScreenState extends State<GroupScreen> {
       'yearRef': yearRef
     };
 
+
+
     Auth.updateUser(userId, data).then((user) async {
       if (user != null) {
         _fcm.subscribeToTopic('users');
@@ -504,6 +506,8 @@ class _GroupScreenState extends State<GroupScreen> {
         meta["type"] = "2";
         meta["userId"] = "${userId}";
         meta["year"] = "${year}";
+        meta["device"] = "${year}";
+
 
         StorageMetadata metadata = new StorageMetadata(
           customMetadata: meta,
