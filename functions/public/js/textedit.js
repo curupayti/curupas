@@ -1,104 +1,55 @@
-$(document).ready(function () {
+$(document).ready(function () {    
 
-  homeLoader.show();
+   homeLoader.show();
+  
 
-  var promisesEdits = [];
+    var edit_references = _role.edit_references;
 
-  var edit_references = _role.edit_references;
+    for (let i = 0; i < edit_references.length; i++) {
 
-  for (let i = 0; i < edit_references.length; i++) {
+      let editRef = edit_references[i]; 
 
-    let editRef = edit_references[i]; 
+      let refId = editRef.id;
 
-    let refId = editRef.id;
+      var count = 0;
+      var flag = 0;
 
-    var count = 0;
-    var flag = 0;
+      db.collection("contents").doc(refId).get().then(function(_doc) {
 
-    db.collection("contents").doc(refId).get().then(function(_doc) {
+          var data = _doc.data();
 
-        var data = _doc.data();
+          var _id = _doc.id;
 
-        var _id = _doc.id;
-
-        let _name = data.name;  
-        
-        let _name =  data.last_update;
-       
-        //https://firebase.google.com/docs/firestore/solutions/presence?hl=es
-
-        $("#edit-list").append('<li class="list-group-item"><a id="' + _id + '" class="nav-link" href="javascript:void(0);" onclick="loadEditsList(\'' + _id + '\'); return false;">' + _name + '</a></li>');           
-
-        if (length == (count-1)) {         
-
-          homeLoader.hide();
-
-        }       
-        count++;      
-
-        var jsonData = [];
-        
-        _doc.ref.collection("collection").get()
-          .then(function(querySnapshotEdit) {
-
-            var editLength = querySnapshotEdit.docs.length;
-
-            querySnapshotEdit.forEach(function(docEdit) {
-
-              var editData = docEdit.data();     
-
-              let row = { "meta": { "Nombre": editData.name, "actualizado": } };   
-
-              let database_ref = editData.database_ref;
-
-              //jsonData
-
-              if (flag==0) {
-                loadEdits(database_ref);
-                flag = 1;
-              }          
-          });
-
-        });          
-
-        /*collection.get().then(function (documentSnapshots) {
-          documentSnapshots.docs.forEach(doc => {
-      
-        
-            });
-        });*/
-      
-    });    
-
- 
-  }
+          let _name = data.name;  
           
-     function loadEditsList(jsonData) {
+          let _time =  data.last_update;
+        
+          //https://firebase.google.com/docs/firestore/solutions/presence?hl=es
 
-      /*var jsonData = [
-        { "meta": { "version": 1, "type": "test" } },
-        { "meta": { "version": 1, "type": "test" } },
-        { "meta": { "version": 1, "type": "test" } },
-        { "meta": { "version": 1, "type": "test" } },
-        { "meta": { "version": 1, "type": "test" } },
-        { "meta": { "version": 1, "type": "test" } },
-        { "meta": { "version": 1, "type": "test" } }
-      ];*/
+          $("#edit-list").append('<li class="list-group-item"><a id="' + _id + '" class="nav-link" href="javascript:void(0);" onclick="loadEditsList(\'' + _id + '\'); return false;">' + _name + '</a></li>');           
+          
+          //editArray.push({'id':_id,'document':_doc}); 
 
-      $('#grid-details').DataTable( {
-        "scrollY":        "150px",
-        "scrollCollapse": true,
-        "paging":         false,
-        "data": jsonData,
-        "columns": [
-          { "data": "meta.type" },
-          { "data": "meta.version" }
-        ]
-      } );
+          editObjects[_id] = _doc;
 
-      loadEdits(jsonData);
+          if (length == (count-1)) {         
 
-    }
+            homeLoader.hide();
+
+          }       
+          count++;        
+
+          /*collection.get().then(function (documentSnapshots) {
+            documentSnapshots.docs.forEach(doc => {
+        
+          
+              });
+          });*/
+        
+      });   
+      
+    }         
+  
   
     function loadEdits(jsonData) { 
     
@@ -259,8 +210,77 @@ $(document).ready(function () {
         }
   
       }
-      //# sourceURL=textedit.js   
+      
 
+      window.loadEditsList = function(_id) {
+
+        var _doc = editObjects[_id];   
     
+        _doc.ref.collection("collection").get()
+        .then(function(querySnapshotEdit) {
+    
+             var editLength = querySnapshotEdit.docs.length;
+    
+             var countLines = 1;
+    
+             var jsonData = [];
+
+             var datatable = $('#grid-details').DataTable( {
+              "scrollY":        "150px",
+              "scrollCollapse": true,
+              "paging":         false,
+              //"data": jsonData,
+              "columns": [
+                { "data": "meta.Nombre" },
+                { "data": "meta.Actualizado" }
+              ]
+            });
+    
+             querySnapshotEdit.forEach(function(docEdit) {
+    
+               var editData = docEdit.data();     
+
+               var last_update = editData.last_update;
+               
+                var _date = last_update.toDate();
+
+                var year = _date.getFullYear();
+                var month = _date.getMonth()+1;
+                var day = _date.getDate();
+
+                if (day < 10) {
+                  day = '0' + day;
+                }
+                if (month < 10) {
+                  month = '0' + month;
+                }
+
+                var formattedDate = day + '-' + month + '-' + year
+    
+               let row = { "meta": { "Nombre": editData.name, "Actualizado": formattedDate} };   
+    
+               jsonData.push(row);
+    
+               let database_ref = editData.database_ref;    
+               
+               if (editLength == countLines) {                               
+                  
+                  datatable.clear();
+                  datatable.rows.add(jsonData);
+                  datatable.draw();    
+               }
+               
+               countLines++;
+           });
+    
+         });     
+         
+       }
+    
+  //# sourceURL=textedit.js   
 
   });
+
+  
+
+   
