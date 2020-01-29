@@ -57,7 +57,7 @@
     right: 230px;
     top: 59px;
     max-height: 150px;
-    overflow-y: auto;
+    overflow-y: auto;    
     width: 150px;
     z-index: 10;
     display: none;
@@ -98,16 +98,15 @@
   }
   
   #firepad-container {
+    display: none;
     position: absolute;
     left: 20px;
     top: 400px !important; 
-    right: 20px;
-    /*bottom: 80px;*/
-    background: white;
-    /* TODO: Tune these more? */
-    /*-moz-box-shadow: 0 5px 25px #333;*/    
+    width: 1075px;
+    bottom: 80px;
+    background: white;    
     border:1px solid #C9C9C9;
-    /*box-shadow: 0 5px 25px #333;*/
+
   }
   
   #firepad-container .firepad-userlist {

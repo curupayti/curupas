@@ -67,7 +67,7 @@ $(document).ready(function () {
            //https://datatables.net/download/index
 
            var datatable = $('#grid-details').DataTable( {
-            scrollY: "200px",
+            scrollY: "180px",
             scrollCollapse: true,
             paging:         false,
             retrieve: true, 
