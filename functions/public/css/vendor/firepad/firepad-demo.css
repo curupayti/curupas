@@ -100,9 +100,9 @@
   #firepad-container {
     position: absolute;
     left: 20px;
-    top: 350px;
+    top: 400px !important; 
     right: 20px;
-    bottom: 80px;
+    /*bottom: 80px;*/
     background: white;
     /* TODO: Tune these more? */
     /*-moz-box-shadow: 0 5px 25px #333;*/    

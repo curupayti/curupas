@@ -21,15 +21,17 @@ $(document).ready(function () {
           var _id = _doc.id;
 
           let _name = data.name;  
+
+          let _amount = data.amount;  
           
           let _time =  data.last_update;
         
           //https://firebase.google.com/docs/firestore/solutions/presence?hl=es
 
-          $("#edit-list").append('<li class="list-group-item"><a id="' + _id + '" class="nav-link" href="javascript:void(0);" onclick="loadEditsList(\'' + _id + '\'); return false;">' + _name + '</a></li>');           
+          $("#edit-list").append('<li class="list-group-item d-flex justify-content-between align-items-center"><a id="' + _id + '" class="nav-link" href="javascript:void(0);" onclick="loadEditsList(\'' + _id + '\'); return false;">' + _name + '</a><span class="badge badge-primary badge-pill">' + _amount + '</span></li>');           
           
           //editArray.push({'id':_id,'document':_doc}); 
-
+          
           editObjects[_id] = _doc;
 
           if (length == (count-1)) {         
@@ -61,21 +63,21 @@ $(document).ready(function () {
   
            var jsonData = [];
 
+           //Descargar con botones y usar un solo archivo
+           //https://datatables.net/download/index
+
            var datatable = $('#grid-details').DataTable( {
-            "scrollY":        "150px",
-            "scrollCollapse": true,
-            "paging":         false,
-            "retrieve": true, 
-            "bInfo" : false,             
-            "buttons": [
-              'copy', 'excel', 'pdf'
-            ],
-            "columns": [
+            scrollY: "200px",
+            scrollCollapse: true,
+            paging:         false,
+            retrieve: true, 
+            bInfo : false,                                                       
+            columns: [
               { "data": "meta.database_ref" },
               { "data": "meta.Nombre" },
               { "data": "meta.Actualizado" }
             ],
-            "columnDefs": [
+            columnDefs: [
               {
                 "targets": [ 0 ],
                 "visible": false,
@@ -85,8 +87,29 @@ $(document).ready(function () {
                   "visible": true,
                   "searchable": true
               }
-            ]
-          });     
+            ],    
+            dom: 'Bfrtip',
+            buttons: {
+              buttons: [
+                {
+                  text: "Register new",
+                  action: function(e, dt, node, config) {
+                    //trigger the bootstrap modal
+                  }
+                }
+              ],
+              dom: {
+                button: {
+                  tag: "button",
+                  className: "btn btn-primary"
+                },
+                buttonLiner: {
+                  tag: null
+                }
+              }
+            } 
+          });        
+    
           
           $('#grid-details tbody').on('click', 'tr', function () {
               var data = datatable.row( this ).data();

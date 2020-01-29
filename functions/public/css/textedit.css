@@ -14,11 +14,18 @@
 
 #row-edits {
     height:1000px;
+    width:1100px;
 }
+
+
+/*#row-edits {
+   max-width:300px;
+}*/
 
 #edit-list {
     border: 1px solid black; 
     max-height: 250px;
+    margin-top: 60px;
     margin-bottom: 10px;
     overflow:scroll;  
     -webkit-overflow-scrolling: touch;
@@ -30,5 +37,6 @@
 }*/
 
 #grid-details_wrapper {
-    height:240px;    
+    height:240px;  
+    /*width: 600px;*/
 }
