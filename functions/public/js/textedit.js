@@ -27,10 +27,15 @@ $(document).ready(function () {
           let _time =  data.last_update;
 
           let _new =  data.new;
+
+          let _short = data.short;
         
           //https://firebase.google.com/docs/firestore/solutions/presence?hl=es
 
-          $("#edit-list").append('<li class="list-group-item d-flex justify-content-between align-items-center"><a id="' + _id + '" class="nav-link" href="javascript:void(0);" onclick="loadEditsList(\'' + _id + '\',\'' + _new + '\'); return false;">' + _name + '</a><span class="badge badge-primary badge-pill">' + _amount + '</span></li>');           
+          $("#edit-list").append(
+            '<li class="list-group-item d-flex justify-content-between align-items-center">' +
+            '<a id="' + _id + '" class="nav-link" href="javascript:void(0);" ' + 
+            'onclick="loadEditsList(\'' + _id + '\',\'' + _new + '\',\'' + _short + '\'); return false;">' + _name + '</a><span class="badge badge-primary badge-pill">' + _amount + '</span></li>');           
           
           //editArray.push({'id':_id,'document':_doc}); 
           
@@ -51,10 +56,10 @@ $(document).ready(function () {
       });
       
     }     
-    
-     
   
-    window.loadEditsList = function(_id, _new) { 
+    window.loadEditsList = function(_id, _new, _short) { 
+
+      window._short = _short;
       
       clearFirepad();      
 
@@ -75,7 +80,7 @@ $(document).ready(function () {
           if (window.datatable !=undefined ) {
             window.datatable.clear();
             //window.datatable.buttons().remove()
-            $('.new-button').text(_new);
+            $('#new-button').text(_new);
 
           }
 
@@ -106,16 +111,32 @@ $(document).ready(function () {
               buttons: [
                 {
                   text: _new,
-                  action: function(e, dt, node, config) {
-                    //trigger the bootstrap modal
+                  action: function(e, dt, node, config) 
+                  {
+                    $("#new-title").text(_new);
+                    $('#addModal').modal('show');
+                  },
+                  attr:  {                    
+                    id: 'new-button'
+                  }
+                }, 
+                {
+                  text: "Editar",
+                  action: function(e, dt, node, config) 
+                  {
+
+                  },
+                  attr:  {                    
+                    id: 'edit-button',
+                    disabled: true
                   }
                 }
               ],
               dom: {
                 button: {
                   tag: "button",                  
-                  className: "btn btn-primary new-button"
-                },
+                  className: "btn btn-primary"
+                },                
                 buttonLiner: {
                   tag: null
                 }
@@ -129,12 +150,18 @@ $(document).ready(function () {
               //alert( 'You clicked on '+data.meta.id+'\'s row' );
               if ( $(this).hasClass('selected') ) {
                   $(this).removeClass('selected');
+                  $("#edit-button").prop('disabled', true);
+                  clearFirepad();            
+                  $("#firepad-container").hide();
               }
               else {
                 window.datatable.$('tr.selected').removeClass('selected');
                   $(this).addClass('selected');
+                  $("#edit-button").removeAttr('disabled');
+                  $("#firepad-container").show();
+                  loadEdits(data.meta.database_ref);                        
               }
-              loadEdits(data.meta.database_ref);
+              
           } );       
           
   
@@ -191,11 +218,41 @@ $(document).ready(function () {
           $( hash_firepad ).remove();
         } 
      }
-     
-     
-    function loadEdits(database_ref) { 
 
-      clearFirepad();
+     $("#add-form").submit(function (event) {
+        event.preventDefault(); 
+        
+        var new_name = $('#new-name').val();
+        var new_desc = $('#new-desc').val();
+
+        var document_path = "contents/" + window._short + "/collection";
+        
+        db.collection(document_path).add({
+          group_ref: _user.yearReference,
+          name: new_name,
+          description: new_desc         
+        })
+        .then(function(document) {
+            
+            let docRefId = document.id;                       
+
+            var db_ref = database.ref(window._short).child(docRefId);
+
+            document.set({
+              "database_ref":db_ref.key,
+            }).then(function(upDoc) {
+              loadEdits(db_ref);
+            });
+            
+        }).catch(function(error) {
+          console.error("Error adding document: ", error);
+        });   
+        
+
+     });
+     
+     
+    function loadEdits(database_ref) {            
 
       var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );
       

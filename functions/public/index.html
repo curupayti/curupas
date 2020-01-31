@@ -106,11 +106,13 @@
                 .then(function(querySnapshotUser) {
                     querySnapshotUser.forEach(function(docUser) {                        
                         var roleReference =  docUser.data().roleRef;
+                        var yearReference =  docUser.data().yearRef;
 
                         _user.userId = docUser.data().userID;
                         _user.name = docUser.data().name;
                         _user.profilePictureURL = docUser.data().profilePictureURL;            
                         _user.roleReference = roleReference;                        
+                        _user.yearReference = yearReference;                        
 
                         roleReference.get()
                         .then(function(docPage) {                     
