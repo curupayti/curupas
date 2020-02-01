@@ -93,17 +93,27 @@ $(document).ready(function () {
             columns: [
               { "data": "meta.database_ref" },
               { "data": "meta.Nombre" },
+              { "data": "meta.Desc" },
               { "data": "meta.Actualizado" }
             ],
             columnDefs: [
               {
                 "targets": [ 0 ],
                 "visible": false,
-                "searchable": false
-              },{
-                  "targets": [ 1 ],
-                  "visible": true,
-                  "searchable": true
+                "searchable": false,
+                "width": "30%"
+              },
+              {
+                "targets": [ 2 ],
+                "visible": true,
+                "searchable": true,
+                "width": "50%"
+              },
+              {
+                "targets": [ 3 ],
+                "visible": true,
+                "searchable": true,
+                "width": "20%"
               }
             ],    
             dom: 'Bfrtip',
@@ -159,7 +169,7 @@ $(document).ready(function () {
                   $(this).addClass('selected');
                   $("#edit-button").removeAttr('disabled');
                   $("#firepad-container").show();
-                  loadEdits(data.meta.database_ref);                        
+                  loadEdits(data.meta.database_ref, _short);                        
               }
               
           } );       
@@ -167,26 +177,11 @@ $(document).ready(function () {
   
            querySnapshotEdit.forEach(function(docEdit) {
   
-             var editData = docEdit.data();     
+             var editData = docEdit.data();                  
 
-             var last_update = editData.last_update;
-             
-              var _date = last_update.toDate();
-
-              var year = _date.getFullYear();
-              var month = _date.getMonth()+1;
-              var day = _date.getDate();
-
-              if (day < 10) {
-                day = '0' + day;
-              }
-              if (month < 10) {
-                month = '0' + month;
-              }
-
-              var formattedDate = day + '-' + month + '-' + year
+             let last_update = getDateFrom(editData.last_update);
   
-             let row = { "meta": {  "database_ref": editData.database_ref, "Nombre": editData.name, "Actualizado": formattedDate} };   
+             let row = { "meta": {  "database_ref": editData.database_ref, "Nombre": editData.name, "Desc": editData.description.slice(0, 20) + "...", "Actualizado": last_update } };   
   
              jsonData.push(row);
   
@@ -203,6 +198,26 @@ $(document).ready(function () {
   
        });     
        
+     }
+
+     function getDateFrom(date) {
+
+      var _date = date.toDate();
+
+      var year = _date.getFullYear();
+      var month = _date.getMonth()+1;
+      var day = _date.getDate();
+
+      if (day < 10) {
+        day = '0' + day;
+      }
+      if (month < 10) {
+        month = '0' + month;
+      }
+
+      var formattedDate = day + '-' + month + '-' + year;
+
+      return formattedDate;
      }
 
      function clearFirepad() {
@@ -226,24 +241,42 @@ $(document).ready(function () {
         var new_desc = $('#new-desc').val();
 
         var document_path = "contents/" + window._short + "/collection";
+
+        var _database_ref = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+        var db_ref = database.ref(window._short).child(_id);
+
+        var timestamp =  new Date();
         
         db.collection(document_path).add({
           group_ref: _user.yearReference,
           name: new_name,
-          description: new_desc         
+          description: new_desc,
+          database_ref : _database_ref,
+          last_update: timestamp        
         })
-        .then(function(document) {
-            
-            let docRefId = document.id;                       
+        .then(function(document) { 
 
-            var db_ref = database.ref(window._short).child(docRefId);
-
-            document.set({
-              "database_ref":db_ref.key,
-            }).then(function(upDoc) {
-              loadEdits(db_ref);
-            });
+            let docRefId = document.id;  
             
+            var _desc = new_desc.slice(0, 20) + "...";
+
+            var thedate = getDateFrom(timestamp);
+
+            let row = { "meta": {  
+              "database_ref": _database_ref, 
+              "Nombre": new_name, 
+              "Desc": _desc, 
+              "Actualizado": thedate } };                 
+
+            window.datatable.row.add( [ row ] ).draw( false );    
+              
+            $('#addModal').modal('hide');
+
+            $("#firepad-container").show();
+
+            loadEdits(db_ref, window._short);
+
         }).catch(function(error) {
           console.error("Error adding document: ", error);
         });   
@@ -252,7 +285,7 @@ $(document).ready(function () {
      });
      
      
-    function loadEdits(database_ref) {            
+    function loadEdits(database_ref, _short) {            
 
       var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );
       
@@ -271,17 +304,14 @@ $(document).ready(function () {
         userList.dispose();
         $('.CodeMirror').remove();
       }
-
-      //var id = window.location.hash.replace(/#/g, '') || randomString(10);
-      var url = window.location.toString().replace(/#.*/, '') + '#' + id;
-      //var firepadRef = new Firebase('https://firepad.firebaseio.com/demo').child(id);
+      
+      var url = window.location.toString().replace(/#.*/, '') + '#' + id;     
 
       var id =  _user.userId;
       var firepadRef = database_ref; //database.ref(id);
-
-      //var id = window.location.hash.replace(/#/g, '') || randomString(10);
+      
       var url = window.location.toString().replace(/#.*/, '') + '#' + id;
-      var firepadRef = new Firebase('https://firepad.firebaseio.com/demo').child(id);
+      var firepadRef = new Firebase( 'https://curupas-app.firebaseio.com/' + _short ).child(id);
 
       var id = window.location.hash.replace(/#/g, '') || randomString(10);
       //var url = window.location.toString().replace(/#.*/, '') + '#' + id;
