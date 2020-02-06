@@ -34,11 +34,9 @@ $(document).ready(function () {
 
           $("#edit-list").append(
             '<li class="list-group-item d-flex justify-content-between align-items-center">' +
-            '<a id="' + _id + '" class="nav-link" href="javascript:void(0);" ' + 
-            'onclick="loadEditsList(\'' + _id + '\',\'' + _new + '\',\'' + _short + '\'); return false;">' + _name + '</a><span class="badge badge-primary badge-pill">' + _amount + '</span></li>');           
-          
-          //editArray.push({'id':_id,'document':_doc}); 
-          
+            '<a class="nav-link" href="javascript:void(0);" ' + 
+            'onclick="loadEditsList(\'' + _id + '\',\'' + _new + '\',\'' + _short + '\'); return false;">' + _name + '</a><span id="' + _id + '" class="badge badge-primary badge-pill">' + _amount + '</span></li>');                    
+                   
           editObjects[_id] = _doc;
 
           if (length == (count-1)) {         
@@ -56,10 +54,14 @@ $(document).ready(function () {
       });
       
     }     
+
+    window.jsonData = [];
   
     window.loadEditsList = function(_id, _new, _short) { 
 
       window._short = _short;
+
+      window._id = _id;
       
       clearFirepad();      
 
@@ -71,17 +73,13 @@ $(document).ready(function () {
            var editLength = querySnapshotEdit.docs.length;
   
            var countLines = 1;
-  
-           var jsonData = [];
 
            //Descargar con botones y usar un solo archivo
            //https://datatables.net/download/index
 
           if (window.datatable !=undefined ) {
-            window.datatable.clear();
-            //window.datatable.buttons().remove()
+            window.datatable.clear();            
             $('#new-button').text(_new);
-
           }
 
            window.datatable = $('#grid-details').DataTable( {
@@ -92,6 +90,7 @@ $(document).ready(function () {
             bInfo : false,                                                       
             columns: [
               { "data": "meta.database_ref" },
+              { "data": "meta.id" },
               { "data": "meta.Nombre" },
               { "data": "meta.Desc" },
               { "data": "meta.Actualizado" }
@@ -100,17 +99,21 @@ $(document).ready(function () {
               {
                 "targets": [ 0 ],
                 "visible": false,
-                "searchable": false,
-                "width": "30%"
+                "searchable": false,                
               },
               {
-                "targets": [ 2 ],
+                "targets": [ 1 ],
+                "visible": false,
+                "searchable": false,                
+              },
+              {
+                "targets": [ 3 ],
                 "visible": true,
                 "searchable": true,
                 "width": "50%"
               },
               {
-                "targets": [ 3 ],
+                "targets": [ 4 ],
                 "visible": true,
                 "searchable": true,
                 "width": "20%"
@@ -152,11 +155,13 @@ $(document).ready(function () {
                 }
               }
             } 
-          });        
-    
+          });         
+       
           
           $('#grid-details tbody').on('click', 'tr', function () {
+
               var data = window.datatable.row( this ).data();
+              
               //alert( 'You clicked on '+data.meta.id+'\'s row' );
               if ( $(this).hasClass('selected') ) {
                   $(this).removeClass('selected');
@@ -177,20 +182,21 @@ $(document).ready(function () {
   
            querySnapshotEdit.forEach(function(docEdit) {
   
-             var editData = docEdit.data();                  
+             var editData = docEdit.data();   
+             
+             let _date = editData.last_update;
 
-             let last_update = getDateFrom(editData.last_update);
+             let last_update = getDateFrom(_date.toDate());
   
-             let row = { "meta": {  "database_ref": editData.database_ref, "Nombre": editData.name, "Desc": editData.description.slice(0, 20) + "...", "Actualizado": last_update } };   
+             let row = { "meta": {  "database_ref": editData.database_ref, "id": _id, "Nombre": editData.name, "Desc": editData.description.slice(0, 20) + "...", "Actualizado": last_update } };   
   
-             jsonData.push(row);
+             window.jsonData.push(row);
   
              let database_ref = editData.database_ref;    
              
-             if (editLength == countLines) {                                              
-              
-              window.datatable.rows.add(jsonData);
-              window.datatable.draw();    
+             if (editLength == countLines) {                                                            
+                window.datatable.rows.add(window.jsonData);
+                window.datatable.draw();    
              }
              
              countLines++;
@@ -200,9 +206,7 @@ $(document).ready(function () {
        
      }
 
-     function getDateFrom(date) {
-
-      var _date = date.toDate();
+     function getDateFrom(_date) {      
 
       var year = _date.getFullYear();
       var month = _date.getMonth()+1;
@@ -236,46 +240,55 @@ $(document).ready(function () {
 
      $("#add-form").submit(function (event) {
         event.preventDefault(); 
+
+        window.datatable.clear();
         
         var new_name = $('#new-name').val();
         var new_desc = $('#new-desc').val();
 
         var document_path = "contents/" + window._short + "/collection";
 
-        var _database_ref = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        var _database_ref = makeid(28);        
 
-        var db_ref = database.ref(window._short).child(_id);
+        var _time =  new Date();
+
+        var _desc = new_desc.slice(0, 20) + "...";
 
         var timestamp =  new Date();
+
+        var thedate = getDateFrom(timestamp);            
+
+        let row = { "meta": {  
+          "database_ref": _database_ref, 
+          "id" : window._id,
+          "Nombre": new_name, 
+          "Desc": new_desc, 
+          "Actualizado": thedate } };   
+
+        window.jsonData.push(row); 
         
-        db.collection(document_path).add({
-          group_ref: _user.yearReference,
-          name: new_name,
-          description: new_desc,
+        db.collection(document_path).add( {
+          group_ref : _user.yearReference,
+          name : new_name,
+          description : new_desc,
           database_ref : _database_ref,
-          last_update: timestamp        
-        })
-        .then(function(document) { 
-
-            let docRefId = document.id;  
-            
-            var _desc = new_desc.slice(0, 20) + "...";
-
-            var thedate = getDateFrom(timestamp);
-
-            let row = { "meta": {  
-              "database_ref": _database_ref, 
-              "Nombre": new_name, 
-              "Desc": _desc, 
-              "Actualizado": thedate } };                 
-
-            window.datatable.row.add( [ row ] ).draw( false );    
+          last_update : _time        
+        } ).then(function(document) {                                        
+             
+            window.datatable.rows.add(window.jsonData);
+            window.datatable.draw(); 
               
             $('#addModal').modal('hide');
 
             $("#firepad-container").show();
 
-            loadEdits(db_ref, window._short);
+            loadEdits(_database_ref, window._short);
+
+            var num = parseInt($("#" + window._id).text());
+
+            num++;
+
+            $("#" + window._id).text(num);
 
         }).catch(function(error) {
           console.error("Error adding document: ", error);
@@ -283,6 +296,17 @@ $(document).ready(function () {
         
 
      });
+
+     function makeid(length) {
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+     }
+
      
      
     function loadEdits(database_ref, _short) {            
@@ -292,9 +316,7 @@ $(document).ready(function () {
       var firepad_div = $( "<div id='firepad'></div>" );
       
       $( "#firepad-container" ).append( firepad_userlist_div );
-      $( "#firepad-container" ).append( firepad_div );
-    
-      var userId = _user.userId;
+      $( "#firepad-container" ).append( firepad_div );    
   
       var firepad = null, userList = null, codeMirror = null;
   
@@ -303,52 +325,32 @@ $(document).ready(function () {
         firepad.dispose();
         userList.dispose();
         $('.CodeMirror').remove();
-      }
-      
-      var url = window.location.toString().replace(/#.*/, '') + '#' + id;     
+      }      
+    
+      var firepadRef = new Firebase( 'https://curupas-app.firebaseio.com/' + _short ).child(database_ref);
 
-      var id =  _user.userId;
-      var firepadRef = database_ref; //database.ref(id);
-      
-      var url = window.location.toString().replace(/#.*/, '') + '#' + id;
-      var firepadRef = new Firebase( 'https://curupas-app.firebaseio.com/' + _short ).child(id);
-
-      var id = window.location.hash.replace(/#/g, '') || randomString(10);
-      //var url = window.location.toString().replace(/#.*/, '') + '#' + id;
-      var firepadRef = new Firebase(firebaseConfig.databaseURL).child(id);
-
-      var userId = firepadRef.push().name(); // Just a random ID.
       codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });
+
+      //LISTENER DRAG
+      //https://groups.google.com/forum/#!topic/firepad-io/d9HRHfd9NcE
+
       firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
-          { richTextToolbar: true, richTextShortcuts: true, userId: userId});
+          { richTextToolbar: true, richTextShortcuts: true, userId: _user.userId});
       userList = FirepadUserList.fromDiv(firepadRef.child('users'),
-          document.getElementById('firepad-userlist'), userId);
+          document.getElementById('firepad-userlist'), _user.userId);
 
         firepad.on('ready', function() {
           if (firepad.isHistoryEmpty()) {
             firepad.setText('Welcome to your own private pad!\n\nShare the URL below and collaborate with your friends.');
           }
 
-          ensurePadInList(id);
+          ensurePadInList(database_ref);
           buildPadList();
         });
 
 
         codeMirror.focus();
-
-        window.location = url;
-        $('#url').val(url);
-        $("#url").on('click', function(e) {
-          $(this).focus().select();
-          e.preventDefault();
-          return false;
-        });
-
-        setTimeout(function() {
-          $(window).on('hashchange', joinFirepadForHash);
-        }, 0);
-
-      //}
+       
 
       function padListEnabled() {
         return (typeof localStorage !== 'undefined' && typeof JSON !== 'undefined' && localStorage.setItem &&
@@ -404,14 +406,7 @@ $(document).ready(function () {
 
         return text;
       }
-
-      /*$(window).on('ready', function() {
-        joinFirepadForHash();
-        setTimeout(function() {
-          $(window).on('hashchange', joinFirepadForHash);
-        }, 0);
-      });*/
-
+    
       function displayPads() {
         $('#my-pads-list').toggle();
       }
