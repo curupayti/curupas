@@ -58,7 +58,7 @@ SpeedDial buildSpeedDial() {
       SpeedDialChild(
           child: Icon(Icons.poll, color: Colors.white),
           backgroundColor: Color.fromRGBO(0, 29, 126, 1),
-          label: 'Encuesta',
+          label: 'Newsletter',
           labelStyle: TextStyle(fontSize: 18.0),
           onTap: () => print('FIRST CHILD')),
     ],
