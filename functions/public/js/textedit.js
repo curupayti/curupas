@@ -56,12 +56,16 @@ $(document).ready(function () {
     }     
 
     window.jsonData = [];
+    window.editDocuments = [];
+
+    window._id_collection;
+    window._id_document_collection;
   
     window.loadEditsList = function(_id, _new, _short) { 
 
       window._short = _short;
 
-      window._id = _id;
+      window._id_collection = _id;
       
       clearFirepad();      
 
@@ -161,18 +165,24 @@ $(document).ready(function () {
           $('#grid-details tbody').on('click', 'tr', function () {
 
               var data = window.datatable.row( this ).data();
+
+              console.log(data.meta.id);
+
+              window._id_document_collection = data.meta.id;
               
               //alert( 'You clicked on '+data.meta.id+'\'s row' );
               if ( $(this).hasClass('selected') ) {
                   $(this).removeClass('selected');
                   $("#edit-button").prop('disabled', true);
                   clearFirepad();            
+                  $("#publish-buttons").hide();
                   $("#firepad-container").hide();
               }
               else {
                 window.datatable.$('tr.selected').removeClass('selected');
                   $(this).addClass('selected');
                   $("#edit-button").removeAttr('disabled');
+                  $("#publish-buttons").show();
                   $("#firepad-container").show();
                   loadEdits(data.meta.database_ref, _short);                        
               }
@@ -181,6 +191,10 @@ $(document).ready(function () {
           
   
            querySnapshotEdit.forEach(function(docEdit) {
+
+            let _doc_id_ = docEdit.id;
+
+            window.editDocuments[_doc_id_] = docEdit;
   
              var editData = docEdit.data();   
              
@@ -188,7 +202,7 @@ $(document).ready(function () {
 
              let last_update = getDateFrom(_date.toDate());
   
-             let row = { "meta": {  "database_ref": editData.database_ref, "id": _id, "Nombre": editData.name, "Desc": editData.description.slice(0, 20) + "...", "Actualizado": last_update } };   
+             let row = { "meta": {  "database_ref": editData.database_ref, "id": _doc_id_, "Nombre": editData.name, "Desc": editData.description.slice(0, 20) + "...", "Actualizado": last_update } };   
   
              window.jsonData.push(row);
   
@@ -260,7 +274,7 @@ $(document).ready(function () {
 
         let row = { "meta": {  
           "database_ref": _database_ref, 
-          "id" : window._id,
+          "id" : window._id_collection,
           "Nombre": new_name, 
           "Desc": new_desc, 
           "Actualizado": thedate } };   
@@ -284,11 +298,11 @@ $(document).ready(function () {
 
             loadEdits(_database_ref, window._short);
 
-            var num = parseInt($("#" + window._id).text());
+            var num = parseInt($("#" + window._id_collection).text());
 
             num++;
 
-            $("#" + window._id).text(num);
+            $("#" + window._id_collection).text(num);
 
         }).catch(function(error) {
           console.error("Error adding document: ", error);
@@ -306,6 +320,33 @@ $(document).ready(function () {
         }
         return result;
      }
+
+
+     $('#button-publish').click(function() { 
+      
+        //var document_path = "contents/" + window._short + "/collection/" + window._id_collection;
+
+        var _document = window.editDocuments[window._id_document_collection];
+
+        var _time =  new Date();
+
+        db.collection('contents')
+        .doc(window._short)
+        .collection("collection")
+        .doc(window._id_document_collection)
+        .update({        
+          "published" : true,
+          "last_update" : _time        
+        } ).catch(function(error) {
+          console.error("Error adding document: ", error);
+        }); 
+
+     });
+
+     $('#button-publish').click(function() { 
+      
+      
+    });
 
      
      

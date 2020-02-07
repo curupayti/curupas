@@ -216,6 +216,7 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
 
 
 exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(event => {
+
   const uuid = event.params.uid;
 
   console.log('User to send notification', uuid);
@@ -297,6 +298,70 @@ exports.sendSMS = functions.https.onRequest((req, res) => {
 
 }); 
 
+exports.updateContent = functions.firestore
+  .document('/contents/newsletter/collection/yq7tg6ArxaKlUQnhwBov')
+  .onUpdate((change, context) => {    
+
+     const newValue = change.after.data();
+     
+     const database_ref = newValue.database_ref;
+     
+     console.log("llega database_ref: " + database_ref); 
+     
+     var firepadRef = firebase.database().ref().child("newsletter").child(database_ref);    
+
+     var headless = new Firepad.Headless(firepadRef);
+
+     headless.getHtml(function(_html) {
+
+        console.log("html: " + _html);        
+
+        //headless.dispose();
+
+        return change.after.ref.update({html: _html});  
+           
+
+     }).catch(function(error) {
+          console.log("Error getting document:", error);
+
+          headless.dispose();
+     });
+
+     
+});
+
+
+/*exports.publishNewsletterToHtml = functions.firestore.document('/content').onUpdate( (change, context) => {
+  
+  const id = change.params.id;
+  const database_ref = change.params.database_ref;
+
+  console.log("llega id: " + id); 
+  console.log("llega database_ref: " + database_ref); 
+
+  var rootRef = firebase.database().ref("newsletter");
+  var firepadRef = rootRef.child(database_ref);
+
+  var headless = new Firepad.Headless(firepadRef);
+
+  headless.getHtml(function(_html) {
+
+    console.log("html: " + _html); 
+    
+    firestore.collection("/content/newsletter/collection/").doc(id).update({html:_html});
+ 
+    headless.dispose();
+
+  }).catch(function(error) {
+      console.log("Error getting document:", error);
+
+      headless.dispose();
+  });
+
+
+});*/
+
+
 
 exports.getFirePadFromRef = functions.https.onRequest((req, res) => {
 
@@ -313,47 +378,11 @@ exports.getFirePadFromRef = functions.https.onRequest((req, res) => {
 
   //console.log("headless: " + headless);
 
-  headless.getHtml(function(html) {
+    headless.getHtml(function(html) {
 
-    console.log("html: " + html);    
-    
-    //const html = JSDOM(text);
-    //console.log("Html: " + html);    
+      console.log("html: " + html);       
 
-    //var docRef = firestore.collection("edits").doc(refId);
-
-    /*docRef.get().then(function(doc) {
-
-        if (doc.exists) {            
-            //console.log("Document data:", doc.data());
-            docRef.update({
-              content: text,
-              updatedAt: now
-            });  
-
-            res.send(text);
-            
-            headless.dispose();
-            
-        } else {
-            // doc.data() will be undefined in this case
-            console.log("No such document!");
-            var now = firebase.firestore.FieldValue.serverTimestamp();
-            var edit = {
-              content: text, 
-              title: "Hola Mundo",            
-              updatedAt: now
-              //updatedBy : user.name
-            };
-            docRef.set(edit).then(()=>{        
-              console.log("GUARDADO: " + JSON.stringify(edit));
-            });  
-
-            res.send(text);
-
-            headless.dispose();
-
-        }*/
+      headless.dispose();
 
     }).catch(function(error) {
         console.log("Error getting document:", error);
@@ -361,13 +390,6 @@ exports.getFirePadFromRef = functions.https.onRequest((req, res) => {
         headless.dispose();
     });
     
-  });
+});
 
-  //res.send({result: true});
-  
-  /*headless.getHtml(function(text) {
-    console.log("HTML of firepad retrieved: " + text);
-    res.send(text);
-  });*/  
-
-//}); 
+ 

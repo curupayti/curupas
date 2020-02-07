@@ -96,6 +96,7 @@
   #create-pad:active {
     background-image: url('/images/firepad/create-pad-pressed.png');
   }
+ 
   
   #firepad-container {
     display: none;
