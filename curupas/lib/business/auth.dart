@@ -262,16 +262,28 @@ class Auth {
     });
   }
 
-  static Future<DrawerContent> getDrawers() async {
-    DrawerContent _drawerContent = DrawerContent();
-    await Firestore.instance.document("contents/drawer").get().then((document) async {
+  static Future<HtmlContent> getHtmlContentByType(String type) async {
+    HtmlContent _drawerContent = HtmlContent();
+    await Firestore.instance.document("contents/${type}").get().then((document) async {
       if (document.exists) {
        await getContenHtmls(document).then((listContentHtml) {
-         _drawerContent = DrawerContent.fromDocument(document, listContentHtml);
+         _drawerContent = HtmlContent.fromDocument(document, listContentHtml);
         });
       }
     });
     return _drawerContent;
+  }
+
+  static Future<HtmlContent> getHtmlContentByTypeAndGroup(String type, DocumentReference group_red) async {
+    HtmlContent _htmlContent = HtmlContent();
+    await Firestore.instance.document("contents/${type}").get().then((document) async {
+      if (document.exists) {
+        await getContenHtmlsBygroup(document, group_red).then((listContentHtml) {
+          _htmlContent = HtmlContent.fromDocument(document, listContentHtml);
+        });
+      }
+    });
+    return _htmlContent;
   }
 
 
@@ -279,6 +291,17 @@ class Auth {
     QuerySnapshot collectionSnapshot = await document.reference.collection("collection").getDocuments();
     List<DocumentSnapshot> templist;
     List<ContentHtml> listContentHtml = new List();
+    templist = collectionSnapshot.documents;
+    listContentHtml = await templist.map((DocumentSnapshot docSnapshot) {
+      return ContentHtml.fromDocument(docSnapshot);
+    }).toList();
+    return listContentHtml;
+  }
+
+  static Future<List<ContentHtml>> getContenHtmlsBygroup(DocumentSnapshot document, DocumentReference group_red) async {
+    List<DocumentSnapshot> templist;
+    List<ContentHtml> listContentHtml = new List();
+    QuerySnapshot collectionSnapshot = await document.reference.collection('collection').where("group_ref",isEqualTo: group_red).getDocuments();
     templist = collectionSnapshot.documents;
     listContentHtml = await templist.map((DocumentSnapshot docSnapshot) {
       return ContentHtml.fromDocument(docSnapshot);

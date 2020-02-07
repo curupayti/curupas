@@ -362,14 +362,35 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void getDrawers() async {
-    await Auth.getDrawers().then((_drawer) {
+    await Auth.getHtmlContentByType("drawer").then((_drawer) {
       _globals.drawerContent = _drawer;
       _globals.drawerContent.contents.sort((a, b) {
         return a.name.toLowerCase().compareTo(b.name.toLowerCase());
       });
+      getNewsletters();
+    });
+  }
+
+  void getNewsletters() async {
+    await Auth.getHtmlContentByType("newsletter").then((_newsletter) {
+      _globals.newsletterContent = _newsletter;
+      _globals.newsletterContent.contents.sort((a, b) {
+        return a.last_update.compareTo(b.last_update);
+      });
+      getAnecdotes();
+    });
+  }
+
+  void getAnecdotes() async {
+    await Auth.getHtmlContentByTypeAndGroup("anecdote", _globals.group.yearRef).then((_anecdote) {
+      _globals.anecdoteContent = _anecdote;
+      _globals.anecdoteContent.contents.sort((a, b) {
+        return a.last_update.compareTo(b.last_update);
+      });
       getStreamingData();
     });
   }
+
 
   void getStreamingData() async {
     List<YT_API> ytResult = [];

@@ -3,20 +3,18 @@ import 'package:curupas/models/content_html.dart';
 import 'package:device_info/device_info.dart';
 import 'package:intl/intl.dart';
 
-
-
-class DrawerContent {
+class HtmlContent {
   final String name;
   final DateTime last_update;
   final List<ContentHtml> contents;
 
 
-  DrawerContent.fromMap(Map<dynamic, dynamic> data)
+  HtmlContent.fromMap(Map<dynamic, dynamic> data)
       : name = data["name"],
         last_update = data["last_update"],
         contents = List.from(data['contents']);
 
-  DrawerContent({
+  HtmlContent({
     this.name,
     this.last_update,
     this.contents,
@@ -30,24 +28,13 @@ class DrawerContent {
     };
   }
 
-  /*DateTime parseTime(dynamic date) {
+  factory HtmlContent.fromJson(Map<String, Object> doc, List<ContentHtml> contents) {
 
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-
-    if (Platform.isIOS) {
-
-    }
-
-    return Platform.isIOS ? (date as Timestamp).toDate() : (date as DateTime);
-  }*/
-
-  factory DrawerContent.fromJson(Map<String, Object> doc, List<ContentHtml> contents) {
-    //var data = new DateTime();
     Timestamp timestamp = doc["last_update"] as Timestamp;
     var format = new DateFormat('d MMM, hh:mm a');
     DateTime date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
 
-    DrawerContent drawer = new DrawerContent(
+    HtmlContent drawer = new HtmlContent(
       name: doc['name'],
       last_update: date,
       contents: contents,
@@ -55,8 +42,8 @@ class DrawerContent {
     return drawer;
   }
 
-  factory DrawerContent.fromDocument(DocumentSnapshot doc, List<ContentHtml> contents) {
-    return DrawerContent.fromJson(doc.data, contents);
+  factory HtmlContent.fromDocument(DocumentSnapshot doc, List<ContentHtml> contents) {
+    return HtmlContent.fromJson(doc.data, contents);
   }
 
   void setGroupReference(DocumentReference ref) {}
