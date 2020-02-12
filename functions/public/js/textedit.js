@@ -16,12 +16,12 @@ $(document).ready(function () {
 
       db.collection("contents").doc(refId).get().then(function(_doc) {
 
-          var data = _doc.data();
-
-          var _id = _doc.id;
+          var data = _doc.data();          
 
           let _name = data.name;  
 
+          var _id = _doc.id;
+ 
           let _amount = data.amount;  
           
           let _time =  data.last_update;
@@ -35,7 +35,7 @@ $(document).ready(function () {
           $("#edit-list").append(
             '<li class="list-group-item d-flex justify-content-between align-items-center">' +
             '<a class="nav-link" href="javascript:void(0);" ' + 
-            'onclick="loadEditsList(\'' + _id + '\',\'' + _new + '\',\'' + _short + '\'); return false;">' + _name + '</a><span id="' + _id + '" class="badge badge-primary badge-pill">' + _amount + '</span></li>');                    
+            'onclick="loadEditsList(\'' + _new + '\',\'' + _short + '\'); return false;">' + _name + '</a><span id="' + _id + '" class="badge badge-primary badge-pill">' + _amount + '</span></li>');                    
                    
           editObjects[_id] = _doc;
 
@@ -58,18 +58,17 @@ $(document).ready(function () {
     window.jsonData = [];
     window.editDocuments = [];
 
-    window._id_collection;
+    window._short;
     window._id_document_collection;
+    window.database_ref;
   
-    window.loadEditsList = function(_id, _new, _short) { 
+    window.loadEditsList = function(_new, _short) { 
 
-      window._short = _short;
-
-      window._id_collection = _id;
+      window._short = _short;      
       
       clearFirepad();      
 
-      var _doc = editObjects[_id];   
+      var _doc = editObjects[_short];   
   
       _doc.ref.collection("collection").get()
       .then(function(querySnapshotEdit) {
@@ -193,7 +192,7 @@ $(document).ready(function () {
            querySnapshotEdit.forEach(function(docEdit) {
 
             let _doc_id_ = docEdit.id;
-
+            
             window.editDocuments[_doc_id_] = docEdit;
   
              var editData = docEdit.data();   
@@ -274,7 +273,7 @@ $(document).ready(function () {
 
         let row = { "meta": {  
           "database_ref": _database_ref, 
-          "id" : window._id_collection,
+          "id" : window._short,
           "Nombre": new_name, 
           "Desc": new_desc, 
           "Actualizado": thedate } };   
@@ -298,11 +297,11 @@ $(document).ready(function () {
 
             loadEdits(_database_ref, window._short);
 
-            var num = parseInt($("#" + window._id_collection).text());
+            var num = parseInt($("#" + window._short).text());
 
             num++;
 
-            $("#" + window._id_collection).text(num);
+            $("#" + window._short).text(num);
 
         }).catch(function(error) {
           console.error("Error adding document: ", error);
@@ -322,35 +321,92 @@ $(document).ready(function () {
      }
 
 
+     /*$('#button-publish').click(function() {   
+
+        var publishContent = functions.httpsCallable('publishContent');
+
+        var ref = window.database_ref;
+        var short = window._short;
+        var id = window._id_document_collection;
+        
+        publishContent({
+          database_ref: ref,
+          contentType: short,
+          documentId: id          
+        }).then(function(result) {
+
+          if (resutl) {
+
+          } else {
+
+          }
+        
+        }).catch(function(error) {
+         
+          var code = error.code;
+          var message = error.message;
+          var details = error.details;
+         
+        });
+
+     });*/
+
      $('#button-publish').click(function() { 
+
+      var ref = window.database_ref;
+      var short = window._short;
+      var id = window._id_document_collection;
+
+      var publishContent = firebase.functions().httpsCallable('publishContent');
       
-        //var document_path = "contents/" + window._short + "/collection/" + window._id_collection;
-
-        var _document = window.editDocuments[window._id_document_collection];
-
-        var _time =  new Date();
-
-        db.collection('contents')
-        .doc(window._short)
-        .collection("collection")
-        .doc(window._id_document_collection)
-        .update({        
-          "published" : true,
-          "last_update" : _time        
-        } ).catch(function(error) {
-          console.error("Error adding document: ", error);
-        }); 
-
-     });
-
-     $('#button-publish').click(function() { 
+      publishContent({
+        database_ref: ref,
+        contentType: short,
+        documentId: id          
+      }).then(function(result) {
+        // Read result of the Cloud Function.
+        var sanitizedMessage = result.data.text;
+        // ...
+      });
       
-      
+        /*var settings = {
+          "url": "https://us-central1-curupas-app.cloudfunctions.net/publishContent",
+          "method": "POST",
+          "timeout": 0,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "data": JSON.stringify({
+            "database_ref":window.database_ref,
+            "contentType":window._short,
+            "documentId":window._id_document_collection
+          }),
+        };
+        
+        $.ajax(settings).done(function (response) {
+
+          console.log(response);
+
+          if (response.true) {
+
+            $('#view-publish').prop('disabled', false);
+
+          } else {
+
+          }
+          
+        });*/
+
     });
 
      
      
-    function loadEdits(database_ref, _short) {            
+    function loadEdits(database_ref, _short) { 
+
+      window.database_ref = database_ref;     
+      
+      $('#button-publish').prop('disabled', true);
+      $('#view-publish').prop('disabled', true);
 
       var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );
       
@@ -388,6 +444,26 @@ $(document).ready(function () {
           ensurePadInList(database_ref);
           buildPadList();
         });
+
+        firepad.on('newLine', function() {
+
+          $('#button-publish').prop('disabled', false);
+          
+          /*var _document = window.editDocuments[window._id_document_collection];
+          var _time =  new Date(); 
+          db.collection('contents')
+          .doc(window._short)
+          .collection("collection")
+          .doc(window._id_document_collection)
+          .update({        
+            "published" : false,
+            "last_update" : _time        
+          }).catch(function(error) {
+            console.error("Error adding document: ", error);
+          }); */
+          
+        });
+        
 
 
         codeMirror.focus();
@@ -455,26 +531,22 @@ $(document).ready(function () {
       function getFirepadById (firepadId) {
 
           var getFirePadFromRef = functions.httpsCallable('getFirePadFromRef');
+
           getFirePadFromRef({"refId": firepadId}).then(function(result) {
           
           var sanitizedMessage = result.data.text;
 
           console.log(sanitizedMessage);
           
-        }).catch(function(error) {
-          // Getting the Error details.
-          var code = error.code;
-          var message = error.message;
-          var details = error.details;
-          // ...
-        });
-
+          }).catch(function(error) {
+          
+            var code = error.code;
+            var message = error.message;
+            var details = error.details;
+          
+          });
       }
-
-    }
-      
-
-      
+    }    
     
   //# sourceURL=textedit.js   
 

@@ -1,0 +1,32 @@
+untitled:Untitled-1
+exports.updateContent = functions.firestore
+  .document('/contents/newsletter/collection/KfeG31b87WbSkO9pHYLn')
+  .onUpdate( async (change, context) => {  
+
+      const newValue = change.after.data();     
+      const database_ref = newValue.database_ref;
+      
+      async function getHtml(database_ref) {        
+        
+        var firepadRef = firebase.database().ref().child("newsletter").child(database_ref);   
+        var headless = new Firepad.Headless(firepadRef);
+        await headless.getHtml(function(_html_) {
+            console.log("_html_: " + _html_);  
+            //callback(_html_);
+            //headless.dispose();     
+            //return _html_;   
+            change.after.ref.set({html:_html_,published:true},{merge:true});
+        });
+        
+      }
+
+      getHtml(database_ref);
+      
+
+      /*getHtml(database_ref, function(_html){
+        console.log("_html: " + _html);
+        var promise = [];
+        promise.push(change.after.ref.set({html:_html,published:true},{merge:true}))
+        return Promise.all(promise);
+      });*/
+});

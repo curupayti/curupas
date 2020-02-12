@@ -61,6 +61,30 @@ const THUMB_PREFIX = 'thumb_';
 
 
 /**
+ * HTTP function that supports CORS requests.
+ *
+ * @param {Object} req Cloud Function request context.
+ * @param {Object} res Cloud Function response context.
+ */
+/*exports.corsEnabledFunction = (req, res) => {
+  // Set CORS headers for preflight requests
+  // Allows GETs from any origin with the Content-Type header
+  // and caches preflight response for 3600s
+
+  res.set('Access-Control-Allow-Origin', '*');
+
+  if (req.method === 'OPTIONS') {
+    // Send response to OPTIONS requests
+    res.set('Access-Control-Allow-Methods', 'GET');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    res.set('Access-Control-Max-Age', '3600');
+    res.status(204).send('');
+  } else {
+    res.send('Hello World!');
+  }
+};*/
+
+/**
  * When an image is uploaded in the Storage bucket We generate a thumbnail automatically using
  * ImageMagick.
  * After the thumbnail has been generated and uploaded to Cloud Storage,
@@ -298,8 +322,8 @@ exports.sendSMS = functions.https.onRequest((req, res) => {
 
 }); 
 
-exports.updateContent = functions.firestore
-  .document('/contents/newsletter/collection/yq7tg6ArxaKlUQnhwBov')
+/*exports.updateContent = functions.firestore
+  .document('/contents/newsletter/collection/KfeG31b87WbSkO9pHYLn')
   .onUpdate((change, context) => {    
 
      const newValue = change.after.data();
@@ -312,22 +336,83 @@ exports.updateContent = functions.firestore
 
      var headless = new Firepad.Headless(firepadRef);
 
+     console.log("headless: " + headless);        
+
      headless.getHtml(function(_html) {
 
-        console.log("html: " + _html);        
+        console.log("html: " + _html);              
 
-        //headless.dispose();
+        firestore.collection("/content/newsletter/collection/").doc("KfeG31b87WbSkO9pHYLn").set({html:_html},{merge:true});     
 
-        return change.after.ref.update({html: _html});  
-           
+        headless.dispose();
 
      }).catch(function(error) {
-          console.log("Error getting document:", error);
-
-          headless.dispose();
+       headless.dispose();
      });
-
      
+});*/
+
+
+
+
+//exports.publishContent = functions.https.onCall((data) => {//(req, res) => {
+
+//exports.publishContent = functions.https.onCall((data, context) => {
+
+
+exports.publishContent = functions.https.onRequest((req, res) => {
+  
+  let data = req.body;
+
+  const database_ref = data.database_ref;
+  const contentType = data.contentType; 
+  const documentId = data.documentId; 
+
+  console.log("database_ref: " + database_ref);  
+  console.log("contentType: " + contentType);  
+  console.log("documentId: " + documentId);  
+
+  var firepadRef = firebase.database().ref().child(contentType).child(database_ref);    
+  var headless = new Firepad.Headless(firepadRef);
+  
+  headless.getHtml(function(_html) {
+
+    console.log("html: " + _html);              
+
+    firestore.collection("contents")
+    .doc(contentType)
+    .collection("collection")
+    .doc(documentId)
+    .set({
+      html : _html,
+      published : true
+    },{merge:true})
+    .then(() => {
+      console.log('Successfully set');      
+      
+      res.send(true); 
+
+      headless.dispose();
+
+      //return {
+      //  result: "true"       
+      //};
+      
+    }).catch(function(error) {
+
+      
+      res.send(false); 
+
+      headless.dispose();            
+
+      //return {
+      //  result: "false"
+      //};
+
+    });    
+
+  });
+    
 });
 
 

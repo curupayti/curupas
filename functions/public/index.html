@@ -70,6 +70,8 @@
             measurementId: "G-2RRZXWLMTL"
         };
         firebase.initializeApp(firebaseConfig);
+        //firebase.functions().useFunctionsEmulator('http://localhost:5001');
+        //firebase.functions().useFunctionsEmulator('http://localhost:5000') 
 
         const db = firebase.firestore();
         const storage = firebase.storage();
