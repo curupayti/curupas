@@ -353,24 +353,20 @@ $(document).ready(function () {
 
      $('#button-publish').click(function() { 
 
-      var ref = window.database_ref;
+      /*var ref = window.database_ref;
       var short = window._short;
       var id = window._id_document_collection;
-
-      var publishContent = firebase.functions().httpsCallable('publishContent');
-      
+      var publishContent = firebase.functions().httpsCallable('publish');      
       publishContent({
         database_ref: ref,
         contentType: short,
         documentId: id          
-      }).then(function(result) {
-        // Read result of the Cloud Function.
-        var sanitizedMessage = result.data.text;
-        // ...
-      });
+      }).then(function(result) {        
+        var publishResult = result.data;        
+      });*/     
       
-        /*var settings = {
-          "url": "https://us-central1-curupas-app.cloudfunctions.net/publishContent",
+      var settings = {
+          "url": "https://us-central1-curupas-app.cloudfunctions.net/publish",
           "method": "POST",
           "timeout": 0,
           "headers": {
@@ -387,7 +383,7 @@ $(document).ready(function () {
 
           console.log(response);
 
-          if (response.true) {
+          if (response) {
 
             $('#view-publish').prop('disabled', false);
 
@@ -395,8 +391,7 @@ $(document).ready(function () {
 
           }
           
-        });*/
-
+        });     
     });
 
      

@@ -41,9 +41,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const Firepad  = require('firepad');
-const cors = require('cors')({origin: true});
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
+
+const cors = require('cors')({origin: true});
 
 const mkdirp = require('mkdirp-promise');
 const request = require('request');
@@ -58,31 +59,6 @@ const THUMB_MAX_HEIGHT = 200;
 const THUMB_MAX_WIDTH = 200;
 // Thumbnail prefix added to file names.
 const THUMB_PREFIX = 'thumb_';
-
-
-/**
- * HTTP function that supports CORS requests.
- *
- * @param {Object} req Cloud Function request context.
- * @param {Object} res Cloud Function response context.
- */
-/*exports.corsEnabledFunction = (req, res) => {
-  // Set CORS headers for preflight requests
-  // Allows GETs from any origin with the Content-Type header
-  // and caches preflight response for 3600s
-
-  res.set('Access-Control-Allow-Origin', '*');
-
-  if (req.method === 'OPTIONS') {
-    // Send response to OPTIONS requests
-    res.set('Access-Control-Allow-Methods', 'GET');
-    res.set('Access-Control-Allow-Headers', 'Content-Type');
-    res.set('Access-Control-Max-Age', '3600');
-    res.status(204).send('');
-  } else {
-    res.send('Hello World!');
-  }
-};*/
 
 /**
  * When an image is uploaded in the Storage bucket We generate a thumbnail automatically using
@@ -322,159 +298,62 @@ exports.sendSMS = functions.https.onRequest((req, res) => {
 
 }); 
 
-/*exports.updateContent = functions.firestore
-  .document('/contents/newsletter/collection/KfeG31b87WbSkO9pHYLn')
-  .onUpdate((change, context) => {    
-
-     const newValue = change.after.data();
-     
-     const database_ref = newValue.database_ref;
-     
-     console.log("llega database_ref: " + database_ref); 
-     
-     var firepadRef = firebase.database().ref().child("newsletter").child(database_ref);    
-
-     var headless = new Firepad.Headless(firepadRef);
-
-     console.log("headless: " + headless);        
-
-     headless.getHtml(function(_html) {
-
-        console.log("html: " + _html);              
-
-        firestore.collection("/content/newsletter/collection/").doc("KfeG31b87WbSkO9pHYLn").set({html:_html},{merge:true});     
-
-        headless.dispose();
-
-     }).catch(function(error) {
-       headless.dispose();
-     });
-     
-});*/
-
-
-
-
-//exports.publishContent = functions.https.onCall((data) => {//(req, res) => {
-
-//exports.publishContent = functions.https.onCall((data, context) => {
-
-
-exports.publishContent = functions.https.onRequest((req, res) => {
+exports.publish = functions.https.onRequest((request, response) => {
   
-  let data = req.body;
+  response.set('Access-Control-Allow-Origin', '*');
+  response.set('Access-Control-Allow-Credentials', 'true'); // vital
 
-  const database_ref = data.database_ref;
-  const contentType = data.contentType; 
-  const documentId = data.documentId; 
-
-  console.log("database_ref: " + database_ref);  
-  console.log("contentType: " + contentType);  
-  console.log("documentId: " + documentId);  
-
-  var firepadRef = firebase.database().ref().child(contentType).child(database_ref);    
-  var headless = new Firepad.Headless(firepadRef);
+  if (request.method === 'OPTIONS') {
+      
+      // Send response to OPTIONS requests
+      response.set('Access-Control-Allow-Methods', 'GET');
+      response.set('Access-Control-Allow-Headers', 'Content-Type');
+      response.set('Access-Control-Max-Age', '3600');
+      response.status(204).send('');
   
-  headless.getHtml(function(_html) {
-
-    console.log("html: " + _html);              
-
-    firestore.collection("contents")
-    .doc(contentType)
-    .collection("collection")
-    .doc(documentId)
-    .set({
-      html : _html,
-      published : true
-    },{merge:true})
-    .then(() => {
-      console.log('Successfully set');      
+    } else {
       
-      res.send(true); 
+      const data = request.body;
+      const database_ref = data.database_ref;
+      const contentType = data.contentType; 
+      const documentId = data.documentId; 
 
-      headless.dispose();
+      var firepadRef = firebase.database().ref().child(contentType).child(database_ref);    
+      var headless = new Firepad.Headless(firepadRef);  
 
-      //return {
-      //  result: "true"       
-      //};
-      
-    }).catch(function(error) {
+      return cors(request, response, () => {  
+          
+          headless.getHtml(function(_html) {           
 
-      
-      res.send(false); 
+            firestore.collection("contents")
+            .doc(contentType)
+            .collection("collection")
+            .doc(documentId)
+            .set({
+              html : _html,
+              published : true
+            },{merge:true})
+            .then(() => {
 
-      headless.dispose();            
+              console.log('Successfully set');          
 
-      //return {
-      //  result: "false"
-      //};
+              response.send(true); 
 
-    });    
+              headless.dispose();
+              
+            }).catch(function(error) {
+              
+              response.send(false);               
 
-  });
-    
+              headless.dispose();
+
+            });
+
+          });
+
+      });    
+  }   
 });
 
-
-/*exports.publishNewsletterToHtml = functions.firestore.document('/content').onUpdate( (change, context) => {
-  
-  const id = change.params.id;
-  const database_ref = change.params.database_ref;
-
-  console.log("llega id: " + id); 
-  console.log("llega database_ref: " + database_ref); 
-
-  var rootRef = firebase.database().ref("newsletter");
-  var firepadRef = rootRef.child(database_ref);
-
-  var headless = new Firepad.Headless(firepadRef);
-
-  headless.getHtml(function(_html) {
-
-    console.log("html: " + _html); 
-    
-    firestore.collection("/content/newsletter/collection/").doc(id).update({html:_html});
- 
-    headless.dispose();
-
-  }).catch(function(error) {
-      console.log("Error getting document:", error);
-
-      headless.dispose();
-  });
-
-
-});*/
-
-
-
-exports.getFirePadFromRef = functions.https.onRequest((req, res) => {
-
-  const refId = req.body.data.refId; 
-
-  //console.log("refId: " + refId);
-
-  var rootRef = firebase.database().ref();
-  var firepadRef = rootRef.child(refId);
-
-  //console.log("firepadRef: " + JSON.stringify(firepadRef));
-
-  var headless = new Firepad.Headless(firepadRef);
-
-  //console.log("headless: " + headless);
-
-    headless.getHtml(function(html) {
-
-      console.log("html: " + html);       
-
-      headless.dispose();
-
-    }).catch(function(error) {
-        console.log("Error getting document:", error);
-
-        headless.dispose();
-    });
-    
-});
 
  

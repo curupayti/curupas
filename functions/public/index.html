@@ -91,8 +91,7 @@
                     return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
                 }
             }
-        };
-
+        };       
         //var role = getUrlParameter('role');
 
         //if (role==undefined) {   
@@ -101,6 +100,29 @@
 
             if (user) {
 
+
+                /*firebase.auth().currentUser.getIdToken(rue).then(function(idToken) {
+                  
+                    let token = idToken;
+
+                    console.log(token);
+
+                }).catch(function(error) {
+                    // Handle error
+                });*/
+
+                /*let idToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjYzZTllYThmNzNkZWExMTRkZWI5YTY0OTcxZDJhMjkzN2QwYzY3YWEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vY3VydXBhcy1hcHAiLCJhdWQiOiJjdXJ1cGFzLWFwcCIsImF1dGhfdGltZSI6MTU3NTk4MTE1MiwidXNlcl9pZCI6IlpBdldRakZhYjJmaXYyN2czSHUwa2NwU0NYUDIiLCJzdWIiOiJaQXZXUWpGYWIyZml2MjdnM0h1MGtjcFNDWFAyIiwiaWF0IjoxNTgxNTM0OTA1LCJleHAiOjE1ODE1Mzg1MDUsImVtYWlsIjoiam9zZW1hbnVlbHZpZ2lsQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJqb3NlbWFudWVsdmlnaWxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.Sb5coyhk8PAotRplIEDN8wd-1qVn6X_cOcEUxUZVs34c3-frpAhLunyqwECNsA5YHYC6y339e0zRhZDid_zp_hHo8KNEwddsM-bg5RJMTe6FiVxSTiwhseUYm4q74W051pRL0LGRidENXjAzh9WpEhJ-HmW8_R9ViAsD4UfSHbzIQbz-ynx3zRUXVmzMqF-FT-UzBm-mYJb8PxSWH01lqsH5-IkCaAJeQNIdkyu-9Xmj31dcQzMLqR1bulAWAfUQSTQwwdL8WOyPCeCy5N82-WAbBeVeNy887EtYwosBO6fS3acYx70kbmQMgK6Eep68qfJg8JN3IO99YFLtrjpQ1A";
+
+                firebase.auth().verifyIdToken(idToken)
+                .then(function(decodedToken) {
+                    let uid = decodedToken.uid;
+                    console.log(uid);
+                    // ...
+                }).catch(function(error) {
+                    // Handle error
+                });*/
+
+                
                 console.log(user.email);
 
                 var previous = db.collection("users").where("email", "==", user.email)
