@@ -336,14 +336,18 @@ exports.publish = functions.https.onRequest((request, response) => {
             .then(() => {
 
               console.log('Successfully set');          
+              
+              let json_resutl_ok = { data: { html: _html, result: true }};
 
-              response.send(true); 
+              response.send(json_resutl_ok); 
 
               headless.dispose();
               
             }).catch(function(error) {
+
+              let json_resutl_false = { data: { result: false }};
               
-              response.send(false);               
+              response.send(json_resutl_false);               
 
               headless.dispose();
 

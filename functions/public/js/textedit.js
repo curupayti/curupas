@@ -318,38 +318,7 @@ $(document).ready(function () {
             result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
         return result;
-     }
-
-
-     /*$('#button-publish').click(function() {   
-
-        var publishContent = functions.httpsCallable('publishContent');
-
-        var ref = window.database_ref;
-        var short = window._short;
-        var id = window._id_document_collection;
-        
-        publishContent({
-          database_ref: ref,
-          contentType: short,
-          documentId: id          
-        }).then(function(result) {
-
-          if (resutl) {
-
-          } else {
-
-          }
-        
-        }).catch(function(error) {
-         
-          var code = error.code;
-          var message = error.message;
-          var details = error.details;
-         
-        });
-
-     });*/
+     }   
 
      $('#button-publish').click(function() { 
 
@@ -383,17 +352,19 @@ $(document).ready(function () {
 
           console.log(response);
 
-          if (response) {
-
+          if (response.data.result) {
             $('#view-publish').prop('disabled', false);
-
-          } else {
-
-          }
+            window.html = response.data.html;           
+          } 
           
         });     
     });
 
+    $('#view-publish').click(function() { 
+
+      $('#previewModal').modal('show');
+
+    });
      
      
     function loadEdits(database_ref, _short) { 
@@ -439,7 +410,7 @@ $(document).ready(function () {
           ensurePadInList(database_ref);
           buildPadList();
         });
-
+        
         firepad.on('newLine', function() {
 
           $('#button-publish').prop('disabled', false);
