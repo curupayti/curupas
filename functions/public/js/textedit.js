@@ -28,9 +28,7 @@ $(document).ready(function () {
 
           let _new =  data.new;
 
-          let _short = data.short;
-        
-          //https://firebase.google.com/docs/firestore/solutions/presence?hl=es
+          let _short = data.short;                
 
           $("#edit-list").append(
             '<li class="list-group-item d-flex justify-content-between align-items-center">' +
@@ -75,10 +73,7 @@ $(document).ready(function () {
   
            var editLength = querySnapshotEdit.docs.length;
   
-           var countLines = 1;
-
-           //Descargar con botones y usar un solo archivo
-           //https://datatables.net/download/index
+           var countLines = 1;        
 
           if (window.datatable !=undefined ) {
             window.datatable.clear();            
@@ -392,20 +387,87 @@ $(document).ready(function () {
     
       var firepadRef = new Firebase( 'https://curupas-app.firebaseio.com/' + _short ).child(database_ref);
 
-      codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });
+      codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });          
+      
+      codeMirror.on('drop', function(data, e) {
+        var file;
+        var files;
+        // Check if files were dropped
+        var _URL = window.URL || window.webkitURL;
+        files = e.dataTransfer.files;
+        if (files.length > 0) {
+          e.preventDefault();
+          e.stopPropagation();
+          _file = files[0];
+          //alert('File: ' + file.name);
+          var img = new Image();    
+          img = new Image();
+          var objectUrl = _URL.createObjectURL(_file);
+          img.onload = function () {
+
+              var _width = this.width;
+              var _height = this.height;
+              
+              var metadataFiles = {
+                customMetadata: {
+                    'thumbnail': 'false',
+                    'type' : '0'
+                }
+              }
+
+              var storageRef = storage.ref("/" + _short + "/" + database_ref);       
+
+              let rnd = Math.floor((Math.random()) * 0x10000).toString(7);
+                                                              
+              var filePathPost = _short + "_" +  rnd + ".png";        
+              const postRef = storageRef.child(filePathPost);
+              const putRef = postRef.put(_file, metadataFiles);  
+              //prefArray.push(putRef);  
+              putRef.on('state_changed', function(snapshot) {
+                  var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                  console.log('Upload is ' + progress + '% done');
+                  switch (snapshot.state) {
+                    case firebase.storage.TaskState.PAUSED: // or 'paused'
+                      console.log('Upload is paused');
+                      break;
+                    case firebase.storage.TaskState.RUNNING: // or 'running'
+                      console.log('Upload is running');
+                      break;
+                  }
+                }, function(error) {
+                  // Handle unsuccessful uploads
+                }, function() {                                                          
+                  putRef.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
+                      firepad.insertEntity('img', {
+                        'src' : downloadURL,
+                        'width' : _width,
+                        'height' : _height
+                      });
+                       
+                  });                  
+              });             
+              
+          };          
+          img.src = objectUrl;
+          return false;
+        }
+      });
 
       //LISTENER DRAG
-      //https://groups.google.com/forum/#!topic/firepad-io/d9HRHfd9NcE
+      //https://gist.github.com/mikelehen/fa5ceab5ad6f241b6544
+      //https://groups.google.com/forum/#!topic/firepad-io/d9HRHfd9NcE         
 
       firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
           { richTextToolbar: true, richTextShortcuts: true, userId: _user.userId});
       userList = FirepadUserList.fromDiv(firepadRef.child('users'),
           document.getElementById('firepad-userlist'), _user.userId);
 
+
+
         firepad.on('ready', function() {
           if (firepad.isHistoryEmpty()) {
             firepad.setText('Welcome to your own private pad!\n\nShare the URL below and collaborate with your friends.');
-          }
+          }          
 
           ensurePadInList(database_ref);
           buildPadList();
@@ -428,11 +490,12 @@ $(document).ready(function () {
             console.error("Error adding document: ", error);
           }); */
           
-        });
-        
+        });        
 
 
         codeMirror.focus();
+
+        codeMirror.setOption('dragDrop', true);        
        
 
       function padListEnabled() {
@@ -493,26 +556,7 @@ $(document).ready(function () {
       function displayPads() {
         $('#my-pads-list').toggle();
       }
-
-      function getFirepadById (firepadId) {
-
-          var getFirePadFromRef = functions.httpsCallable('getFirePadFromRef');
-
-          getFirePadFromRef({"refId": firepadId}).then(function(result) {
-          
-          var sanitizedMessage = result.data.text;
-
-          console.log(sanitizedMessage);
-          
-          }).catch(function(error) {
-          
-            var code = error.code;
-            var message = error.message;
-            var details = error.details;
-          
-          });
-      }
-    }    
+    }        
     
   //# sourceURL=textedit.js   
 
