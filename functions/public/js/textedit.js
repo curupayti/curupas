@@ -252,7 +252,7 @@ $(document).ready(function () {
         window.datatable.clear();
         
         var new_name = $('#new-name').val();
-        var new_desc = $('#new-desc').val();
+        var new_desc = $('#new-desc').val();          
 
         var document_path = "contents/" + window._short + "/collection";
 
@@ -281,8 +281,30 @@ $(document).ready(function () {
           description : new_desc,
           database_ref : _database_ref,
           last_update : _time        
-        } ).then(function(document) {                                        
-             
+        } ).then(function(doc) {   
+          
+            let _id = doc.id;
+          
+            var storage_path = "contents/" + window._short + "/" + _id;
+
+            var storageRef = storage.ref(storage_path);        
+            var file = document.getElementById("imgInp").files[0];                 
+            let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
+            var filePath = window._short + "_" +  rnd + ".png";            
+            
+            var thisRef = storageRef.child(filePath);                         
+
+            var metadata = {
+                customMetadata: {
+                    'thumbnail': 'true',
+                    'type' : '3',
+                    'short' : window._short,
+                    'id' : _id                   
+                }
+            }
+
+            thisRef.put(file, metadata);
+
             window.datatable.rows.add(window.jsonData);
             window.datatable.draw(); 
               
@@ -297,6 +319,8 @@ $(document).ready(function () {
             num++;
 
             $("#" + window._short).text(num);
+            $('#addPostModal').modal('hide');  
+
 
         }).catch(function(error) {
           console.error("Error adding document: ", error);
@@ -413,9 +437,9 @@ $(document).ready(function () {
                     'thumbnail': 'false',
                     'type' : '0'
                 }
-              }
+              }              
 
-              var storageRef = storage.ref("/" + _short + "/" + database_ref);       
+              var storageRef = storage.ref("contents/" + _short + "/" + window._id_document_collection + "/images");       
 
               let rnd = Math.floor((Math.random()) * 0x10000).toString(7);
                                                               
@@ -461,8 +485,6 @@ $(document).ready(function () {
           { richTextToolbar: true, richTextShortcuts: true, userId: _user.userId});
       userList = FirepadUserList.fromDiv(firepadRef.child('users'),
           document.getElementById('firepad-userlist'), _user.userId);
-
-
 
         firepad.on('ready', function() {
           if (firepad.isHistoryEmpty()) {
@@ -556,7 +578,31 @@ $(document).ready(function () {
       function displayPads() {
         $('#my-pads-list').toggle();
       }
-    }        
+    }     
+    
+    function readURL(input) {
+      if (input.files && input.files[0]) {
+          var reader = new FileReader();            
+          reader.onload = function (e) {
+              $('#avatar-preview').attr('src', e.target.result);
+          }            
+          reader.readAsDataURL(input.files[0]);
+      }
+  }
+  
+  $("#imgInp").change(function(){
+      readURL(this);
+  });
+
+  /*Spinner*/
+
+  function modal(){
+     $('.modal').modal('show');
+     setTimeout(function () {
+       console.log('hejF');
+       $('.modal').modal('hide');
+     }, 3000);
+  }
     
   //# sourceURL=textedit.js   
 

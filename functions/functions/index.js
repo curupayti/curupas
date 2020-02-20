@@ -153,13 +153,40 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
       const fileUrl = originalResult[0];    
       var userId = customMetadata.userId;
       var year = customMetadata.year;
+      
       console.log('year: '+ year);          
+      
       let _time = admin.firestore.FieldValue.serverTimestamp();
+      
       console.log("_time: " + _time);
+      
       await firestore.collection("users").doc(userId).update(
         { profilePictureURL : fileUrl,
           thumbnailPictureURL: thumbFileUrl, timeStamp:_time});
 
+    } else if (customMetadataType == 3) {  
+
+        const fileUrl = originalResult[0];            
+        var _short = customMetadata.short;          
+        var _id = customMetadata.id;    
+        let _time = admin.firestore.FieldValue.serverTimestamp();   
+
+        console.log("_short: " + _short);        
+        console.log("_id: " + _id);
+        console.log("_time: " + _time);           
+
+        await firestore.collection('contents')
+        .doc(_short)
+        .collection("collection")
+        .doc(_id)
+        .update({ 
+          storage_icon_ref : filePath,
+          storage_thumbFile_ref : thumbFilePath,
+          icon_original : fileUrl,
+          icon: thumbFileUrl, 
+          last_update: _time 
+        });                     
+    
     }
     
   }  
