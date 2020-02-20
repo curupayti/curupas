@@ -91,7 +91,8 @@ $(document).ready(function () {
               { "data": "meta.id" },
               { "data": "meta.Nombre" },
               { "data": "meta.Desc" },
-              { "data": "meta.Actualizado" }
+              { "data": "meta.Actualizado" },
+              { "data": "meta.Imagen" }
             ],
             columnDefs: [
               {
@@ -108,12 +109,18 @@ $(document).ready(function () {
                 "targets": [ 3 ],
                 "visible": true,
                 "searchable": true,
-                "width": "50%"
+                "width": "30%"
               },
               {
                 "targets": [ 4 ],
                 "visible": true,
                 "searchable": true,
+                "width": "15%"
+              },
+              {
+                "targets": [ 5 ],
+                "visible": true,
+                "searchable": false,
                 "width": "20%"
               }
             ],    
@@ -195,8 +202,19 @@ $(document).ready(function () {
              let _date = editData.last_update;
 
              let last_update = getDateFrom(_date.toDate());
+
+             let _icon = editData.icon;
   
-             let row = { "meta": {  "database_ref": editData.database_ref, "id": _doc_id_, "Nombre": editData.name, "Desc": editData.description.slice(0, 20) + "...", "Actualizado": last_update } };   
+             let row = { 
+               "meta": {  
+                 "database_ref": editData.database_ref, 
+                 "id": _doc_id_, 
+                 "Nombre": editData.name, 
+                 "Desc": editData.description.slice(0, 20) + "...", 
+                 "Actualizado": last_update,
+                 "Imagen": "<img src='" + _icon + "' style='height:30px; width:30px'>",
+                } 
+             };   
   
              window.jsonData.push(row);
   
