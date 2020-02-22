@@ -69,29 +69,6 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  /*Widget _buildPlayButton(BuildContext context) {
-    return Material(
-      color: Colors.black87,
-      type: MaterialType.circle,
-      child: InkWell(
-        onTap: () async {
-          Navigator.pushNamed(
-            context,
-            '/postswipe',
-            arguments: feed,
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Icon(
-            Icons.play_arrow,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }*/
-
   Widget _buildInfo() {
     return Stack(
       children: <Widget>[

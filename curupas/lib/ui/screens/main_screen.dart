@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:curupas/models/content_html.dart';
 import 'package:curupas/models/drawer_content.dart';
+import 'package:curupas/models/museum.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,8 @@ import 'package:youtube_api/youtube_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
+
+//https://pub.dev/packages/flutter_staggered_grid_view#-example-tab-
 
 class MainScreen extends StatefulWidget {
   MainScreen({Key key, this.title, FirebaseUser firebaseUser})
@@ -355,25 +358,25 @@ class _MainScreenState extends State<MainScreen> {
   void getMuseums(String desc, List<Post> posts) async {
     await Auth.getMuseumSnapshots().then((templist) {
       Auth.getMuseum(templist).then((museums) {
-        _globals.setData(desc, posts, museums);
-        getDrawers();
+        getDrawers(desc, posts, museums);
       });
     });
   }
 
-  void getDrawers() async {
+  void getDrawers(String desc, List<Post> posts, List<Museum> museums) async {
     await Auth.getHtmlContentByType("drawer").then((_drawer) {
       _globals.drawerContent = _drawer;
       _globals.drawerContent.contents.sort((a, b) {
         return a.name.toLowerCase().compareTo(b.name.toLowerCase());
       });
-      getNewsletters();
+      getNewsletters(desc, posts, museums);
     });
   }
 
-  void getNewsletters() async {
-    await Auth.getHtmlContentByType("newsletter").then((_newsletter) {
-      _globals.newsletterContent = _newsletter;
+  void getNewsletters(String desc, List<Post> posts, List<Museum> museums) async {
+    await Auth.getHtmlContentByType("newsletter").then((_newsletterContent) {
+      _globals.newsletterContent = _newsletterContent;
+      _globals.setData(desc, posts, museums, _newsletterContent.contents);
       _globals.newsletterContent.contents.sort((a, b) {
         return a.last_update.compareTo(b.last_update);
       });

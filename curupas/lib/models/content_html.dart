@@ -10,6 +10,7 @@ class ContentHtml {
   final DocumentReference group_ref;
   final String icon;
   final DateTime last_update;
+  final int id;
 
   ContentHtml({
     this.documentID,
@@ -19,6 +20,7 @@ class ContentHtml {
     this.group_ref,
     this.icon,
     this.last_update,
+    this.id
   });
 
   Map<String, Object> toJson() {
@@ -29,7 +31,8 @@ class ContentHtml {
       'database_ref': database_ref,
       'group_ref': group_ref,
       'icon': icon,
-      'last_update' : last_update
+      'last_update' : last_update,
+      'id' : id
     };
   }
 
@@ -39,6 +42,8 @@ class ContentHtml {
     var format = new DateFormat('d MMM, hh:mm a');
     DateTime date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
 
+    int id = date.month;
+
     ContentHtml content_html = new ContentHtml(
       html: doc['html'],
       documentID: doc['documentID'],
@@ -47,6 +52,7 @@ class ContentHtml {
       group_ref: doc['group_ref'],
       icon: doc['icon'],
       last_update: date,
+      id: id
     );
     return content_html;
   }

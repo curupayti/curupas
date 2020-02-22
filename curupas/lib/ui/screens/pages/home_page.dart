@@ -1,4 +1,5 @@
 import 'package:curupas/ui/screens/widgets/museum.dart';
+import 'package:curupas/ui/screens/widgets/newsletter/newsletter.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -131,7 +132,8 @@ Widget _buildContent() {
       children: <Widget>[
         _buildHeader(),
         _buildPostScroller(),
-        _buildPDatePickerTimeline(),
+        _buildNewsletterTimeline(),
+        _buildMuseumTimeline(),
       ],
     ),
   );
@@ -236,12 +238,22 @@ Widget _buildPostScroller() {
   );
 }
 
-Widget _buildPDatePickerTimeline() {
+Widget _buildMuseumTimeline() {
   return Padding(
     padding: const EdgeInsets.only(top: 16.0),
     child: SizedBox.fromSize(
-      size: Size.fromHeight(245.0),
+      size: Size.fromHeight(170.0),
       child: new MuseumWidget(museums: _globals.homeData.museums),
+    ),
+  );
+}
+
+Widget _buildNewsletterTimeline() {
+  return Padding(
+    padding: const EdgeInsets.only(top: 16.0),
+    child: SizedBox.fromSize(
+      size: Size.fromHeight(200.0),
+      child: new NewsletterWidget(newsletters: _globals.homeData.newsletters),
     ),
   );
 }

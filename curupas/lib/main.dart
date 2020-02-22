@@ -17,6 +17,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'models/post.dart';
 import 'models/streaming.dart';
 
+//Flutter awesome
+//https://github.com/leisim/awesome-flutter-packages
+
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Firestore.instance.settings();

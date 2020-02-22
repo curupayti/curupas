@@ -17,9 +17,11 @@
   import 'package:youtube_api/youtube_api.dart';
   import 'package:file_picker/file_picker.dart';
   import 'business/auth.dart';
-  import 'models/drawer_content.dart';
+  import 'models/content_html.dart';
+import 'models/drawer_content.dart';
   import 'models/museum.dart';
-  import 'models/streaming.dart';
+  import 'models/newsletter.dart';
+import 'models/streaming.dart';
   import 'package:path/path.dart' as p;
   import 'dart:math' as math;
 
@@ -123,7 +125,7 @@
     streammer.setYtResutl(_ytResult);
   }
 
-  void setData(String desc, List<Post> posts, List<Museum> museums) {
+  void setData(String desc, List<Post> posts, List<Museum> museums, List<ContentHtml> newsletters) {
     Data _dataPost = new Data(
       name: 'Curupa',
       avatar: 'assets/images/escudo.png',
@@ -132,6 +134,7 @@
       biography: desc,
       posts: posts,
       museums: museums,
+      newsletters : newsletters,
     );
     homeData = _dataPost;
   }
@@ -232,6 +235,7 @@
       this.biography,
       this.posts,
       this.museums,
+      this.newsletters,
     });
 
     final String name;
@@ -241,6 +245,7 @@
     final String biography;
     final List<Post> posts;
     final List<Museum> museums;
+    final List<ContentHtml> newsletters;
   }
 
   class Video {
