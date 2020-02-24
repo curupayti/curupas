@@ -18,15 +18,12 @@ dependencies:
 
   cloud_firestore: ^0.13.0+1
   cloud_functions: ^0.4.1+6
-  #firebase_core: ^0.4.3+1
   firebase_auth: ^0.15.3
   firebase_storage: ^3.1.0
   firebase_database: ^3.1.1
   firebase_messaging: ^6.0.9
-  #firebase_in_app_messaging: ^0.1.1+1
   firebase_analytics: ^5.0.9
   firebase_crashlytics: ^0.1.2+4
-
   flutter_facebook_login: ^3.0.0
   shared_preferences: ^0.5.6
   flutter_swiper: ^1.1.6
@@ -50,18 +47,17 @@ dependencies:
   url_launcher: ^5.1.6
   location: ^2.3.5
   geolocator: ^5.1.4+2
-  table_calendar: ^2.2.1
   photo_view: ^0.9.0
   flutter_svg: ^0.15.0
   circular_profile_avatar: ^1.0.6
   flutter_webview_plugin: 0.3.0+2
   webview_flutter: ^0.3.19+4
   device_info: ^0.4.1+4
-  #flutter_staggered_grid_view: ^0.3.0
+  datetime_picker_formfield: ^0.1.8
 
+  #flutter_staggered_grid_view: ^0.3.0
   #circular_bottom_navigation: ^1.0.1
   #url_launcher: ^3.0.2
-
   #geoflutterfire: ^2.0.3+5
   #geoflutterfire:
   #git: https://github.com/felipecesar42/GeoFlutterFire.git

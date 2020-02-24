@@ -1,4 +1,5 @@
 import 'package:curupas/models/content_html.dart';
+import 'package:curupas/ui/screens/calendar/event_creator.dart';
 import 'package:curupas/ui/screens/drawer/content_viewer.dart';
 import 'package:curupas/ui/screens/widgets/youtube/player_screen.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:curupas/ui/screens/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'models/event_calendar.dart';
 import 'models/post.dart';
 import 'models/streaming.dart';
 
@@ -112,6 +114,13 @@ class RouteGenerator {
                 //  streaming: settings.arguments,
                 //)
                 PlayerScreen(),
+          );
+        }
+        return _errorRoute();
+      case '/eventcreator':
+        if (args is EventCalendar) {
+          return MaterialPageRoute(
+            builder: (_) => EventCreator(event: settings.arguments),
           );
         }
         return _errorRoute();

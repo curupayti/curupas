@@ -411,6 +411,24 @@ class Auth {
     return museums;
   }
 
+  static Future<QuerySnapshot> getCalendarData(DateTime _dateTime) async {
+    QuerySnapshot userEvents = await Firestore.instance
+        .collection('calendar')
+        .where(
+        'start', isGreaterThanOrEqualTo: new DateTime(_dateTime.year, _dateTime.month))
+        .getDocuments();
+    return userEvents;
+  }
+
+  static Future<QuerySnapshot> getCalendarEvents(DateTime _eventDate) async {
+      QuerySnapshot events = await Firestore.instance
+          .collection('calendar')
+          .where('time', isGreaterThan: new DateTime(_eventDate.year, _eventDate.month, _eventDate.day-1, 23, 59, 59))
+          .where('time', isLessThan: new DateTime(_eventDate.year, _eventDate.month, _eventDate.day+1))
+          .getDocuments();
+      return events;
+  }
+
   static String getExceptionText(Exception e) {
     if (e is PlatformException) {
       switch (e.message) {
@@ -433,4 +451,5 @@ class Auth {
       return 'Unknown error occured.';
     }
   }
+
 }
