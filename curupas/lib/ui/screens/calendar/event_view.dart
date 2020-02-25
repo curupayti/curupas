@@ -119,7 +119,7 @@ class EventsViewState extends State<EventsView> {
 
   void _deleteEvent(DocumentSnapshot document) {
     setState(() {
-      Firestore.instance.collection('calendar_events').document(document.documentID).delete();
+      //Firestore.instance.collection('calendar_events').document(document.documentID).delete();
     });
   }
 

@@ -51,7 +51,7 @@
       return Scaffold(
         body: Column(
           children: <Widget>[
-            UpperSection(),
+            //UpperSection(),
             CalendarSection(),
           ],
         ),
@@ -91,98 +91,6 @@
     );
   }
 
-  class UpperSection extends StatelessWidget {
-
-    const UpperSection({
-      Key key,
-    }) : super(key: key);
-
-    @override
-    Widget build(BuildContext context) {
-      double button_width = MediaQuery.of(context).size.width / 3;
-      return new Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-          Padding(
-          padding: EdgeInsets.only(top: 10.0),
-            child:
-                new Container(
-                  height:40,
-                  width: MediaQuery.of(context).size.width,
-                  color: Colors.yellow,
-                  child: Material(
-                      elevation: 4.0,
-                      borderRadius: BorderRadius.all(Radius.circular(6.0)),
-                      child: Wrap(
-                        direction: Axis.horizontal,
-                        children: <Widget>[
-                        SizedBox(
-                          height: 50.0,
-                          width: button_width,
-                          child:
-                            FlatButton(
-                              child: Text("Curupa",
-                                style: new TextStyle(
-                                  fontSize: 20.0,
-                                  height: 1.5,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              onPressed: (){
-
-                              }
-                            ),
-                          ),
-                          SizedBox(
-                            height: 50.0,
-                            width: button_width,
-                            child:
-                              FlatButton(
-                                  child: Text("Partidos",
-                                    style: new TextStyle(
-                                      fontSize: 20.0,
-                                      height: 1.5,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  onPressed: (){
-
-                                  }
-                              ),
-                          ),
-                          SizedBox(
-                            height: 50.0,
-                            width: button_width,
-                            child:
-                              FlatButton(
-                                  child: Text("Camada",
-                                    style: new TextStyle(
-                                      fontSize: 20.0,
-                                      height: 1.5,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  onPressed: (){
-
-                                  }
-                              ),
-                          ),
-                        ],
-                      ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      );
-    }
-  }
-
   class CalendarSection extends StatefulWidget {
     @override
     _CalendarState createState() => _CalendarState();
@@ -208,7 +116,6 @@
     @override
     Widget build(BuildContext context) {
 
-
       final int numWeekDays = 7;
       var size = MediaQuery.of(context).size;
 
@@ -218,154 +125,201 @@
       final double itemHeight = (size.height - kToolbarHeight-kBottomNavigationBarHeight-24-28-55) / 6;
       final double itemWidth = size.width / numWeekDays;
 
-      return new FutureBuilder(
-              future: Auth.getCalendarData(_dateTime).then((snapshot) {
-                _userEventSnapshot = snapshot;
-              }),
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.none:
-                  case ConnectionState.waiting:
-                    return new LinearProgressIndicator();
-                  case ConnectionState.done:
-                    return new Column(
-                        children: <Widget>[
-                          new Column(
-                            children: <Widget>[
-                              new Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new FittedBox(
-                                    fit: BoxFit.contain,
-                                    child: new Text(
-                                      getMonthName(_dateTime.month) + " " + _dateTime.year.toString(),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.today,
-                                      color: Colors.black,
-                                    ),
-                                    onPressed: _goToToday
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.chevron_left,
-                                      color: Colors.black,
-                                    ),
-                                    onPressed: _previousMonthSelected
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.chevron_right,
-                                      color: Colors.black,
-                                    ),
-                                    onPressed: _nextMonthSelected
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          new Column(
-                            children: <Widget>[
-                              new Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Expanded(
-                                      child: new Text('S',
-                                          textAlign: TextAlign.center,
-                                          style: Theme
-                                              .of(context)
-                                              .textTheme
-                                              .headline)),
-                                  new Expanded(
-                                      child: new Text('M',
-                                          textAlign: TextAlign.center,
-                                          style: Theme
-                                              .of(context)
-                                              .textTheme
-                                              .headline)),
-                                  new Expanded(
-                                      child: new Text('T',
-                                          textAlign: TextAlign.center,
-                                          style: Theme
-                                              .of(context)
-                                              .textTheme
-                                              .headline)),
-                                  new Expanded(
-                                      child: new Text('W',
-                                          textAlign: TextAlign.center,
-                                          style: Theme
-                                              .of(context)
-                                              .textTheme
-                                              .headline)),
-                                  new Expanded(
-                                      child: new Text('T',
-                                          textAlign: TextAlign.center,
-                                          style: Theme
-                                              .of(context)
-                                              .textTheme
-                                              .headline)),
-                                  new Expanded(
-                                      child: new Text('F',
-                                          textAlign: TextAlign.center,
-                                          style: Theme
-                                              .of(context)
-                                              .textTheme
-                                              .headline)),
-                                  new Expanded(
-                                      child: new Text('S',
-                                          textAlign: TextAlign.center,
-                                          style: Theme
-                                              .of(context)
-                                              .textTheme
-                                              .headline)),
-                                ],
-                              ),
-                              new GridView.count(
-                                crossAxisCount: numWeekDays,
-                                childAspectRatio: (itemWidth / itemHeight),
-                                shrinkWrap: true,
-                                scrollDirection: Axis.vertical,
-                                children: List.generate(
-                                    getNumberOfDaysInMonth(_dateTime.month),
-                                      (index) {
-                                        int dayNumber = index + 1;
-                                        return new GestureDetector(
-                                          // Used for handling tap on each day view
-                                          onTap: () =>
-                                              _onDayTapped(
-                                                  dayNumber - _beginMonthPadding),
-                                          child: new Container(
-                                              margin: const EdgeInsets.all(2.0),
-                                              padding: const EdgeInsets.all(1.0),
-                                              decoration: new BoxDecoration(
-                                                  border: new Border.all(
-                                                      color: Colors.grey)),
-                                              child: new Column(
-                                                children: <Widget>[
-                                                  buildDayNumberWidget(dayNumber),
-                                                  buildDayEventInfoWidget(dayNumber)
-                                                ],
-                                              )));
-                                    }),
-                                  ),
-                                ],
-                              ),
-                            ],
-                        );
-                    break;
-                  default:
-                    if (snapshot.hasError)
-                      return new Text('Error: ${snapshot.error}');
-                    else
-                      return new Text('Result: ${snapshot.data}');
-                }
-              }
-          );
+      double button_width = MediaQuery.of(context).size.width / 3;
 
+      return new FutureBuilder(
+        future: Auth.getCalendarData(_dateTime).then((snapshot) {
+          _userEventSnapshot = snapshot;
+        }),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          return new Column(
+              children: <Widget>[
+                new Column(
+                  children: <Widget>[
+                    new Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          SizedBox(
+                            height: 50.0,
+                            width: button_width,
+                            child:
+                            FlatButton(
+                                child: Text("Curupa",
+                                  style: new TextStyle(
+                                    fontSize: 20.0,
+                                    height: 1.5,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: (){
+
+                                }
+                            ),
+                          ),
+                          SizedBox(
+                            height: 50.0,
+                            width: button_width,
+                            child:
+                            FlatButton(
+                                child: Text("Partidos",
+                                  style: new TextStyle(
+                                    fontSize: 20.0,
+                                    height: 1.5,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: (){
+
+                                }
+                            ),
+                          ),
+                          SizedBox(
+                            height: 50.0,
+                            width: button_width,
+                            child:
+                            FlatButton(
+                                child: Text("Camada",
+                                  style: new TextStyle(
+                                    fontSize: 20.0,
+                                    height: 1.5,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: (){
+
+                                }
+                            ),
+                          ),
+                        ],
+                    ),
+                  ],
+                ),
+                new Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: 70.0,
+                      child:
+                        Padding(
+                        padding: EdgeInsets.only(bottom: 15.0),
+                          child:
+                            new Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: <Widget>[
+                                  new Padding(
+                                    padding: EdgeInsets.only(bottom: 8.0),
+                                    child: new Text(
+                                      getMonthNameSpanish(_dateTime.month) + " " + _dateTime.year.toString(),
+                                      style: new TextStyle(
+                                        fontSize: 22.0,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.today,
+                                    color: Colors.black,
+                                    size: 30,
+                                  ),
+                                  onPressed: _goToToday
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.chevron_left,
+                                    color: Colors.black,
+                                    size: 40,
+                                  ),
+                                  onPressed: _previousMonthSelected
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.black,
+                                    size: 40,
+                                  ),
+                                  onPressed: _nextMonthSelected
+                                ),
+                              ],
+                            ),
+                        ),
+                    ),
+                  ],
+                ),
+                new Column(
+                  children: <Widget>[
+                    new Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        new Expanded(
+                            child: new Text('D',//'S',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.subtitle)),
+                        new Expanded(
+                            child: new Text('L',//'M',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.subtitle)),
+                        new Expanded(
+                            child: new Text('M',//'T',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.subtitle)),
+                        new Expanded(
+                            child: new Text('M',//'W',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.subtitle)),
+                        new Expanded(
+                            child: new Text('J',//'T',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.subtitle)),
+                        new Expanded(
+                            child: new Text('V',//'F',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.subtitle)),
+                        new Expanded(
+                            child: new Text('S',//'S',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.subtitle)),
+                      ],
+                    ),
+                    new GridView.count(
+                      crossAxisCount: numWeekDays,
+                      childAspectRatio: (itemWidth / itemHeight),
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      children: List.generate(
+                          getNumberOfDaysInMonth(_dateTime.month),
+                            (index) {
+                              int dayNumber = index + 1;
+                              return new GestureDetector(
+                                // Used for handling tap on each day view
+                                onTap: () =>
+                                    _onDayTapped(
+                                        dayNumber - _beginMonthPadding),
+                                child: new Container(
+                                    margin: const EdgeInsets.all(2.0),
+                                    padding: const EdgeInsets.all(1.0),
+                                    decoration: new BoxDecoration(
+                                        border: new Border.all(
+                                            color: Colors.grey)),
+                                    child: new Column(
+                                      children: <Widget>[
+                                        buildDayNumberWidget(dayNumber),
+                                        buildDayEventInfoWidget(dayNumber)
+                                      ],
+                                    )));
+                          }),
+                        ),
+                      ],
+                    ),
+                  ],
+             );
+        });
     }
 
     Align buildDayNumberWidget(int dayNumber) {
@@ -489,6 +443,38 @@
           numDays = 28;
       }
       return numDays + _beginMonthPadding;
+    }
+
+    String getMonthNameSpanish(final int month) {
+      // Months are 1, ..., 12
+      switch (month) {
+        case 1:
+          return "Enero";
+        case 2:
+          return "Febrero";
+        case 3:
+          return "Marzo";
+        case 4:
+          return "Abril";
+        case 5:
+          return "Mayo";
+        case 6:
+          return "Junio";
+        case 7:
+          return "Julio";
+        case 8:
+          return "Augosto";
+        case 9:
+          return "Septiembre";
+        case 10:
+          return "Octubre";
+        case 11:
+          return "Noviembre";
+        case 12:
+          return "Diciembre";
+        default:
+          return "Unknown";
+      }
     }
 
     String getMonthName(final int month) {
