@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
-class ContentHtml {
+class HTML {
 
   final String documentID;
   final String html;
@@ -12,7 +12,7 @@ class ContentHtml {
   final DateTime last_update;
   final int id;
 
-  ContentHtml({
+  HTML({
     this.documentID,
     this.html,
     this.name,
@@ -36,7 +36,7 @@ class ContentHtml {
     };
   }
 
-  factory ContentHtml.fromJson(Map<String, Object> doc) {
+  factory HTML.fromJson(Map<String, Object> doc) {
 
     Timestamp timestamp = doc["last_update"] as Timestamp;
     var format = new DateFormat('d MMM, hh:mm a');
@@ -44,7 +44,7 @@ class ContentHtml {
 
     int id = date.month;
 
-    ContentHtml content_html = new ContentHtml(
+    HTML content_html = new HTML(
       html: doc['html'],
       documentID: doc['documentID'],
       name: doc['name'],
@@ -57,7 +57,7 @@ class ContentHtml {
     return content_html;
   }
 
-  factory ContentHtml.fromDocument(DocumentSnapshot doc) {
-    return ContentHtml.fromJson(doc.data);
+  factory HTML.fromDocument(DocumentSnapshot doc) {
+    return HTML.fromJson(doc.data);
   }
 }

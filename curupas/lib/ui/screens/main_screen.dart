@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:cloud_functions/cloud_functions.dart';
-import 'package:curupas/models/content_html.dart';
-import 'package:curupas/models/drawer_content.dart';
-import 'package:curupas/models/museum.dart';
+import 'package:curupas/models/HTML.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +9,7 @@ import 'package:curupas/business/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:curupas/business/messaging.dart';
 import 'package:curupas/models/description.dart';
-import 'package:curupas/models/post.dart';
 import 'package:curupas/models/streaming.dart';
-import 'package:curupas/models/user.dart';
 import 'package:curupas/ui/screens/pages/calendar_page.dart';
 import 'package:curupas/ui/screens/pages/group_page.dart';
 import 'package:curupas/ui/screens/pages/home_page.dart';
@@ -24,9 +19,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:youtube_api/youtube_api.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'dart:convert';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 //https://pub.dev/packages/flutter_staggered_grid_view#-example-tab-
 
@@ -117,10 +109,6 @@ class _MainScreenState extends State<MainScreen> {
       ..onTap = () => _openUrl(curupasUrl);
 
     super.initState();
-  }
-
-  Future<void> loadContent() async {
-    getDescription();
   }
 
   Future<bool> isRegistered() async {
@@ -227,7 +215,7 @@ class _MainScreenState extends State<MainScreen> {
                   if (index == 0) {
                     return _createHeader();
                   } else {
-                    ContentHtml contentHtml = _globals.drawerContent.contents[index];
+                    HTML contentHtml = _globals.drawerContent.contents[index];
                     int icon = int.parse(contentHtml.icon);
                     return _createDrawerItem(
                         contentHtml : contentHtml,
@@ -318,7 +306,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _createDrawerItem(
-      {ContentHtml contentHtml, int index, IconData icon, String text, GestureTapCallback onTap}) {
+      {HTML contentHtml, int index, IconData icon, String text, GestureTapCallback onTap}) {
     return ListTile(
       title:
         Row(
@@ -339,63 +327,90 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void getDescription() async {
+  Future<void> loadContent() async {
+
+    List responses  = new List();
+
+    try {
+      responses = await Future.wait([
+        getDescription(),
+        getPosts(),
+        getMuseums(),
+        getDrawers(),
+        getNewsletters(),
+        getAnecdotes(),
+        getStreamingData(),
+      ]);
+    } catch (e) {
+      print(e.toString());
+    }
+    if (responses.contains(true)) {
+        print("responses: " + responses.toString());
+    }
+  }
+
+  Future<bool> getDescription() async {
     Stream<Description> descStream = Auth.getDescription();
-    descStream.listen((Description _desc) async {
+    await descStream.listen((Description _desc) async {
       _globals.description = _desc;
-      getPosts(_desc.title, _desc.description);
+      return true;
     });
+    return false;
   }
 
-  void getPosts(String title, String description) async {
-    await Auth.getPostSnapshots().then((templist) {
-      Auth.getPost(templist).then((posts) {
-        getMuseums(description, posts);
+  Future<bool> getPosts() async {
+    await Auth.getPostSnapshots().then((templist) async {
+      await Auth.getPost(templist).then((_posts) {
+        _globals.posts = _posts;
+        return true;
       });
+      return false;
     });
   }
 
-  void getMuseums(String desc, List<Post> posts) async {
-    await Auth.getMuseumSnapshots().then((templist) {
-      Auth.getMuseum(templist).then((museums) {
-        getDrawers(desc, posts, museums);
+  Future<bool> getMuseums() async {
+    await Auth.getMuseumSnapshots().then((templist) async {
+      await Auth.getMuseum(templist).then((_museums) {
+        _globals.museums = _museums;
+        return true;
       });
+      return false;
     });
   }
 
-  void getDrawers(String desc, List<Post> posts, List<Museum> museums) async {
+  Future<bool> getDrawers() async {
     await Auth.getHtmlContentByType("drawer").then((_drawer) {
       _globals.drawerContent = _drawer;
       _globals.drawerContent.contents.sort((a, b) {
         return a.name.toLowerCase().compareTo(b.name.toLowerCase());
       });
-      getNewsletters(desc, posts, museums);
+      return true;
     });
+    return false;
   }
 
-  void getNewsletters(String desc, List<Post> posts, List<Museum> museums) async {
+  Future<bool> getNewsletters() async {
     await Auth.getHtmlContentByType("newsletter").then((_newsletterContent) {
       _globals.newsletterContent = _newsletterContent;
-      _globals.setData(desc, posts, museums, _newsletterContent.contents);
       _globals.newsletterContent.contents.sort((a, b) {
         return a.last_update.compareTo(b.last_update);
       });
-      getAnecdotes();
+      return true;
     });
+    return false;
   }
 
-  void getAnecdotes() async {
+  Future<bool> getAnecdotes() async {
     await Auth.getHtmlContentByTypeAndGroup("anecdote", _globals.group.yearRef).then((_anecdote) {
       _globals.anecdoteContent = _anecdote;
       _globals.anecdoteContent.contents.sort((a, b) {
         return a.last_update.compareTo(b.last_update);
       });
-      getStreamingData();
     });
   }
 
 
-  void getStreamingData() async {
+  Future<bool> getStreamingData() async {
     List<YT_API> ytResult = [];
     List<Streaming> streamingList = [];
     try {

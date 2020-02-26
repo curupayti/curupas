@@ -1,7 +1,5 @@
   import 'dart:async';
   import 'dart:io';
-  import 'dart:math';
-
   import 'package:cloud_firestore/cloud_firestore.dart';
   import 'package:cloud_functions/cloud_functions.dart';
   import 'package:device_info/device_info.dart';
@@ -15,31 +13,35 @@
   import 'package:curupas/models/user.dart';
   import 'package:curupas/ui/screens/widgets/alert_dialog.dart';
   import 'package:youtube_api/youtube_api.dart';
-  import 'package:file_picker/file_picker.dart';
   import 'business/auth.dart';
-  import 'models/content_html.dart';
-import 'models/drawer_content.dart';
+  import 'models/HTML.dart';
+  import 'models/HTMLS.dart';
   import 'models/museum.dart';
-  import 'models/newsletter.dart';
-import 'models/streaming.dart';
+  import 'models/streaming.dart';
   import 'package:path/path.dart' as p;
   import 'dart:math' as math;
 
   User user = new User();
   Group group = new Group();
 
-  //HTML CONTENT
-  HtmlContent drawerContent = new HtmlContent();
-  HtmlContent newsletterContent = new HtmlContent();
-  HtmlContent anecdoteContent = new HtmlContent();
+  //App Data object
+  AppData appData = new AppData();
 
+  //APP CONTENT FOR Data
   Description description = new Description();
-  List<Post> feeds = new List<Post>();
-  Data homeData = new Data();
+  List<Post> posts = new List<Post>();
+  List<Museum> museums = new List<Museum>();
+
+  //HTML CONTENT
+  HTMLS drawerContent = new HTMLS();
+  HTMLS newsletterContent = new HTMLS();
+  HTMLS anecdoteContent = new HTMLS();
+
+  //_globals.setData(desc, posts, museums, newsletters, _globals.anecdoteContent.contents);
+
   Streammer streammer;
   bool streamingReachable = false;
   FilePickerGlobal filePickerGlobal;
-  //double bottomNavBarHeight = 80;
 
   String error_email_already_in_use = "ERROR_EMAIL_ALREADY_IN_USE";
   String error_unknown = "ERROR_UNKNOWN";
@@ -125,8 +127,8 @@ import 'models/streaming.dart';
     streammer.setYtResutl(_ytResult);
   }
 
-  void setData(String desc, List<Post> posts, List<Museum> museums, List<ContentHtml> newsletters) {
-    Data _dataPost = new Data(
+  void setData(String desc, List<Post> posts, List<Museum> museums, List<HTML> newsletters, List<HTML> anecdotes) {
+    AppData _dataPost = new AppData(
       name: 'Curupa',
       avatar: 'assets/images/escudo.png',
       backdropPhoto: 'assets/images/cancha.png',
@@ -136,7 +138,7 @@ import 'models/streaming.dart';
       museums: museums,
       newsletters : newsletters,
     );
-    homeData = _dataPost;
+    appData = _dataPost;
   }
 
   void queryDevice() async {
@@ -226,8 +228,8 @@ import 'models/streaming.dart';
     }
   }
 
-  class Data {
-    Data({
+  class AppData {
+    AppData({
       this.name,
       this.avatar,
       this.backdropPhoto,
@@ -235,7 +237,9 @@ import 'models/streaming.dart';
       this.biography,
       this.posts,
       this.museums,
+      this.drawers,
       this.newsletters,
+      this.anecdotes,
     });
 
     final String name;
@@ -245,7 +249,9 @@ import 'models/streaming.dart';
     final String biography;
     final List<Post> posts;
     final List<Museum> museums;
-    final List<ContentHtml> newsletters;
+    final List<HTML> drawers;
+    final List<HTML> newsletters;
+    final List<HTML> anecdotes;
   }
 
   class Video {

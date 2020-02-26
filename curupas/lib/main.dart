@@ -1,4 +1,4 @@
-import 'package:curupas/models/content_html.dart';
+import 'package:curupas/models/HTML.dart';
 import 'package:curupas/ui/screens/calendar/event_creator.dart';
 import 'package:curupas/ui/screens/drawer/content_viewer.dart';
 import 'package:curupas/ui/screens/widgets/youtube/player_screen.dart';
@@ -97,7 +97,7 @@ class RouteGenerator {
         }
         break;
       case '/contentviewer':
-        if (args is ContentHtml) {
+        if (args is HTML) {
           return MaterialPageRoute(
             builder: (_) => ContentViewer(
               contentHtml: settings.arguments,

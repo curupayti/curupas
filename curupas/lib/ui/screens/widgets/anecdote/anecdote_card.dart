@@ -1,8 +1,8 @@
 import 'package:curupas/models/HTML.dart';
 import 'package:flutter/material.dart';
 
-class NewsletterCard extends StatelessWidget {
-  NewsletterCard(this.html);
+class AnecdoteCard extends StatelessWidget {
+  AnecdoteCard(this.html);
   final HTML html;
 
   @override

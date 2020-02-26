@@ -1,11 +1,11 @@
-import 'package:curupas/models/content_html.dart';
+import 'package:curupas/models/HTML.dart';
 import 'package:flutter/material.dart';
 
 import 'newsletter_card.dart';
 
 class NewsletterWidget extends StatelessWidget {
 
-  final List<ContentHtml> newsletters;
+  final List<HTML> newsletters;
 
   NewsletterWidget({Key key, this.newsletters}) : super(key: key);
 

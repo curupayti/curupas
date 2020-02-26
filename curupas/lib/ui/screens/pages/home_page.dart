@@ -1,5 +1,5 @@
 import 'package:curupas/ui/screens/widgets/museum.dart';
-import 'package:curupas/ui/screens/widgets/newsletter/newsletter.dart';
+import 'package:curupas/ui/screens/widgets/newsletter/newsletter_widget.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -100,7 +100,7 @@ class HomeBackground extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(bottom: bottomPadding),
             child:
-                Image.asset(_globals.homeData.backdropPhoto, fit: BoxFit.cover),
+                Image.asset(_globals.appData.backdropPhoto, fit: BoxFit.cover),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: bottomPadding),
@@ -164,7 +164,7 @@ Widget _buildHeaderText() {
       Padding(
         padding: EdgeInsets.only(left: ScreenUtil().setHeight(10.0)),
         child: Text(
-          _globals.homeData.name,
+          _globals.appData.name,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -176,7 +176,7 @@ Widget _buildHeaderText() {
       Padding(
         padding: EdgeInsets.only(top: ScreenUtil().setHeight(16.0)),
         child: Text(
-          _globals.homeData.location,
+          _globals.appData.location,
           style: TextStyle(
             color: Colors.white.withOpacity(0.85),
             fontWeight: FontWeight.w500,
@@ -190,7 +190,7 @@ Widget _buildHeaderText() {
         height: 1.0,
       ),
       Text(
-        _globals.homeData.biography,
+        _globals.appData.biography,
         style: TextStyle(
           color: Colors.white.withOpacity(0.85),
           fontSize: ScreenUtil().setSp(30.0),
@@ -216,7 +216,7 @@ Widget _buildAvatar() {
       right: ScreenUtil().setWidth(20.0),
       bottom: ScreenUtil().setWidth(20.0),
     ),
-    child: Image.asset(_globals.homeData.avatar),
+    child: Image.asset(_globals.appData.avatar),
   );
 }
 
@@ -228,9 +228,9 @@ Widget _buildPostScroller() {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        itemCount: _globals.homeData.posts.length,
+        itemCount: _globals.appData.posts.length,
         itemBuilder: (BuildContext context, int index) {
-          var post = _globals.homeData.posts[index];
+          var post = _globals.appData.posts[index];
           return PostCard(post);
         },
       ),
@@ -243,7 +243,7 @@ Widget _buildMuseumTimeline() {
     padding: const EdgeInsets.only(top: 16.0),
     child: SizedBox.fromSize(
       size: Size.fromHeight(170.0),
-      child: new MuseumWidget(museums: _globals.homeData.museums),
+      child: new MuseumWidget(museums: _globals.appData.museums),
     ),
   );
 }
@@ -253,7 +253,7 @@ Widget _buildNewsletterTimeline() {
     padding: const EdgeInsets.only(top: 16.0),
     child: SizedBox.fromSize(
       size: Size.fromHeight(200.0),
-      child: new NewsletterWidget(newsletters: _globals.homeData.newsletters),
+      child: new NewsletterWidget(newsletters: _globals.appData.newsletters),
     ),
   );
 }

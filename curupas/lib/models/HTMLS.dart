@@ -1,20 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:curupas/models/content_html.dart';
+import 'package:curupas/models/HTML.dart';
 import 'package:device_info/device_info.dart';
 import 'package:intl/intl.dart';
 
-class HtmlContent {
+class HTMLS {
+
   final String name;
   final DateTime last_update;
-  final List<ContentHtml> contents;
+  final List<HTML> contents;
 
-
-  HtmlContent.fromMap(Map<dynamic, dynamic> data)
+  HTMLS.fromMap(Map<dynamic, dynamic> data)
       : name = data["name"],
         last_update = data["last_update"],
         contents = List.from(data['contents']);
 
-  HtmlContent({
+  HTMLS({
     this.name,
     this.last_update,
     this.contents,
@@ -28,13 +28,13 @@ class HtmlContent {
     };
   }
 
-  factory HtmlContent.fromJson(Map<String, Object> doc, List<ContentHtml> contents) {
+  factory HTMLS.fromJson(Map<String, Object> doc, List<HTML> contents) {
 
     Timestamp timestamp = doc["last_update"] as Timestamp;
     var format = new DateFormat('d MMM, hh:mm a');
     DateTime date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
 
-    HtmlContent drawer = new HtmlContent(
+    HTMLS drawer = new HTMLS(
       name: doc['name'],
       last_update: date,
       contents: contents,
@@ -42,8 +42,8 @@ class HtmlContent {
     return drawer;
   }
 
-  factory HtmlContent.fromDocument(DocumentSnapshot doc, List<ContentHtml> contents) {
-    return HtmlContent.fromJson(doc.data, contents);
+  factory HTMLS.fromDocument(DocumentSnapshot doc, List<HTML> contents) {
+    return HTMLS.fromJson(doc.data, contents);
   }
 
   void setGroupReference(DocumentReference ref) {}

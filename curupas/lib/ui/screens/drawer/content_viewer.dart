@@ -1,10 +1,10 @@
-import 'package:curupas/models/content_html.dart';
+import 'package:curupas/models/HTML.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 
 class ContentViewer extends StatelessWidget {
-  final ContentHtml contentHtml;
+  final HTML contentHtml;
 
   ContentViewer({Key key, @required this.contentHtml}) : super(key: key);
 

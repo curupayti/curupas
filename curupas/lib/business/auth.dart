@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:curupas/models/content_html.dart';
-import 'package:curupas/models/drawer_content.dart';
+import 'package:curupas/models/HTML.dart';
+import 'package:curupas/models/HTMLS.dart';
 import 'package:curupas/models/museum.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -262,24 +262,24 @@ class Auth {
     });
   }
 
-  static Future<HtmlContent> getHtmlContentByType(String type) async {
-    HtmlContent _drawerContent = HtmlContent();
+  static Future<HTMLS> getHtmlContentByType(String type) async {
+    HTMLS _drawerContent = HTMLS();
     await Firestore.instance.document("contents/${type}").get().then((document) async {
       if (document.exists) {
        await getContenHtmls(document).then((listContentHtml) {
-         _drawerContent = HtmlContent.fromDocument(document, listContentHtml);
+         _drawerContent = HTMLS.fromDocument(document, listContentHtml);
         });
       }
     });
     return _drawerContent;
   }
 
-  static Future<HtmlContent> getHtmlContentByTypeAndGroup(String type, DocumentReference group_red) async {
-    HtmlContent _htmlContent = HtmlContent();
+  static Future<HTMLS> getHtmlContentByTypeAndGroup(String type, DocumentReference group_red) async {
+    HTMLS _htmlContent = HTMLS();
     await Firestore.instance.document("contents/${type}").get().then((document) async {
       if (document.exists) {
         await getContenHtmlsBygroup(document, group_red).then((listContentHtml) {
-          _htmlContent = HtmlContent.fromDocument(document, listContentHtml);
+          _htmlContent = HTMLS.fromDocument(document, listContentHtml);
         });
       }
     });
@@ -287,24 +287,24 @@ class Auth {
   }
 
 
-  static Future<List<ContentHtml>> getContenHtmls(DocumentSnapshot document) async {
+  static Future<List<HTML>> getContenHtmls(DocumentSnapshot document) async {
     QuerySnapshot collectionSnapshot = await document.reference.collection("collection").getDocuments();
     List<DocumentSnapshot> templist;
-    List<ContentHtml> listContentHtml = new List();
+    List<HTML> listContentHtml = new List();
     templist = collectionSnapshot.documents;
     listContentHtml = await templist.map((DocumentSnapshot docSnapshot) {
-      return ContentHtml.fromDocument(docSnapshot);
+      return HTML.fromDocument(docSnapshot);
     }).toList();
     return listContentHtml;
   }
 
-  static Future<List<ContentHtml>> getContenHtmlsBygroup(DocumentSnapshot document, DocumentReference group_red) async {
+  static Future<List<HTML>> getContenHtmlsBygroup(DocumentSnapshot document, DocumentReference group_red) async {
     List<DocumentSnapshot> templist;
-    List<ContentHtml> listContentHtml = new List();
+    List<HTML> listContentHtml = new List();
     QuerySnapshot collectionSnapshot = await document.reference.collection('collection').where("group_ref",isEqualTo: group_red).getDocuments();
     templist = collectionSnapshot.documents;
     listContentHtml = await templist.map((DocumentSnapshot docSnapshot) {
-      return ContentHtml.fromDocument(docSnapshot);
+      return HTML.fromDocument(docSnapshot);
     }).toList();
     return listContentHtml;
   }
