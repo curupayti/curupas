@@ -1,7 +1,6 @@
 $(document).ready(function () {    
 
-   homeLoader.show();
-  
+   homeLoader.show();  
 
     var edit_references = _role.edit_references;
 
@@ -596,6 +595,10 @@ $(document).ready(function () {
       function displayPads() {
         $('#my-pads-list').toggle();
       }
+
+      $(".firepad-tb-insert-image").parent().parent().hide();
+
+
     }     
     
     function readURL(input) {

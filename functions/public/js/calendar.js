@@ -3,12 +3,14 @@ $(document).ready(function () {
   var calendarEvents = [];  
 
   db.collection('calendar').onSnapshot(snapshot => {
+      
       let size = snapshot.size;
       var count = 0;
       let changes = snapshot.docChanges();
-      changes.forEach(change => {
-          let doc = change.doc;
 
+      changes.forEach(change => {
+          
+          let doc = change.doc;
           let name = doc.data().name;
           let className = doc.data().className;
           let allDay = doc.data().allDay;
