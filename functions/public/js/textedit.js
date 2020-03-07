@@ -1,6 +1,6 @@
-$(document).ready(function () {    
+$(document).ready(function () {        
 
-   homeLoader.show();  
+    homeLoader.show();  
 
     var edit_references = _role.edit_references;
 
@@ -202,6 +202,10 @@ $(document).ready(function () {
 
              let last_update = getDateFrom(_date.toDate());
 
+             if (editData.html != undefined){
+               window.html = editData.html;
+             }
+
              let _icon = editData.icon;
   
              let row = { 
@@ -357,18 +361,48 @@ $(document).ready(function () {
      }   
 
      $('#button-publish').click(function() { 
+        $('#publishModal').modal('show');        
+      });
 
-      /*var ref = window.database_ref;
-      var short = window._short;
-      var id = window._id_document_collection;
-      var publishContent = firebase.functions().httpsCallable('publish');      
-      publishContent({
-        database_ref: ref,
-        contentType: short,
-        documentId: id          
-      }).then(function(result) {        
-        var publishResult = result.data;        
-      });*/     
+    $('#publishModal').on('hidden.bs.modal', function () {
+      
+    });
+
+    $('#acceptCheckbox').change(function() {
+      if ($(this).prop('checked')) {
+        $('#button-accept').prop('disabled', false);       
+      } else  {
+        $('#button-accept').prop('disabled', true);
+      }
+    });
+
+    $('#button-accept').click(function(event) { 
+
+      event.preventDefault();
+
+      var _document = window.editDocuments[window._id_document_collection];
+        var _time =  new Date(); 
+        db.collection('contents')
+        .doc(window._short)
+        .collection("collection")
+        .doc(window._id_document_collection)
+        .update({        
+          "approved" : false,
+          "published" : false,
+          "last_update" : _time        
+        })
+        .then(function(documentUpdated) {
+
+          $('#publishModal').modal('hide');
+
+        })
+        .catch(function(error) {
+          console.error("Error adding document: ", error);
+        }); 
+
+    });
+
+     $('#button-save').click(function() {     
       
       var settings = {
           "url": "https://us-central1-curupas-app.cloudfunctions.net/publish",
@@ -383,32 +417,41 @@ $(document).ready(function () {
             "documentId":window._id_document_collection
           }),
         };
+
+        homeLoader.show();  
         
         $.ajax(settings).done(function (response) {
 
           console.log(response);
 
           if (response.data.result) {
-            $('#view-publish').prop('disabled', false);
+            homeLoader.hide();  
+            //$('#view-save').prop('disabled', false);
             window.html = response.data.html;           
           } 
           
         });     
     });
 
-    $('#view-publish').click(function() { 
-
-      $('#previewModal').modal('show');
-
+    $('#view-save').click(function() { 
+        $('#previewModal').modal('show');
+        $('#modal-content').append("<div id='modal-container'>" + window.html + "</div>");
     });
-     
+
+    $('#previewModal').on('hidden.bs.modal', function () {
+      $('#modal-container').remove();
+    });     
      
     function loadEdits(database_ref, _short) { 
 
       window.database_ref = database_ref;     
       
-      $('#button-publish').prop('disabled', true);
-      $('#view-publish').prop('disabled', true);
+      //$('#button-publish').prop('disabled', true);
+      
+      $('#button-save').prop('disabled', true);
+      $('#button-accept').prop('disabled', true);      
+
+      //$('#view-save').prop('disabled', true);
 
       var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );
       
@@ -514,20 +557,7 @@ $(document).ready(function () {
         
         firepad.on('newLine', function() {
 
-          $('#button-publish').prop('disabled', false);
-          
-          /*var _document = window.editDocuments[window._id_document_collection];
-          var _time =  new Date(); 
-          db.collection('contents')
-          .doc(window._short)
-          .collection("collection")
-          .doc(window._id_document_collection)
-          .update({        
-            "published" : false,
-            "last_update" : _time        
-          }).catch(function(error) {
-            console.error("Error adding document: ", error);
-          }); */
+          $('#button-save').prop('disabled', false);        
           
         });        
 
