@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:curupas/models/HTML.dart';
+import 'package:curupas/models/HTMLS.dart';
+import 'package:curupas/models/museum.dart';
+import 'package:curupas/models/post.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +65,9 @@ class _MainScreenState extends State<MainScreen> {
 
   SharedPreferences prefs;
 
-  static String key = "AIzaSyCapBh4kR9X8U82KyU7bAlyg7_jgteR4RE";
+  //static String key = "AIzaSyCapBh4kR9X8U82KyU7bAlyg7_jgteR4RE"; //OLD
+
+  static String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";
   static String channelId = "UCeLNPJoPAio9rT2GAdXDVmw";
 
   YoutubeAPI ytApi = new YoutubeAPI(key);
@@ -329,9 +334,61 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> loadContent() async {
 
-    List responses  = new List();
+    _globals.initData();
 
-    try {
+    getDescription();
+    getPosts();
+    getMuseums();
+    getDrawers();
+    getNewsletters();
+    getAnecdotes();
+    getStreamingData();
+
+    Timer timer = new Timer.periodic(Duration(seconds: 5), (timer) {
+
+        print(DateTime.now());
+
+        int counter = 0;
+
+        if (_globals.description!=null) {
+          counter++;
+        }
+
+        if (_globals.posts!=null) {
+          counter++;
+        }
+
+        if (_globals.museums!=null) {
+          counter++;
+        }
+
+        if (_globals.drawerContent.contents!=null) {
+          counter++;
+        }
+
+        if (_globals.newsletterContent.contents!=null) {
+          counter++;
+        }
+
+        if (_globals.anecdoteContent.contents!=null) {
+          counter++;
+        }
+
+        if (_globals.streammer!=null) {
+          counter++;
+        }
+
+        if (counter == 7) {
+          timer.cancel();
+          _globals.setDataFromGlobal();
+          updeteWidget();
+        }
+
+    });
+
+    //List responses  = new List();
+
+    /*try {
       responses = await Future.wait([
         getDescription(),
         getPosts(),
@@ -344,64 +401,64 @@ class _MainScreenState extends State<MainScreen> {
     } catch (e) {
       print(e.toString());
     }
+
+    for (int i = 0; i < responses.length; i++) {
+
+      switch (responses[i].runtimeType) {
+        case Description: {
+          _globals.description = responses[i];
+        }
+      }
+    }
+
     if (responses.contains(true)) {
         print("responses: " + responses.toString());
-    }
+    }*/
   }
 
-  Future<bool> getDescription() async {
+  void getDescription() {
     Stream<Description> descStream = Auth.getDescription();
-    await descStream.listen((Description _desc) async {
+    descStream.listen((Description _desc) {
       _globals.description = _desc;
-      return true;
     });
-    return false;
   }
 
-  Future<bool> getPosts() async {
-    await Auth.getPostSnapshots().then((templist) async {
-      await Auth.getPost(templist).then((_posts) {
+  void getPosts() {
+     Auth.getPostSnapshots().then((templist) {
+       Auth.getPost(templist).then((List<Post> _posts) {
         _globals.posts = _posts;
-        return true;
       });
-      return false;
     });
   }
 
-  Future<bool> getMuseums() async {
-    await Auth.getMuseumSnapshots().then((templist) async {
-      await Auth.getMuseum(templist).then((_museums) {
-        _globals.museums = _museums;
-        return true;
+  void getMuseums() async {
+     Auth.getMuseumSnapshots().then((templist) {  
+       Auth.getMuseum(templist).then((List<Museum> _museums) {
+        _globals.museums = _museums;        
       });
-      return false;
     });
   }
 
-  Future<bool> getDrawers() async {
-    await Auth.getHtmlContentByType("drawer").then((_drawer) {
+  void getDrawers() {
+    Auth.getHtmlContentByType("drawer").then((HTMLS _drawer) {
       _globals.drawerContent = _drawer;
       _globals.drawerContent.contents.sort((a, b) {
         return a.name.toLowerCase().compareTo(b.name.toLowerCase());
       });
-      return true;
     });
-    return false;
   }
 
-  Future<bool> getNewsletters() async {
-    await Auth.getHtmlContentByType("newsletter").then((_newsletterContent) {
+  void getNewsletters() {
+    Auth.getHtmlContentByType("newsletter").then((HTMLS _newsletterContent) {
       _globals.newsletterContent = _newsletterContent;
       _globals.newsletterContent.contents.sort((a, b) {
         return a.last_update.compareTo(b.last_update);
       });
-      return true;
     });
-    return false;
   }
 
-  Future<bool> getAnecdotes() async {
-    await Auth.getHtmlContentByTypeAndGroup("anecdote", _globals.group.yearRef).then((_anecdote) {
+  void getAnecdotes() async {
+    Auth.getHtmlContentByTypeAndGroup("anecdote", _globals.group.yearRef).then((HTMLS _anecdote) {
       _globals.anecdoteContent = _anecdote;
       _globals.anecdoteContent.contents.sort((a, b) {
         return a.last_update.compareTo(b.last_update);
@@ -446,7 +503,6 @@ class _MainScreenState extends State<MainScreen> {
       }
       _globals.streammer.serStreamings(streamingList);
     }
-    updeteWidget();
   }
 
   Future<File> writeYoutubeLog(int counter, String content) async {

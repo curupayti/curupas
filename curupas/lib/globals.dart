@@ -127,18 +127,25 @@
     streammer.setYtResutl(_ytResult);
   }
 
-  void setData(String desc, List<Post> posts, List<Museum> museums, List<HTML> newsletters, List<HTML> anecdotes) {
+  void initData(){
     AppData _dataPost = new AppData(
       name: 'Curupa',
       avatar: 'assets/images/escudo.png',
       backdropPhoto: 'assets/images/cancha.png',
       location: 'Hurlingham, Buenos Aires',
-      biography: desc,
-      posts: posts,
-      museums: museums,
-      newsletters : newsletters,
     );
     appData = _dataPost;
+  }
+
+  void setDataFromGlobal() {
+    setData(description.description, posts, museums, newsletterContent.contents, anecdoteContent.contents);
+  }
+
+  void setData(String desc, List<Post> posts, List<Museum> museums, List<HTML> newsletters, List<HTML> anecdotes) {
+    appData.biography = desc;
+    appData.posts = posts;
+    appData.museums = museums;
+    appData.newsletters = newsletters;
   }
 
   void queryDevice() async {
@@ -246,11 +253,11 @@
     final String avatar;
     final String backdropPhoto;
     final String location;
-    final String biography;
-    final List<Post> posts;
-    final List<Museum> museums;
+    String biography;
+    List<Post> posts;
+    List<Museum> museums;
     final List<HTML> drawers;
-    final List<HTML> newsletters;
+    List<HTML> newsletters;
     final List<HTML> anecdotes;
   }
 
