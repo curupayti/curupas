@@ -3,6 +3,7 @@
   import 'package:curupas/ui/screens/widgets/anecdote/anecdote_widget.dart';
   import 'package:curupas/ui/screens/widgets/gallery/galleryPhotoViewWrapper.dart';
   import 'package:curupas/ui/screens/widgets/gallery/gallery_example_item.dart';
+import 'package:flutter/gestures.dart';
   import "package:flutter/material.dart";
   import 'package:flutter/cupertino.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -75,7 +76,7 @@
             UpperSection(),
             _buildAnecdotes(),
             //GridSection(parent: groupPageState),
-            MiddleSection(),
+            //MiddleSection(),
           ],
         ),
       );
@@ -87,7 +88,8 @@
       marginRight: 25,
       marginBottom: 50,
       animatedIcon: AnimatedIcons.menu_close,
-      animatedIconTheme: IconThemeData(size: 22.0),
+      //animatedIconTheme: IconThemeData(size: 22.0),
+      child: Icon(Icons.add),
       visible: true,
       closeManually: false,
       curve: Curves.bounceIn,
@@ -105,22 +107,29 @@
         SpeedDialChild(
             child: Icon(Icons.photo, color: Colors.white),
             backgroundColor: Color.fromRGBO(0, 29, 126, 1),
-            label: 'Subir imagen',
+            label: 'Subir imagen o video',
             labelStyle: TextStyle(fontSize: 18.0),
-            onTap: () => print('FIRST CHILD')),
-        SpeedDialChild(
+            onTap: () {
+              //
+            },
+        ),
+        /*SpeedDialChild(
           child: Icon(Icons.video_label, color: Colors.white),
           backgroundColor: Color.fromRGBO(0, 29, 126, 1),
           label: 'Subir Video',
           labelStyle: TextStyle(fontSize: 18.0),
-          onTap: () => print('SECOND CHILD'),
-        ),
+          onTap: () {
+            //
+          },
+        ),*/
         SpeedDialChild(
           child: Icon(Icons.calendar_today),
           backgroundColor: Colors.white,
           label: 'Proponer juntada',
           labelStyle: TextStyle(fontSize: 18.0),
-          onTap: () => print('THIRD CHILD'),
+          onTap: () {
+              //
+          },
         ),
       ],
     );
@@ -284,13 +293,56 @@
   }
 
   Widget _buildAnecdotes() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0),
-      child: SizedBox.fromSize(
-        size: Size.fromHeight(200.0),
-        child: new AnecdoteWidget(anecdotes: _globals.appData.anecdotes),
-      ),
-    );
+
+    if   (_globals.appData.anecdotes!= null) {
+
+
+      return Padding(
+        padding: const EdgeInsets.only(top: 16.0),
+        child: SizedBox.fromSize(
+          size: Size.fromHeight(200.0),
+          child: new AnecdoteWidget(anecdotes: _globals.appData.anecdotes),
+        ),
+      );
+
+    } else {
+
+      TextStyle messageStyle = TextStyle(fontSize: 24, color: Colors.grey);
+
+      return Padding(
+        padding: const EdgeInsets.only(top: 16.0),
+        child: SizedBox.fromSize(
+          size: Size.fromHeight(200.0),
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: messageStyle,
+              text:
+              "Agrega tus historias entrando en ",
+              children: <TextSpan>[
+                TextSpan(
+                    text:
+                    " la pagina "),
+                TextSpan(
+                    text: 'app.curupas.com.ar',
+                    style: TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        print('You clicked on me!');
+                      }),
+                TextSpan(
+                    text:
+                    " desde tu computadora."),
+              ],
+            ),
+          ),
+        ),
+      );
+
+
+    }
   }
 
   class MiddleSection extends StatelessWidget {

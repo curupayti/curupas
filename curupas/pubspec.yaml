@@ -54,8 +54,8 @@ dependencies:
   webview_flutter: ^0.3.19+4
   device_info: ^0.4.1+4
   datetime_picker_formfield: ^0.1.8
+  flutter_staggered_grid_view: ^0.3.0
 
-  #flutter_staggered_grid_view: ^0.3.0
   #circular_bottom_navigation: ^1.0.1
   #url_launcher: ^3.0.2
   #geoflutterfire: ^2.0.3+5
