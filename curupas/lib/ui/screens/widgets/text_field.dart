@@ -52,7 +52,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       color: Colors.white,
       shape: RoundedRectangleBorder(
         side: BorderSide(color: currentColor, width: 2.0),
-        borderRadius: BorderRadius.circular(20.0),
+        borderRadius: BorderRadius.circular(10.0),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.0),

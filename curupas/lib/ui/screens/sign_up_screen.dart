@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:diacritic/diacritic.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
@@ -373,7 +374,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 new GestureDetector(
                                   onTap: () {
                                     _globals.filePickerGlobal
-                                        .getImagePath()
+                                        .getImagePath(FileType.IMAGE)
                                         .then((result) {
                                       File _file = new File(result);
                                       if (_file != null) {
@@ -618,7 +619,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  Widget _buildSendSMSDialog(BuildContext context) {
+  /*Widget _buildSendSMSDialog(BuildContext context) {
     return new AlertDialog(
       title: Text('Confirmación de numero',
           style: TextStyle(
@@ -647,7 +648,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       ],
     );
-  }
+  }*/
 
   Widget _buildAboutText() {
     return new RichText(

@@ -1,27 +1,41 @@
 
+  import 'dart:io';
   import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curupas/models/add_media.dart';
   import 'package:curupas/ui/screens/widgets/anecdote/anecdote_widget.dart';
   import 'package:curupas/ui/screens/widgets/gallery/galleryPhotoViewWrapper.dart';
   import 'package:curupas/ui/screens/widgets/gallery/gallery_example_item.dart';
-import 'package:flutter/gestures.dart';
+  import 'package:file_picker/file_picker.dart';
+  import 'package:flutter/gestures.dart';
   import "package:flutter/material.dart";
   import 'package:flutter/cupertino.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
   import 'package:curupas/globals.dart' as _globals;
   import 'package:curupas/ui/screens/friend_screen.dart';
-
-  var currentUserEmail;
-  var _scaffoldContext;
-
-  DocumentReference userRef;
+  import 'package:shared_preferences/shared_preferences.dart';
 
   class GroupPage extends StatefulWidget {
+
     GroupPage({Key key}) : super(key: key);
     @override
     _GroupPageState createState() => _GroupPageState();
   }
 
   class _GroupPageState extends State<GroupPage> {
+
+    var currentUserEmail;
+
+    DocumentReference userRef;
+    SharedPreferences prefs;
+
+    String _videoPath;
+
+    double _progressValue;
+
+    //File vars
+    String _imagePath;
+
+
     @override
     Widget build(BuildContext context) {
       double height = MediaQuery.of(context).size.height;
@@ -31,7 +45,7 @@ import 'package:flutter/gestures.dart';
             children: <Widget>[Container(height: height, child: GroupBody())],
           ),
         ),
-        floatingActionButton: buildSpeedDial(),
+        floatingActionButton: buildSpeedDial(context),
       );
     }
 
@@ -39,26 +53,118 @@ import 'package:flutter/gestures.dart';
     void initState() {
       super.initState();
 
+      getPrefs();
+      _progressValue = 0.0;
+
       //getFirePadFromRef("ZAvWQjFab2fiv27g3Hu0kcpSCXP2");
+
+
     }
 
-    /*void getFirePadFromRef(String refId) async {
-      try {
-        final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-          functionName: 'getFirePadFromRef',
-        );
-        HttpsCallableResult resp = await callable.call(<String, dynamic>{
-          "refId": refId,
-        });
-        String response = resp.toString();
-        print(response);
+    void getPrefs() async {
+      prefs = await SharedPreferences.getInstance();
+    }
 
-      } catch (e) {
-        print('caught generic exception');
-        print(e);
-      }
-    }*/
+    SpeedDial buildSpeedDial(BuildContext context) {
+      return SpeedDial(
+        marginRight: 25,
+        marginBottom: 50,
+        animatedIcon: AnimatedIcons.menu_close,
+        //animatedIconTheme: IconThemeData(size: 22.0),
+        child: Icon(Icons.add),
+        visible: true,
+        closeManually: false,
+        curve: Curves.bounceIn,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.5,
+        onOpen: () => print('OPENING DIAL'),
+        onClose: () => print('DIAL CLOSED'),
+        tooltip: 'Menu',
+        heroTag: 'speed-dial-hero-tag',
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 8.0,
+        shape: CircleBorder(),
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.photo, color: Colors.white),
+            backgroundColor: Color.fromRGBO(0, 29, 126, 1),
+            label: 'Subir imagen',
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: () {
+              _globals.filePickerGlobal
+                  .getImagePath(FileType.IMAGE)
+                  .then((result) {
+                    File _file = new File(result);
+                    if (_file != null) {
+                      _imagePath = result;
+                      Image _newImage = new Image.file(_file);
+
+                      AddMedia addMedia = new AddMedia(
+                          title:"Imagen seleccionada",
+                          selectedImage :_newImage,
+                          path: _imagePath,
+                          type:"images");
+
+                      Navigator.pushNamed(
+                        context,
+                        '/addmedia',
+                        arguments: addMedia,
+                      );
+                    };
+                  });
+              },
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.video_label, color: Colors.white),
+            backgroundColor: Color.fromRGBO(0, 29, 126, 1),
+            label: 'Subir Video',
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: () {
+              _globals.filePickerGlobal
+                  .getImagePath(FileType.VIDEO)
+                  .then((result) {
+                File _file = new File(result);
+                if (_file != null) {
+                  _videoPath = result;
+                  _globals.filePickerGlobal
+                      .getThumbnailFromVideo(_videoPath)
+                      .then((Image image) async {
+                    setState(() {
+
+                        AddMedia addMedia = new AddMedia(
+                            title:"Video seleccionada",
+                            selectedImage :image,
+                            path: result,
+                            type:"videos");
+
+                        Navigator.pushNamed(
+                          context,
+                          '/addmedia',
+                          arguments: addMedia,
+                        );
+
+                    });
+                  });
+                }
+              });
+            },
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.calendar_today),
+            backgroundColor: Colors.white,
+            label: 'Proponer juntada',
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: () {
+              //
+            },
+          ),
+        ],
+      );
+    }
   }
+
+
 
   class GroupBody extends StatelessWidget {
     final _GroupPageState groupPageState;
@@ -81,59 +187,14 @@ import 'package:flutter/gestures.dart';
         ),
       );
     }
+
+    @override
+    void initState() {
+     
+
+    }
   }
 
-  SpeedDial buildSpeedDial() {
-    return SpeedDial(
-      marginRight: 25,
-      marginBottom: 50,
-      animatedIcon: AnimatedIcons.menu_close,
-      //animatedIconTheme: IconThemeData(size: 22.0),
-      child: Icon(Icons.add),
-      visible: true,
-      closeManually: false,
-      curve: Curves.bounceIn,
-      overlayColor: Colors.black,
-      overlayOpacity: 0.5,
-      onOpen: () => print('OPENING DIAL'),
-      onClose: () => print('DIAL CLOSED'),
-      tooltip: 'Menu',
-      heroTag: 'speed-dial-hero-tag',
-      backgroundColor: Colors.white,
-      foregroundColor: Colors.black,
-      elevation: 8.0,
-      shape: CircleBorder(),
-      children: [
-        SpeedDialChild(
-            child: Icon(Icons.photo, color: Colors.white),
-            backgroundColor: Color.fromRGBO(0, 29, 126, 1),
-            label: 'Subir imagen o video',
-            labelStyle: TextStyle(fontSize: 18.0),
-            onTap: () {
-              //
-            },
-        ),
-        /*SpeedDialChild(
-          child: Icon(Icons.video_label, color: Colors.white),
-          backgroundColor: Color.fromRGBO(0, 29, 126, 1),
-          label: 'Subir Video',
-          labelStyle: TextStyle(fontSize: 18.0),
-          onTap: () {
-            //
-          },
-        ),*/
-        SpeedDialChild(
-          child: Icon(Icons.calendar_today),
-          backgroundColor: Colors.white,
-          label: 'Proponer juntada',
-          labelStyle: TextStyle(fontSize: 18.0),
-          onTap: () {
-              //
-          },
-        ),
-      ],
-    );
-  }
 
   class UpperSection extends StatelessWidget {
     const UpperSection({

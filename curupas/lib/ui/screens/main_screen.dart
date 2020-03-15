@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'package:curupas/models/HTML.dart';
 import 'package:curupas/models/HTMLS.dart';
+import 'package:curupas/models/group.dart';
 import 'package:curupas/models/museum.dart';
 import 'package:curupas/models/post.dart';
+import 'package:curupas/models/user.dart';
+import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -93,19 +96,28 @@ class _MainScreenState extends State<MainScreen> {
         _globals.setFilePickerGlobal();
         String userId = prefs.getString('userId');
         _globals.getUserData(userId).then((user) {
-          if (!user.smsChecked) {
-            if (!user.accepted) {
+
+            _globals.user = user;
+
+            if (!user.smsChecked) {
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) =>
+                    new SMSDialog(userId: user.userID),
+              );
+
+            } else if (!user.accepted) {
+
               showDialog(
                 context: context,
                 builder: (BuildContext context) =>
                     _buildNotAcceptedDialog(context),
               );
-            } else {
-              loadContent();
+
+            } else  {
+              loadContent(user);
             }
-          } else {
-            loadContent();
-          }
         });
       }
     });
@@ -332,10 +344,11 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Future<void> loadContent() async {
+  Future<void> loadContent(User user) async {
 
     _globals.initData();
 
+    getGroupByYear(user.group.year);
     getDescription();
     getPosts();
     getMuseums();
@@ -349,6 +362,10 @@ class _MainScreenState extends State<MainScreen> {
         print(DateTime.now());
 
         int counter = 0;
+
+        if (_globals.group!=null) {
+          counter++;
+        }
 
         if (_globals.description!=null) {
           counter++;
@@ -378,7 +395,7 @@ class _MainScreenState extends State<MainScreen> {
           counter++;
         }
 
-        if (counter == 7) {
+        if (counter == 8) {
           timer.cancel();
           _globals.setDataFromGlobal();
           updeteWidget();
@@ -415,6 +432,15 @@ class _MainScreenState extends State<MainScreen> {
         print("responses: " + responses.toString());
     }*/
   }
+
+  void getGroupByYear(String year) {
+    Stream<Group> descStream = Auth.getGroupByYear(year);
+    descStream.listen((Group _group) {
+      _globals.group = _group;
+      _globals.user.group = _group;
+    });
+  }
+
 
   void getDescription() {
     Stream<Description> descStream = Auth.getDescription();

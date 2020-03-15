@@ -508,12 +508,14 @@ class _GroupScreenState extends State<GroupScreen> {
         meta["year"] = "${year}";
         meta["device"] = "${year}";
 
+        String folder = year + "/users";
 
         StorageMetadata metadata = new StorageMetadata(
           customMetadata: meta,
         );
+
         _globals.filePickerGlobal
-            .uploadFile(_imagePath, imageName, metadata)
+            .uploadFile(_imagePath, imageName, folder, metadata)
             .then((url) async {
           _globals.user = user;
           prefs.setBool('group', true);
