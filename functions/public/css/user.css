@@ -2,6 +2,11 @@
     padding-top: 50px;
 }
 
+#container {
+    /*margin-right: 5px !important;*/
+    margin-top: 50px !important; 
+}
+
 .table-wrapper {
     background: #fff;
     padding: 20px 25px;
@@ -413,3 +418,11 @@ table.table .avatar {
     tbody tr.selected td {
     background-color: #ffd659;
     }
+
+
+
+
+#grid-details_wrapper {
+    height:240px;  
+    /*width: 600px;*/
+}

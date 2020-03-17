@@ -55,9 +55,12 @@ var FirepadUserList = (function() {
   };
 
   FirepadUserList.prototype.makeUserEntryForSelf_ = function() {
+    
+
     var myUserRef = this.ref_.child(this.userId_);
 
     var colorDiv = elt('div', null, { 'class': 'firepad-userlist-color-indicator' });
+
     this.firebaseOn_(myUserRef.child('color'), 'value', function(colorSnapshot) {
       var color = colorSnapshot.val();
       if (typeof color === 'string' && color.match(/^#[a-fA-F0-9]{3,6}$/)) {
@@ -67,18 +70,22 @@ var FirepadUserList = (function() {
 
     var nameInput = elt('input', null, { type: 'text', 'class': 'firepad-userlist-name-input'} );
     nameInput.value = this.displayName_;
-
+ 
     var nameHint = elt('div', 'ENTER YOUR NAME', { 'class': 'firepad-userlist-name-hint'} );
 
+    myUserRef.child('name').onDisconnect().remove();
+    myUserRef.child('name').set(name);
+    nameHint.style.display = 'none';
+
     // Update Firebase when name changes.
-    on(nameInput, 'change', function(e) {
+    /*on(nameInput, 'change', function(e) {
       var name = nameInput.value || "Guest " + Math.floor(Math.random() * 1000);
       myUserRef.child('name').onDisconnect().remove();
       myUserRef.child('name').set(name);
       nameHint.style.display = 'none';
       nameInput.blur();
       stopEvent(e);
-    });
+    });*/
 
     var nameDiv = elt('div', [nameInput, nameHint]);
 
