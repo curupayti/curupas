@@ -133,7 +133,7 @@ import 'package:curupas/models/add_media.dart';
                     setState(() {
 
                         AddMedia addMedia = new AddMedia(
-                            title:"Video seleccionada",
+                            title:"Video seleccionado",
                             selectedImage :image,
                             path: result,
                             type:"videos");

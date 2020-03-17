@@ -7,7 +7,6 @@
   import 'package:firebase_storage/firebase_storage.dart';
   import 'package:flutter/cupertino.dart';
   import 'package:flutter/material.dart';
-  import 'package:keyboard_visibility/keyboard_visibility.dart';
   import 'package:shared_preferences/shared_preferences.dart';
   import 'package:curupas/globals.dart' as _globals;
 
@@ -203,7 +202,11 @@
                               String year = _globals.group.year;
                               String documentId = _globals.group.documentID;
 
-                              String nonSpName = _globals.user.nonSpName;
+                              String name = _globals.user.name.toLowerCase();
+                              String toUnderscoreName = name.replaceAll(" ", "-");
+                              String diaName = removeDiacritics(toUnderscoreName);
+                              int nowTime = new DateTime.now().millisecondsSinceEpoch;
+                              String fileName = "${removeDiacritics(diaName)}-${nowTime}";
 
                               String lowerTitle = _titleGroup.text.toLowerCase();
                               String toUnderscore = lowerTitle.replaceAll(" ", "_");
@@ -223,10 +226,9 @@
                                 customMetadata: meta,
                               );
 
-                              int nowTime = new DateTime.now().millisecondsSinceEpoch;
-                              String fileName = "${removeDiacritics(nonSpName)}_${nowTime}";
-
                               String folder = "${year}/${widget.addMedia.type}";
+
+                              //String folder = year;
 
                               _globals.filePickerGlobal
                                   .uploadFile(widget.addMedia.path, fileName, folder, metadata)

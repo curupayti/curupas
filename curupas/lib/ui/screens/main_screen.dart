@@ -348,7 +348,7 @@ class _MainScreenState extends State<MainScreen> {
 
     _globals.initData();
 
-    getGroupByYear(user.group.year);
+    //getGroupByYear(user.group.year);
     getDescription();
     getPosts();
     getMuseums();
@@ -363,9 +363,9 @@ class _MainScreenState extends State<MainScreen> {
 
         int counter = 0;
 
-        if (_globals.group!=null) {
-          counter++;
-        }
+        //if (_globals.group!=null) {
+        //  counter++;
+        //}
 
         if (_globals.description!=null) {
           counter++;
@@ -395,7 +395,7 @@ class _MainScreenState extends State<MainScreen> {
           counter++;
         }
 
-        if (counter == 8) {
+        if (counter == 7) {
           timer.cancel();
           _globals.setDataFromGlobal();
           updeteWidget();
