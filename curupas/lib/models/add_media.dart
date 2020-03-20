@@ -7,11 +7,13 @@ class AddMedia {
   Image selectedImage;
   String path;
   String type;
+  int typeId;
 
   AddMedia({
     this.title,
     this.selectedImage,
     this.path,
     this.type,
+    this.typeId
   });
 }

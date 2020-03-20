@@ -104,7 +104,8 @@ import 'package:curupas/models/add_media.dart';
                           title:"Imagen seleccionada",
                           selectedImage :_newImage,
                           path: _imagePath,
-                          type:"images");
+                          type:"images",
+                          typeId: 0);
 
                       Navigator.pushNamed(
                         context,
@@ -136,7 +137,8 @@ import 'package:curupas/models/add_media.dart';
                             title:"Video seleccionado",
                             selectedImage :image,
                             path: result,
-                            type:"videos");
+                            type:"videos",
+                            typeId: 1);
 
                         Navigator.pushNamed(
                           context,

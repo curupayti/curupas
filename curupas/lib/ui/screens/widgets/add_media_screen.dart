@@ -6,7 +6,9 @@
   import 'package:diacritic/diacritic.dart';
   import 'package:firebase_storage/firebase_storage.dart';
   import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
   import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:shared_preferences/shared_preferences.dart';
   import 'package:curupas/globals.dart' as _globals;
 
@@ -24,8 +26,6 @@
 
     SharedPreferences prefs;
 
-    double _progressValue = 0.0;
-
     bool loading = false;
 
     final TextEditingController _titleGroup = new TextEditingController();
@@ -37,18 +37,24 @@
     CustomTextField _descGroupField;
     FocusNode descFocusNodeGroup = new FocusNode();
 
-    bool _isTitleGroupVisible = true;
-    bool _isDescGroupVisible = true;
+    int _loadingInProgress = -1;
 
-    bool _isThumbnailVisible = true;
-
-    bool _areButtonsVisible = true;
+    String typeCapitol;
+    String typeShort;
 
     @override
     void initState() {
       super.initState();
 
       getPrefs();
+
+      if (widget.addMedia.typeId==0) {
+        typeCapitol = "NUEVA IMAGEN";
+        typeShort = "imagen";
+      } else if (widget.addMedia.typeId==1) {
+        typeCapitol = "NUEVO VIDEO";
+        typeShort = "video";
+      }
 
       _titleGroupField = new CustomTextField(
         baseColor: Colors.grey,
@@ -83,6 +89,10 @@
         focusNode: descFocusNodeGroup,
       );
 
+      setState(() {
+        _loadingInProgress = 0;
+      });
+
       /*KeyboardVisibilityNotification().addNewListener(
         onChange: (bool visible) {
           if (visible) {
@@ -102,79 +112,57 @@
 
     @override
     Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text("Second Route"),
-        ),
-        body: SingleChildScrollView(
-          child:
-            Center(
-              child: Padding(
-                padding:
-                EdgeInsets.only(top: 10.0, bottom: 2.5, left: 10.0, right: 10.0),
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding:
-                      EdgeInsets.only(top: 2.5, bottom: 10, left: 10.0, right: 10.0),
-                      child: Visibility(
-                        visible: _isTitleGroupVisible,
-                        child: new Container(
-                          height: 50.0,
-                          child: _titleGroupField,
+      switch (_loadingInProgress) {
+        case 0:
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(typeCapitol),
+            ),
+            body: SingleChildScrollView(
+              child:
+              Center(
+                child: Padding(
+                  padding:
+                  EdgeInsets.only(top: 10.0, bottom: 2.5, left: 10.0, right: 10.0),
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding:
+                        EdgeInsets.only(top: 2.5, bottom: 10, left: 10.0, right: 10.0),
+                        child:  new Container(
+                            height: 50.0,
+                            child: _titleGroupField,
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding:
-                      EdgeInsets.only(top: 6.0, bottom: 10.0, left: 10.0, right: 10.0),
-                      child: Visibility(
-                        visible: _isDescGroupVisible,
-                        child: new Container(
-                          height: 80.0,
-                          child: _descGroupField,
+                      Padding(
+                        padding:
+                        EdgeInsets.only(top: 6.0, bottom: 10.0, left: 10.0, right: 10.0),
+                        child:  new Container(
+                            height: 80.0,
+                            child: _descGroupField,
                         ),
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(12),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(color: Colors.grey[300]),
-                      child: Text(
-                        widget.addMedia.title, //"Imagen seleccionada",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    Padding(
-                      padding:
-                      EdgeInsets.only(top: 10.0, bottom: 10.0, left: 10.0, right: 10.0),
-                      child: Container(
-                        height: 200,
-                        width: 300,
-                        child: widget.addMedia.selectedImage,
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(top: 10.0, bottom: 10.0, left: 10.0, right: 10.0),
-                      child: Visibility(
-                        visible: loading,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            LinearProgressIndicator(
-                              value: _progressValue,
-                            ),
-                            Text('${(_progressValue * 100).round()}%'),
-                          ],
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(color: Colors.grey[300]),
+                        child: Text(
+                          widget.addMedia.title, //"Imagen seleccionada",
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600),
                         ),
                       ),
-                    ),
-                    Visibility(
-                      visible: _areButtonsVisible,
-                      child:
+                      Padding(
+                        padding:
+                        EdgeInsets.only(top: 10.0, bottom: 10.0, left: 10.0, right: 10.0),
+                        child: Container(
+                          height: 200,
+                          width: 300,
+                          child: widget.addMedia.selectedImage,
+                        ),
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -197,6 +185,10 @@
                           RaisedButton(
                             color: Colors.blue,
                             onPressed: () {
+
+                              setState(() {
+                                _loadingInProgress = 1;
+                              });
 
                               String userId = prefs.getString('userId');
                               String year = _globals.group.year;
@@ -228,17 +220,15 @@
 
                               String folder = "${year}/${widget.addMedia.type}";
 
-                              //String folder = year;
-
                               _globals.filePickerGlobal
                                   .uploadFile(widget.addMedia.path, fileName, folder, metadata)
-                                  .then((data) async {
+                                  .then((completed) async {
 
-                                print(data);
-                                /*showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) => _buildAboutDialog(context),
-                                  );*/
+                                setState(() {
+                                  _loadingInProgress = 2;
+                                  typeCapitol = "VIDEO CARGADO";
+                                });
+
                               });
                             },
                             child: Text(
@@ -251,14 +241,184 @@
 
                         ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-          ),
-        ),
-      );
-    }
+            ),
+          );
+          break;
+        case 1:
+          return Stack(children: <Widget>[
+            new Container(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                color: Colors.white,
+              ),
+              child: new Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                          top: ScreenUtil().setHeight(30.0),
+                          bottom: ScreenUtil().setWidth(50.0),
+                          left: ScreenUtil().setWidth(30.0),
+                          right: ScreenUtil().setWidth(30.0)),
+                      child: widget.addMedia.selectedImage,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(50.0)),
+                    child: new Text(
+                      "Subiendo ${typeShort} ${widget.addMedia.title}",
+                      softWrap: true,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey,
+                        decoration: TextDecoration.none,
+                        fontSize: ScreenUtil().setSp(50.0),
+                        fontWeight: FontWeight.w300,
+                        fontFamily: "OpenSans",
+                      ),
+                    ),
+                  ),
+                  new Container(
+                    width: 60,
+                    height: 60,
+                    child: new CircularProgressIndicator(),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: ScreenUtil().setHeight(50.0)),
+                    child: new Text(
+                      "Un momento por favor",
+                      softWrap: true,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey,
+                        decoration: TextDecoration.none,
+                        fontSize: ScreenUtil().setSp(35.0),
+                        fontWeight: FontWeight.w300,
+                        fontFamily: "OpenSans",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ]);
+          break;
+        case 2:
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(typeCapitol),
+            ),
+            body: SingleChildScrollView(
+              child:
+              Center(
+                child: Padding(
+                  padding:
+                  EdgeInsets.only(top: 10.0, bottom: 2.5, left: 10.0, right: 10.0),
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding:
+                        EdgeInsets.only(top: 2.5, bottom: 10, left: 10.0, right: 10.0),
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: TextStyle(fontSize: 24, color: Colors.grey),
+                            text:
+                            "Gracias por agregar tu video",
+                            children: <TextSpan>[
+                              TextSpan(
+                                  text: widget.addMedia.title
+                              ),
+                              TextSpan(
+                                  text:
+                                  "Va a ser revisado en breve."),
+                            ],
+                          ),
+                        ),
+                      ),
+                      RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: TextStyle(fontSize: 24, color: Colors.grey),
+                          text:
+                          "Te recordamos que podes cargar ",
+                          children: <TextSpan>[
+                            TextSpan(
+                                text:
+                                " tus historias en la pagina "
+                            ),
+                            TextSpan(
+                                text: 'app.curupas.com.ar',
+                                style: TextStyle(
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline),
+                                    recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      print('You clicked on me!');
+                                    }
+                            ),
+                            TextSpan(
+                                text:
+                                " entrando con tu usuario y contraseña "),
+                            TextSpan(
+                                text:
+                                " desde tu computadora."),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                        EdgeInsets.only(top: 6.0, bottom: 10.0, left: 10.0, right: 10.0),
+                        child: new Container(
+                            height: 80.0,
+                            child: new Text(
+                              "No dejes de compartir contenido.",
+                              softWrap: true,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.grey,
+                                decoration: TextDecoration.none,
+                                fontSize: ScreenUtil().setSp(35.0),
+                                fontWeight: FontWeight.w300,
+                                fontFamily: "OpenSans",
+                              ),
+                            ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          RaisedButton(
+                            color: Colors.blue,
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text(
+                              '  VOLVER  ',
+                              style: TextStyle(
+                                  fontSize: 25.0,
+                                  color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+          break;
 
-
+        }
+      }
   }

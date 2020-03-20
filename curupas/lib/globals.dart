@@ -220,7 +220,7 @@
         return new Image.memory(uint8list);
       }
 
-      Future<String> uploadFile(
+      Future<bool> uploadFile(
           String _imagePath,
           String fileName,
           String folder,
@@ -238,22 +238,29 @@
 
         //int count = 0;
 
-        StreamSubscription<StorageTaskEvent> streamSubscription =
-        uploadTask.events.listen((event) {
-
+        //StreamSubscription<StorageTaskEvent> streamSubscription =
+        //uploadTask.events.listen((event) {
           //if ( count == 0 ) {
           //  return event.toString();
           //} else {
-            double _progess = event.snapshot.bytesTransferred.toDouble() / event.snapshot.totalByteCount.toDouble();
-            return _progess.toString();
+            //double _progess = event.snapshot.bytesTransferred.toDouble() / event.snapshot.totalByteCount.toDouble();
+            //return _progess.toString();
           //}
           //count++;
+        //});
+
+        //StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+
+       await uploadTask.onComplete.then((completed)  {
+
+          //String url = (await downloadUrl.ref.getDownloadURL());
+          //streamSubscription.cancel();
+          return true;
+
         });
 
-        StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
-        String url = (await downloadUrl.ref.getDownloadURL());
-        streamSubscription.cancel();
-        return url;
+
+
       }
 
       Future<String> getStorageFileUrl(String childReference) async {
