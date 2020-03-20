@@ -78,7 +78,7 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
   
   //console.log("=============== customMetadataType:" + customMetadataType);
 
-  console.log("isThumbnail:" + isThumbnail);  
+  //console.log("isThumbnail:" + isThumbnail);  
 
   // Cloud Storage files.
   const bucket = admin.storage().bucket(object.bucket);
@@ -109,6 +109,7 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
     }    
     
     const thumbFile = bucket.file(thumbFilePath);
+
     const metadata = {
       contentType: contentType,
       // To enable Client-side caching you can set the Cache-Control headers here. Uncomment below.
@@ -116,16 +117,16 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
     };    
     
     // Create the temp directory where the storage file will be downloaded.
-    await mkdirp(tempLocalDir)
+    await mkdirp(tempLocalDir);
     // Download file from bucket.
     await file.download({destination: tempLocalFile});
-    console.log('The file has been downloaded to', tempLocalFile);
+    //console.log('The file has been downloaded to', tempLocalFile);
     // Generate a thumbnail using ImageMagick.
     await spawn('convert', [tempLocalFile, '-thumbnail', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});
-    console.log('Thumbnail created at', tempLocalThumbFile);
+    //console.log('Thumbnail created at', tempLocalThumbFile);
     // Uploading the Thumbnail.
     await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath, metadata: metadata});
-    console.log('Thumbnail uploaded to Storage at', thumbFilePath);
+    //console.log('Thumbnail uploaded to Storage at', thumbFilePath);
     // Once the image has been uploaded delete the local files to free up disk space.
     fs.unlinkSync(tempLocalFile);
     fs.unlinkSync(tempLocalThumbFile);
@@ -146,9 +147,9 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
    
       var _id = customMetadata.id;
       var _collection = customMetadata.collection; 
-      console.log('_id: '+ _id + " _collection: " + _collection);          
+      //console.log('_id: '+ _id + " _collection: " + _collection);          
       let _time = admin.firestore.FieldValue.serverTimestamp();
-      console.log("_time: " + _time);         
+      //console.log("_time: " + _time);         
       await firestore.collection(_collection).doc(_id).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
    
     //Save User Thumbnail
@@ -158,11 +159,11 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
       var userId = customMetadata.userId;
       var year = customMetadata.year;
       
-      console.log('year: '+ year);          
+      //console.log('year: '+ year);          
       
       let _time = admin.firestore.FieldValue.serverTimestamp();
       
-      console.log("_time: " + _time);
+      //console.log("_time: " + _time);
       
       await firestore.collection("users").doc(userId).update(
         { profilePictureURL : fileUrl,
@@ -175,9 +176,9 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
         var _id = customMetadata.id;    
         let _time = admin.firestore.FieldValue.serverTimestamp();   
 
-        console.log("_short: " + _short);        
-        console.log("_id: " + _id);
-        console.log("_time: " + _time);           
+        //console.log("_short: " + _short);        
+        //console.log("_id: " + _id);
+        //console.log("_time: " + _time);           
 
         await firestore.collection('contents')
         .doc(_short)
@@ -195,92 +196,79 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
     
   }  else { // not isThiumbnail
 
-    console.log("::customMetadataType:: " + customMetadataType);  
+    //console.log("::customMetadataType:: " + customMetadataType);  
 
     if (customMetadataType == 4) {  
 
       //console.log("::entra::");
-
-      const filePathInBucket   = object.name;
-      const fileDir            = path.dirname(filePathInBucket);
-      const fileName           = path.basename(filePathInBucket);
-      const fileInfo           = parseName(fileName);
-
-      console.log("filePathInBucket:: " + filePathInBucket);
-      console.log("fileDir:: " + fileDir);
-      console.log("fileName:: " + fileName);
-
-      const thumbFileExt       = 'jpg';
-      let   thumbFilePath      = path.normalize(path.join(fileDir, `${fileInfo.name}.thumbnail.${thumbFileExt}`));
-      const tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);      
-
-      //console.log("thumbFilePath:: " + thumbFilePath);
-      //console.log("tempLocalThumbFile:: " + tempLocalThumbFile);
-
-      await generateFromVideo(filePathInBucket, tempLocalThumbFile);     
-
-      await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath});
-
-      fs.unlinkSync(tempLocalThumbFile);
-
-      //console.log("generatedThumbnail:: " + generatedThumbnail);
       
+      const file = object.name;
+      const thumbFileExt       = 'jpg';
+      const fileDir = path.dirname(filePath);
+      //const fileName = path.basename(filePath);
+
+      const fileInfo = parseName(file);
+
+      const thumbFilePath = path.normalize(path.join(fileDir, `${fileInfo.name}-thumbnail.${thumbFileExt}`));
+      const tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
+      const tempLocalDir       = path.join(os.tmpdir(), fileDir);
+     
+      await mkdirp(tempLocalDir);
+
+      console.log("tempLocalThumbFile:: " + tempLocalThumbFile);
+
+      const videoFile = bucket.file(file);
+
+      const signedVideoUrl = await videoFile.getSignedUrl(config);         
+  
+      const videoUrl = signedVideoUrl[0];
+      
+      console.log("videoUrl:: " + videoUrl);
+      
+      await spawn(ffmpegPath, ['-ss', '0', '-i', videoUrl, '-f', 'image2', '-vframes', '1', '-vf', `scale=${THUMB_MAX_WIDTH}:-1`, tempLocalThumbFile]);
+
+      await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath});      
+
+      await fs.unlinkSync(tempLocalThumbFile);   
+
       var documentId = customMetadata.documentId;
       var doc_name_title = customMetadata.doc_name_title;
       var title = customMetadata.title;
       var desc = customMetadata.desc; 
-      var userId = customMetadata.userId;  
+      var userId = customMetadata.userId;        
       
-      //console.log("fileName:: " + fileName);
-      //console.log("documentId:: " + documentId);
+      let _time = admin.firestore.FieldValue.serverTimestamp();    
       
-      let _time = admin.firestore.FieldValue.serverTimestamp();         
+      const fileThumb = bucket.file(thumbFilePath);
       
-      await firestore.collection('years')
-      .doc(documentId)
-      .collection("videos")
-      .doc(doc_name_title)
-      .set({ 
-        thumbnail : JSON.parse(JSON.stringify(generatedThumbnail)),
-        video : fileName,
-        title : title,
-        desc: desc, 
-        userId : userId,
-        aprroved: false,
-        last_update: _time 
-      });
+      // Get the Signed URLs for the thumbnail and original image.
+      const signedUrl = await fileThumb.getSignedUrl(config);
+      const thumbResult = signedUrl[0];
 
+      console.log('thumbResult: ' + thumbResult);
+      
+        await firestore.collection('years')
+        .doc(documentId)
+        .collection("videos")
+        .doc(doc_name_title)
+        .set({ 
+          thumbnail : thumbResult,
+          video : videoUrl,
+          title : title,
+          desc: desc, 
+          userId : userId,
+          aprroved: false,
+          last_update: _time 
+        });
+    
     }
-
   }
 
   function parseName(fileName) {
       let _file = path.basename(fileName);
       var _name = _file.replace(/\.[^/.]+$/, "");      
       return { name : _name };
-  }
-
-
-  function generateFromVideo(file, thumbFilePath) {
-
-    const thumbFile = bucket.file(file);
-
-    console.log("thumbFile:: " + thumbFile);
-
-    //const promise = spawn(ffmpegPath, ['-ss', '0', '-i', file, '-f', 'image2', '-vframes', '1', '-vf', `scale=${THUMB_MAX_WIDTH}:-1`, thumbFilePath]);
-    //promise.childProcess.stdout.on('data', (data) => console.log('[spawn] stdout: ', data.toString()));
-    //promise.childProcess.stderr.on('data', (data) => console.log('[spawn] stderr: ', data.toString()));
-    //return promise;
-
-    return thumbFile.getSignedUrl(config).then((signedUrl) => {
-        const fileUrl = signedUrl[0];
-        console.log("fileUrl:: " + fileUrl);
-        const promise = spawn(ffmpegPath, ['-ss', '0', '-i', fileUrl, '-f', 'image2', '-vframes', '1', '-vf', `scale=${THUMB_MAX_WIDTH}:-1`, thumbFilePath]);
-        promise.childProcess.stdout.on('data', (data) => console.info('[spawn] stdout: ', data.toString()));
-        promise.childProcess.stderr.on('data', (data) => console.info('[spawn] stderr: ', data.toString()));
-        return promise;
-    });
-  }
+  } 
 
 });
 
