@@ -226,7 +226,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
                                 setState(() {
                                   _loadingInProgress = 2;
-                                  typeCapitol = "VIDEO CARGADO";
+                                  typeCapitol = "Video subido";
                                 });
 
                               });
@@ -324,6 +324,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                   EdgeInsets.only(top: 10.0, bottom: 2.5, left: 10.0, right: 10.0),
                   child: Column(
                     children: <Widget>[
+                      SizedBox(
+                        height: 30,
+                      ),
                       Padding(
                         padding:
                         EdgeInsets.only(top: 2.5, bottom: 10, left: 10.0, right: 10.0),
@@ -332,17 +335,20 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                           text: TextSpan(
                             style: TextStyle(fontSize: 24, color: Colors.grey),
                             text:
-                            "Gracias por agregar tu video",
+                            "Gracias por agregar tu ",
                             children: <TextSpan>[
                               TextSpan(
-                                  text: widget.addMedia.title
+                                  text: widget.addMedia.title.toLowerCase()
                               ),
                               TextSpan(
                                   text:
-                                  "Va a ser revisado en breve."),
+                                  ". Va a ser revisado en breve."),
                             ],
                           ),
                         ),
+                      ),
+                      SizedBox(
+                        height: 30,
                       ),
                       RichText(
                         textAlign: TextAlign.center,
@@ -373,6 +379,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                                 " desde tu computadora."),
                           ],
                         ),
+                      ),
+                      SizedBox(
+                        height: 30,
                       ),
                       Padding(
                         padding:
