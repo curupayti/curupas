@@ -59,6 +59,14 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
       //getFirePadFromRef("ZAvWQjFab2fiv27g3Hu0kcpSCXP2");
 
 
+      _globals.eventBus
+          .on()
+          .listen((event) {
+
+            print(event.toString());
+
+      });
+
     }
 
     void getPrefs() async {
@@ -105,7 +113,7 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
                           selectedImage :_newImage,
                           path: _imagePath,
                           type:"images",
-                          typeId: 0);
+                          typeId: 2);
 
                       Navigator.pushNamed(
                         context,
@@ -451,13 +459,34 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
               crossAxisCount: 4,
               itemCount: _globals.group.medias.length,
               itemBuilder: (context, j) {
+                bool isVideo = false;
                 String imgPath = _globals.group.medias[j].thumbnailUrl;
                 String title = _globals.group.medias[j].title;
                 String description = _globals.group.medias[j].description;
+                if (_globals.group.medias[j].type == 1) {
+                  isVideo = true;
+                }
                 return new Card(
                   child: new Column(
                     children: <Widget>[
-                      new Image.network(imgPath),
+                      new Center(
+                        child:
+                        Stack(
+                            children: <Widget>[
+                              new Image.network(imgPath),
+                              Visibility(
+                                visible: isVideo,
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.play_circle_outline,
+                                    size: 60.0,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                        ),
+                      ),
                       new Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: new Column(

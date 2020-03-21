@@ -48,12 +48,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
       getPrefs();
 
-      if (widget.addMedia.typeId==0) {
-        typeCapitol = "NUEVA IMAGEN";
-        typeShort = "imagen";
-      } else if (widget.addMedia.typeId==1) {
+      if (widget.addMedia.typeId==1) {
         typeCapitol = "NUEVO VIDEO";
         typeShort = "video";
+      } else if (widget.addMedia.typeId==2) {
+        typeCapitol = "NUEVA IMAGEN";
+        typeShort = "imagen";
       }
 
       _titleGroupField = new CustomTextField(
@@ -194,19 +194,35 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                               String year = _globals.group.year;
                               String documentId = _globals.group.documentID;
 
-                              String name = _globals.user.name.toLowerCase();
-                              String toUnderscoreName = name.replaceAll(" ", "-");
-                              String diaName = removeDiacritics(toUnderscoreName);
-                              int nowTime = new DateTime.now().millisecondsSinceEpoch;
-                              String fileName = "${removeDiacritics(diaName)}-${nowTime}";
+                              String typeId, thumbnail;
+
+                              if (widget.addMedia.typeId==1) {
+
+                                typeId = "1";
+                                thumbnail = "false";
+
+                              } else if (widget.addMedia.typeId==2) {
+
+                                typeId = "4";
+                                thumbnail = "true";
+
+                              }
 
                               String lowerTitle = _titleGroup.text.toLowerCase();
-                              String toUnderscore = lowerTitle.replaceAll(" ", "_");
+                              String toUnderscore = lowerTitle.replaceAll(" ", "-");
                               String toNonSpecial = removeDiacritics(toUnderscore);
 
+                              //String name = _globals.user.name.toLowerCase();
+                              //String toUnderscoreName = name.replaceAll(" ", "-");
+                              //String diaName = removeDiacritics(toUnderscoreName);
+
+                              int nowTime = new DateTime.now().millisecondsSinceEpoch;
+
+                              String fileName = "${removeDiacritics(toNonSpecial)}-${nowTime}";
+
                               Map<String, String> meta = new Map<String, String>();
-                              meta["thumbnail"] = "false";
-                              meta["type"] = "4";
+                              meta["thumbnail"] = thumbnail;
+                              meta["type"] = typeId;
                               meta["userId"] = "${userId}";
                               meta["year"] = "${year}";
                               meta["documentId"] = documentId;
@@ -226,7 +242,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
                                 setState(() {
                                   _loadingInProgress = 2;
-                                  typeCapitol = "Video subido";
+                                  if (widget.addMedia.typeId==1) {
+                                    typeCapitol = "Video subido";
+                                  } else if (widget.addMedia.typeId==2) {
+                                    typeCapitol = "Imagen subida";
+                                  }
                                 });
 
                               });

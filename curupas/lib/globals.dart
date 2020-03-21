@@ -4,6 +4,7 @@
     import 'package:cloud_firestore/cloud_firestore.dart';
     import 'package:cloud_functions/cloud_functions.dart';
     import 'package:device_info/device_info.dart';
+import 'package:event_bus/event_bus.dart';
     import 'package:file_picker/file_picker.dart';
     import 'package:firebase_storage/firebase_storage.dart';
     import 'package:flutter/cupertino.dart';
@@ -26,6 +27,8 @@
 
     User user = new User();
     Group group = new Group();
+
+    EventBus eventBus = EventBus();
 
     //App Data object
     AppData appData = new AppData();
