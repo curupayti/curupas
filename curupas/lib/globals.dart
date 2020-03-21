@@ -1,3 +1,4 @@
+
     import 'dart:async';
     import 'dart:io';
     import 'package:cloud_firestore/cloud_firestore.dart';
@@ -68,6 +69,7 @@
                       group = await Group.fromDocument(yearSnapshot);
                       userSnapshot.data["group"] = group;
                       _user = await User.fromDocument(userSnapshot);
+                      Auth.getGroupVideoMediaByType(group.documentID);
                       return _user;
                     } on Exception catch (exception) {
                       print(exception.toString());

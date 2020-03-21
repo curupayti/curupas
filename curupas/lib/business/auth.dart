@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:curupas/models/HTML.dart';
 import 'package:curupas/models/HTMLS.dart';
+import 'package:curupas/models/group_media.dart';
 import 'package:curupas/models/museum.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -213,6 +214,28 @@ class Auth {
         return Group.fromDocument(doc);
       }).first;
     });
+  }
+
+
+  static getGroupVideoMediaByType(String documentId) async {
+    Firestore.instance.document("years/${documentId}").get().then((document) async {
+      if (document.exists) {
+        getMedias(document).then((listGroupMedia) {
+          _globals.group.medias = listGroupMedia;
+        });
+      }
+    });
+  }
+
+  static Future<List<GroupMedia>> getMedias(DocumentSnapshot document) async {
+    QuerySnapshot collectionSnapshot = await document.reference.collection("media").getDocuments();
+    List<DocumentSnapshot> templist;
+    List<GroupMedia> listGroupMedia = new List();
+    templist = collectionSnapshot.documents;
+    listGroupMedia = await templist.map((DocumentSnapshot docSnapshot) {
+      return GroupMedia.fromDocument(docSnapshot);
+    }).toList();
+    return listGroupMedia;
   }
 
   static Stream<User> getUser(String userID) {

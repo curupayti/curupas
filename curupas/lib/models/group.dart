@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'group_media.dart';
+
 class Group {
   final String year;
   final String documentID;
+  List<GroupMedia> medias;
   final DocumentReference yearRef;
 
   Group({this.year, this.documentID, this.yearRef});

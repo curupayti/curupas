@@ -1,10 +1,9 @@
 
   import 'dart:io';
   import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:curupas/models/add_media.dart';
+  import 'package:curupas/models/add_media.dart';
   import 'package:curupas/ui/screens/widgets/anecdote/anecdote_widget.dart';
-  import 'package:curupas/ui/screens/widgets/gallery/galleryPhotoViewWrapper.dart';
-  import 'package:curupas/ui/screens/widgets/gallery/gallery_example_item.dart';
+import 'package:curupas/ui/screens/widgets/flat_button.dart';
   import 'package:file_picker/file_picker.dart';
   import 'package:flutter/gestures.dart';
   import "package:flutter/material.dart";
@@ -12,6 +11,7 @@ import 'package:curupas/models/add_media.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
   import 'package:curupas/globals.dart' as _globals;
   import 'package:curupas/ui/screens/friend_screen.dart';
+  import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
   import 'package:shared_preferences/shared_preferences.dart';
 
   class GroupPage extends StatefulWidget {
@@ -182,7 +182,8 @@ import 'package:curupas/models/add_media.dart';
               height: 8.0,
             ),
             UpperSection(),
-            _buildAnecdotes(),
+            AnecdoteSection(),
+            StaggeredSection(),
             //GridSection(parent: groupPageState),
             //MiddleSection(),
           ],
@@ -260,7 +261,7 @@ import 'package:curupas/models/add_media.dart';
     }
   }
 
-  class GridSection extends StatelessWidget {
+  /*class GridSection extends StatelessWidget {
     final _GroupPageState parent;
 
     bool verticalGallery = false;
@@ -353,60 +354,143 @@ import 'package:curupas/models/add_media.dart';
         ),
       );
     }
-  }
-
-  Widget _buildAnecdotes() {
-
-    if   (_globals.appData.anecdotes!= null) {
+  }*/
 
 
-      return Padding(
-        padding: const EdgeInsets.only(top: 16.0),
-        child: SizedBox.fromSize(
-          size: Size.fromHeight(200.0),
-          child: new AnecdoteWidget(anecdotes: _globals.appData.anecdotes),
-        ),
+  class AnecdoteSection extends StatelessWidget {
+
+    final _GroupPageState parent;
+
+    bool verticalGallery = false;
+
+    AnecdoteSection({Key key, @required this.parent}) : super(key: key);
+
+    List<Object> allImage = new List();
+
+    @override
+    Widget build(BuildContext context) {
+      return Column(
+        children: <Widget>[
+          SizedBox(
+            height: 00.0,
+            child: _buildAnecdotes(),
+          ),
+        ],
       );
+    }
 
-    } else {
+    Widget _buildAnecdotes() {
 
-      TextStyle messageStyle = TextStyle(fontSize: 24, color: Colors.grey);
+      if   (_globals.appData.anecdotes!= null) {
 
-      return Padding(
-        padding: const EdgeInsets.only(top: 16.0),
-        child: SizedBox.fromSize(
-          size: Size.fromHeight(200.0),
-          child: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: messageStyle,
-              text:
-              "Agrega tus historias entrando en ",
-              children: <TextSpan>[
-                TextSpan(
-                    text:
-                    " la pagina "),
-                TextSpan(
-                    text: 'app.curupas.com.ar',
-                    style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        print('You clicked on me!');
-                      }),
-                TextSpan(
-                    text:
-                    " desde tu computadora."),
-              ],
+        return Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: SizedBox.fromSize(
+            size: Size.fromHeight(200.0),
+            child: new AnecdoteWidget(anecdotes: _globals.appData.anecdotes),
+          ),
+        );
+
+      } else {
+
+        TextStyle messageStyle = TextStyle(fontSize: 24, color: Colors.grey);
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: SizedBox.fromSize(
+            size: Size.fromHeight(200.0),
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: messageStyle,
+                text:
+                "Agrega tus historias entrando en ",
+                children: <TextSpan>[
+                  TextSpan(
+                      text:
+                      " la pagina "),
+                  TextSpan(
+                      text: 'app.curupas.com.ar',
+                      style: TextStyle(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          print('You clicked on me!');
+                        }),
+                  TextSpan(
+                      text:
+                      " desde tu computadora."),
+                ],
+              ),
             ),
           ),
-        ),
+        );
+      }
+    }
+
+  }
+
+  class StaggeredSection extends StatelessWidget {
+
+    final _GroupPageState parent;
+
+    bool verticalGallery = false;
+
+    StaggeredSection({Key key, @required this.parent}) : super(key: key);
+
+    @override
+    Widget build(BuildContext context) {
+      return Column(
+        children: <Widget>[
+          SizedBox(
+            height: 100.0,
+            child: StaggeredGridView.countBuilder(
+              padding:
+              const EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0, bottom: 8.0),
+              crossAxisCount: 4,
+              itemCount: _globals.group.medias.length,
+              itemBuilder: (context, j) {
+                String imgPath = _globals.group.medias[j].thumbnailUrl;
+                String title = _globals.group.medias[j].title;
+                String description = _globals.group.medias[j].description;
+                return new Card(
+                  child: new Column(
+                    children: <Widget>[
+                      new Image.network(imgPath),
+                      new Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: new Column(
+                          children: <Widget>[
+                            new Text(
+                              title,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            new Text(
+                              description,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              },
+              staggeredTileBuilder: (j) =>
+              new StaggeredTile.fit(2),
+              mainAxisSpacing: 10.0,
+              crossAxisSpacing: 10.0,
+            ),
+          ),
+        ],
       );
-
-
     }
   }
+
+
+
+
 
   class MiddleSection extends StatelessWidget {
     MiddleSection({
