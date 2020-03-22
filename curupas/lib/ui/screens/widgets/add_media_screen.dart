@@ -190,9 +190,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                                 _loadingInProgress = 1;
                               });
 
+                              int nowTime = new DateTime.now().millisecondsSinceEpoch;
+
                               String userId = prefs.getString('userId');
                               String year = _globals.group.year;
-                              String documentId = _globals.group.documentID;
+                              String documentId = "${_globals.group.documentID}-${nowTime}";
 
                               String typeId, thumbnail;
 
@@ -211,12 +213,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                               String lowerTitle = _titleGroup.text.toLowerCase();
                               String toUnderscore = lowerTitle.replaceAll(" ", "-");
                               String toNonSpecial = removeDiacritics(toUnderscore);
-
-                              //String name = _globals.user.name.toLowerCase();
-                              //String toUnderscoreName = name.replaceAll(" ", "-");
-                              //String diaName = removeDiacritics(toUnderscoreName);
-
-                              int nowTime = new DateTime.now().millisecondsSinceEpoch;
 
                               String fileName = "${removeDiacritics(toNonSpecial)}-${nowTime}";
 

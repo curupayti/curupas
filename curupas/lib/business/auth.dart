@@ -222,25 +222,41 @@
         if (document.exists) {
           await getMedias(document).then((listGroupMedia) {
             _globals.group.medias = listGroupMedia;
+            setMediaListener(documentId);
           });
         }
       });
-      setMediaListener(documentId);
     }
 
     static setMediaListener(String documentId) {
       CollectionReference reference = Firestore.instance.collection("years/${documentId}/media");
       reference.snapshots().listen((querySnapshot) {
         querySnapshot.documentChanges.forEach((change) {
-          // Do something with change
-
-            //print(change);
-
             DocumentChange doc = change;
-
-            _globals.eventBus.fire("updated");
+            if (change.type == DocumentChangeType.added){
+              print("document: ${change.document.data} added");
+              GroupMedia groupMedia = GroupMedia.fromDocument(change.document);
+              bool contains = containsGroupMedia(groupMedia.documentID);
+              print(contains);
+              //Esto es inconsistente si dos medias tienen el mismo titulo.
+              if (contains==false) {
+                _globals.group.medias.add(groupMedia);
+                _globals.eventBus.fire("added");
+              }
+            }
         });
       });
+    }
+
+    static bool containsGroupMedia(String groupMediaID) {
+      int length = _globals.group.medias.length;
+      for (var i = 0; i< length; i++) {
+        String _groupMediaID = _globals.group.medias[i].documentID;
+        if (_groupMediaID == groupMediaID) {
+          return true;
+        }
+      }
+      return false;
     }
 
     static Future<List<GroupMedia>> getMedias(DocumentSnapshot document) async {

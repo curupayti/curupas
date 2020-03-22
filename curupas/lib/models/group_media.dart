@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class GroupMedia {
+  String documentID;
   int type;
   bool approved;
   String title;
@@ -13,6 +14,7 @@ class GroupMedia {
   String imageUrl;
 
   GroupMedia({
+    this.documentID,
     this.type,
     this.approved,
     this.title,
@@ -24,6 +26,7 @@ class GroupMedia {
 
   Map<String, Object> toJson() {
     return {
+      'documentID': documentID,
       'type': type,
       'approved': approved,
       'title': title,
@@ -35,13 +38,14 @@ class GroupMedia {
     };
   }
 
-  factory GroupMedia.fromJson(Map<String, Object> doc) {
+  factory GroupMedia.fromJson(Map<String, Object> doc, String documentID) {
 
     Timestamp timestamp = doc["last_update"] as Timestamp;
     var format = new DateFormat('d MMM, hh:mm a');
     DateTime date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
 
     GroupMedia group = new GroupMedia(
+      documentID : documentID,
       type: doc['type'],
       approved: doc['approved'],
       title: doc['title'],
@@ -59,7 +63,8 @@ class GroupMedia {
   }
 
   factory GroupMedia.fromDocument(DocumentSnapshot doc) {
-    return GroupMedia.fromJson(doc.data);
+    String documentId = doc.documentID;
+    return GroupMedia.fromJson(doc.data, documentId);
   }
 
 }

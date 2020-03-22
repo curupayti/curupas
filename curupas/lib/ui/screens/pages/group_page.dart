@@ -35,14 +35,17 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
     //File vars
     String _imagePath;
 
-
     @override
     Widget build(BuildContext context) {
       double height = MediaQuery.of(context).size.height;
       return Scaffold(
         body: SingleChildScrollView(
           child: Column(
-            children: <Widget>[Container(height: height, child: GroupBody())],
+            children: <Widget>[
+              Container(
+                  height: height,
+                  child: GroupBody()
+            )],
           ),
         ),
         floatingActionButton: buildSpeedDial(context),
@@ -58,15 +61,12 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
 
       //getFirePadFromRef("ZAvWQjFab2fiv27g3Hu0kcpSCXP2");
 
-
       _globals.eventBus
           .on()
           .listen((event) {
-
-            print(event.toString());
-
+            //print(event.toString());
+            setState(() {});
       });
-
     }
 
     void getPrefs() async {
@@ -140,20 +140,17 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
                       .getThumbnailFromVideo(_videoPath)
                       .then((Image image) async {
                     setState(() {
-
                         AddMedia addMedia = new AddMedia(
                             title:"Video seleccionado",
                             selectedImage :image,
                             path: result,
                             type:"videos",
                             typeId: 1);
-
                         Navigator.pushNamed(
                           context,
                           '/addmedia',
                           arguments: addMedia,
                         );
-
                     });
                   });
                 }
@@ -175,7 +172,6 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
   }
 
 
-
   class GroupBody extends StatelessWidget {
     final _GroupPageState groupPageState;
 
@@ -186,9 +182,6 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
       return Scaffold(
         body: Column(
           children: <Widget>[
-            SizedBox(
-              height: 8.0,
-            ),
             UpperSection(),
             AnecdoteSection(),
             StaggeredSection(),
@@ -201,11 +194,9 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
 
     @override
     void initState() {
-     
 
     }
   }
-
 
   class UpperSection extends StatelessWidget {
     const UpperSection({
@@ -214,156 +205,38 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
 
     @override
     Widget build(BuildContext context) {
-      return Column(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(top: 10.0),
-                  child: new Stack(fit: StackFit.loose, children: <Widget>[
-                    new Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        new Image.asset("assets/images/camadas.png",
-                            height: 63.0, width: 300.0, fit: BoxFit.cover),
-                      ],
+      return new Stack(fit: StackFit.loose, children: <Widget>[
+          new Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(
+                height: 8.0,
+              ),
+              new Image.asset("assets/images/camadas.png",
+                  height: 45.0, width: 214.0, fit: BoxFit.cover),
+              SizedBox(width: 20.0),
+              new GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FriendsListPage()),
+                    );
+                  },
+                  child: new CircleAvatar(
+                    backgroundColor: Colors.grey,
+                    radius: 30.0,
+                    child: new Icon(
+                      Icons.group,
+                      color: Colors.white,
                     ),
-                    Padding(
-                        padding: EdgeInsets.only(top: 100.0),
-                        child: new Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            new Text(_globals.group.year,
-                                style: TextStyle(
-                                  fontSize: 50.0,
-                                )),
-                            SizedBox(width: 30.0),
-                            new GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => FriendsListPage()),
-                                  );
-                                },
-                                child: new CircleAvatar(
-                                  backgroundColor: Colors.grey,
-                                  radius: 30.0,
-                                  child: new Icon(
-                                    Icons.group,
-                                    color: Colors.white,
-                                  ),
-                                )),
-                          ],
-                        )),
-                  ]),
-                ),
-              ],
-            ),
+                  )),
+            ],
           ),
-        ],
-      );
+        ]);
     }
   }
-
-  /*class GridSection extends StatelessWidget {
-    final _GroupPageState parent;
-
-    bool verticalGallery = false;
-
-    GridSection({Key key, @required this.parent}) : super(key: key);
-
-    TextStyle defaultStyle = TextStyle(fontSize: 24, color: Colors.grey);
-    List<Object> allImage = new List();
-
-    @override
-    Widget build(BuildContext context) {
-      return Column(
-        children: <Widget>[
-          SizedBox(
-            height: 00.0,
-            child: _buildGrid(context),
-          ),
-        ],
-      );
-    }
-
-    Widget _buildGrid(BuildContext context) {
-      return new Flexible(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        GalleryExampleItemThumbnail(
-                          galleryExampleItem: galleryItems[0],
-                          onTap: () {
-                            open(context, 0);
-                          },
-                        ),
-                        GalleryExampleItemThumbnail(
-                          galleryExampleItem: galleryItems[2],
-                          onTap: () {
-                            open(context, 2);
-                          },
-                        ),
-                        GalleryExampleItemThumbnail(
-                          galleryExampleItem: galleryItems[3],
-                          onTap: () {
-                            open(context, 3);
-                          },
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        const Text("Vertical"),
-                        Checkbox(
-                          value: verticalGallery,
-                          onChanged: (value) {
-                            parent.setState(() {
-                              verticalGallery = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    void open(BuildContext context, final int index) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => GalleryPhotoViewWrapper(
-            galleryItems: galleryItems,
-            backgroundDecoration: const BoxDecoration(
-              color: Colors.black,
-            ),
-            initialIndex: index,
-            scrollDirection: verticalGallery ? Axis.vertical : Axis.horizontal,
-          ),
-        ),
-      );
-    }
-  }*/
-
 
   class AnecdoteSection extends StatelessWidget {
 
@@ -380,7 +253,7 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
       return Column(
         children: <Widget>[
           SizedBox(
-            height: 00.0,
+            height: 100.0,
             child: _buildAnecdotes(),
           ),
         ],
@@ -394,29 +267,26 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
         return Padding(
           padding: const EdgeInsets.only(top: 16.0),
           child: SizedBox.fromSize(
-            size: Size.fromHeight(200.0),
+            size: Size.fromHeight(100.0),
             child: new AnecdoteWidget(anecdotes: _globals.appData.anecdotes),
           ),
         );
 
       } else {
 
-        TextStyle messageStyle = TextStyle(fontSize: 24, color: Colors.grey);
+        TextStyle messageStyle = TextStyle(fontSize: 18, color: Colors.grey);
 
         return Padding(
-          padding: const EdgeInsets.only(top: 16.0),
+          padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
           child: SizedBox.fromSize(
-            size: Size.fromHeight(200.0),
+            size: Size.fromHeight(100.0),
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
                 style: messageStyle,
                 text:
-                "Agrega tus historias entrando en ",
+                "Agrega historia ",
                 children: <TextSpan>[
-                  TextSpan(
-                      text:
-                      " la pagina "),
                   TextSpan(
                       text: 'app.curupas.com.ar',
                       style: TextStyle(
@@ -425,10 +295,8 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
                           print('You clicked on me!');
-                        }),
-                  TextSpan(
-                      text:
-                      " desde tu computadora."),
+                      }
+                  ),
                 ],
               ),
             ),
@@ -449,10 +317,14 @@ import 'package:curupas/ui/screens/widgets/flat_button.dart';
 
     @override
     Widget build(BuildContext context) {
+
+      double height = MediaQuery.of(context).size.height;
+      double gridHeight = height - 200;
+
       return Column(
         children: <Widget>[
           SizedBox(
-            height: 100.0,
+            height: gridHeight,
             child: StaggeredGridView.countBuilder(
               padding:
               const EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0, bottom: 8.0),
