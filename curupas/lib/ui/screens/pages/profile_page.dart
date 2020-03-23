@@ -64,7 +64,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
     ProfilePageScreen(this.parent);
 
-    @overridegit add
+    @override
     Widget build(BuildContext context) {
       double height = MediaQuery.of(context).size.height + 100;
       return Scaffold(
