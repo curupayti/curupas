@@ -36,6 +36,7 @@
         }); 
 
         function renderUser(document) {  
+
             _documents[document.id] = document;      
 
             let itemObj = {
@@ -83,8 +84,8 @@
                     "width": "20%"
                   }
                 ],    
-                dom: 'Bfrtip',
-                buttons: {
+                //dom: 'Bfrtip',
+                /*buttons: {
                   buttons: [
                     {
                       text: "Nuevo",
@@ -118,7 +119,7 @@
                       tag: null
                     }
                   }
-                } 
+                }*/ 
               });  
 
               let row = { 

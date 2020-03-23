@@ -156,29 +156,26 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
     } else if (customMetadataType == 2) {  
 
       const fileUrl = originalResult[0];    
-      var userId = customMetadata.userId;
-      var year = customMetadata.year;
+      var userId = customMetadata.userId;           
       
-      //console.log('year: '+ year);          
-      
-      let _time = admin.firestore.FieldValue.serverTimestamp();
-      
-      //console.log("_time: " + _time);
+      let _time = admin.firestore.FieldValue.serverTimestamp();     
       
       await firestore.collection("users").doc(userId).update(
-        { profilePictureURL : fileUrl,
-          thumbnailPictureURL: thumbFileUrl, timeStamp:_time});
+      { 
+          profilePictureURL : fileUrl,
+          thumbnailPictureURL: thumbFileUrl, 
+          profilePicture : filePath,
+          thumbnailPicture : thumbFilePath,          
+          timeStamp:_time
+      });
 
+    // Update content  
     } else if (customMetadataType == 3) {  
 
         const fileUrl = originalResult[0];            
         var _short = customMetadata.short;          
         var _id = customMetadata.id;    
-        let _time = admin.firestore.FieldValue.serverTimestamp();   
-
-        //console.log("_short: " + _short);        
-        //console.log("_id: " + _id);
-        //console.log("_time: " + _time);           
+        let _time = admin.firestore.FieldValue.serverTimestamp();             
 
         await firestore.collection('contents')
         .doc(_short)
@@ -192,13 +189,67 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
           last_update: _time 
         });                     
     
-    } 
+      // Save Media thumbnail image and video  
+      } else if (customMetadataType == 4) {  
+
+        var documentId = customMetadata.documentId;
+        var doc_name_title = customMetadata.doc_name_title;
+        var title = customMetadata.title;
+        var desc = customMetadata.desc; 
+        var userId = customMetadata.userId;              
+        
+        let _time = admin.firestore.FieldValue.serverTimestamp();    
+
+        const fileUrl = originalResult[0]; 
+
+        await firestore.collection('years')
+        .doc(documentId)
+        .collection("media")
+        .doc(doc_name_title)
+        .set({ 
+          type: 2,
+          thumbnail : thumbFileUrl,
+          image : fileUrl,
+          title : title,
+          desc: desc, 
+          userId : userId,
+          aprroved: false,
+          last_update: _time 
+        });    
+    
+      // Udate user avatar
+      } else if (customMetadataType == 5) {  
+
+        const fileUrl = originalResult[0];    
+        var userId = customMetadata.userId; 
+        var profilePicture = customMetadata.profilePicture;         
+        var thumbnailPicture = customMetadata.thumbnailPicture;           
+
+        console.log("::profilePicture:: " + profilePicture); 
+        console.log("::thumbnailPicture:: " + thumbnailPicture);         
+
+        let _time = admin.firestore.FieldValue.serverTimestamp();
+
+        firestore.collection("users").doc(userId).update(
+        { 
+            "profilePictureURL" : fileUrl,
+            "thumbnailPictureURL": thumbFileUrl, 
+            "profilePicture" : filePath,
+            "thumbnailPicture" : thumbFilePath,          
+            "timeStamp" :_time
+        });
+
+        //Borra imagenes viejas. 
+        bucket.file(profilePicture).delete();
+        bucket.file(thumbnailPicture).delete();
+
+      }
     
   }  else { // not isThiumbnail
 
     //console.log("::customMetadataType:: " + customMetadataType);  
 
-    if (customMetadataType == 4) {  
+    if (customMetadataType == 1) {  
 
       //console.log("::entra::");
       
@@ -235,7 +286,7 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
       var doc_name_title = customMetadata.doc_name_title;
       var title = customMetadata.title;
       var desc = customMetadata.desc; 
-      var userId = customMetadata.userId;        
+      var userId = customMetadata.userId;              
       
       let _time = admin.firestore.FieldValue.serverTimestamp();    
       
@@ -249,9 +300,10 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
       
         await firestore.collection('years')
         .doc(documentId)
-        .collection("videos")
+        .collection("media")
         .doc(doc_name_title)
         .set({ 
+          type: 1,
           thumbnail : thumbResult,
           video : videoUrl,
           title : title,
@@ -271,55 +323,6 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
   } 
 
 });
-
-
-/**
- * Initiate a recursive delete of documents at a given path.
- * 
- * The calling user must be authenticated and have the custom "admin" attribute
- * set to true on the auth token.
- * 
- * This delete is NOT an atomic operation and it's possible
- * that it may fail after only deleting some documents.
- * 
- * @param {string} data.path the document or collection path to delete.
- */
-/*exports.recursiveDelete = functions
-  .runWith({
-    timeoutSeconds: 540,
-    memory: '2GB'
-  })
-  .https.onCall((data, context) => {
-    // Only allow admin users to execute this function.
-    if (!(context.auth && context.auth.token && context.auth.token.admin)) {
-      throw new functions.https.HttpsError(
-        'permission-denied',
-        'Must be an administrative user to initiate delete.'
-      );
-    }
-
-    const path = data.path;
-    console.log(
-      `User ${context.auth.uid} has requested to delete path ${path}`
-    );
-
-    // Run a recursive delete on the given document or collection path.
-    // The 'token' must be set in the functions config, and can be generated
-    // at the command line by running 'firebase login:ci'.
-    return firebase_tools.firestore
-      .delete(path, {
-        project: process.env.GCLOUD_PROJECT,
-        recursive: true,
-        yes: true,
-        token: functions.config().fb.token
-      })
-      .then(() => {
-        return {
-          path: path 
-        };
-      });
-  });*/
-
 
 exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(event => {
 
