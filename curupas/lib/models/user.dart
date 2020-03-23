@@ -10,7 +10,9 @@ class User {
   final String birthday;
   final String email;
   final String profilePictureURL;
+  final String profilePicture;
   final String thumbnailPictureURL;
+  final String thumbnailPicture;
   final LocationData locationData;
   DocumentReference yearRef;
   DocumentReference userRef;
@@ -29,7 +31,9 @@ class User {
       this.birthday,
       this.email,
       this.profilePictureURL,
+      this.profilePicture,
       this.thumbnailPictureURL,
+      this.thumbnailPicture,
       this.locationData,
       this.yearRef,
       this.group,
@@ -53,7 +57,9 @@ class User {
       'birthday': birthday,
       'email': email,
       'profilePictureURL': profilePictureURL,
+      'profilePicture': profilePicture,
       'thumbnailPictureURL': thumbnailPictureURL,
+      'thumbnailPicture': thumbnailPicture,
       'yearRef': yearRef,
       'location': geo,
       'year': year,
@@ -88,7 +94,9 @@ class User {
       birthday: doc['birthday'],
       email: doc['email'],
       profilePictureURL: doc['profilePictureURL'],
+      profilePicture: doc['profilePicture'],
       thumbnailPictureURL: doc['thumbnailPictureURL'],
+      thumbnailPicture: doc['thumbnailPicture'],
       locationData: locData,
       yearRef: yearReference,
       group: doc['group'],

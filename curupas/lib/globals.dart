@@ -227,13 +227,14 @@ import 'package:event_bus/event_bus.dart';
 
       Future<bool> uploadFile(
           String _imagePath,
-          String fileName,
-          String folder,
+          String filePath,
           StorageMetadata metadata
           ) async {
 
         String extension = p.extension(_imagePath);
-        String fileFolderExtension = folder + "/" +  fileName + '$extension';
+        //String fileFolderExtension = folder + "/" +  fileName + '$extension';
+
+        String fileFolderExtension = filePath + '$extension';
 
         StorageReference storageRef =
             FirebaseStorage.instance.ref().child(fileFolderExtension);

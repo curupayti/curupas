@@ -230,10 +230,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                                 customMetadata: meta,
                               );
 
-                              String folder = "${year}/${widget.addMedia.type}";
+                              String filePath = "${year}/${widget.addMedia.type}/${fileName}";
 
                               _globals.filePickerGlobal
-                                  .uploadFile(widget.addMedia.path, fileName, folder, metadata)
+                                  .uploadFile(widget.addMedia.path, filePath, metadata)
                                   .then((completed) async {
 
                                 setState(() {

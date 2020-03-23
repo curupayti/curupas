@@ -28,16 +28,11 @@ class GroupScreen extends StatefulWidget {
 }
 
 class _GroupScreenState extends State<GroupScreen> {
+
   List<DropdownMenuItem<String>> _groupMenuItems = new List();
   List<Group> _groups = new List();
   Group _currentGroup;
   String _currentItem;
-
-  //Cyber Children
-  //final TextEditingController _group = new TextEditingController();
-  //final TextEditingController _country = new TextEditingController();
-  //CustomTextField _groupField;
-  //CustomTextField _countryField;
 
   final TextEditingController _newGroup = new TextEditingController();
   CustomTextField _newGroupField;
@@ -122,7 +117,7 @@ class _GroupScreenState extends State<GroupScreen> {
     };
   }
 
-  Future<List<String>> getUserIdAndYear() async {
+  /*Future<List<String>> getUserIdAndYear() async {
     prefs = await SharedPreferences.getInstance();
     String userId = prefs.getString('userId');
     String year = prefs.getString('year');
@@ -136,13 +131,13 @@ class _GroupScreenState extends State<GroupScreen> {
       list[2] = name;
     }
     return list;
-  }
+  }*/
 
-  Future<String> getGroupYear() async {
+  /*Future<String> getGroupYear() async {
     prefs = await SharedPreferences.getInstance();
     String year = prefs.getString('userId');
     return year;
-  }
+  }*/
 
   void _enableButton() {
     setButtonEnabled(true);
@@ -473,10 +468,12 @@ class _GroupScreenState extends State<GroupScreen> {
     DocumentReference yearRef =
         Firestore.instance.collection('years').document(groupId);
 
+    int nowTime = new DateTime.now().millisecondsSinceEpoch;
+
     //Upload image
     String toNonSpecial = prefs.getString('toNonSpecial');
     String _imagePath = prefs.getString('_imagePath');
-    String imageName = "${year}/${toNonSpecial}";
+    String filePath = "${year}/users/${toNonSpecial}-${nowTime}";
     String thumbImageName = "${year}/thumb_${toNonSpecial}";
 
     String _extension = p.extension(_imagePath);
@@ -484,17 +481,10 @@ class _GroupScreenState extends State<GroupScreen> {
     String thumbImageNameExtension = thumbImageName + '$_extension';
     prefs.setString('thumbImageNameExtension', thumbImageNameExtension);
 
-    String phone = prefs.getString('phone');
-    String email = prefs.getString('email');
-    String fullname = prefs.getString('fullname');
-    String birthday = prefs.getString('birthday');
-
     Map<String, dynamic> data = <String, dynamic>{
       'year': _currentGroup.year,
       'yearRef': yearRef
     };
-
-
 
     Auth.updateUser(userId, data).then((user) async {
       if (user != null) {
@@ -506,17 +496,14 @@ class _GroupScreenState extends State<GroupScreen> {
         meta["type"] = "2";
         meta["userId"] = "${userId}";
         meta["year"] = "${year}";
-        meta["device"] = "${year}";
-
-        String folder = year + "/users";
 
         StorageMetadata metadata = new StorageMetadata(
           customMetadata: meta,
         );
 
         _globals.filePickerGlobal
-            .uploadFile(_imagePath, imageName, folder, metadata)
-            .then((url) async {
+            .uploadFile(_imagePath, filePath, metadata)
+            .then((url) {
           _globals.user = user;
           prefs.setBool('group', true);
           prefs.setString('year', year);
