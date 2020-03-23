@@ -166,7 +166,7 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
           thumbnailPictureURL: thumbFileUrl, 
           profilePicture : filePath,
           thumbnailPicture : thumbFilePath,          
-          timeStamp:_time
+          last_update:_time
       });
 
     // Update content  
@@ -222,11 +222,11 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
 
         const fileUrl = originalResult[0];    
         var userId = customMetadata.userId; 
-        var profilePicture = customMetadata.profilePicture;         
-        var thumbnailPicture = customMetadata.thumbnailPicture;           
+        var profilePictureToDelete = customMetadata.profilePictureToDelete;         
+        var thumbnailPictureToDelete = customMetadata.thumbnailPictureToDelete;           
 
-        console.log("::profilePicture:: " + profilePicture); 
-        console.log("::thumbnailPicture:: " + thumbnailPicture);         
+        //console.log("::profilePicture:: " + profilePicture); 
+        //console.log("::thumbnailPicture:: " + thumbnailPicture);         
 
         let _time = admin.firestore.FieldValue.serverTimestamp();
 
@@ -236,12 +236,12 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
             "thumbnailPictureURL": thumbFileUrl, 
             "profilePicture" : filePath,
             "thumbnailPicture" : thumbFilePath,          
-            "timeStamp" :_time
+            "last_update" :_time
         });
 
         //Borra imagenes viejas. 
-        bucket.file(profilePicture).delete();
-        bucket.file(thumbnailPicture).delete();
+        bucket.file(profilePictureToDelete).delete();
+        bucket.file(thumbnailPictureToDelete).delete();
 
       }
     
