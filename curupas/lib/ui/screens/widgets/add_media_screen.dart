@@ -6,9 +6,9 @@
   import 'package:diacritic/diacritic.dart';
   import 'package:firebase_storage/firebase_storage.dart';
   import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
+  import 'package:flutter/gestures.dart';
   import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+  import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:shared_preferences/shared_preferences.dart';
   import 'package:curupas/globals.dart' as _globals;
 

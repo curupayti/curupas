@@ -64,7 +64,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
     ProfilePageScreen(this.parent);
 
-    @override
+    @overridegit add
     Widget build(BuildContext context) {
       double height = MediaQuery.of(context).size.height + 100;
       return Scaffold(
@@ -73,7 +73,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
             children: <Widget>[Container(height: height, child: ProfileBody(this.parent))],
           ),
         ),
-        floatingActionButton: buildSpeedDial(),
+        //floatingActionButton: buildSpeedDial(),
       );
     }
   }
@@ -97,7 +97,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
     }
   }
 
-  SpeedDial buildSpeedDial() {
+  /*SpeedDial buildSpeedDial() {
     return SpeedDial(
       marginRight: 25,
       marginBottom: 50,
@@ -127,7 +127,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
             onTap: () => print('FIRST CHILD')),
       ],
     );
-  }
+  }*/
 
   class UpperSection extends StatelessWidget {
 
