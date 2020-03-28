@@ -138,9 +138,11 @@ import 'package:event_bus/event_bus.dart';
       AppData _dataPost = new AppData(
         name: 'Curupa',
         avatar: 'assets/images/escudo.png',
-        backdropPhoto: 'assets/images/cancha.png',
+        home_background: 'assets/images/cancha.png',
+        group_background: 'assets/images/group_backgrnd.png',
         location: 'Hurlingham, Buenos Aires',
       );
+      appData = _dataPost;
       appData = _dataPost;
     }
 
@@ -282,7 +284,8 @@ import 'package:event_bus/event_bus.dart';
       AppData({
         this.name,
         this.avatar,
-        this.backdropPhoto,
+        this.home_background,
+        this.group_background,
         this.location,
         this.biography,
         this.posts,
@@ -294,7 +297,8 @@ import 'package:event_bus/event_bus.dart';
 
       final String name;
       final String avatar;
-      final String backdropPhoto;
+      final String home_background;
+      final String group_background;
       final String location;
       String biography;
       List<Post> posts;
