@@ -4,25 +4,24 @@
               <div id="top-content">
                 <div class="row" id="row-edits">     
                     <div id="col-edits" class="col">
-                        <h4 class="alert-heading">Editor de contenidos Curupas</h4>                      
-                        <ul id="edit-list" class="list-group list-group-flush"></ul> 
+                        <h4 class="alert-heading">Editor de contenidos Curupas</h4>        
+                        <table id="grid-main" style="width:100%" class="display" ></table>                                     
+                        <div id="publish-buttons" style="
+                            display: none;
+                            position: absolute;
+                            left: 20px;
+                            top: 350px !important;
+                            width: 1075px;">                    
+                            <span style="font-size:20px;color:gray" class="ml-auto float-left" >Para agregar una imagen al texto arrastrala dentro del editor</span>
+                            <button id="button-save" class="btn ml-auto btn btn-primary float-right">Guardar</button>
+                            <button id="view-save" class="btn ml-auto btn btn-secondary float-right" style="margin-right: 5px;">Vista Previa</button>                    
+                            <button id="button-publish" class="btn ml-auto btn btn-secondary float-right" style="margin-right: 5px;" >Publicar</button>
+                        </div>                      
                     </div>
                     <div id="col-list" class="col">
                       <table id="grid-details" style="width:100%" class="display" ></table>      
                     </div>
-                </div>                
-
-                <div id="publish-buttons" style="
-                    display: none;
-                    position: absolute;
-                    left: 20px;
-                    top: 350px !important;
-                    width: 1075px;">                    
-                    <span style="font-size:20px;color:gray" class="ml-auto float-left" >Para agregar una imagen al texto arrastrala dentro del editor</span>
-                    <button id="button-save" class="btn ml-auto btn btn-primary float-right">Guardar</button>
-                    <button id="view-save" class="btn ml-auto btn btn-secondary float-right" style="margin-right: 5px;">Vista Previa</button>                    
-                    <button id="button-publish" class="btn ml-auto btn btn-secondary float-right" style="margin-right: 5px;" >Publicar</button>
-                </div>
+                </div>                               
                 <div id="firepad-container">
                       <!--<div id="firepad-userlist"></div>
                       <div id="firepad"></div>-->

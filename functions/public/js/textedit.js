@@ -2,6 +2,8 @@ $(document).ready(function () {
 
     homeLoader.show();  
 
+    window.jsonDataMain = [];
+
     var edit_references = _role.edit_references;
 
     for (let i = 0; i < edit_references.length; i++) {
@@ -29,30 +31,109 @@ $(document).ready(function () {
 
           let _short = data.short;                
 
-          $("#edit-list").append(
-            '<li class="list-group-item d-flex justify-content-between align-items-center">' +
-            '<a class="nav-link" href="javascript:void(0);" ' + 
-            'onclick="loadEditsList(\'' + _new + '\',\'' + _short + '\'); return false;">' + _name + '</a><span id="' + _id + '" class="badge badge-primary badge-pill">' + _amount + '</span></li>');                    
-                   
+          window.datatable_main = $('#grid-main').DataTable({
+            scrollY: "180px",
+            scrollCollapse: true,
+            paging:         false,
+            retrieve: true, 
+            bInfo : false,      
+            columns: [             
+              { "data": "meta.id" },
+              { "data": "meta.Nombre" },
+              { "data": "meta.Cantidad" },
+              { "data": "meta.Actualizado" }              
+            ],
+            columnDefs: [
+              {
+                "targets": [ 0 ],
+                "visible": false,
+                "searchable": false,                
+              },
+              {
+                "targets": [ 1 ],
+                "visible": false,
+                "searchable": false,                
+              },
+              {
+                "targets": [ 2 ],
+                "visible": true,
+                "searchable": true,
+                "width": "30%"
+              },
+              {
+                "targets": [ 3 ],
+                "visible": true,
+                "searchable": true,
+                "width": "15%"
+              },              
+            ]                 
+          });  
+
+          /*
+          { "data": "meta.id" },
+              { "data": "meta.Nombre" },
+              { "data": "meta.Cantidad" },
+              { "data": "meta.Actualizado" }        */
+              
+
+          let row = { 
+            "meta": {                
+              "id": _id, 
+              "Nombre": _name, 
+              "Cantidad": _amount, 
+              "Actualizado": _time,              
+             } 
+          };   
+
+          window.jsonDataMain.push(row);
+
+          $('#grid-main tbody').on('click', 'tr', function () {
+
+              var data = window.datatable_main.row( this ).data();
+              //console.log(data.meta.id);
+              window._id_document_collection = data.meta.id;
+              
+              //alert( 'You clicked on '+data.meta.id+'\'s row' );
+              if ( $(this).hasClass('selected') ) {
+                  $(this).removeClass('selected');
+                  $("#edit-button").prop('disabled', true);
+                  clearFirepad();            
+                  $("#publish-buttons").hide();
+                  $("#firepad-container").hide();
+              }
+              else {
+                window.datatable_detail.$('tr.selected').removeClass('selected');
+                  $(this).addClass('selected');
+                  $("#edit-button").removeAttr('disabled');
+                  $("#publish-buttons").show();
+                  $("#firepad-container").show();
+                  loadEdits(data.meta.database_ref, _short);                        
+              }
+              
+          });   
+  
           editObjects[_id] = _doc;
 
-          if (length == (count-1)) {         
+          if (length == (count-1)) {    
+            
+            window.datatable_main.rows.add(window.jsonDataMain);
+            window.datatable_main.draw();    
 
             homeLoader.hide();
 
           }       
           count++;      
-
-      });   
-
-      $('#edit-list li').click(function() { 
-        $('li.list-group-item.active').removeClass("active"); 
-        $(this).addClass("active"); 
       });
-      
-    }     
 
-    window.jsonData = [];
+    }  
+
+    $('#edit-list li').click(function() { 
+      $('li.list-group-item.active').removeClass("active"); 
+      $(this).addClass("active"); 
+    });           
+    
+
+    window.jsonDataDetail = [];
     window.editDocuments = [];
 
     window._short;
@@ -74,15 +155,15 @@ $(document).ready(function () {
   
            var countLines = 1;        
 
-          if (window.datatable !=undefined ) {
-            window.datatable.clear();            
+          if (window.datatable_detail !=undefined ) {
+            window.datatable_detail.clear();            
             $('#new-button').text(_new);
           }
 
-           window.datatable = $('#grid-details').DataTable( {
+          window.datatable_detail = $('#grid-details').DataTable({
             scrollY: "180px",
             scrollCollapse: true,
-            paging:         false,
+            paging: false,
             retrieve: true, 
             bInfo : false,                                                       
             columns: [
@@ -91,7 +172,7 @@ $(document).ready(function () {
               { "data": "meta.Nombre" },
               { "data": "meta.Desc" },
               { "data": "meta.Actualizado" },
-              { "data": "meta.Imagen" }
+              { "data": "meta.Image}n" }
             ],
             columnDefs: [
               {
@@ -159,13 +240,11 @@ $(document).ready(function () {
                 }
               }
             } 
-          });         
-       
-          
+          });
+                 
           $('#grid-details tbody').on('click', 'tr', function () {
 
-              var data = window.datatable.row( this ).data();
-
+              var data = window.datatable_detail.row( this ).data();
               console.log(data.meta.id);
 
               window._id_document_collection = data.meta.id;
@@ -179,7 +258,7 @@ $(document).ready(function () {
                   $("#firepad-container").hide();
               }
               else {
-                window.datatable.$('tr.selected').removeClass('selected');
+                window.datatable_detail.$('tr.selected').removeClass('selected');
                   $(this).addClass('selected');
                   $("#edit-button").removeAttr('disabled');
                   $("#publish-buttons").show();
@@ -187,10 +266,10 @@ $(document).ready(function () {
                   loadEdits(data.meta.database_ref, _short);                        
               }
               
-          } );       
+          });      
           
   
-           querySnapshotEdit.forEach(function(docEdit) {
+          querySnapshotEdit.forEach(function(docEdit) {
 
             let _doc_id_ = docEdit.id;
             
@@ -219,21 +298,22 @@ $(document).ready(function () {
                 } 
              };   
   
-             window.jsonData.push(row);
+             window.jsonDataDetail.push(row);
   
              let database_ref = editData.database_ref;    
              
              if (editLength == countLines) {                                                            
-                window.datatable.rows.add(window.jsonData);
-                window.datatable.draw();    
+                window.datatable_detail.rows.add(window.jsonDataDetail);
+                window.datatable_detail.draw();    
              }
              
              countLines++;
          });
   
-       });     
-       
-     }
+     });  
+     
+    }
+     
 
      function getDateFrom(_date) {      
 
@@ -268,9 +348,10 @@ $(document).ready(function () {
      }
 
      $("#add-form").submit(function (event) {
+
         event.preventDefault(); 
 
-        window.datatable.clear();
+        window.datatable_detail.clear();
         
         var new_name = $('#new-name').val();
         var new_desc = $('#new-desc').val();          
@@ -294,15 +375,17 @@ $(document).ready(function () {
           "Desc": new_desc, 
           "Actualizado": thedate } };   
 
-        window.jsonData.push(row); 
+        window.jsonDataDetail.push(row); 
         
         db.collection(document_path).add( {
+          
           group_ref : _user.yearReference,
           name : new_name,
           description : new_desc,
           database_ref : _database_ref,
           last_update : _time        
-        } ).then(function(doc) {   
+
+        }).then(function(doc){   
           
             let _id = doc.id;
           
@@ -326,8 +409,8 @@ $(document).ready(function () {
 
             thisRef.put(file, metadata);
 
-            window.datatable.rows.add(window.jsonData);
-            window.datatable.draw(); 
+            window.datatable_detail.rows.add(window.jsonDataDetail);
+            window.datatable_detail.draw(); 
               
             $('#addModal').modal('hide');
 
