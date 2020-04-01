@@ -19,17 +19,12 @@ $(document).ready(function () {
 
           var data = _doc.data();          
 
-          let _name = data.name;  
-
-          var _id = _doc.id;
- 
-          let _amount = data.amount;  
-          
-          let _time =  data.last_update;
-
-          let _new =  data.new;
-
-          let _short = data.short;                
+          var _name = data.name;  
+          var _new =  data.new;
+          var _short = data.short;   
+          var _id = _doc.id; 
+          let _amount = data.amount;            
+          let _time =  data.last_update;                     
 
           window.datatable_main = $('#grid-main').DataTable({
             scrollY: "180px",
@@ -39,6 +34,8 @@ $(document).ready(function () {
             bInfo : false,      
             columns: [             
               { "data": "meta.id" },
+              { "data": "meta.new" },
+              { "data": "meta.short" },
               { "data": "meta.Nombre" },
               { "data": "meta.Cantidad" },
               { "data": "meta.Actualizado" }              
@@ -56,15 +53,20 @@ $(document).ready(function () {
               },
               {
                 "targets": [ 2 ],
-                "visible": true,
-                "searchable": true,
-                "width": "30%"
+                "visible": false,
+                "searchable": false,                
               },
               {
                 "targets": [ 3 ],
                 "visible": true,
                 "searchable": true,
-                "width": "15%"
+                //"width": "30%"
+              },
+              {
+                "targets": [ 4 ],
+                "visible": true,
+                "searchable": false,
+                //"width": "15%"
               },              
             ]                 
           });  
@@ -79,6 +81,8 @@ $(document).ready(function () {
           let row = { 
             "meta": {                
               "id": _id, 
+              "new": _new, 
+              "short": _short, 
               "Nombre": _name, 
               "Cantidad": _amount, 
               "Actualizado": _time,              
@@ -90,24 +94,20 @@ $(document).ready(function () {
           $('#grid-main tbody').on('click', 'tr', function () {
 
               var data = window.datatable_main.row( this ).data();
-              //console.log(data.meta.id);
-              window._id_document_collection = data.meta.id;
               
-              //alert( 'You clicked on '+data.meta.id+'\'s row' );
+              window._id_document_collection = data.meta.id;  
+              
+              let _new = data.meta.new;
+              let _short = data.meta.short;                
+              
+              
               if ( $(this).hasClass('selected') ) {
-                  $(this).removeClass('selected');
-                  $("#edit-button").prop('disabled', true);
-                  clearFirepad();            
-                  $("#publish-buttons").hide();
-                  $("#firepad-container").hide();
-              }
-              else {
-                window.datatable_detail.$('tr.selected').removeClass('selected');
-                  $(this).addClass('selected');
-                  $("#edit-button").removeAttr('disabled');
-                  $("#publish-buttons").show();
-                  $("#firepad-container").show();
-                  loadEdits(data.meta.database_ref, _short);                        
+                  $(this).removeClass('selected');                  
+              } else {
+                
+                window.datatable_main.$('tr.selected').removeClass('selected');
+                  $(this).addClass('selected');                  
+                  loadEditsList(_new, _short);
               }
               
           });   
