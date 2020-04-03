@@ -3,14 +3,13 @@
   import 'package:cloud_firestore/cloud_firestore.dart';
   import 'package:curupas/models/add_media.dart';
   import 'package:curupas/ui/screens/widgets/anecdote/anecdote_widget.dart';
-  import 'package:curupas/ui/screens/widgets/flat_button.dart';
   import 'package:file_picker/file_picker.dart';
   import 'package:flutter/gestures.dart';
   import "package:flutter/material.dart";
   import 'package:flutter/cupertino.dart';
+  import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
   import 'package:curupas/globals.dart' as _globals;
-  import 'package:curupas/ui/screens/friend_screen.dart';
   import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
   import 'package:shared_preferences/shared_preferences.dart';
   import 'dart:ui' as ui;
@@ -25,19 +24,210 @@
   class _GroupPageState extends State<GroupPage> {
 
     var currentUserEmail;
-
     DocumentReference userRef;
     SharedPreferences prefs;
-
     String _videoPath;
-
     double _progressValue;
-
     List<Color> _colors = [Colors.greenAccent, Colors.yellow];
     List<double> _stops = [0.0, 0.7];
-
     //File vars
     String _imagePath;
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        body: GroupStream(),
+        floatingActionButton: buildSpeedDial(context),
+      );
+    }
+
+    @override
+    void initState() {
+      super.initState();
+
+      _globals.eventBus
+          .on()
+          .listen((event) {
+        //print(event.toString());
+        setState(() {});
+      });
+    }
+
+    SpeedDial buildSpeedDial(BuildContext context) {
+      return SpeedDial(
+        marginRight: 25,
+        marginBottom: 50,
+        animatedIcon: AnimatedIcons.menu_close,
+        //animatedIconTheme: IconThemeData(size: 22.0),
+        child: Icon(Icons.add),
+        visible: true,
+        closeManually: false,
+        curve: Curves.bounceIn,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.5,
+        onOpen: () => print('OPENING DIAL'),
+        onClose: () => print('DIAL CLOSED'),
+        tooltip: 'Menu',
+        heroTag: 'speed-dial-hero-tag',
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 8.0,
+        shape: CircleBorder(),
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.photo, color: Colors.white),
+            backgroundColor: Color.fromRGBO(0, 29, 126, 1),
+            label: 'Subir imagen',
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: () {
+              _globals.filePickerGlobal
+                  .getImagePath(FileType.IMAGE)
+                  .then((result) {
+                File _file = new File(result);
+                if (_file != null) {
+                  _imagePath = result;
+                  Image _newImage = new Image.file(_file);
+
+                  AddMedia addMedia = new AddMedia(
+                      title:"Imagen seleccionada",
+                      selectedImage :_newImage,
+                      path: _imagePath,
+                      type:"images",
+                      typeId: 2);
+
+                  Navigator.pushNamed(
+                    context,
+                    '/addmedia',
+                    arguments: addMedia,
+                  );
+                };
+              });
+            },
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.video_label, color: Colors.white),
+            backgroundColor: Color.fromRGBO(0, 29, 126, 1),
+            label: 'Subir Video',
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: () {
+              _globals.filePickerGlobal
+                  .getImagePath(FileType.VIDEO)
+                  .then((result) {
+                File _file = new File(result);
+                if (_file != null) {
+                  _videoPath = result;
+                  _globals.filePickerGlobal
+                      .getThumbnailFromVideo(_videoPath)
+                      .then((Image image) async {
+                    setState(() {
+                      AddMedia addMedia = new AddMedia(
+                          title:"Video seleccionado",
+                          selectedImage :image,
+                          path: result,
+                          type:"videos",
+                          typeId: 1);
+                      Navigator.pushNamed(
+                        context,
+                        '/addmedia',
+                        arguments: addMedia,
+                      );
+                    });
+                  });
+                }
+              });
+            },
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.calendar_today),
+            backgroundColor: Colors.white,
+            label: 'Proponer juntada',
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: () {
+              //
+            },
+          ),
+        ],
+      );
+    }
+  }
+
+  class GroupStream extends StatefulWidget {
+    @override
+    _GroupStreamState createState() => new _GroupStreamState();
+  }
+
+  class _GroupStreamState extends State<GroupStream> {
+    @override
+    Widget build(BuildContext context) {
+      double height = MediaQuery.of(context).size.height;
+      double _height = height - (80 /* navbar */ + ScreenUtil.statusBarHeight);
+      return Scaffold(
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Container(height: _height, child: GroupBackground())
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  class GroupBackground extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+      double bottomPadding =
+          ScreenUtil.statusBarHeight + ScreenUtil().setHeight(30.0);
+      return Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(bottom: bottomPadding),
+              child:
+              Image.asset(_globals.appData.group_background, fit: BoxFit.cover),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: bottomPadding),
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                child: Container(
+                  color: Colors.black.withOpacity(0.5),
+                  child: _buildContent(),
+                ),
+              ),
+            ),
+            CustomPaint(
+              //painter: CurvePainter(0, null, 10),
+            ),
+            CustomPaint(
+              //painter: CurvePainter(null, bottomPadding, 5),
+            ),
+          ],
+        ),
+        //floatingActionButton: buildSpeedDial(),
+      );
+    }
+  }
+
+  Widget _buildContent() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          UpperSection(),
+          AnecdoteSection(),
+          StaggeredSection(),
+        ],
+      ),
+    );
+  }
+
+
+
+
+  /*class _GroupPageState extends State<GroupPage> {
+
 
 
     @override
@@ -120,106 +310,11 @@
       prefs = await SharedPreferences.getInstance();
     }
 
-    SpeedDial buildSpeedDial(BuildContext context) {
-      return SpeedDial(
-        marginRight: 25,
-        marginBottom: 50,
-        animatedIcon: AnimatedIcons.menu_close,
-        //animatedIconTheme: IconThemeData(size: 22.0),
-        child: Icon(Icons.add),
-        visible: true,
-        closeManually: false,
-        curve: Curves.bounceIn,
-        overlayColor: Colors.black,
-        overlayOpacity: 0.5,
-        onOpen: () => print('OPENING DIAL'),
-        onClose: () => print('DIAL CLOSED'),
-        tooltip: 'Menu',
-        heroTag: 'speed-dial-hero-tag',
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 8.0,
-        shape: CircleBorder(),
-        children: [
-          SpeedDialChild(
-            child: Icon(Icons.photo, color: Colors.white),
-            backgroundColor: Color.fromRGBO(0, 29, 126, 1),
-            label: 'Subir imagen',
-            labelStyle: TextStyle(fontSize: 18.0),
-            onTap: () {
-              _globals.filePickerGlobal
-                  .getImagePath(FileType.IMAGE)
-                  .then((result) {
-                    File _file = new File(result);
-                    if (_file != null) {
-                      _imagePath = result;
-                      Image _newImage = new Image.file(_file);
 
-                      AddMedia addMedia = new AddMedia(
-                          title:"Imagen seleccionada",
-                          selectedImage :_newImage,
-                          path: _imagePath,
-                          type:"images",
-                          typeId: 2);
-
-                      Navigator.pushNamed(
-                        context,
-                        '/addmedia',
-                        arguments: addMedia,
-                      );
-                    };
-                  });
-              },
-          ),
-          SpeedDialChild(
-            child: Icon(Icons.video_label, color: Colors.white),
-            backgroundColor: Color.fromRGBO(0, 29, 126, 1),
-            label: 'Subir Video',
-            labelStyle: TextStyle(fontSize: 18.0),
-            onTap: () {
-              _globals.filePickerGlobal
-                  .getImagePath(FileType.VIDEO)
-                  .then((result) {
-                File _file = new File(result);
-                if (_file != null) {
-                  _videoPath = result;
-                  _globals.filePickerGlobal
-                      .getThumbnailFromVideo(_videoPath)
-                      .then((Image image) async {
-                    setState(() {
-                        AddMedia addMedia = new AddMedia(
-                            title:"Video seleccionado",
-                            selectedImage :image,
-                            path: result,
-                            type:"videos",
-                            typeId: 1);
-                        Navigator.pushNamed(
-                          context,
-                          '/addmedia',
-                          arguments: addMedia,
-                        );
-                    });
-                  });
-                }
-              });
-            },
-          ),
-          SpeedDialChild(
-            child: Icon(Icons.calendar_today),
-            backgroundColor: Colors.white,
-            label: 'Proponer juntada',
-            labelStyle: TextStyle(fontSize: 18.0),
-            onTap: () {
-              //
-            },
-          ),
-        ],
-      );
-    }
-  }
+  }*/
 
 
-  class GroupBody extends StatelessWidget {
+  /*class GroupBody extends StatelessWidget {
     final _GroupPageState groupPageState;
 
     GroupBody({Key key, @required this.groupPageState}) : super(key: key);
@@ -241,7 +336,7 @@
     void initState() {
 
     }
-  }
+  }*/
 
   class UpperSection extends StatelessWidget {
     const UpperSection({
@@ -256,27 +351,10 @@
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               SizedBox(
-                height: 8.0,
+                height: 30.0,
               ),
               new Image.asset("assets/images/camadas.png",
                   height: 45.0, width: 214.0, fit: BoxFit.cover),
-              SizedBox(width: 20.0),
-              new GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => FriendsListPage()),
-                    );
-                  },
-                  child: new CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 30.0,
-                    child: new Icon(
-                      Icons.group,
-                      color: Colors.white,
-                    ),
-                  )),
             ],
           ),
         ]);

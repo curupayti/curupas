@@ -6,6 +6,7 @@ import 'package:curupas/models/group.dart';
 import 'package:curupas/models/museum.dart';
 import 'package:curupas/models/post.dart';
 import 'package:curupas/models/user.dart';
+import 'package:curupas/ui/screens/friend_screen.dart';
 import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/gestures.dart';
@@ -43,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
   GlobalKey bottomNavigationKey = GlobalKey();
   List<TabData> tabItems;
 
-  String _group;
+  String group;
 
   List<String> pageTitles = [];
   String pageTitle;
@@ -85,6 +86,15 @@ class _MainScreenState extends State<MainScreen> {
 
   String curupasUrl = 'https://curupas.com.ar/';
 
+  List<IconButton> navBarIcons = new List<IconButton>();
+  IconButton currentIconButton;
+  IconButton _home;
+  IconButton _calendar;
+  IconButton _videos;
+  IconButton _group;
+  IconButton _profile;
+
+
   @override
   void initState() {
 
@@ -121,6 +131,63 @@ class _MainScreenState extends State<MainScreen> {
         });
       }
     });
+
+    _home = IconButton(
+      icon: Icon(
+        Icons.help,
+        color: Colors.grey,
+      ),
+      onPressed: () {
+        // do something
+      },
+    );
+
+    _calendar = IconButton(
+      icon: Icon(
+        Icons.update,
+        color: Colors.grey,
+      ),
+      onPressed: () {
+        // do something
+      },
+    );
+
+
+    _videos = IconButton(
+      icon: Icon(
+        Icons.visibility ,
+        color: Colors.grey,
+      ),
+      onPressed: () {
+        // do something
+      },
+    );
+
+
+    _group = IconButton(
+      icon: Icon(
+        Icons.group,
+        color: Colors.grey,
+      ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => FriendsListPage()),
+        );
+      },
+    );
+
+
+    _profile = IconButton(
+      icon: Icon(
+        Icons.settings,
+        color: Colors.grey,
+      ),
+      onPressed: () {
+        // do something
+      },
+    );
 
     _flutterTapRecognizer = new TapGestureRecognizer()
       ..onTap = () => _openUrl(curupasUrl);
@@ -223,6 +290,9 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () => _scaffoldKey.currentState.openDrawer()),
           title: Text(pageTitle),
           centerTitle: true,
+          actions: <Widget>[
+            currentIconButton
+          ],
         ),
         drawer: Drawer(
           child:
@@ -281,6 +351,7 @@ class _MainScreenState extends State<MainScreen> {
             setState(() {
               pageTitle = pageTitles[index];
               currentPage = pages[index];
+              currentIconButton = navBarIcons[index];
             });
           },
         ),
@@ -402,35 +473,6 @@ class _MainScreenState extends State<MainScreen> {
         }
 
     });
-
-    //List responses  = new List();
-
-    /*try {
-      responses = await Future.wait([
-        getDescription(),
-        getPosts(),
-        getMuseums(),
-        getDrawers(),
-        getNewsletters(),
-        getAnecdotes(),
-        getStreamingData(),
-      ]);
-    } catch (e) {
-      print(e.toString());
-    }
-
-    for (int i = 0; i < responses.length; i++) {
-
-      switch (responses[i].runtimeType) {
-        case Description: {
-          _globals.description = responses[i];
-        }
-      }
-    }
-
-    if (responses.contains(true)) {
-        print("responses: " + responses.toString());
-    }*/
   }
 
   void getGroupByYear(String year) {
@@ -550,8 +592,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void updeteWidget() {
-    _group = _globals.group.year;
-    pageTitles = ["Home", "Calendario", "Streaming", _group, "Perfil"];
+
+    group = _globals.group.year;
+    pageTitles = ["Home", "Calendario", "Streaming", group, "Perfil"];
     pageTitle = pageTitles[0];
     tabItems = List.of([
       new TabData(iconData: Icons.home, title: pageTitles[0]),
@@ -581,9 +624,12 @@ class _MainScreenState extends State<MainScreen> {
       key: keyFive,
     );
 
+    navBarIcons = [_home, _calendar, _videos, _group, _profile];
+
     setState(() {
       pages = [one, two, three, four, five];
       currentPage = one;
+      currentIconButton = _home;
       _loadingInProgress = false;
     });
   }

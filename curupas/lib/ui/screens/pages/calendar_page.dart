@@ -27,7 +27,7 @@
     @override
     void initState() {
       super.initState();
-    }
+  }
   }
 
   class CalendarPageScreen extends StatelessWidget {
