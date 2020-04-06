@@ -9,6 +9,7 @@ import 'package:curupas/models/user.dart';
 import 'package:curupas/ui/screens/friend_screen.dart';
 import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -30,9 +31,9 @@ import 'package:youtube_api/youtube_api.dart';
 //https://pub.dev/packages/flutter_staggered_grid_view#-example-tab-
 
 class MainScreen extends StatefulWidget {
-  MainScreen({Key key, this.title, FirebaseUser firebaseUser})
-      : super(key: key);
-  final String title;
+
+  MainScreen({Key key}) : super(key: key);
+
   _MainScreenState createState() => _MainScreenState();
 }
 
@@ -93,6 +94,8 @@ class _MainScreenState extends State<MainScreen> {
   IconButton _videos;
   IconButton _group;
   IconButton _profile;
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
 
   @override
@@ -467,9 +470,36 @@ class _MainScreenState extends State<MainScreen> {
         }
 
         if (counter == 7) {
+
           timer.cancel();
+
           _globals.setDataFromGlobal();
           updeteWidget();
+
+          _firebaseMessaging.requestNotificationPermissions();
+
+          _firebaseMessaging.configure(
+
+
+            onMessage: (Map<String, dynamic> message) async {
+              print("onMessage: $message");
+              //_showItemDialog(message);
+            },
+
+            onBackgroundMessage: myBackgroundMessageHandler,
+
+            onLaunch: (Map<String, dynamic> message) async {
+              print("onLaunch: $message");
+              //_navigateToItemDetail(message);
+            },
+            
+            onResume: (Map<String, dynamic> message) async {
+              print("onResume: $message");
+              //_navigateToItemDetail(message);
+            },
+         
+          );
+
         }
 
     });
@@ -740,4 +770,19 @@ class _MainScreenState extends State<MainScreen> {
       throw 'Could not launch $url';
     }*/
   }
+
+  static Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) {
+    if (message.containsKey('data')) {
+      // Handle data message
+      final dynamic data = message['data'];
+    }
+
+    if (message.containsKey('notification')) {
+      // Handle notification message
+      final dynamic notification = message['notification'];
+    }
+
+    // Or do other work.
+  }
+
 }
