@@ -99,11 +99,12 @@
  
   
   #firepad-container {
-    display: none;
+    /*display: none;*/
     position: absolute;
     left: 20px;
-    top: 400px !important; 
-    width: 1075px;
+    top: 0px !important; 
+    /*width: 1075px;*/
+    width: 100%;
     bottom: 80px;
     background: white;    
     border:1px solid #C9C9C9;

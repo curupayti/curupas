@@ -1,3 +1,4 @@
+file:///home/jose/repos/curupa/functions/public/js/textedit.js {"mtime":1585936512573,"size":23057,"etag":"34r6kdarnnuo","orphaned":false}
 $(document).ready(function () {        
 
     homeLoader.show();  
@@ -103,7 +104,7 @@ $(document).ready(function () {
               let _new = data.meta.new;
               let _short = data.meta.short;   
 
-              window.datatable_main.clear();                        
+              window.datatable_main.clear();                      
               
               
               if ( $(this).hasClass('selected') ) {
@@ -111,8 +112,9 @@ $(document).ready(function () {
               } else {
                 
                 window.datatable_main.$('tr.selected').removeClass('selected');
-                  $(this).addClass('selected');                  
+                $(this).addClass('selected');                  
                   loadEditsList(_new, _short);
+
               }
               
           });   
@@ -255,18 +257,15 @@ $(document).ready(function () {
                   $("#edit-button").prop('disabled', true);
                   clearFirepad();            
                   $("#publish-buttons").hide();
-                  //$("#firepad-container").hide();
+                  $("#firepad-container").hide();
               }
               else {
                 window.datatable_detail.$('tr.selected').removeClass('selected');
                   $(this).addClass('selected');
                   $("#edit-button").removeAttr('disabled');
                   $("#publish-buttons").show();
-                  
                   $("#firepad-container").show();                  
-                  
                   $('#editModal').modal('show');
-
                   $('#editModal').on('shown.bs.modal', function () {                    
                     loadEdits(data.meta.database_ref, _short);   
                  });
