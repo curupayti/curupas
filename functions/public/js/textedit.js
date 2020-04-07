@@ -129,14 +129,7 @@ $(document).ready(function () {
           }       
           count++;      
       });
-
-    }  
-
-    /*$('#edit-list li').click(function() { 
-      $('li.list-group-item.active').removeClass("active"); 
-      $(this).addClass("active"); 
-    });*/           
-    
+    }     
 
     window.jsonDataDetail = [];
     window.editDocuments = [];
@@ -267,8 +260,12 @@ $(document).ready(function () {
                   
                   $('#editModal').modal('show');
 
-                  $('#editModal').on('shown.bs.modal', function () {                    
-                    loadEdits(data.meta.database_ref, _short);   
+                  $('#editModal').on('shown.bs.modal', function () {                       
+                    var height = $(document).height();
+                    $("#body-modal").css({'height': height + 'px'});
+                    setTimeout( function() {                          
+                        loadEdits(data.meta.database_ref, _short);   
+                    }, 500);
                  });
               }
 
@@ -353,7 +350,7 @@ $(document).ready(function () {
         if($(hash_firepad).length){
           $( hash_firepad ).remove();
         } 
-     }
+     }     
 
      $("#add-form").submit(function (event) {
 
