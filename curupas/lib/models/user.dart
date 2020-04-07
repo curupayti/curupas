@@ -23,6 +23,7 @@ class User {
   final int smsCode;
   final int smsId;
   final bool smsChecked;
+  String token;
 
   User(
       {this.userID,
@@ -42,7 +43,8 @@ class User {
       this.roleRef,
       this.smsCode,
       this.smsId,
-      this.smsChecked});
+      this.smsChecked,
+      this.token});
 
   Map<String, Object> toJson() {
     GeoPoint geo = GeoPoint(locationData.latitude, locationData.longitude);
@@ -69,6 +71,7 @@ class User {
       'smsCode': smsCode,
       'smsId': smsId,
       'smsChecked': smsChecked,
+      'token': token,
     };
   }
 
@@ -104,6 +107,7 @@ class User {
       accepted: doc['accepted'],
       roleRef: doc['roleRef'],
       smsChecked: doc['smsChecked'],
+      token: doc['token'],
     );
     return user;
   }
