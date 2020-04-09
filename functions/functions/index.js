@@ -324,7 +324,38 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
 
 });
 
-exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(event => {
+exports.sendNotificationTo = functions.https.onRequest((req, res) => {
+
+
+});  
+
+exports.createUser = firestore.document('notifications/{notificatonId}/users/{userId}').onCreate((snap, context) => {
+
+      const _doc = snap.data(); 
+      var title = _doc.title;
+      var message = _doc.message;
+      var urlImage = _doc.image;
+
+      _doc.ref.collection("users").get()
+      .then(function(usersSnapshot) {
+
+          var usersLength = usersSnapshot.docs.length;
+          querySnapshotEdit.forEach(function(docUserNotification) {
+
+            var notiData = docUserNotification.data();   
+            let _date = notiData.token;
+
+
+
+      
+          });    
+
+      });
+  
+});
+
+
+/*exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(event => {
 
   const uuid = event.params.uid;
 
@@ -347,7 +378,7 @@ exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(even
       console.log("The read failed: " + errorObject.code);
   });
 
-});
+});*/
 
 exports.sendSMS = functions.https.onRequest((req, res) => {
   

@@ -31,9 +31,10 @@
 
 .modal-body {
   position:relative !important;
-  height: 100%;
+  height: 100px;
   width: 80%;
 }
+
 
 .modal-dialog {
     width: 80% !important;
