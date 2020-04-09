@@ -151,7 +151,7 @@ $(document).ready(function () {
             'overflow-y': 'hidden'
         });
 
-        $('#destiny').empty();        
+        clearData();
         
         let length = window.roles.length;              
         
@@ -168,9 +168,20 @@ $(document).ready(function () {
 
     $('#destiny').on('change', function(e){               
       
-        let value = $(this).val();   
+        let value = $(this).val();          
         
-        //$("#usersTable").find("tr").remove();
+        clearData();        
+        
+        if (value==0) {
+            loadAllUsers();
+        } else {
+            loadSelectorByRole(value);        
+        }       
+
+    });
+
+    function clearData() {
+
         $('#usersTable').empty();
 
         let header = `<thead>
@@ -183,14 +194,7 @@ $(document).ready(function () {
         </thead>`;
 
         $('#usersTable').append(header);
-        
-        if (value==0) {
-            loadAllUsers();
-        } else {
-            loadSelectorByRole(value);        
-        }       
-
-    });
+    }
 
     function loadSelectorByRole(id) {
 
