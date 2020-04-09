@@ -52,23 +52,7 @@ $(document).ready(function () {
         } else {
             topic = selectedText;
         }               
-    });
-
-    $("#submitNotification").on("click", function(e) {      
-        e.preventDefault();
-        var now = firebase.firestore.FieldValue.serverTimestamp();
-        var newCityRef = db.collection("notifications").doc();
-        var title = $('#title').val();
-        var desc = $("#notification").val();
-        newCityRef.set({
-            title: title, 
-            notification: desc,            
-            createdAt: now,
-            notificationTopic : topic
-        }).then(()=>{        
-            $('#addNotificationModal').modal('hide');
-        });
-    });
+    });    
 
     // REAL TIME LISTENER
     db.collection('notifications').onSnapshot(snapshot => {       
@@ -161,8 +145,10 @@ $(document).ready(function () {
             let id = data.id;
             var addoption = $('<option></option>').val(id).text(content);                       
             $('#destiny').append(addoption);            
-        }             
-        $('#destiny').val(0);
+        } 
+        
+        //Limpiar combo al entrar y verificar cual id es el que esta en foco. 
+        //$('#destiny').val(0);
         loadAllUsers();
     });  
 
@@ -259,11 +245,10 @@ $(document).ready(function () {
             </th>
             <th>${name}</th>            
             <th>${year}</th>
-            <th style="display:none">${id}</th>            
+            <th class="id" style="display:none">${id}</th>            
         </tr>`;
 
         $('#usersTable').append(row);
-
     }
 
 
@@ -277,43 +262,49 @@ $(document).ready(function () {
         });
     });
 
-    //document.querySelector('input').addEventListener('keyup', function (evt) {
+    $("#submitNotification").click(function (e) {        
+        e.preventDefault();
 
-    $('.input').keyup(function (evt) {
+        var userdata = []; 
 
-        var elm = evt.target;
-        var queryString = elm.value.trim();
-        if (queryString.length < 2) {
-          results.innerHTML = '';
-          return;
-        }
-        queryString = queryString.toLowerCase();
-      
-        var query = db.collection('users');
-        var parts = queryString.split(' ');
-        var valid = false;
-        for (var i = 0; i < parts.length; i += 1) {
-          var part = parts[i].trim();
-          if (part.length < 2) {
-            continue;
-          }
-      
-          valid = true;
-          query = query.where('terms.' + part, '==', true);
-        }
-      
-        if (!valid) {
-          results.innerHTML = '';
-          return;
-        }
-      
-        // Use `setTimeout` to debounce our api calls
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(function () {
-          runQuery(query);
-        }, 300);
-      });
+        $('#usersTable input:checked').each(function(){
+            var id,toArea,checkBox;
+            id = $(this).closest('tr').find('.id').html();
+            let _userData = window.checked_users[id];
+            let data = {token:_userData.token, userID:_userData.userID};             
+            userdata.push(data);
+        });
 
+        var length = userdata.length;
+
+        if (length>0) {
+
+            var now = firebase.firestore.FieldValue.serverTimestamp();
+            var notificationRef = db.collection("notifications").doc();
+            var title = $('#title').val();
+            var desc = $("#notification").val();
+
+            notificationRef.set({
+                title: title, 
+                notification: desc, 
+                //users: userdata,           
+                createdAt: now,            
+            }).then(() => {      
+
+                notificationRef.get().then(document => {
+                    var document_path = "notifications/" + document.id + "/users";
+                    for (var i=0; i<length; i++) {
+                        db.collection(document_path).add( {                        
+                            token: userdata[i].token,   
+                            userId: userdata[i].userID,                                    
+                        });   
+                    }     
+                    $('#addNotificationModal').modal('hide');
+                });    
+            });            
+        }
+
+    });     
 
     $("#table tr").click(function(){
         $(this).addClass('selected').siblings().removeClass('selected');    
