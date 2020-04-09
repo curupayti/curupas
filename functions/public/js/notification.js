@@ -140,10 +140,10 @@ $(document).ready(function () {
         $('#add-notification-form .form-control').val('');
     });  
 
-    $('#addNotificationModal').on('show.bs.modal', function () {        
+    $("#addNotificationModal").on('show.bs.modal', function () {
 
         $(this).find('.modal-content').css({
-               width:'800px',                               
+            width:'800px',                               
         });
 
         $(this).css({            
@@ -151,10 +151,8 @@ $(document).ready(function () {
             'overflow-y': 'hidden'
         });
 
-    });
-    
-    $("#addNotificationModal").on('show.bs.modal', function () {
-
+        $('#destiny').empty();        
+        
         let length = window.roles.length;              
         
         for (var i=0; i<length;i++){
@@ -170,7 +168,21 @@ $(document).ready(function () {
 
     $('#destiny').on('change', function(e){               
       
-        let value = $(this).val();      
+        let value = $(this).val();   
+        
+        //$("#usersTable").find("tr").remove();
+        $('#usersTable').empty();
+
+        let header = `<thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Camada</th>                                                                    
+                <th scope="col" style="display:none">id</th>
+            </tr>
+        </thead>`;
+
+        $('#usersTable').append(header);
         
         if (value==0) {
             loadAllUsers();
@@ -193,10 +205,9 @@ $(document).ready(function () {
         var usersRef = db.collection("users").where("roleRef", "==", rolRef)
         .get()
         .then(function(querySnapshot) {
-            querySnapshot.forEach(function(doc) {
-                //console.log(doc.id, " => ", doc.data());
+            querySnapshot.forEach(function(doc) {                           
                 populateUserTable(doc, count);
-                count++;
+                count++;           
             });
         })
         .catch(function(error) {
@@ -216,8 +227,12 @@ $(document).ready(function () {
         .then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
                 //console.log(doc.id, " => ", doc.data());
-                populateUserTable(doc, count);
-                count++;
+
+                if (doc.id != "init") {
+                    populateUserTable(doc, count);
+                    count++;
+                }
+               
             });
         })
         .catch(function(error) {
@@ -225,7 +240,8 @@ $(document).ready(function () {
         });
     }
 
-    function populateUserTable(doc, id) {
+    function populateUserTable(doc, id) {                
+
         let data = doc.data();
 
         window.checked_users[id] = data;
@@ -237,14 +253,25 @@ $(document).ready(function () {
             <th class="active">
                 <input type="checkbox" class="select-all checkbox" name="select-all" />
             </th>
-            <th class="Nombre">"${name}"</th>            
-            <th class="Camada">"${year}"</th>
-            <th class="id" data-visible="false">${id}"</th>            
+            <th>${name}</th>            
+            <th>${year}</th>
+            <th style="display:none">${id}</th>            
         </tr>`;
 
         $('#usersTable').append(row);
 
     }
+
+
+    //button select all or cancel
+    $("#select-all").click(function () {
+        var all = $("input.select-all")[0];
+        all.checked = !all.checked
+        var checked = all.checked;
+        $("input.select-item").each(function (index,item) {
+            item.checked = checked;
+        });
+    });
 
     //document.querySelector('input').addEventListener('keyup', function (evt) {
 
