@@ -5,17 +5,24 @@ $(document).ready(function () {
 
     window.roles = [];
 
+    window.checked_users = [];
+
+    var count = 0;
+
+    let data_all = {name: "Todos los usuarios", role: 1};
+    window.roles.push(data_all);
+
     db.collection("roles").get()
     .then(function(querySnapshotRoles) {
         querySnapshotRoles.forEach(function(doc) { 
-            var roleData = doc.data();
-            var _role = roleData.role;
             var _name = doc.id;
-            let data = {name: _role, role: "role/" + _name};
+            var roleData = doc.data();
+            var _role = roleData.role;            
+            var _roleRef = doc.ref;            
+            let data = {name: _role, roleRef: _roleRef, role: "roles/" + _name, id: count};
             window.roles.push(data);
-        });
-        let data_all = {name: "Todos los usuarios", role: 1};
-        window.roles.push(data_all);
+            count++;
+        });        
     })
     .catch(function(error) {
         console.log("Error getting documents: ", error);
@@ -132,46 +139,112 @@ $(document).ready(function () {
     $("#addNotificationModal").on('hidden.bs.modal', function () {
         $('#add-notification-form .form-control').val('');
     });  
+
+    $('#addNotificationModal').on('show.bs.modal', function () {        
+
+        $(this).find('.modal-content').css({
+               width:'800px',                               
+        });
+
+        $(this).css({            
+            transform: 'translateX(-20%)',
+            'overflow-y': 'hidden'
+        });
+
+    });
     
     $("#addNotificationModal").on('show.bs.modal', function () {
 
-        let length = window.roles.length;               
+        let length = window.roles.length;              
         
         for (var i=0; i<length;i++){
             let data = window.roles[i];
-            let content = data.name;
-            let value = data.role;           
-
-            var addoption = $('<option></option>').val(value).text(content);                       
-            $('#destiny').append(addoption);
-            
-        }        
+            let content = data.name;        
+            let id = data.id;
+            var addoption = $('<option></option>').val(id).text(content);                       
+            $('#destiny').append(addoption);            
+        }             
+        $('#destiny').val(0);
+        loadAllUsers();
     });  
 
-    $('#destiny').on('change', function(e){        
+    $('#destiny').on('change', function(e){               
+      
+        let value = $(this).val();      
         
-        //this.options[this.selectedIndex].value,
-        //$(this).find("option:selected").val();
-
-        var sel;
-        switch(this.selectedIndex) {
-            case 0:                
-                sel = "Todos";    
-                break;
-            case 1:
-                sel = "Usuarios";    
-                break;
-            case 3:
-                sel = "Camada";    
-                break;
-            case 3:
-                sel = "Referentes";    
-                break;
-        }
-
-        $('#titulo-selected').text(sel);
+        if (value==0) {
+            loadAllUsers();
+        } else {
+            loadSelectorByRole(value);        
+        }       
 
     });
+
+    function loadSelectorByRole(id) {
+
+        let roleObject = window.roles[id];
+        let rolRef = roleObject.roleRef;
+
+        let name = roleObject.name;
+
+        $('#titulo-selected').text(name);
+
+        var count = 0;
+        var usersRef = db.collection("users").where("roleRef", "==", rolRef)
+        .get()
+        .then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+                //console.log(doc.id, " => ", doc.data());
+                populateUserTable(doc, count);
+                count++;
+            });
+        })
+        .catch(function(error) {
+            console.log("Error getting documents: ", error);
+        });
+    }
+
+    function loadAllUsers() {
+
+        let roleObject = window.roles[0];
+        let name = roleObject.name;
+
+        $('#titulo-selected').text(name);
+
+        var count = 0;
+        var usersRef = db.collection("users").get()
+        .then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+                //console.log(doc.id, " => ", doc.data());
+                populateUserTable(doc, count);
+                count++;
+            });
+        })
+        .catch(function(error) {
+            console.log("Error getting documents: ", error);
+        });
+    }
+
+    function populateUserTable(doc, id) {
+        let data = doc.data();
+
+        window.checked_users[id] = data;
+
+        let name = data.name;
+        let year = data.year;        
+
+        let row = `<tr>
+            <th class="active">
+                <input type="checkbox" class="select-all checkbox" name="select-all" />
+            </th>
+            <th class="Nombre">"${name}"</th>            
+            <th class="Camada">"${year}"</th>
+            <th class="id" data-visible="false">${id}"</th>            
+        </tr>`;
+
+        $('#usersTable').append(row);
+
+    }
 
     //document.querySelector('input').addEventListener('keyup', function (evt) {
 

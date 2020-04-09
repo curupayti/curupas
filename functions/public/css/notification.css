@@ -2,17 +2,16 @@
     padding-top: 50px;
 }
 
-
-.modal-body {
+/*.modal-body {
     position:relative !important;
-    height: 80%;
+    height: 90%;
     max-width: 800px !important;
     margin: 0 auto; 
   }
   
   .modal-dialog {
-      max-width: 800px;
-      height: 80% !important;
+      max-width: 800px !important;;
+      height: 90% !important;
       margin: 0 !important;
       padding: 0 !important;
       max-width:none !important;
@@ -21,20 +20,20 @@
   .modal-content {
       height: auto !important;
       width:800px  !important;;
-      min-height: 80% !important;
+      min-height: 90% !important;
       border-radius: 0 !important;
       background-color: #ececec !important 
   }
 
   .modal .modal-dialog {
      max-width: 800px !important;
-    }
+    }*/
 
-  .card {
+  /*.card {
     margin: 0 auto; 
     float: none; 
     margin-bottom: 10px; 
-  }
+  }*/
   
 
 .table-wrapper {
