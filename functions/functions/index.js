@@ -243,7 +243,24 @@
           bucket.file(profilePictureToDelete).delete();
           bucket.file(thumbnailPictureToDelete).delete();
 
-        }
+        // Udate user avatar
+      } else if (customMetadataType == 6) { 
+
+          const fileUrl = originalResult[0];             
+          var notificationId = customMetadata.notificationId;        
+
+          //console.log("::notificationId:: " + notificationId);         
+
+          let _time = admin.firestore.FieldValue.serverTimestamp();              
+
+          firestore.collection("notifications").doc(notificationId).update(
+          { 
+              "imageURL" : fileUrl,
+              "thumbnailImageURL": thumbFileUrl,               
+              "last_update" :_time
+          });
+        
+      }
       
     }  else { // not isThiumbnail
 
@@ -326,72 +343,49 @@
 
   exports.sendNotification = functions.firestore
     .document('notifications/{notificationsId}')
-    .onCreate((snap, context) => {
+    .onUpdate((snap, context) => {
     
-    const newValue = snap.data();      
-    var title = newValue.title;
-    var message = newValue.notification;
-    //var urlImage = _doc.image;
+    const newValue = snap.data();        
 
-    var document_path = "notifications/" + snap.ref.id + "/users";
+    var thumbnailImageURL = newValue.thumbnailImageURL;
 
-    console.log("document_path " + document_path);
-    
-   return firestore.collection(document_path).get()      
-    .then(function(usersSnapshot) {
+    if (thumbnailImageURL != undefined) {
 
-        //var usersLength = usersSnapshot.docs.length;
-        usersSnapshot.forEach(function(docUserNotification) {
+        var title = newValue.title;
+        var message = newValue.notification;
+        var urlimage = newValue.image;
+        var notificationId = newValue.notificationId;
+        var document_path = "notifications/" + snap.ref.id + "/users";
+        console.log("document_path " + document_path);
 
-          var notiData = docUserNotification.data();   
-          let token = notiData.token;
+        return firestore.collection(document_path).get()      
+        .then(function(usersSnapshot) {
             
-          const payload = {
-            "notification": {
-                "title": title,
-                "body": message,
-              }
-          };           
-          
-          console.log("payload " + JSON.stringify(payload));
-          
-          admin.messaging().sendToDevice(token, payload);                       
+            usersSnapshot.forEach(function(docUserNotification) {
+              var notiData = docUserNotification.data();   
+              let token = notiData.token;          
 
+              const payload = {
+                "notification": {
+                    "title": title,
+                    "body": message,
+                    "image":urlimage,
+                  },
+                  "data" : {
+                    "notificationId" : notificationId,
+                  }
+              };                     
+              //console.log("payload " + JSON.stringify(payload));          
+              admin.messaging().sendToDevice(token, payload);     
+            });    
+        
+        }).catch(err=>{
+          console.log("error:  " + err);
         });    
-    
-    }).catch(err=>{
-
-      console.log("error:  " + err);
-
-    });
-    
+      } else {
+        return {};
+      }
   });
-
-
-  /*exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(event => {
-
-    const uuid = event.params.uid;
-
-    console.log('User to send notification', uuid);
-
-    var ref = admin.database.ref('Users/${uuid}/token');
-
-    return ref.once("value", function(snapshot){
-      
-      const payload = {
-          notification: {
-              title: 'You have been invited to a trip.',
-              body: 'Tap here to check it out!'
-          }
-      };
-      
-      admin.messaging().sendToDevice(snapshot.val(), payload);
-
-    }, function (errorObject) {
-        console.log("The read failed: " + errorObject.code);
-    });
-
-  });*/
 
   exports.sendSMS = functions.https.onRequest((req, res) => {
     

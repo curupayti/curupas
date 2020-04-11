@@ -85,6 +85,20 @@ $(document).ready(function () {
        
     });
 
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();            
+            reader.onload = function (e) {
+                $('#avatar-preview').attr('src', e.target.result);
+            }            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    $("#imgInp").change(function(){
+        readURL(this);
+    });
+
     function formatDate(date) {
         var d = new Date(date),
             month = '' + (d.getMonth() + 1),
@@ -277,7 +291,7 @@ $(document).ready(function () {
 
         var length = userdata.length;
 
-        if (length>0) {            
+        if (length>0) {                          
 
             var titletext = $("#titletext").val();
             var notitext = $("#notitext").val();
@@ -286,19 +300,44 @@ $(document).ready(function () {
             var notificationRef = db.collection("notifications").doc();            
 
             notificationRef.set({
+            
                 title: titletext, 
-                notification: notitext,                 
+                notification: notitext, 
+                image: ageUrl,                
                 createdAt: now,            
-            }).then(() => {      
+            
+            }).then(() => {    
+                
+                notificationRef.get().then(document => {                   
 
-                notificationRef.get().then(document => {
+                    var storageRef = storage.ref("notifications/" + document.id);        
+                    var file = document.getElementById("imgInp").files[0];                 
+                    let rnd = Math.floor((Math.random()) * 0x10000).toString(7);  
+                    
+                    var newString = titletext.replace(/[^A-Z0-9]/ig, "_");
+                    var filePath = newString + "_" +  rnd + ".png";            
+                    
+                    var thisRef = storageRef.child(filePath);                         
+
+                    var metadata = {
+                        customMetadata: {
+                            'thumbnail': 'true',
+                            'type' : '6',                    
+                            'notificationId' : document.id                
+                        }
+                    }
+
+                    thisRef.put(file, metadata);
+
                     var document_path = "notifications/" + document.id + "/users";
                     for (var i=0; i<length; i++) {
                         db.collection(document_path).add( {                        
                             token: userdata[i].token,   
                             userId: userdata[i].userID,                                    
                         });   
-                    }     
+                    }   
+                    
+                    
                     $('#addNotificationModal').modal('hide');
                 });  
                   
