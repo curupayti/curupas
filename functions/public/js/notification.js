@@ -277,17 +277,17 @@ $(document).ready(function () {
 
         var length = userdata.length;
 
-        if (length>0) {
+        if (length>0) {            
 
+            var titletext = $("#titletext").val();
+            var notitext = $("#notitext").val();
             var now = firebase.firestore.FieldValue.serverTimestamp();
-            var notificationRef = db.collection("notifications").doc();
-            var title = $('#title').val();
-            var desc = $("#notification").val();
+
+            var notificationRef = db.collection("notifications").doc();            
 
             notificationRef.set({
-                title: title, 
-                notification: desc, 
-                //users: userdata,           
+                title: titletext, 
+                notification: notitext,                 
                 createdAt: now,            
             }).then(() => {      
 
@@ -300,7 +300,8 @@ $(document).ready(function () {
                         });   
                     }     
                     $('#addNotificationModal').modal('hide');
-                });    
+                });  
+                  
             });            
         }
 

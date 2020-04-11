@@ -1,196 +1,286 @@
-/**
- * Copyright 2016 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for t`he specific language governing permissions and
- * limitations under the License.
- */
-'use strict';
+  /**
+   * Copyright 2016 Google Inc. All Rights Reserved.
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *      http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for t`he specific language governing permissions and
+   * limitations under the License.
+   */
+  'use strict';
 
-const functions = require('firebase-functions');
-var admin = require('firebase-admin');
+  const functions = require('firebase-functions');
+  var admin = require('firebase-admin');
 
-var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
-var db_url = "https://curupas-app.firebaseio.com";
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: db_url
-});
-const firestore = admin.firestore();
+  var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
+  var db_url = "https://curupas-app.firebaseio.com";
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: db_url
+  });
+  const firestore = admin.firestore();
 
-const firebase = require('firebase');
+  const firebase = require('firebase');
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg",
-  authDomain: "curupas-app.firebaseapp.com",
-  databaseURL: "https://curupas-app.firebaseio.com",
-  projectId: "curupas-app",
-  storageBucket: "curupas-app.appspot.com",
-  messagingSenderId: "813267916846",
-  appId: "1:813267916846:web:529f9c18a84b6b45aa67bf",
-  measurementId: "G-2RRZXWLMTL"
-};
-firebase.initializeApp(firebaseConfig);
+  const firebaseConfig = {
+    apiKey: "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg",
+    authDomain: "curupas-app.firebaseapp.com",
+    databaseURL: "https://curupas-app.firebaseio.com",
+    projectId: "curupas-app",
+    storageBucket: "curupas-app.appspot.com",
+    messagingSenderId: "813267916846",
+    appId: "1:813267916846:web:529f9c18a84b6b45aa67bf",
+    measurementId: "G-2RRZXWLMTL"
+  };
+  firebase.initializeApp(firebaseConfig);
 
-const Firepad  = require('firepad');
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
+  const Firepad  = require('firepad');
+  const jsdom = require("jsdom");
+  const { JSDOM } = jsdom;
 
-const cors = require('cors')({origin: true});
+  const cors = require('cors')({origin: true});
 
-const mkdirp = require('mkdirp-promise');
-const request = require('request');
+  const mkdirp = require('mkdirp-promise');
+  const request = require('request');
 
-const spawn = require('child-process-promise').spawn;
-const path = require('path');
-const os = require('os');
-const fs = require('fs');
+  const spawn = require('child-process-promise').spawn;
+  const path = require('path');
+  const os = require('os');
+  const fs = require('fs');
 
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+  const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 
-// Max height and width of the thumbnail in pixels.
-const THUMB_MAX_HEIGHT = 200;
-const THUMB_MAX_WIDTH = 200;
-// Thumbnail prefix added to file names.
-const THUMB_PREFIX = 'thumb_';
+  // Max height and width of the thumbnail in pixels.
+  const THUMB_MAX_HEIGHT = 200;
+  const THUMB_MAX_WIDTH = 200;
+  // Thumbnail prefix added to file names.
+  const THUMB_PREFIX = 'thumb_';
 
-/**
- * When an image is uploaded in the Storage bucket We generate a thumbnail automatically using
- * ImageMagick.
- * After the thumbnail has been generated and uploaded to Cloud Storage,
- * we write the public URL to the Firebase Realtime Database.
- */
-exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(async (object) => {  
-  
-  const filePath = object.name;
-  const customMetadata = object.metadata;
-  var isThumbnail = false;  
-  isThumbnail = (customMetadata.thumbnail == 'true');
-  var customMetadataType = parseInt(customMetadata.type);       
-  
-  //console.log("=============== customMetadataType:" + customMetadataType);
-
-  //console.log("isThumbnail:" + isThumbnail);  
-
-  // Cloud Storage files.
-  const bucket = admin.storage().bucket(object.bucket);
-  const config = {
-    action: 'read',
-    expires: '03-01-2500',
-  };  
-
-  if (isThumbnail == true) {    
-
-    const file = bucket.file(filePath);
-    const contentType = object.contentType; // This is the image MIME type
-    const fileDir = path.dirname(filePath);
-    const fileName = path.basename(filePath);
-    const thumbFilePath = path.normalize(path.join(fileDir, `${THUMB_PREFIX}${fileName}`));
-    const tempLocalFile = path.join(os.tmpdir(), filePath);
-    const tempLocalDir = path.dirname(tempLocalFile);
-    const tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
-
-    // Exit if this is triggered on a file that is not an image.
-    if (!contentType.startsWith('image/')) {
-      return console.log('This is not an image.');
-    }
-
-    // Exit if the image is already a thumbnail.
-    if (fileName.startsWith(THUMB_PREFIX)) {
-      return console.log('Already a Thumbnail.');
-    }    
+  /**
+   * When an image is uploaded in the Storage bucket We generate a thumbnail automatically using
+   * ImageMagick.
+   * After the thumbnail has been generated and uploaded to Cloud Storage,
+   * we write the public URL to the Firebase Realtime Database.
+   */
+  exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(async (object) => {  
     
-    const thumbFile = bucket.file(thumbFilePath);
-
-    const metadata = {
-      contentType: contentType,
-      // To enable Client-side caching you can set the Cache-Control headers here. Uncomment below.
-      // 'Cache-Control': 'public,max-age=3600',
-    };    
+    const filePath = object.name;
+    const customMetadata = object.metadata;
+    var isThumbnail = false;  
+    isThumbnail = (customMetadata.thumbnail == 'true');
+    var customMetadataType = parseInt(customMetadata.type);       
     
-    // Create the temp directory where the storage file will be downloaded.
-    await mkdirp(tempLocalDir);
-    // Download file from bucket.
-    await file.download({destination: tempLocalFile});
-    //console.log('The file has been downloaded to', tempLocalFile);
-    // Generate a thumbnail using ImageMagick.
-    await spawn('convert', [tempLocalFile, '-thumbnail', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});
-    //console.log('Thumbnail created at', tempLocalThumbFile);
-    // Uploading the Thumbnail.
-    await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath, metadata: metadata});
-    //console.log('Thumbnail uploaded to Storage at', thumbFilePath);
-    // Once the image has been uploaded delete the local files to free up disk space.
-    fs.unlinkSync(tempLocalFile);
-    fs.unlinkSync(tempLocalThumbFile);
-    
-    // Get the Signed URLs for the thumbnail and original image.
-    const results = await Promise.all([
-      thumbFile.getSignedUrl(config),
-      file.getSignedUrl(config),
-    ]);
-    
-    console.log('Got Signed URLs.');
-    const thumbResult = results[0];
-    const originalResult = results[1];
-    const thumbFileUrl = thumbResult[0];     
+    //console.log("=============== customMetadataType:" + customMetadataType);
 
-    //Save Post/Museum Thumbnail
-    if (customMetadataType == 1) {  
-   
-      var _id = customMetadata.id;
-      var _collection = customMetadata.collection; 
-      //console.log('_id: '+ _id + " _collection: " + _collection);          
-      let _time = admin.firestore.FieldValue.serverTimestamp();
-      //console.log("_time: " + _time);         
-      await firestore.collection(_collection).doc(_id).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
-   
-    //Save User Thumbnail
-    } else if (customMetadataType == 2) {  
+    //console.log("isThumbnail:" + isThumbnail);  
 
-      const fileUrl = originalResult[0];    
-      var userId = customMetadata.userId;           
+    // Cloud Storage files.
+    const bucket = admin.storage().bucket(object.bucket);
+    const config = {
+      action: 'read',
+      expires: '03-01-2500',
+    };  
+
+    if (isThumbnail == true) {    
+
+      const file = bucket.file(filePath);
+      const contentType = object.contentType; // This is the image MIME type
+      const fileDir = path.dirname(filePath);
+      const fileName = path.basename(filePath);
+      const thumbFilePath = path.normalize(path.join(fileDir, `${THUMB_PREFIX}${fileName}`));
+      const tempLocalFile = path.join(os.tmpdir(), filePath);
+      const tempLocalDir = path.dirname(tempLocalFile);
+      const tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
+
+      // Exit if this is triggered on a file that is not an image.
+      if (!contentType.startsWith('image/')) {
+        return console.log('This is not an image.');
+      }
+
+      // Exit if the image is already a thumbnail.
+      if (fileName.startsWith(THUMB_PREFIX)) {
+        return console.log('Already a Thumbnail.');
+      }    
       
-      let _time = admin.firestore.FieldValue.serverTimestamp();     
+      const thumbFile = bucket.file(thumbFilePath);
+
+      const metadata = {
+        contentType: contentType,
+        // To enable Client-side caching you can set the Cache-Control headers here. Uncomment below.
+        // 'Cache-Control': 'public,max-age=3600',
+      };    
       
-      await firestore.collection("users").doc(userId).update(
-      { 
-          profilePictureURL : fileUrl,
-          thumbnailPictureURL: thumbFileUrl, 
-          profilePicture : filePath,
-          thumbnailPicture : thumbFilePath,          
-          last_update:_time
-      });
+      // Create the temp directory where the storage file will be downloaded.
+      await mkdirp(tempLocalDir);
+      // Download file from bucket.
+      await file.download({destination: tempLocalFile});
+      //console.log('The file has been downloaded to', tempLocalFile);
+      // Generate a thumbnail using ImageMagick.
+      await spawn('convert', [tempLocalFile, '-thumbnail', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});
+      //console.log('Thumbnail created at', tempLocalThumbFile);
+      // Uploading the Thumbnail.
+      await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath, metadata: metadata});
+      //console.log('Thumbnail uploaded to Storage at', thumbFilePath);
+      // Once the image has been uploaded delete the local files to free up disk space.
+      fs.unlinkSync(tempLocalFile);
+      fs.unlinkSync(tempLocalThumbFile);
+      
+      // Get the Signed URLs for the thumbnail and original image.
+      const results = await Promise.all([
+        thumbFile.getSignedUrl(config),
+        file.getSignedUrl(config),
+      ]);
+      
+      console.log('Got Signed URLs.');
+      const thumbResult = results[0];
+      const originalResult = results[1];
+      const thumbFileUrl = thumbResult[0];     
 
-    // Update content  
-    } else if (customMetadataType == 3) {  
-
-        const fileUrl = originalResult[0];            
-        var _short = customMetadata.short;          
-        var _id = customMetadata.id;    
-        let _time = admin.firestore.FieldValue.serverTimestamp();             
-
-        await firestore.collection('contents')
-        .doc(_short)
-        .collection("collection")
-        .doc(_id)
-        .update({ 
-          storage_icon_ref : filePath,
-          storage_thumbFile_ref : thumbFilePath,
-          icon_original : fileUrl,
-          icon: thumbFileUrl, 
-          last_update: _time 
-        });                     
+      //Save Post/Museum Thumbnail
+      if (customMetadataType == 1) {  
     
-      // Save Media thumbnail image and video  
-      } else if (customMetadataType == 4) {  
+        var _id = customMetadata.id;
+        var _collection = customMetadata.collection; 
+        //console.log('_id: '+ _id + " _collection: " + _collection);          
+        let _time = admin.firestore.FieldValue.serverTimestamp();
+        //console.log("_time: " + _time);         
+        await firestore.collection(_collection).doc(_id).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
+    
+      //Save User Thumbnail
+      } else if (customMetadataType == 2) {  
+
+        const fileUrl = originalResult[0];    
+        var userId = customMetadata.userId;           
+        
+        let _time = admin.firestore.FieldValue.serverTimestamp();     
+        
+        await firestore.collection("users").doc(userId).update(
+        { 
+            profilePictureURL : fileUrl,
+            thumbnailPictureURL: thumbFileUrl, 
+            profilePicture : filePath,
+            thumbnailPicture : thumbFilePath,          
+            last_update:_time
+        });
+
+      // Update content  
+      } else if (customMetadataType == 3) {  
+
+          const fileUrl = originalResult[0];            
+          var _short = customMetadata.short;          
+          var _id = customMetadata.id;    
+          let _time = admin.firestore.FieldValue.serverTimestamp();             
+
+          await firestore.collection('contents')
+          .doc(_short)
+          .collection("collection")
+          .doc(_id)
+          .update({ 
+            storage_icon_ref : filePath,
+            storage_thumbFile_ref : thumbFilePath,
+            icon_original : fileUrl,
+            icon: thumbFileUrl, 
+            last_update: _time 
+          });                     
+      
+        // Save Media thumbnail image and video  
+        } else if (customMetadataType == 4) {  
+
+          var documentId = customMetadata.documentId;
+          var doc_name_title = customMetadata.doc_name_title;
+          var title = customMetadata.title;
+          var desc = customMetadata.desc; 
+          var userId = customMetadata.userId;              
+          
+          let _time = admin.firestore.FieldValue.serverTimestamp();    
+
+          const fileUrl = originalResult[0]; 
+
+          await firestore.collection('years')
+          .doc(documentId)
+          .collection("media")
+          .doc(doc_name_title)
+          .set({ 
+            type: 2,
+            thumbnail : thumbFileUrl,
+            image : fileUrl,
+            title : title,
+            desc: desc, 
+            userId : userId,
+            aprroved: false,
+            last_update: _time 
+          });    
+      
+        // Udate user avatar
+        } else if (customMetadataType == 5) {  
+
+          const fileUrl = originalResult[0];    
+          var userId = customMetadata.userId; 
+          var profilePictureToDelete = customMetadata.profilePictureToDelete;         
+          var thumbnailPictureToDelete = customMetadata.thumbnailPictureToDelete;           
+
+          //console.log("::profilePicture:: " + profilePicture); 
+          //console.log("::thumbnailPicture:: " + thumbnailPicture);         
+
+          let _time = admin.firestore.FieldValue.serverTimestamp();
+
+          firestore.collection("users").doc(userId).update(
+          { 
+              "profilePictureURL" : fileUrl,
+              "thumbnailPictureURL": thumbFileUrl, 
+              "profilePicture" : filePath,
+              "thumbnailPicture" : thumbFilePath,          
+              "last_update" :_time
+          });
+
+          //Borra imagenes viejas. 
+          bucket.file(profilePictureToDelete).delete();
+          bucket.file(thumbnailPictureToDelete).delete();
+
+        }
+      
+    }  else { // not isThiumbnail
+
+      //console.log("::customMetadataType:: " + customMetadataType);  
+
+      if (customMetadataType == 1) {  
+
+        //console.log("::entra::");
+        
+        const file = object.name;
+        const thumbFileExt       = 'jpg';
+        const fileDir = path.dirname(filePath);
+        //const fileName = path.basename(filePath);
+
+        const fileInfo = parseName(file);
+
+        const thumbFilePath = path.normalize(path.join(fileDir, `${fileInfo.name}-thumbnail.${thumbFileExt}`));
+        const tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
+        const tempLocalDir       = path.join(os.tmpdir(), fileDir);
+      
+        await mkdirp(tempLocalDir);
+
+        console.log("tempLocalThumbFile:: " + tempLocalThumbFile);
+
+        const videoFile = bucket.file(file);
+
+        const signedVideoUrl = await videoFile.getSignedUrl(config);         
+    
+        const videoUrl = signedVideoUrl[0];
+        
+        console.log("videoUrl:: " + videoUrl);
+        
+        await spawn(ffmpegPath, ['-ss', '0', '-i', videoUrl, '-f', 'image2', '-vframes', '1', '-vf', `scale=${THUMB_MAX_WIDTH}:-1`, tempLocalThumbFile]);
+
+        await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath});      
+
+        await fs.unlinkSync(tempLocalThumbFile);   
 
         var documentId = customMetadata.documentId;
         var doc_name_title = customMetadata.doc_name_title;
@@ -199,305 +289,228 @@ exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(as
         var userId = customMetadata.userId;              
         
         let _time = admin.firestore.FieldValue.serverTimestamp();    
+        
+        const fileThumb = bucket.file(thumbFilePath);
+        
+        // Get the Signed URLs for the thumbnail and original image.
+        const signedUrl = await fileThumb.getSignedUrl(config);
+        const thumbResult = signedUrl[0];
 
-        const fileUrl = originalResult[0]; 
-
-        await firestore.collection('years')
-        .doc(documentId)
-        .collection("media")
-        .doc(doc_name_title)
-        .set({ 
-          type: 2,
-          thumbnail : thumbFileUrl,
-          image : fileUrl,
-          title : title,
-          desc: desc, 
-          userId : userId,
-          aprroved: false,
-          last_update: _time 
-        });    
-    
-      // Udate user avatar
-      } else if (customMetadataType == 5) {  
-
-        const fileUrl = originalResult[0];    
-        var userId = customMetadata.userId; 
-        var profilePictureToDelete = customMetadata.profilePictureToDelete;         
-        var thumbnailPictureToDelete = customMetadata.thumbnailPictureToDelete;           
-
-        //console.log("::profilePicture:: " + profilePicture); 
-        //console.log("::thumbnailPicture:: " + thumbnailPicture);         
-
-        let _time = admin.firestore.FieldValue.serverTimestamp();
-
-        firestore.collection("users").doc(userId).update(
-        { 
-            "profilePictureURL" : fileUrl,
-            "thumbnailPictureURL": thumbFileUrl, 
-            "profilePicture" : filePath,
-            "thumbnailPicture" : thumbFilePath,          
-            "last_update" :_time
-        });
-
-        //Borra imagenes viejas. 
-        bucket.file(profilePictureToDelete).delete();
-        bucket.file(thumbnailPictureToDelete).delete();
-
+        console.log('thumbResult: ' + thumbResult);
+        
+          await firestore.collection('years')
+          .doc(documentId)
+          .collection("media")
+          .doc(doc_name_title)
+          .set({ 
+            type: 1,
+            thumbnail : thumbResult,
+            video : videoUrl,
+            title : title,
+            desc: desc, 
+            userId : userId,
+            aprroved: false,
+            last_update: _time 
+          });
+      
       }
-    
-  }  else { // not isThiumbnail
-
-    //console.log("::customMetadataType:: " + customMetadataType);  
-
-    if (customMetadataType == 1) {  
-
-      //console.log("::entra::");
-      
-      const file = object.name;
-      const thumbFileExt       = 'jpg';
-      const fileDir = path.dirname(filePath);
-      //const fileName = path.basename(filePath);
-
-      const fileInfo = parseName(file);
-
-      const thumbFilePath = path.normalize(path.join(fileDir, `${fileInfo.name}-thumbnail.${thumbFileExt}`));
-      const tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
-      const tempLocalDir       = path.join(os.tmpdir(), fileDir);
-     
-      await mkdirp(tempLocalDir);
-
-      console.log("tempLocalThumbFile:: " + tempLocalThumbFile);
-
-      const videoFile = bucket.file(file);
-
-      const signedVideoUrl = await videoFile.getSignedUrl(config);         
-  
-      const videoUrl = signedVideoUrl[0];
-      
-      console.log("videoUrl:: " + videoUrl);
-      
-      await spawn(ffmpegPath, ['-ss', '0', '-i', videoUrl, '-f', 'image2', '-vframes', '1', '-vf', `scale=${THUMB_MAX_WIDTH}:-1`, tempLocalThumbFile]);
-
-      await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath});      
-
-      await fs.unlinkSync(tempLocalThumbFile);   
-
-      var documentId = customMetadata.documentId;
-      var doc_name_title = customMetadata.doc_name_title;
-      var title = customMetadata.title;
-      var desc = customMetadata.desc; 
-      var userId = customMetadata.userId;              
-      
-      let _time = admin.firestore.FieldValue.serverTimestamp();    
-      
-      const fileThumb = bucket.file(thumbFilePath);
-      
-      // Get the Signed URLs for the thumbnail and original image.
-      const signedUrl = await fileThumb.getSignedUrl(config);
-      const thumbResult = signedUrl[0];
-
-      console.log('thumbResult: ' + thumbResult);
-      
-        await firestore.collection('years')
-        .doc(documentId)
-        .collection("media")
-        .doc(doc_name_title)
-        .set({ 
-          type: 1,
-          thumbnail : thumbResult,
-          video : videoUrl,
-          title : title,
-          desc: desc, 
-          userId : userId,
-          aprroved: false,
-          last_update: _time 
-        });
-    
     }
-  }
 
-  function parseName(fileName) {
-      let _file = path.basename(fileName);
-      var _name = _file.replace(/\.[^/.]+$/, "");      
-      return { name : _name };
-  } 
+    function parseName(fileName) {
+        let _file = path.basename(fileName);
+        var _name = _file.replace(/\.[^/.]+$/, "");      
+        return { name : _name };
+    } 
 
-});
-
-exports.sendNotificationTo = functions.https.onRequest((req, res) => {
-
-
-});  
-
-exports.createUser = firestore.document('notifications/{notificatonId}/users/{userId}').onCreate((snap, context) => {
-
-      const _doc = snap.data(); 
-      var title = _doc.title;
-      var message = _doc.message;
-      var urlImage = _doc.image;
-
-      _doc.ref.collection("users").get()
-      .then(function(usersSnapshot) {
-
-          var usersLength = usersSnapshot.docs.length;
-          querySnapshotEdit.forEach(function(docUserNotification) {
-
-            var notiData = docUserNotification.data();   
-            let _date = notiData.token;
-
-
-
-      
-          });    
-
-      });
-  
-});
-
-
-/*exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(event => {
-
-  const uuid = event.params.uid;
-
-  console.log('User to send notification', uuid);
-
-  var ref = admin.database.ref('Users/${uuid}/token');
-
-  return ref.once("value", function(snapshot){
-    
-    const payload = {
-        notification: {
-            title: 'You have been invited to a trip.',
-            body: 'Tap here to check it out!'
-        }
-    };
-    
-    admin.messaging().sendToDevice(snapshot.val(), payload);
-
-  }, function (errorObject) {
-      console.log("The read failed: " + errorObject.code);
   });
 
-});*/
+  exports.sendNotification = functions.firestore
+    .document('notifications/{notificationsId}')
+    .onCreate((snap, context) => {
+    
+    const newValue = snap.data();      
+    var title = newValue.title;
+    var message = newValue.notification;
+    //var urlImage = _doc.image;
 
-exports.sendSMS = functions.https.onRequest((req, res) => {
-  
-    const phone = req.body.data.phone;
-    const payload = req.body.data.payload;
-    const userId = req.body.data.userId;
+    var document_path = "notifications/" + snap.ref.id + "/users";
 
-    var headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer 7FA7ED241142E7BE36671CE0FEC9E84F'
-    };
+    console.log("document_path " + document_path);
+    
+   return firestore.collection(document_path).get()      
+    .then(function(usersSnapshot) {
 
-    var dataString = '{"recipient":' + phone + ',"message":"' + payload + '"}';  
+        //var usersLength = usersSnapshot.docs.length;
+        usersSnapshot.forEach(function(docUserNotification) {
 
-    var options = {
-        url: 'https://api.notimation.com/api/v1/sms',
-        method: 'POST',
-        headers: headers,
-        body: dataString
-    };  
-
-    request(options, function (error, response, body) {
-
-        if (!error) {
-
-            var body = JSON.parse(body);
-            console.log("body: " + JSON.stringify(body));
+          var notiData = docUserNotification.data();   
+          let token = notiData.token;
             
-            var data = body["data"];
-            console.log("data: " + JSON.stringify(data)); 
-            
-            var smsid = data["sms_id"]; 
-                       
-            console.log("smsid: " + smsid);
-
-            var userRef = firestore.collection("users").doc(userId);
-            return userRef.update({
-              smsId: smsid
-            })
-            .then(function() {
-                res.send(body); 
-            })
-            .catch(function(e) {                
-                console.error("Error updating document: ", e);
-                res.send(e);
-            });
-            
-            
-        } else {
-
-            var _error = JSON.parse(error);
-
-            res.send(_error);
-        }
-    });  
-
-}); 
-
-exports.publish = functions.https.onRequest((request, response) => {
-  
-  response.set('Access-Control-Allow-Origin', '*');
-  response.set('Access-Control-Allow-Credentials', 'true'); // vital
-
-  if (request.method === 'OPTIONS') {
-      
-      // Send response to OPTIONS requests
-      response.set('Access-Control-Allow-Methods', 'GET');
-      response.set('Access-Control-Allow-Headers', 'Content-Type');
-      response.set('Access-Control-Max-Age', '3600');
-      response.status(204).send('');
-  
-    } else {
-      
-      const data = request.body;
-      const database_ref = data.database_ref;
-      const contentType = data.contentType; 
-      const documentId = data.documentId; 
-
-      var firepadRef = firebase.database().ref().child(contentType).child(database_ref);    
-      var headless = new Firepad.Headless(firepadRef);  
-
-      return cors(request, response, () => {  
+          const payload = {
+            "notification": {
+                "title": title,
+                "body": message,
+              }
+          };           
           
-          headless.getHtml(function(_html) {           
+          console.log("payload " + JSON.stringify(payload));
+          
+          admin.messaging().sendToDevice(token, payload);                       
 
-            firestore.collection("contents")
-            .doc(contentType)
-            .collection("collection")
-            .doc(documentId)
-            .set({
-              html : _html,
-              published : true
-            },{merge:true})
-            .then(() => {
+        });    
+    
+    }).catch(err=>{
 
-              console.log('Successfully set');          
+      console.log("error:  " + err);
+
+    });
+    
+  });
+
+
+  /*exports.sendNewPostNotification = functions.database.ref('/post/').onCreate(event => {
+
+    const uuid = event.params.uid;
+
+    console.log('User to send notification', uuid);
+
+    var ref = admin.database.ref('Users/${uuid}/token');
+
+    return ref.once("value", function(snapshot){
+      
+      const payload = {
+          notification: {
+              title: 'You have been invited to a trip.',
+              body: 'Tap here to check it out!'
+          }
+      };
+      
+      admin.messaging().sendToDevice(snapshot.val(), payload);
+
+    }, function (errorObject) {
+        console.log("The read failed: " + errorObject.code);
+    });
+
+  });*/
+
+  exports.sendSMS = functions.https.onRequest((req, res) => {
+    
+      const phone = req.body.data.phone;
+      const payload = req.body.data.payload;
+      const userId = req.body.data.userId;
+
+      var headers = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 7FA7ED241142E7BE36671CE0FEC9E84F'
+      };
+
+      var dataString = '{"recipient":' + phone + ',"message":"' + payload + '"}';  
+
+      var options = {
+          url: 'https://api.notimation.com/api/v1/sms',
+          method: 'POST',
+          headers: headers,
+          body: dataString
+      };  
+
+      request(options, function (error, response, body) {
+
+          if (!error) {
+
+              var body = JSON.parse(body);
+              console.log("body: " + JSON.stringify(body));
               
-              let json_resutl_ok = { data: { html: _html, result: true }};
-
-              response.send(json_resutl_ok); 
-
-              headless.dispose();
+              var data = body["data"];
+              console.log("data: " + JSON.stringify(data)); 
               
-            }).catch(function(error) {
+              var smsid = data["sms_id"]; 
+                        
+              console.log("smsid: " + smsid);
 
-              let json_resutl_false = { data: { result: false }};
+              var userRef = firestore.collection("users").doc(userId);
+              return userRef.update({
+                smsId: smsid
+              })
+              .then(function() {
+                  res.send(body); 
+              })
+              .catch(function(e) {                
+                  console.error("Error updating document: ", e);
+                  res.send(e);
+              });
               
-              response.send(json_resutl_false);               
+              
+          } else {
 
-              headless.dispose();
+              var _error = JSON.parse(error);
+
+              res.send(_error);
+          }
+      });  
+
+  }); 
+
+  exports.publish = functions.https.onRequest((request, response) => {
+    
+    response.set('Access-Control-Allow-Origin', '*');
+    response.set('Access-Control-Allow-Credentials', 'true'); // vital
+
+    if (request.method === 'OPTIONS') {
+        
+        // Send response to OPTIONS requests
+        response.set('Access-Control-Allow-Methods', 'GET');
+        response.set('Access-Control-Allow-Headers', 'Content-Type');
+        response.set('Access-Control-Max-Age', '3600');
+        response.status(204).send('');
+    
+      } else {
+        
+        const data = request.body;
+        const database_ref = data.database_ref;
+        const contentType = data.contentType; 
+        const documentId = data.documentId; 
+
+        var firepadRef = firebase.database().ref().child(contentType).child(database_ref);    
+        var headless = new Firepad.Headless(firepadRef);  
+
+        return cors(request, response, () => {  
+            
+            headless.getHtml(function(_html) {           
+
+              firestore.collection("contents")
+              .doc(contentType)
+              .collection("collection")
+              .doc(documentId)
+              .set({
+                html : _html,
+                published : true
+              },{merge:true})
+              .then(() => {
+
+                console.log('Successfully set');          
+                
+                let json_resutl_ok = { data: { html: _html, result: true }};
+
+                response.send(json_resutl_ok); 
+
+                headless.dispose();
+                
+              }).catch(function(error) {
+
+                let json_resutl_false = { data: { result: false }};
+                
+                response.send(json_resutl_false);               
+
+                headless.dispose();
+
+              });
 
             });
 
-          });
-
-      });    
-  }   
-});
+        });    
+    }   
+  });
 
 
- 
+  
