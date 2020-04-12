@@ -302,8 +302,7 @@ $(document).ready(function () {
             notificationRef.set({
             
                 title: titletext, 
-                notification: notitext, 
-                image: ageUrl,                
+                notification: notitext,                 
                 createdAt: now,            
             
             }).then(() => {    
@@ -311,7 +310,7 @@ $(document).ready(function () {
                 notificationRef.get().then(document => {                   
 
                     var storageRef = storage.ref("notifications/" + document.id);        
-                    var file = document.getElementById("imgInp").files[0];                 
+                    var file = $('#imgInp').get(0).files[0]; //document.getElementById("imgInp").files[0];                 
                     let rnd = Math.floor((Math.random()) * 0x10000).toString(7);  
                     
                     var newString = titletext.replace(/[^A-Z0-9]/ig, "_");

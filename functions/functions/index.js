@@ -343,48 +343,55 @@
 
   exports.sendNotification = functions.firestore
     .document('notifications/{notificationsId}')
-    .onUpdate((snap, context) => {
-    
-    const newValue = snap.data();        
+    .onWrite((change, context) => {    
 
+    const newValue = change.after.data();       
     var thumbnailImageURL = newValue.thumbnailImageURL;
+
+    console.log("thumbnailImageURL " + thumbnailImageURL);
 
     if (thumbnailImageURL != undefined) {
 
-        var title = newValue.title;
-        var message = newValue.notification;
-        var urlimage = newValue.image;
-        var notificationId = newValue.notificationId;
-        var document_path = "notifications/" + snap.ref.id + "/users";
-        console.log("document_path " + document_path);
+      var title = newValue.title;
+      var message = newValue.notification;
+      var urlimage = newValue.thumbnailImageURL;
+      var notificationId = context.params.notificationsId;
+      var document_path = "notifications/" + notificationId + "/users";
+      
+      console.log("document_path " + document_path);
 
-        return firestore.collection(document_path).get()      
-        .then(function(usersSnapshot) {
-            
-            usersSnapshot.forEach(function(docUserNotification) {
-              var notiData = docUserNotification.data();   
-              let token = notiData.token;          
+      return firestore.collection(document_path).get()      
+      .then(function(usersSnapshot) {
+          
+          usersSnapshot.forEach(function(docUserNotification) {
+            var notiData = docUserNotification.data();   
+            let token = notiData.token;          
 
-              const payload = {
-                "notification": {
-                    "title": title,
-                    "body": message,
-                    "image":urlimage,
-                  },
-                  "data" : {
-                    "notificationId" : notificationId,
-                  }
-              };                     
-              //console.log("payload " + JSON.stringify(payload));          
-              admin.messaging().sendToDevice(token, payload);     
-            });    
-        
-        }).catch(err=>{
-          console.log("error:  " + err);
-        });    
-      } else {
-        return {};
-      }
+            const payload = {
+              "notification": {
+                  "title": title,
+                  "body": message,
+                  "image":urlimage,
+                },
+                "data" : {
+                  "notificationId" : notificationId,
+                }
+            };      
+                          
+            console.log("payload " + JSON.stringify(payload));          
+            admin.messaging().sendToDevice(token, payload);     
+
+          });    
+      
+      }).catch(err=>{
+        console.log("error:  " + err);
+      });  
+
+    } else {
+      return {};
+    }
+
+  
   });
 
   exports.sendSMS = functions.https.onRequest((req, res) => {
