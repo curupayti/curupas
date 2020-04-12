@@ -3,6 +3,7 @@
   import 'package:cloud_firestore/cloud_firestore.dart';
   import 'package:curupas/models/add_media.dart';
   import 'package:curupas/ui/screens/widgets/anecdote/anecdote_widget.dart';
+import 'package:curupas/ui/screens/widgets/anectodes.dart';
   import 'package:file_picker/file_picker.dart';
   import 'package:flutter/gestures.dart';
   import "package:flutter/material.dart";
@@ -216,127 +217,13 @@
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           UpperSection(),
-          AnecdoteSection(),
+          //AnecdoteSection(),
+          _buildMuseumTimeline(),
           StaggeredSection(),
         ],
       ),
     );
   }
-
-
-
-
-  /*class _GroupPageState extends State<GroupPage> {
-
-
-
-    @override
-    Widget build(BuildContext context) {
-      double height = MediaQuery.of(context).size.height;
-      return Scaffold(
-        body: Stack(
-          //fit: StackFit.expand,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(bottom: 0),
-              child:
-              Image.asset(_globals.appData.group_background, fit: BoxFit.cover),
-            ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 0),
-              child: BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                child: Container(
-                  color: Colors.black.withOpacity(0.5),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          height: height,
-                          child: GroupBody(),
-                        )],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            /*Padding(
-              padding: EdgeInsets.only(bottom: 0),
-              child:
-              Container(
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: _colors,
-                      stops: [0.0, 1.0],
-                      begin: FractionalOffset.topCenter,
-                      end: FractionalOffset.bottomCenter,
-                    )
-                ),
-              ),
-            ),*/
-
-          ]),
-        floatingActionButton: buildSpeedDial(context),
-
-      );
-    }
-
-    /*
-     decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: _colors,
-        stops: _stops,
-      )),
-     */
-
-    @override
-    void initState() {
-      super.initState();
-
-      getPrefs();
-      _progressValue = 0.0;
-
-      //getFirePadFromRef("ZAvWQjFab2fiv27g3Hu0kcpSCXP2");
-
-      _globals.eventBus
-          .on()
-          .listen((event) {
-            //print(event.toString());
-            setState(() {});
-      });
-    }
-
-    void getPrefs() async {
-      prefs = await SharedPreferences.getInstance();
-    }
-
-
-  }*/
-
-
-  /*class GroupBody extends StatelessWidget {
-    final _GroupPageState groupPageState;
-
-    GroupBody({Key key, @required this.groupPageState}) : super(key: key);
-
-    @override
-    Widget build(BuildContext context) {
-      return Scaffold(
-        body: Column(
-          children: <Widget>[
-            UpperSection(),
-            AnecdoteSection(),
-            StaggeredSection(),
-          ],
-        ),
-      );
-    }
-
-    @override
-    void initState() {
-
-    }
-  }*/
 
   class UpperSection extends StatelessWidget {
     const UpperSection({
@@ -359,6 +246,16 @@
           ),
         ]);
     }
+  }
+
+  Widget _buildMuseumTimeline() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: SizedBox.fromSize(
+        size: Size.fromHeight(170.0),
+        child: new AnecdotesWidget(anecdotes: _globals.appData.anecdotes),
+      ),
+    );
   }
 
   class AnecdoteSection extends StatelessWidget {

@@ -26,9 +26,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
   final TextEditingController _phoneController = new TextEditingController();
   final TextEditingController _birthdayController = new TextEditingController();
 
-
-
-
   class _ProfilePageState extends State<ProfilePage> {
 
     DecorationImage _avatarImage;
@@ -53,8 +50,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
         image: new NetworkImage(_globals.user.thumbnailPictureURL),
         fit: BoxFit.cover,
       );
-
-
     }
   }
 
@@ -64,7 +59,65 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
     ProfilePageScreen(this.parent);
 
-    @override
+    Widget build(BuildContext context) {
+      return DefaultTabController(
+          length: 3,
+          child: Scaffold(
+//                appBar: AppBar(
+//                  title: Text(title),
+//                ),
+              body: SafeArea(
+                  child: Column(children: <Widget>[
+                    Container(
+                      color: Colors.greenAccent,
+                      height: MediaQuery.of(context).size.height / 2.8,  // Also Including Tab-bar height.
+                        child: UpperSection(parent),
+                    ),
+                    PreferredSize(
+                      preferredSize: Size.fromHeight(50.0),
+                      child: TabBar(
+                        labelColor: Colors.black,
+                        tabs: [
+                          Tab(
+                            text: 'One',
+                          ),
+                          Tab(
+                            text: 'Two',
+                          ),
+                          Tab(
+                            text: 'Three',
+                          )
+                        ], // list of tabs
+                      ),
+                    ),
+                    //TabBarView(children: [ImageList(),])
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          Container(
+                            color: Colors.deepOrange,
+                            child: Center(child: Text('Tab1')),
+                          ),
+                          Container(
+                            color: Colors.red,
+                            child: Center(child: Text('Tab2')),
+                          ),
+                          Container(
+                            color: Colors.yellowAccent,
+                            child: Center(child: Text('Tab3')),
+                          ) // class name
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+    }
+
+    /*@override
     Widget build(BuildContext context) {
       double height = MediaQuery.of(context).size.height + 100;
       return Scaffold(
@@ -75,7 +128,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
         ),
         //floatingActionButton: buildSpeedDial(),
       );
-    }
+    }*/
   }
 
   class ProfileBody extends StatelessWidget {
@@ -136,16 +189,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
     UpperSection(this.parent);
 
-    /*const UpperSection({
-      Key key,
-    }) : super(key: key);*/
 
     @override
     Widget build(BuildContext context) {
       return Column(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.all(32.0),
+            padding: EdgeInsets.all(20.0),
             child: Column(
               children: <Widget>[
                 new Stack(fit: StackFit.loose, children: <Widget>[
@@ -154,8 +204,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       new Container(
-                        width: 150.0,
-                        height: 150.0,
+                        width: 120.0,
+                        height: 120.0,
                         decoration: new BoxDecoration(
                             shape: BoxShape.circle,
                             image: parent._avatarImage,
@@ -164,7 +214,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                     ],
                   ),
                   Padding(
-                      padding: EdgeInsets.only(top: 110.0, right: 90.0),
+                      padding: EdgeInsets.only(top: 80.0, right: 60.0),
                       child: new Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
@@ -173,7 +223,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                               _globals.filePickerGlobal
                                   .getImagePath(FileType.IMAGE)
                                   .then((result) {
-
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) => _buildUpdateDataDialog(context, parent, result),
@@ -183,21 +232,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                             },
                             child: new CircleAvatar(
                               backgroundColor: Colors.red,
-                              radius: 30.0,
+                              radius: 25.0,
                               child: new Icon(
                                 Icons.camera_alt,
                                 color: Colors.white,
                               ),
                             ),
                           ),
-                          /*new CircleAvatar(
-                            backgroundColor: Colors.red,
-                            radius: 30.0,
-                            child: new Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                            ),
-                          )*/
                         ],
                       )),
                 ]),

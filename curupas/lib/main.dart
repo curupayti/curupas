@@ -7,7 +7,7 @@
   import 'package:flutter/services.dart';
   import 'package:notifier/notifier_provider.dart';
   import 'package:curupas/ui/screens/post/post_swiper_screen.dart';
-  import 'package:curupas/ui/screens/group_screen.dart';
+  import 'package:curupas/ui/screens/sign_up_group_screen.dart';
   import 'package:curupas/ui/screens/main_screen.dart';
   import 'package:curupas/ui/screens/sign_in_screen.dart';
   import "package:curupas/ui/screens/walk_screen.dart";
@@ -51,7 +51,7 @@
           '/welcomeScreen': (BuildContext context) => new WelcomeScreen(),
           '/signin': (BuildContext context) => new SignInScreen(),
           '/signup': (BuildContext context) => new SignUpScreen(),
-          '/group': (BuildContext context) => new GroupScreen(),
+          '/group': (BuildContext context) => new SignUpGroupScreen(),
           '/main': (BuildContext context) => new MainScreen(),
         },
         theme: ThemeData(
@@ -72,7 +72,7 @@
           if (group) {
             return new MainScreen();
           } else {
-            return new GroupScreen();
+            return new SignUpGroupScreen();
           }
         } else {
           return new WelcomeScreen();

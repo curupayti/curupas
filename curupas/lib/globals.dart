@@ -150,11 +150,17 @@
       setData(description.description, posts, museums, newsletterContent.contents, anecdoteContent.contents);
     }
 
-    void setData(String desc, List<Post> posts, List<Museum> museums, List<HTML> newsletters, List<HTML> anecdotes) {
+    void setData(String desc,
+        List<Post> posts,
+        List<Museum> museums,
+        List<HTML> newsletters,
+        List<HTML> anecdotes) {
+
       appData.biography = desc;
       appData.posts = posts;
       appData.museums = museums;
       appData.newsletters = newsletters;
+      appData.anecdotes = anecdotes;
     }
 
     void queryDevice() async {
@@ -305,7 +311,7 @@
       List<Museum> museums;
       final List<HTML> drawers;
       List<HTML> newsletters;
-      final List<HTML> anecdotes;
+      List<HTML> anecdotes;
     }
 
     class Video {

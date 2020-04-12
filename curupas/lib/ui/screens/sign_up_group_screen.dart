@@ -22,12 +22,12 @@ import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class GroupScreen extends StatefulWidget {
+class SignUpGroupScreen extends StatefulWidget {
   @override
-  _GroupScreenState createState() => _GroupScreenState();
+  _SignUpGroupScreenState createState() => _SignUpGroupScreenState();
 }
 
-class _GroupScreenState extends State<GroupScreen> {
+class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
 
   List<DropdownMenuItem<String>> _groupMenuItems = new List();
   List<Group> _groups = new List();
@@ -116,28 +116,6 @@ class _GroupScreenState extends State<GroupScreen> {
       Navigator.of(context).pop();
     };
   }
-
-  /*Future<List<String>> getUserIdAndYear() async {
-    prefs = await SharedPreferences.getInstance();
-    String userId = prefs.getString('userId');
-    String year = prefs.getString('year');
-    String name = prefs.getString('name');
-    List<String> list = new List<String>();
-    if ((userId != "" && userId != null) &&
-        (year != "" && year != null) &&
-        (name != "" && name != null)) {
-      list[0] = userId;
-      list[1] = year;
-      list[2] = name;
-    }
-    return list;
-  }*/
-
-  /*Future<String> getGroupYear() async {
-    prefs = await SharedPreferences.getInstance();
-    String year = prefs.getString('userId');
-    return year;
-  }*/
 
   void _enableButton() {
     setButtonEnabled(true);
@@ -653,7 +631,7 @@ class _GroupScreenState extends State<GroupScreen> {
 }
 
 class InputDoneGroup extends StatelessWidget {
-  _GroupScreenState parent;
+  _SignUpGroupScreenState parent;
   InputDoneGroup(this.parent);
   @override
   Widget build(BuildContext context) {

@@ -583,7 +583,6 @@
       });
     }
 
-
     Future<bool> getStreamingData() async {
       List<YT_API> ytResult = [];
       List<Streaming> streamingList = [];
