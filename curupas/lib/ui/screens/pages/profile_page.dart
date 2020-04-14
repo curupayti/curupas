@@ -78,15 +78,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                       child: TabBar(
                         labelColor: Colors.black,
                         tabs: [
-                          Tab(
-                            text: 'One',
-                          ),
-                          Tab(
-                            text: 'Two',
-                          ),
-                          Tab(
-                            text: 'Three',
-                          )
+                          Tab(icon: Icon(Icons.notifications)),
+                          Tab(icon: Icon(Icons.info)),
+                          Tab(icon: Icon(Icons.payment)),
                         ], // list of tabs
                       ),
                     ),
@@ -115,6 +109,52 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
             ),
           );
 
+    }
+
+    renderNotifications(BuildContext context) {
+      return ListView.builder(
+        itemCount: _globals.notifications.length,
+        itemBuilder: _getItemUI,
+        padding: EdgeInsets.all(0.0),
+      );
+    }
+
+    Widget _getItemUI(BuildContext context, int index) {
+      return new Card(
+          child: new Column(
+            children: <Widget>[
+              new ListTile(
+                /*leading: new Image.asset(
+                  "assets/" + _globals.notifications[index].image,
+                  fit: BoxFit.cover,
+                  width: 100.0,
+                ),*/
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(_globals.notifications[index].thumbnailImageURL),
+                ),
+
+                title: new Text(
+                  _globals.notifications[index].title,
+                  style: new TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
+                ),
+                subtitle: new Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      new Text(_globals.notifications[index].notification,
+                          style: new TextStyle(
+                              fontSize: 13.0, fontWeight: FontWeight.normal)),
+                      new Text('Population: "5',
+                          style: new TextStyle(
+                              fontSize: 11.0, fontWeight: FontWeight.normal)),
+                    ]),
+
+                onTap: () {
+
+                },
+              )
+            ],
+          ));
     }
 
     /*@override

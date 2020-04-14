@@ -20,7 +20,8 @@
     import 'models/HTML.dart';
     import 'models/HTMLS.dart';
     import 'models/museum.dart';
-    import 'models/streaming.dart';
+    import 'models/notification.dart';
+import 'models/streaming.dart';
     import 'package:path/path.dart' as p;
     import 'dart:math' as math;
 
@@ -42,6 +43,8 @@
     HTMLS drawerContent = new HTMLS();
     HTMLS newsletterContent = new HTMLS();
     HTMLS anecdoteContent = new HTMLS();
+
+    List<NotificationCloud> notifications = new List<NotificationCloud>();
 
     //_globals.setData(desc, posts, museums, newsletters, _globals.anecdoteContent.contents);
 

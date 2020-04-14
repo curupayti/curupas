@@ -430,6 +430,7 @@
       getNewsletters();
       getAnecdotes();
       getStreamingData();
+      getNotifications();
 
       Timer timer = new Timer.periodic(Duration(seconds: 5), (timer) {
 
@@ -469,7 +470,11 @@
             counter++;
           }
 
-          if (counter == 7) {
+          if (_globals.notifications!=null) {
+            counter++;
+          }
+
+          if (counter == 8) {
 
             timer.cancel();
 
@@ -623,9 +628,18 @@
 
     Future<File> writeYoutubeLog(int counter, String content) async {
       final file = await _localFile;
-
       // Write the file.
       return file.writeAsString('$content');
+    }
+
+
+    void getNotifications() async {
+      Auth.getNotifications().then((notifications) {
+        _globals.notifications = notifications;
+        _globals.notifications.sort((a, b) {
+          return a.last_update.compareTo(b.last_update);
+        });
+      });
     }
 
     Future<File> get _localFile async {

@@ -31,7 +31,7 @@ class HTMLS {
   factory HTMLS.fromJson(Map<String, Object> doc, List<HTML> contents) {
 
     Timestamp timestamp = doc["last_update"] as Timestamp;
-    var format = new DateFormat('d MMM, hh:mm a');
+    //var format = new DateFormat('d MMM, hh:mm a');
     DateTime date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
 
     HTMLS drawer = new HTMLS(

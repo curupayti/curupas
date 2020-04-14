@@ -1,9 +1,11 @@
 
   import 'dart:async';
-  import 'package:curupas/models/HTML.dart';
+  import 'package:cloud_functions/cloud_functions.dart';
+import 'package:curupas/models/HTML.dart';
   import 'package:curupas/models/HTMLS.dart';
   import 'package:curupas/models/group_media.dart';
   import 'package:curupas/models/museum.dart';
+import 'package:curupas/models/notification.dart';
   import 'package:firebase_analytics/firebase_analytics.dart';
   import 'package:firebase_auth/firebase_auth.dart';
   import 'package:cloud_firestore/cloud_firestore.dart';
@@ -341,7 +343,6 @@
       return _htmlContent;
     }
 
-
     static Future<List<HTML>> getContenHtmls(DocumentSnapshot document) async {
       QuerySnapshot collectionSnapshot = await document.reference.collection("collection").getDocuments();
       List<DocumentSnapshot> templist;
@@ -364,11 +365,34 @@
       return listContentHtml;
     }
 
+    static Future<List<NotificationCloud>> getNotifications() async {
+      List<NotificationCloud> notiList = new List();
+      QuerySnapshot collectionSnapshot = await Firestore.instance.collectionGroup('user-token-chat').getDocuments();
+      for (var doc in collectionSnapshot.documents)  {
+        DocumentReference notiRef = doc.reference.parent().reference().parent();
+        await notiRef.get().then((notiSnapshot) async {
+          NotificationCloud  noti = NotificationCloud.fromDocument(notiSnapshot);
+          notiList.add(noti);
+        });
+      }
+      return notiList;
+    }
+
+    static Future<NotificationCloud> getNotificationById(String notificationId) async {
+      List<DocumentSnapshot> templist;
+      QuerySnapshot collectionSnapshot =
+      await Firestore.instance.collection("notifications/{$notificationId}").getDocuments();
+      templist = collectionSnapshot.documents;
+      await templist.map((DocumentSnapshot docSnapshot) {
+        return NotificationCloud.fromDocument(docSnapshot);
+      });
+    }
+
 
     static Future<List<User>> getUserById(String userId) async {
       List<DocumentSnapshot> templist;
       List<User> list = new List();
-      DocumentReference yearRef = _globals.user.yearRef;
+      //DocumentReference yearRef = _globals.user.yearRef;
       QuerySnapshot collectionSnapshot =
           await Firestore.instance.collection("users").getDocuments();
       templist = collectionSnapshot.documents;
