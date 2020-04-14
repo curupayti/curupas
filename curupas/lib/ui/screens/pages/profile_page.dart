@@ -90,15 +90,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                         children: [
                           Container(
                             color: Colors.deepOrange,
-                            child: Center(child: Text('Tab1')),
+                            child: renderNotifications(context), //Center(child: Text('Notofications')),
                           ),
                           Container(
                             color: Colors.red,
-                            child: Center(child: Text('Tab2')),
+                            child: Center(child: Text('Info')),
                           ),
                           Container(
                             color: Colors.yellowAccent,
-                            child: Center(child: Text('Tab3')),
+                            child: Center(child: Text('Payment')),
                           ) // class name
                         ],
                       ),
@@ -106,8 +106,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                   ],
                 ),
               ),
-            ),
-          );
+          ),
+      );
 
     }
 
