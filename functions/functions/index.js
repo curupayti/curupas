@@ -243,7 +243,7 @@
           bucket.file(profilePictureToDelete).delete();
           bucket.file(thumbnailPictureToDelete).delete();
 
-        // Udate user avatar
+      // Notification
       } else if (customMetadataType == 6) { 
 
           const fileUrl = originalResult[0];             
@@ -356,7 +356,7 @@
       var message = newValue.notification;
       var urlimage = newValue.thumbnailImageURL;
       var notificationId = context.params.notificationsId;
-      var document_path = "notifications/" + notificationId + "/users";
+      var document_path = "notifications/" + notificationId + "/user-token-chat";
       
       console.log("document_path " + document_path);
 
