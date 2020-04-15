@@ -1,3 +1,4 @@
+file:///home/jose/repos/curupa/functions/functions/index.js {"mtime":1586755731203,"size":19164,"etag":"34shil1h2jt6","orphaned":false}
   /**
    * Copyright 2016 Google Inc. All Rights Reserved.
    *
@@ -257,7 +258,7 @@
           { 
               "imageURL" : fileUrl,
               "thumbnailImageURL": thumbFileUrl,               
-              "last_update" :_time
+              "last_update" :_time+}qa<z
           });
         
       }
@@ -392,7 +393,68 @@
     }
 
   
-  });  
+  });
+
+  exports.getNotificationsByUserId = functions.https.onRequest((req, res) => {
+    
+      const userId = req.body.data.userId;
+      
+      firestore.collection("notifications").get()      
+      .then(function(notificationSnapshot) {
+
+        var notiLength = notificationSnapshot.docs.length;
+
+        console.log("notiLength " + notiLength);  
+        
+        console.log("notificatonId " + notificationSnapshot.id);        
+          
+        notificationSnapshot.forEach(function(docUserNotification) {            
+
+            //var notiData = docUserNotification.data();  
+            
+            var notiArray = [];
+            var count = 0;
+            
+            docUserNotification.ref.collection("users").get()
+            .then(function(querySnapshotUser) {
+
+                querySnapshotUser.forEach(function(docUser) {                  
+
+                  var docUser = docUser.data();  
+                  //let _doc_id_ = docUser.id;
+
+                 let _userId = docUser.userId;
+
+                  console.log("_userId " + _userId);    
+
+                  if (_userId==userId) {
+
+                    notiArray.push(notificationSnapshot.id);
+
+                    console.log("count : " + count + " notiLength : " + notiLength);    
+
+                    if (count == (notiLength-1)) {
+
+                      console.log("_userId " + _userId);    
+                      
+                      res.send(notiArray);
+
+                    }
+                  }                 
+
+                });
+
+                count++;
+
+            });
+
+        });    
+      
+      }).catch(err=>{
+        console.log("error:  " + err);
+      }); 
+
+  }); 
 
   exports.sendSMS = functions.https.onRequest((req, res) => {
     

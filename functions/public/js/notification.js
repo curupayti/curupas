@@ -303,7 +303,7 @@ $(document).ready(function () {
             
                 title: titletext, 
                 notification: notitext,                 
-                createdAt: now,            
+                last_update: now,            
             
             }).then(() => {    
                 
@@ -325,10 +325,10 @@ $(document).ready(function () {
                             'notificationId' : document.id                
                         }
                     }
-
+                    
                     thisRef.put(file, metadata);
 
-                    var document_path = "notifications/" + document.id + "/users";
+                    var document_path = "notifications/" + document.id + "/user-token-chat";
                     for (var i=0; i<length; i++) {
                         db.collection(document_path).add( {                        
                             token: userdata[i].token,   
