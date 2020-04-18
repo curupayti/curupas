@@ -1,8 +1,11 @@
   import 'dart:io';
 
+import 'package:curupas/models/credit_card.dart';
+import 'package:curupas/ui/screens/widgets/flat_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import "package:flutter/material.dart";
+import 'package:flutter_credit_card/credit_card_model.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
   import 'package:curupas/globals.dart' as _globals;
@@ -69,7 +72,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
               body: SafeArea(
                   child: Column(children: <Widget>[
                     Container(
-                      color: Colors.greenAccent,
+                      color: Colors.white,
                       height: MediaQuery.of(context).size.height / 2.8,  // Also Including Tab-bar height.
                         child: UpperSection(parent),
                     ),
@@ -79,28 +82,37 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
                         labelColor: Colors.black,
                         tabs: [
                           Tab(icon: Icon(Icons.notifications)),
-                          Tab(icon: Icon(Icons.info)),
                           Tab(icon: Icon(Icons.payment)),
+                          Tab(icon: Icon(Icons.info)),
                         ], // list of tabs
                       ),
                     ),
                     //TabBarView(children: [ImageList(),])
                     Expanded(
-                      child: TabBarView(
-                        children: [
-                          Container(
-                            color: Colors.deepOrange,
-                            child: renderNotifications(context), //Center(child: Text('Notofications')),
-                          ),
-                          Container(
-                            color: Colors.red,
-                            child: Center(child: Text('Info')),
-                          ),
-                          Container(
-                            color: Colors.yellowAccent,
-                            child: Center(child: Text('Payment')),
-                          ) // class name
-                        ],
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.green, Colors.blue],
+                            //begin: Alignment.topCenter,
+                            //end:Alignment.bottomCenter
+                          )),
+                          child:
+                            TabBarView(
+                              children: [
+                                Container(
+                                  color: Colors.white,
+                                  child: renderNotifications(context),
+                                ),
+                                Container(
+                                  color: Colors.red,
+                                  child: CreditCardBody(parent),
+                                ),
+                                Container(
+                                  color: Colors.yellowAccent,
+                                  child: ProfileDataBody(parent),
+                                ) // class name
+                              ],
+                            ),
                       ),
                     ),
                   ],
@@ -108,7 +120,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
               ),
           ),
       );
-
     }
 
     renderNotifications(BuildContext context) {
@@ -156,40 +167,23 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
             ],
           ));
     }
-
-    /*@override
-    Widget build(BuildContext context) {
-      double height = MediaQuery.of(context).size.height + 100;
-      return Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[Container(height: height, child: ProfileBody(this.parent))],
-          ),
-        ),
-        //floatingActionButton: buildSpeedDial(),
-      );
-    }*/
   }
 
-  class ProfileBody extends StatelessWidget {
+  class ProfileDataBody extends StatelessWidget {
 
     _ProfilePageState parent;
 
-    ProfileBody(this.parent);
+    ProfileDataBody(this.parent);
 
     @override
     Widget build(BuildContext context) {
       return Scaffold(
-        body: Column(
-          children: <Widget>[
-            UpperSection(this.parent),
-            MiddleSection(),
-          ],
-        ),
+        body: ProfileDataWidget(),
       );
     }
-
   }
+
+
 
   /*SpeedDial buildSpeedDial() {
     return SpeedDial(
@@ -425,188 +419,266 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
       });
   }
 
-  class MiddleSection extends StatelessWidget {
-    const MiddleSection({
+  class ProfileDataWidget extends StatelessWidget {
+    const ProfileDataWidget({
       Key key,
     }) : super(key: key);
 
     @override
     Widget build(BuildContext context) {
-      return new Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        new Text(
-                          'Nombre',
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Flexible(
-                      child: new TextField(
-                        decoration: const InputDecoration(
-                          hintText: "Ingresa tu nombre",
-                        ),
-                        enabled: !_status,
-                        autofocus: !_status,
-                        controller: _fullnameController,
+      //double _height = 800;
+      return SingleChildScrollView(
+        child: Container(height: 2000, child:
+            Column(
+            //crossAxisAlignment: CrossAxisAlignment.start,
+            //mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 25.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          new Text(
+                            'Nombre',
+                            style: TextStyle(
+                                fontSize: 16.0, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        new Text(
-                          'Camada',
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Flexible(
-                      child: new TextField(
-                        decoration: const InputDecoration(
-                          hintText: "Ingresa tu camada",
-                        ),
-                        enabled: !_status,
-                        autofocus: !_status,
-                        controller: _groupController,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        new Text(
-                          'Email',
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Flexible(
-                      child: new TextField(
-                          decoration:
-                              const InputDecoration(hintText: "Ingresa tu email"),
+                    ],
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Flexible(
+                        child: new TextField(
+                          decoration: const InputDecoration(
+                            hintText: "Ingresa tu nombre",
+                          ),
                           enabled: !_status,
-                          controller: _emailController),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        new Text(
-                          'Telefono',
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
+                          autofocus: !_status,
+                          controller: _fullnameController,
                         ),
-                      ],
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Flexible(
-                      child: new TextField(
-                        decoration: const InputDecoration(
-                            hintText: "Ingresa tu telefono"),
-                        enabled: !_status,
-                        controller: _phoneController,
                       ),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        new Text(
-                          'Fecha de nacimiento',
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
+                    ],
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          new Text(
+                            'Camada',
+                            style: TextStyle(
+                                fontSize: 16.0, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Flexible(
+                        child: new TextField(
+                          decoration: const InputDecoration(
+                            hintText: "Ingresa tu camada",
+                          ),
+                          enabled: !_status,
+                          autofocus: !_status,
+                          controller: _groupController,
                         ),
-                      ],
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 110.0, top: 2.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Flexible(
-                      child: new TextField(
-                        decoration: const InputDecoration(
-                            hintText: "Ingresa tu fecha de nacimiento"),
-                        enabled: !_status,
-                        controller: _birthdayController,
                       ),
-                    ),
-                  ],
-                )),
+                    ],
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          new Text(
+                            'Email',
+                            style: TextStyle(
+                                fontSize: 16.0, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Flexible(
+                        child: new TextField(
+                            decoration:
+                                const InputDecoration(hintText: "Ingresa tu email"),
+                            enabled: !_status,
+                            controller: _emailController),
+                      ),
+                    ],
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          new Text(
+                            'Telefono',
+                            style: TextStyle(
+                                fontSize: 16.0, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Flexible(
+                        child: new TextField(
+                          decoration: const InputDecoration(
+                              hintText: "Ingresa tu telefono"),
+                          enabled: !_status,
+                          controller: _phoneController,
+                        ),
+                      ),
+                    ],
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 15.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          new Text(
+                            'Fecha de nacimiento',
+                            style: TextStyle(
+                                fontSize: 16.0, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 110.0, top: 2.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Flexible(
+                        child: new TextField(
+                          decoration: const InputDecoration(
+                              hintText: "Ingresa tu fecha de nacimiento"),
+                          enabled: !_status,
+                          controller: _birthdayController,
+                        ),
+                      ),
+                    ],
+                  )),
+              ],
+            ),
+          ),
+      );
+    }
+  }
+
+  class CreditCardBody extends StatelessWidget {
+
+    _ProfilePageState parent;
+
+    CreditCardBody(this.parent);
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        body: Column(
+          children: <Widget>[
+            CreditCardWidget(parent),
           ],
         ),
+      );
+    }
+  }
+
+  class CreditCardWidget extends StatelessWidget {
+
+    _ProfilePageState parent;
+
+    CreditCardWidget(this.parent);
+
+    @override
+    Widget build(BuildContext context) {
+      return Column(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.all(50.0),
+            child: Column(
+              children: <Widget>[
+                new Stack(fit: StackFit.loose, children: <Widget>[
+                  new Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CustomFlatButton(
+                        title: "Agregar tarjeta",
+                        enabled: true,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        textColor: Colors.white,
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/creditcard',
+                              arguments: new CreditCard(),
+                          );
+                        },
+                        splashColor: Colors.black12,
+                        borderColor: Colors.black,
+                        borderWidth: 0,
+                        color: Colors.red, //
+                      ),
+                    ],
+                  ),
+                ]),
+                SizedBox(
+                  height: 16.0,
+                ),
+                Text(
+                  _globals.user.name,
+                  style: TextStyle(
+                    fontSize: 30.0,
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
       );
     }
   }

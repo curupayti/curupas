@@ -1,32 +1,23 @@
+
   import 'dart:async';
   import 'dart:io';
   import 'package:curupas/models/HTML.dart';
-  import 'package:curupas/models/HTMLS.dart';
-  import 'package:curupas/models/group.dart';
-  import 'package:curupas/models/museum.dart';
-  import 'package:curupas/models/post.dart';
-  import 'package:curupas/models/user.dart';
   import 'package:curupas/ui/screens/friend_screen.dart';
   import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
+import 'package:event_bus/event_bus.dart';
   import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
   import 'package:firebase_messaging/firebase_messaging.dart';
   import 'package:flutter/gestures.dart';
   import 'package:flutter/material.dart';
   import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:curupas/business/auth.dart';
-  import 'package:firebase_auth/firebase_auth.dart';
-  import 'package:curupas/business/messaging.dart';
-  import 'package:curupas/models/description.dart';
-  import 'package:curupas/models/streaming.dart';
   import 'package:curupas/ui/screens/pages/calendar_page.dart';
   import 'package:curupas/ui/screens/pages/group_page.dart';
   import 'package:curupas/ui/screens/pages/home_page.dart';
   import 'package:curupas/ui/screens/pages/profile_page.dart';
   import 'package:curupas/ui/screens/pages/streaming_page.dart';
-  import 'package:path_provider/path_provider.dart';
   import 'package:shared_preferences/shared_preferences.dart';
   import 'package:curupas/globals.dart' as _globals;
-  import 'package:youtube_api/youtube_api.dart';
 
   //https://pub.dev/packages/flutter_staggered_grid_view#-example-tab-
 
@@ -38,6 +29,7 @@
   }
 
   class _MainScreenState extends State<MainScreen> {
+
     final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
     int selectedPos = 0;
@@ -65,25 +57,9 @@
 
     final PageStorageBucket bucket = PageStorageBucket();
 
-    bool _loadingInProgress = true;
-
+    bool _loading = true;
 
     SharedPreferences prefs;
-
-    //static String key = "AIzaSyCapBh4kR9X8U82KyU7bAlyg7_jgteR4RE"; //OLD
-
-    static String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";
-    static String channelId = "UCeLNPJoPAio9rT2GAdXDVmw";
-
-    YoutubeAPI ytApi = new YoutubeAPI(key);
-
-    TapGestureRecognizer _flutterTapRecognizer;
-
-    TextStyle linkStyle = const TextStyle(
-      color: Colors.blue,
-      decoration: TextDecoration.underline,
-      fontSize: 25.0,
-    );
 
     String curupasUrl = 'https://curupas.com.ar/';
 
@@ -97,40 +73,57 @@
 
     final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
+    TapGestureRecognizer _flutterTapRecognizer;
+
+    TextStyle linkStyle = const TextStyle(
+      color: Colors.blue,
+      decoration: TextDecoration.underline,
+      fontSize: 25.0,
+    );
+
 
     @override
     void initState() {
+      super.initState();
 
       //_globals.queryDevice();
 
       isRegistered().then((result) {
+
         if (result) {
-          new MessagingWidget();
           _globals.setFilePickerGlobal();
           String userId = prefs.getString('userId');
           _globals.getUserData(userId).then((user) {
 
-              _globals.user = user;
-
-              if (!user.smsChecked) {
-
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) =>
-                      new SMSDialog(userId: user.userID),
-                );
-
-              } else if (!user.accepted) {
-
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) =>
-                      _buildNotAcceptedDialog(context),
-                );
-
-              } else  {
-                loadContent(user);
+            _firebaseMessaging.getToken().then((token){
+              if (_globals.user.token != token) {
+                Map<String, dynamic> data = <String, dynamic>{'token': token };
+                Auth.updateUser(_globals.user.userID, data).then((user) async {
+                  _globals.user.token = token;
+                });
               }
+            });
+
+            _globals.user = user;
+            _globals.getDrawers();
+            _globals.initData();
+
+            if (!user.smsChecked) {
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) =>
+                new SMSDialog(userId: user.userID),
+              );
+
+            } else if (!user.accepted) {
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) =>
+                    _buildNotAcceptedDialog(context),
+              );
+            }
           });
         }
       });
@@ -181,7 +174,6 @@
         },
       );
 
-
       _profile = IconButton(
         icon: Icon(
           Icons.settings,
@@ -192,33 +184,130 @@
         },
       );
 
-      _flutterTapRecognizer = new TapGestureRecognizer()
-        ..onTap = () => _openUrl(curupasUrl);
+      listenNotifications();
 
-      super.initState();
+      _globals.eventBus.on().listen((event) {
+
+        int eventResult = int.parse(event.toString());
+
+        if (eventResult==1) {
+          setState(() {
+            updeteWidget();
+            _loading = false;
+          });
+        }
+
+      });
     }
 
     Future<bool> isRegistered() async {
-      bool registered = await getRegistered();
-      if (registered != null) {
-        return true;
-      } else {
-        return false;
-      }
+        bool registered = await getRegistered();
+        if (registered != null) {
+          return true;
+        } else {
+          return false;
+        }
     }
 
     Future<bool> getRegistered() async {
-      prefs = await SharedPreferences.getInstance();
-      bool registered = prefs.getBool('registered');
-      return registered;
+        prefs = await SharedPreferences.getInstance();
+        bool registered = prefs.getBool('registered');
+        return registered;
     }
+
+
+      Widget _buildNotAcceptedDialog(BuildContext context) {
+        return new AlertDialog(
+          title: Text('Aprobación pendiente',
+              style: TextStyle(
+                  color: Colors.blue, fontSize: ScreenUtil().setSp(40.0))),
+          content: new Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _buildAboutText(),
+              SizedBox(
+                height: 16.0,
+              ),
+              _buildLogoAttribution(),
+            ],
+          ),
+          actions: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 5.0, right: 15.0, left: 15.0),
+              child: new FlatButton(
+                onPressed: () {
+                  exit(0);
+                },
+                textColor: Colors.white,
+                child: Text(
+                  'CERRAR APLICACIÓN',
+                  style: TextStyle(
+                      color: Colors.blue, fontSize: ScreenUtil().setSp(40.0)),
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+
+      Widget _buildAboutText() {
+        String message =
+            "Falta que tu referente de la camada ${_globals.group.year} apruebe tu ingreso. Te va a llegar un mensaje de texto SMS cuando lo haga.";
+        return new RichText(
+          text: new TextSpan(
+            text: "${message}\n\n",
+            style: TextStyle(
+                color: Colors.black87, fontSize: ScreenUtil().setSp(30.0)),
+            children: <TextSpan>[
+              new TextSpan(
+                  text:
+                  'Mientras tanto, podes ver mas información del proyecto en ',
+                  style: TextStyle(
+                      color: Colors.black87, fontSize: ScreenUtil().setSp(30.0))),
+              new TextSpan(
+                text: 'Curupas',
+                recognizer: _flutterTapRecognizer,
+                style: linkStyle,
+              ),
+            ],
+          ),
+        );
+      }
+
+      Widget _buildLogoAttribution() {
+        return new Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: new Row(
+            children: <Widget>[
+              new Padding(
+                padding: const EdgeInsets.only(top: 0.0),
+                child: new Image.asset(
+                  "assets/images/escudo.png",
+                  width: 50.0,
+                ),
+              ),
+              const Expanded(
+                child: const Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: const Text(
+                    'El regreso virtual es crecimiento',
+                    style: const TextStyle(fontSize: 20.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
 
     @override
     Widget build(BuildContext context) {
-      ScreenUtil.instance =
-          ScreenUtil(width: 640, height: 1136, allowFontScaling: true)
-            ..init(context);
-      if (_loadingInProgress) {
+
+      if (_loading) {
+
+          ScreenUtil.instance = ScreenUtil(width: 640, height: 1136, allowFontScaling: true)..init(context);
+
         return Stack(children: <Widget>[
           new Container(
             height: MediaQuery.of(context).size.height,
@@ -282,84 +371,86 @@
             ),
           ),
         ]);
-      } else {
-        int _length = _globals.drawerContent.contents.length;
-        return Scaffold(
-          key: _scaffoldKey,
-          appBar: new AppBar(
-            elevation: 0.5,
-            leading: new IconButton(
-                icon: new Icon(Icons.menu),
-                onPressed: () => _scaffoldKey.currentState.openDrawer()),
-            title: Text(pageTitle),
-            centerTitle: true,
-            actions: <Widget>[
-              currentIconButton
-            ],
-          ),
-          drawer: Drawer(
-            child:
-              ListView.separated(
-                  itemCount: _length,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return _createHeader();
-                    } else {
-                      HTML contentHtml = _globals.drawerContent.contents[index];
-                      int icon = int.parse(contentHtml.icon);
-                      return _createDrawerItem(
-                          contentHtml : contentHtml,
-                          index: index,
-                          icon: getIconFromInt(icon),
-                          text: contentHtml.name,
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/contentviewer',
-                              arguments: contentHtml,
-                            );
-                            print(contentHtml.name);
-                          }
-                       );
-                    }
-                  },
-                  separatorBuilder: (context, index) {
-                    return Padding(
-                        padding: EdgeInsets.only(top: 0.0),
-                        child:
-                          Divider(),
-                    );
-                  },
 
-              ),
+      } else {
+
+          int _length = _globals.drawerContent.contents.length;
+          return Scaffold(
+            key: _scaffoldKey,
+            appBar: new AppBar(
+              elevation: 0.5,
+              leading: new IconButton(
+                  icon: new Icon(Icons.menu),
+                  onPressed: () => _scaffoldKey.currentState.openDrawer()),
+              title: Text(pageTitle),
+              centerTitle: true,
+              actions: <Widget>[
+                currentIconButton
+              ],
             ),
-          body: Stack(
-            children: <Widget>[
-              Padding(
-                child: PageStorage(
-                  child: currentPage,
-                  bucket: bucket,
+            drawer: Drawer(
+              child:
+                ListView.separated(
+                    itemCount: _length,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return _createHeader();
+                      } else {
+                        HTML contentHtml = _globals.drawerContent.contents[index];
+                        int icon = int.parse(contentHtml.icon);
+                        return _createDrawerItem(
+                            contentHtml : contentHtml,
+                            index: index,
+                            icon: getIconFromInt(icon),
+                            text: contentHtml.name,
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/contentviewer',
+                                arguments: contentHtml,
+                              );
+                              print(contentHtml.name);
+                            }
+                         );
+                      }
+                    },
+                    separatorBuilder: (context, index) {
+                      return Padding(
+                          padding: EdgeInsets.only(top: 0.0),
+                          child:
+                            Divider(),
+                      );
+                    },
+
                 ),
-                padding: EdgeInsets.only(bottom: 0.0),
               ),
-            ],
-          ),
-          bottomNavigationBar: FancyBottomNavigation(
-            tabs: tabItems,
-            circleColor: Color.fromRGBO(223, 0, 9, 1),
-            inactiveIconColor: Color(0xFF0bf0411),
-            initialSelection: 0,
-            key: bottomNavigationKey,
-            onTabChangedListener: (index) {
-              setState(() {
-                pageTitle = pageTitles[index];
-                currentPage = pages[index];
-                currentIconButton = navBarIcons[index];
-              });
-            },
-          ),
-        );
-      }
+            body: Stack(
+              children: <Widget>[
+                Padding(
+                  child: PageStorage(
+                    child: currentPage,
+                    bucket: bucket,
+                  ),
+                  padding: EdgeInsets.only(bottom: 0.0),
+                ),
+              ],
+            ),
+            bottomNavigationBar: FancyBottomNavigation(
+              tabs: tabItems,
+              circleColor: Color.fromRGBO(223, 0, 9, 1),
+              inactiveIconColor: Color(0xFF0bf0411),
+              initialSelection: 0,
+              key: bottomNavigationKey,
+              onTabChangedListener: (index) {
+                setState(() {
+                  pageTitle = pageTitles[index];
+                  currentPage = pages[index];
+                  currentIconButton = navBarIcons[index];
+                });
+              },
+            ),
+          );
+        }
     }
 
     IconData getIconFromInt(int id) {
@@ -418,76 +509,6 @@
       );
     }
 
-    Future<void> loadContent(User user) async {
-
-      _globals.initData();
-
-      //getGroupByYear(user.group.year);
-      getDescription();
-      getPosts();
-      getMuseums();
-      getDrawers();
-      getNewsletters();
-      getAnecdotes();
-      getStreamingData();
-      getNotifications();
-
-      Timer timer = new Timer.periodic(Duration(seconds: 5), (timer) {
-
-          print(DateTime.now());
-
-          int counter = 0;
-
-          //if (_globals.group!=null) {
-          //  counter++;
-          //}
-
-          if (_globals.description!=null) {
-            counter++;
-          }
-
-          if (_globals.posts!=null) {
-            counter++;
-          }
-
-          if (_globals.museums!=null) {
-            counter++;
-          }
-
-          if (_globals.drawerContent.contents!=null) {
-            counter++;
-          }
-
-          if (_globals.newsletterContent.contents!=null) {
-            counter++;
-          }
-
-          if (_globals.anecdoteContent.contents!=null) {
-            counter++;
-          }
-
-          if (_globals.streammer!=null) {
-            counter++;
-          }
-
-          if (_globals.notifications!=null) {
-            counter++;
-          }
-
-          if (counter == 8) {
-
-            timer.cancel();
-
-            _globals.setDataFromGlobal();
-            updeteWidget();
-
-            listenNotifications();
-
-          }
-
-      });
-    }
-
     void listenNotifications()
     {
       if (Platform.isIOS) iOS_Permission();
@@ -508,14 +529,7 @@
           //_navigateToItemDetail(message);
         },
       );
-      _firebaseMessaging.getToken().then((token){
-        if (_globals.user.token != token) {
-          Map<String, dynamic> data = <String, dynamic>{'token': token };
-          Auth.updateUser(_globals.user.userID, data).then((user) async {
-            _globals.user.token = token;
-          });
-        }
-      });
+
     }
 
     void iOS_Permission() {
@@ -527,130 +541,6 @@
       {
         print("Settings registered: $settings");
       });
-    }
-
-    void getGroupByYear(String year) {
-      Stream<Group> descStream = Auth.getGroupByYear(year);
-      descStream.listen((Group _group) {
-        _globals.group = _group;
-        _globals.user.group = _group;
-      });
-    }
-
-
-    void getDescription() {
-      Stream<Description> descStream = Auth.getDescription();
-      descStream.listen((Description _desc) {
-        _globals.description = _desc;
-      });
-    }
-
-    void getPosts() {
-       Auth.getPostSnapshots().then((templist) {
-         Auth.getPost(templist).then((List<Post> _posts) {
-          _globals.posts = _posts;
-        });
-      });
-    }
-
-    void getMuseums() async {
-       Auth.getMuseumSnapshots().then((templist) {
-         Auth.getMuseum(templist).then((List<Museum> _museums) {
-          _globals.museums = _museums;
-        });
-      });
-    }
-
-    void getDrawers() {
-      Auth.getHtmlContentByType("drawer").then((HTMLS _drawer) {
-        _globals.drawerContent = _drawer;
-        _globals.drawerContent.contents.sort((a, b) {
-          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
-        });
-      });
-    }
-
-    void getNewsletters() {
-      Auth.getHtmlContentByType("newsletter").then((HTMLS _newsletterContent) {
-        _globals.newsletterContent = _newsletterContent;
-        _globals.newsletterContent.contents.sort((a, b) {
-          return a.last_update.compareTo(b.last_update);
-        });
-      });
-    }
-
-    void getAnecdotes() async {
-      Auth.getHtmlContentByTypeAndGroup("anecdote", _globals.group.yearRef).then((HTMLS _anecdote) {
-        _globals.anecdoteContent = _anecdote;
-        _globals.anecdoteContent.contents.sort((a, b) {
-          return a.last_update.compareTo(b.last_update);
-        });
-      });
-    }
-
-    Future<bool> getStreamingData() async {
-      List<YT_API> ytResult = [];
-      List<Streaming> streamingList = [];
-      try {
-        ytResult = await ytApi.channel(channelId);
-      } on Exception catch (exception) {
-        print(exception.toString());
-      } catch (error) {
-        print(error.toString());
-      }
-      if (ytResult.length > 0) {
-        print(ytResult.toString());
-        _globals.streamingReachable = true;
-        _globals.setYoutubeApi(ytResult);
-        for (var i = 0; i < ytResult.length; i++) {
-          Streaming streaming = new Streaming();
-          YT_API ytapi = ytResult[i];
-          //writeYoutubeLog(i, ytapi.toString());
-          streaming.id = ytapi.id;
-          streaming.title = ytapi.title;
-          streaming.kind = ytapi.kind;
-          Map _default = ytapi.thumbnail['high'];
-          String thubnailUrl = _default['url'];
-          streaming.thumnailUrl = thubnailUrl;
-          streaming.videoUrl = ytapi.url;
-          String kind = ytapi.kind;
-          if (kind == "live") {
-            streaming.isLive = true;
-            _globals.streammer.setIsLiveStreaming(true);
-          } else {
-            streaming.isLive = false;
-          }
-          streamingList.add(streaming);
-        }
-        _globals.streammer.serStreamings(streamingList);
-      }
-    }
-
-    Future<File> writeYoutubeLog(int counter, String content) async {
-      final file = await _localFile;
-      // Write the file.
-      return file.writeAsString('$content');
-    }
-
-
-    void getNotifications() async {
-      Auth.getNotifications().then((notifications) {
-        _globals.notifications = notifications;
-        _globals.notifications.sort((a, b) {
-          return a.last_update.compareTo(b.last_update);
-        });
-      });
-    }
-
-    Future<File> get _localFile async {
-      final path = await _localPath;
-      return File('$path/log_youtube.txt');
-    }
-
-    Future<String> get _localPath async {
-      final directory = await getApplicationDocumentsDirectory();
-
-      return directory.path;
     }
 
     void updeteWidget() {
@@ -692,7 +582,6 @@
         pages = [one, two, three, four, five];
         currentPage = one;
         currentIconButton = _home;
-        _loadingInProgress = false;
       });
     }
 
@@ -710,98 +599,6 @@
       Navigator.of(context).pushNamed("/signin");
     }
 
-    Widget _buildNotAcceptedDialog(BuildContext context) {
-      return new AlertDialog(
-        title: Text('Aprobación pendiente',
-            style: TextStyle(
-                color: Colors.blue, fontSize: ScreenUtil().setSp(40.0))),
-        content: new Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _buildAboutText(),
-            SizedBox(
-              height: 16.0,
-            ),
-            _buildLogoAttribution(),
-          ],
-        ),
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(top: 5.0, right: 15.0, left: 15.0),
-            child: new FlatButton(
-              onPressed: () {
-                exit(0);
-              },
-              textColor: Colors.white,
-              child: Text(
-                'CERRAR APLICACIÓN',
-                style: TextStyle(
-                    color: Colors.blue, fontSize: ScreenUtil().setSp(40.0)),
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-
-    Widget _buildAboutText() {
-      String message =
-          "Falta que tu referente de la camada ${_globals.group.year} apruebe tu ingreso. Te va a llegar un mensaje de texto SMS cuando lo haga.";
-      return new RichText(
-        text: new TextSpan(
-          text: "${message}\n\n",
-          style: TextStyle(
-              color: Colors.black87, fontSize: ScreenUtil().setSp(30.0)),
-          children: <TextSpan>[
-            new TextSpan(
-                text:
-                    'Mientras tanto, podes ver mas información del proyecto en ',
-                style: TextStyle(
-                    color: Colors.black87, fontSize: ScreenUtil().setSp(30.0))),
-            new TextSpan(
-              text: 'Curupas',
-              recognizer: _flutterTapRecognizer,
-              style: linkStyle,
-            ),
-          ],
-        ),
-      );
-    }
-
-    Widget _buildLogoAttribution() {
-      return new Padding(
-        padding: const EdgeInsets.only(top: 16.0),
-        child: new Row(
-          children: <Widget>[
-            new Padding(
-              padding: const EdgeInsets.only(top: 0.0),
-              child: new Image.asset(
-                "assets/images/escudo.png",
-                width: 50.0,
-              ),
-            ),
-            const Expanded(
-              child: const Padding(
-                padding: const EdgeInsets.only(left: 20.0),
-                child: const Text(
-                  'El regreso virtual es crecimiento',
-                  style: const TextStyle(fontSize: 20.0),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    void _openUrl(String url) async {
-      /*if (await canLaunch(url)) {
-        await launch(url);
-      } else {
-        throw 'Could not launch $url';
-      }*/
-    }
 
     static Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) {
       if (message.containsKey('data')) {

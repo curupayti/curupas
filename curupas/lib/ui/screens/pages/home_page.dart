@@ -1,14 +1,24 @@
-  import 'package:curupas/ui/screens/widgets/museum.dart';
+
+  import 'dart:async';
+import 'dart:io';
+
+import 'package:curupas/business/auth.dart';
+import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
+import 'package:curupas/ui/screens/widgets/museum.dart';
   import 'package:curupas/ui/screens/widgets/newsletter/newsletter_widget.dart';
+import 'package:event_bus/event_bus.dart';
   import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:flutter/gestures.dart';
   import "package:flutter/material.dart";
   import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
   import 'package:curupas/globals.dart' as _globals;
-  import 'package:curupas/ui/draw/line.dart';
   import 'dart:ui' as ui;
+  import 'package:flutter_spinkit/flutter_spinkit.dart';
 
   import 'package:curupas/ui/screens/post/post_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
   class HomePage extends StatefulWidget {
     HomePage({Key key}) : super(key: key);
@@ -17,10 +27,14 @@
   }
 
   class _HomePageState extends State<HomePage> {
+
+    bool _loading = true;
+    int _counting = 0;
+
     @override
     Widget build(BuildContext context) {
       return Scaffold(
-        body: HomeStream(),
+        body: HomeStream(_loading),
         floatingActionButton: buildSpeedDial(),
       );
     }
@@ -29,12 +43,56 @@
     void initState() {
       super.initState();
       initDynamicLinks(context);
+
+      loadHomeDate();
+
+      _globals.eventBus.on().listen((event) {
+
+        int eventResult = int.parse(event.toString());
+        _counting = _counting + eventResult;
+
+        if (_counting==4) {
+
+          setState(() {
+            _loading = false;
+          });
+        }
+
+        print("Counting : ${_counting}");
+
+      });
+
+    }
+
+    void loadHomeDate() {
+
+      setState(() {
+        _loading = true;
+      });
+
+      _globals.getDescription();
+      _globals.getPosts();
+      _globals.getMuseums();
+      _globals.getNewsletters();
+    }
+
+  }
+
+
+
+  void _openUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
     }
   }
 
   void initDynamicLinks(BuildContext context) async {
-    final PendingDynamicLinkData data =
+
+    /*final PendingDynamicLinkData data =
     await FirebaseDynamicLinks.instance.getInitialLink();
+
     final Uri deepLink = data?.link;
 
     if (deepLink != null) {
@@ -51,7 +109,8 @@
         }, onError: (OnLinkErrorException e) async {
       print('onLinkError');
       print(e.message);
-    });
+    });*/
+
   }
 
   SpeedDial buildSpeedDial() {
@@ -91,11 +150,18 @@
   }
 
   class HomeStream extends StatefulWidget {
+
+    final bool loading;
+
+    HomeStream(this.loading);
+
     @override
     _HomeStreamState createState() => new _HomeStreamState();
   }
 
   class _HomeStreamState extends State<HomeStream> {
+
+
     @override
     Widget build(BuildContext context) {
       double height = MediaQuery.of(context).size.height;
@@ -104,15 +170,26 @@
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              Container(height: _height, child: HomeBackground())
+              Container(height: _height, child: HomeBackground(widget.loading))
             ],
           ),
         ),
       );
     }
+
+    @override
+    void initState() {
+
+    }
+
   }
 
   class HomeBackground extends StatelessWidget {
+
+    final bool loading;
+
+    HomeBackground(this.loading);
+
     @override
     Widget build(BuildContext context) {
       double bottomPadding =
@@ -147,137 +224,157 @@
         //floatingActionButton: buildSpeedDial(),
       );
     }
-  }
 
-  Widget _buildContent() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _buildHeader(),
-          _buildPostScroller(),
-          _buildNewsletterTimeline(),
-          _buildMuseumTimeline(),
-        ],
-      ),
-    );
-  }
+    Widget _buildContent() {
 
-  Widget _buildHeader() {
-    return new Row(
-      children: [
-        new Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: ScreenUtil().setHeight(40.0),
-            ),
-            child: _buildHeaderText(),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(right: ScreenUtil().setWidth(16.0)),
-          child: _buildAvatar(),
-        ),
-      ],
-    );
-  }
+      if (loading) {
 
-  Widget _buildHeaderText() {
-    return new Column(
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(left: ScreenUtil().setHeight(10.0)),
-          child: Text(
-            _globals.appData.name,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: ScreenUtil().setSp(80.0),
-              //backgroundColor: Colors.green,
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: ScreenUtil().setHeight(16.0)),
-          child: Text(
-            _globals.appData.location,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.85),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Container(
-          color: Colors.white.withOpacity(0.85),
-          margin: const EdgeInsets.symmetric(vertical: 16.0),
-          width: ScreenUtil().setWidth(350.0),
-          height: 1.0,
-        ),
-        Text(
-          _globals.appData.biography,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.85),
-            fontSize: ScreenUtil().setSp(30.0),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAvatar() {
-    return Container(
-      width: ScreenUtil().setWidth(250.0),
-      height: ScreenUtil().setHeight(250.0),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white30),
-      ),
-      margin: EdgeInsets.only(
-          top: ScreenUtil().setWidth(20.0), left: ScreenUtil().setWidth(25.0)),
-      padding: EdgeInsets.only(
-        top: ScreenUtil().setWidth(20.0),
-        left: ScreenUtil().setWidth(20.0),
-        right: ScreenUtil().setWidth(20.0),
-        bottom: ScreenUtil().setWidth(20.0),
-      ),
-      child: Image.asset(_globals.appData.avatar),
-    );
-  }
-
-  Widget _buildPostScroller() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0),
-      child: SizedBox.fromSize(
-        size: Size.fromHeight(245.0),
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          itemCount: _globals.appData.posts.length,
+        return SpinKitFadingCircle(
           itemBuilder: (BuildContext context, int index) {
-            var post = _globals.appData.posts[index];
-            return PostCard(post);
+            return DecoratedBox(
+              decoration: BoxDecoration(
+                color: index.isEven ? Colors.red : Colors.green,
+              ),
+            );
           },
-        ),
-      ),
-    );
+        );
+
+      } else {
+
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _buildHeader(),
+              _buildPostScroller(),
+              _buildNewsletterTimeline(),
+              _buildMuseumTimeline(),
+            ],
+          ),
+        );
+
+      }
+    }
+
+      Widget _buildHeader() {
+        return new Row(
+          children: [
+            new Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: ScreenUtil().setHeight(40.0),
+                ),
+                child: _buildHeaderText(),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: ScreenUtil().setWidth(16.0)),
+              child: _buildAvatar(),
+            ),
+          ],
+        );
+      }
+
+      Widget _buildHeaderText() {
+        return new Column(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(left: ScreenUtil().setHeight(10.0)),
+              child: Text(
+                _globals.appData.name,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: ScreenUtil().setSp(80.0),
+                  //backgroundColor: Colors.green,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: ScreenUtil().setHeight(16.0)),
+              child: Text(
+                _globals.appData.location,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.85),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Container(
+              color: Colors.white.withOpacity(0.85),
+              margin: const EdgeInsets.symmetric(vertical: 16.0),
+              width: ScreenUtil().setWidth(350.0),
+              height: 1.0,
+            ),
+            Text(
+              _globals.appData.biography,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.85),
+                fontSize: ScreenUtil().setSp(30.0),
+              ),
+            ),
+          ],
+        );
+      }
+
+      Widget _buildAvatar() {
+        return Container(
+          width: ScreenUtil().setWidth(250.0),
+          height: ScreenUtil().setHeight(250.0),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white30),
+          ),
+          margin: EdgeInsets.only(
+              top: ScreenUtil().setWidth(20.0), left: ScreenUtil().setWidth(25.0)),
+          padding: EdgeInsets.only(
+            top: ScreenUtil().setWidth(20.0),
+            left: ScreenUtil().setWidth(20.0),
+            right: ScreenUtil().setWidth(20.0),
+            bottom: ScreenUtil().setWidth(20.0),
+          ),
+          child: Image.asset(_globals.appData.avatar),
+        );
+      }
+
+      Widget _buildPostScroller() {
+        return Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: SizedBox.fromSize(
+            size: Size.fromHeight(245.0),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              itemCount: _globals.appData.posts.length,
+              itemBuilder: (BuildContext context, int index) {
+                var post = _globals.appData.posts[index];
+                return PostCard(post);
+              },
+            ),
+          ),
+        );
+      }
+
+      Widget _buildMuseumTimeline() {
+        return Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: SizedBox.fromSize(
+            size: Size.fromHeight(170.0),
+            child: new MuseumWidget(museums: _globals.appData.museums),
+          ),
+        );
+      }
+
+      Widget _buildNewsletterTimeline() {
+        return Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: SizedBox.fromSize(
+            size: Size.fromHeight(200.0),
+            child: new NewsletterWidget(newsletters: _globals.appData.newsletters),
+          ),
+        );
+      }
+
   }
 
-  Widget _buildMuseumTimeline() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0),
-      child: SizedBox.fromSize(
-        size: Size.fromHeight(170.0),
-        child: new MuseumWidget(museums: _globals.appData.museums),
-      ),
-    );
-  }
 
-  Widget _buildNewsletterTimeline() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0),
-      child: SizedBox.fromSize(
-        size: Size.fromHeight(200.0),
-        child: new NewsletterWidget(newsletters: _globals.appData.newsletters),
-      ),
-    );
-  }

@@ -324,6 +324,8 @@ import 'package:curupas/models/notification.dart';
       await Firestore.instance.document("contents/${type}").get().then((document) async {
         if (document.exists) {
          await getContenHtmls(document).then((listContentHtml) {
+           //Map<String, dynamic> map = {"doc":document,"list":listContentHtml};
+           //_drawerContent = HTMLS.fromDocument(document, listContentHtml);
            _drawerContent = HTMLS.fromDocument(document, listContentHtml);
           });
         }

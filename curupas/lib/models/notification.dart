@@ -24,16 +24,15 @@ class NotificationCloud {
     return {
       'documentID': documentID,
       'title': title,
-      'title': imageURL,
-      'title': thumbnailImageURL,
-      'title': notification
+      'imageURL': imageURL,
+      'thumbnailImageURL': thumbnailImageURL,
+      'notification': notification
     };
   }
 
   factory NotificationCloud.fromJson(Map<String, Object> doc, String documentID) {
 
     Timestamp timestamp = doc["last_update"] as Timestamp;
-    //var format = new DateFormat('d MMM, hh:mm a');
     DateTime date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
 
     NotificationCloud noti = new NotificationCloud(

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Description {
+
   final String title;
   final String description;
   final String documentID;
@@ -35,4 +36,5 @@ class Description {
   factory Description.fromDocument(DocumentSnapshot doc) {
     return Description.fromJson(doc.data, doc.documentID);
   }
+
 }

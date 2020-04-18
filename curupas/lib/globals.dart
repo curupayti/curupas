@@ -21,9 +21,10 @@
     import 'models/HTMLS.dart';
     import 'models/museum.dart';
     import 'models/notification.dart';
-import 'models/streaming.dart';
+    import 'models/streaming.dart';
     import 'package:path/path.dart' as p;
     import 'dart:math' as math;
+    import 'package:path_provider/path_provider.dart';
 
 
     User user = new User();
@@ -43,6 +44,11 @@ import 'models/streaming.dart';
     HTMLS drawerContent = new HTMLS();
     HTMLS newsletterContent = new HTMLS();
     HTMLS anecdoteContent = new HTMLS();
+
+    //Youtube
+    String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";
+    String channelId = "UCeLNPJoPAio9rT2GAdXDVmw";
+    YoutubeAPI ytApi = new YoutubeAPI(key);
 
     List<NotificationCloud> notifications = new List<NotificationCloud>();
 
@@ -369,3 +375,125 @@ import 'models/streaming.dart';
         print(e);
       }
     }
+
+    void getDrawers() {
+      Auth.getHtmlContentByType("drawer").then((HTMLS _drawer) {
+        drawerContent = _drawer;
+        drawerContent.contents.sort((a, b) {
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+        eventBus.fire("1");
+      });
+    }
+
+    void getDescription() {
+      Stream<Description> descStream = Auth.getDescription();
+      descStream.listen((Description _desc) {
+        description = _desc;
+        eventBus.fire("1");
+        return _desc;
+      });
+    }
+
+
+    void getPosts() {
+      Auth.getPostSnapshots().then((templist) {
+        Auth.getPost(templist).then((List<Post> _posts) {
+          posts = _posts;
+          eventBus.fire("1");
+        });
+      });
+    }
+
+    void getMuseums() async {
+      Auth.getMuseumSnapshots().then((templist) {
+        Auth.getMuseum(templist).then((List<Museum> _museums) {
+          museums = _museums;
+          eventBus.fire("1");
+        });
+      });
+    }
+
+    void getNewsletters() {
+      Auth.getHtmlContentByType("newsletter").then((HTMLS _newsletterContent) {
+        newsletterContent = _newsletterContent;
+        newsletterContent.contents.sort((a, b) {
+          return a.last_update.compareTo(b.last_update);
+        });
+        eventBus.fire("1");
+      });
+    }
+
+    void getAnecdotes() async {
+      Auth.getHtmlContentByTypeAndGroup("anecdote", group.yearRef).then((HTMLS _anecdote) {
+        anecdoteContent = _anecdote;
+        anecdoteContent.contents.sort((a, b) {
+          return a.last_update.compareTo(b.last_update);
+        });
+      });
+    }
+
+    void getNotifications() async {
+      Auth.getNotifications().then((notifications) {
+        notifications = notifications;
+        notifications.sort((a, b) {
+          return a.last_update.compareTo(b.last_update);
+        });
+      });
+    }
+
+    Future<bool> getStreamingData() async {
+      List<YT_API> ytResult = [];
+      List<Streaming> streamingList = [];
+      try {
+        ytResult = await ytApi.channel(channelId);
+      } on Exception catch (exception) {
+        print(exception.toString());
+      } catch (error) {
+        print(error.toString());
+      }
+      if (ytResult.length > 0) {
+        print(ytResult.toString());
+        streamingReachable = true;
+        setYoutubeApi(ytResult);
+        for (var i = 0; i < ytResult.length; i++) {
+          Streaming streaming = new Streaming();
+          YT_API ytapi = ytResult[i];
+          //writeYoutubeLog(i, ytapi.toString());
+          streaming.id = ytapi.id;
+          streaming.title = ytapi.title;
+          streaming.kind = ytapi.kind;
+          Map _default = ytapi.thumbnail['high'];
+          String thubnailUrl = _default['url'];
+          streaming.thumnailUrl = thubnailUrl;
+          streaming.videoUrl = ytapi.url;
+          String kind = ytapi.kind;
+          if (kind == "live") {
+            streaming.isLive = true;
+            streammer.setIsLiveStreaming(true);
+          } else {
+            streaming.isLive = false;
+          }
+          streamingList.add(streaming);
+        }
+        streammer.serStreamings(streamingList);
+      }
+    }
+
+    Future<File> writeYoutubeLog(int counter, String content) async {
+      final file = await _localFile;
+      // Write the file.
+      return file.writeAsString('$content');
+    }
+
+    Future<File> get _localFile async {
+      final path = await _localPath;
+      return File('$path/log_youtube.txt');
+    }
+
+    Future<String> get _localPath async {
+      final directory = await getApplicationDocumentsDirectory();
+
+      return directory.path;
+    }
+
