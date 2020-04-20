@@ -89,11 +89,13 @@
                     },
                     {
                         "id": "workbench.action.files.save",
-                        "label": "&&Save"
+                        "label": "&&Save",
+                        "enabled": false
                     },
                     {
                         "id": "workbench.action.files.saveAs",
-                        "label": "Save &&As..."
+                        "label": "Save &&As...",
+                        "enabled": false
                     },
                     {
                         "id": "workbench.action.files.saveAll",
@@ -357,7 +359,8 @@
                                 },
                                 {
                                     "id": "workbench.action.toggleSidebarVisibility",
-                                    "label": "Show &&Side Bar"
+                                    "label": "Show &&Side Bar",
+                                    "checked": true
                                 },
                                 {
                                     "id": "workbench.action.toggleStatusbarVisibility",
@@ -371,8 +374,7 @@
                                 },
                                 {
                                     "id": "workbench.action.togglePanel",
-                                    "label": "Show &&Panel",
-                                    "checked": true
+                                    "label": "Show &&Panel"
                                 },
                                 {
                                     "id": "vscode.menubar.separator"
@@ -1374,5 +1376,22 @@
     },
     "theme": "vs-dark",
     "themeBackground": "#1e1e1e",
-    "pickerWorkingDir": "/home/jose/repos/curupa"
+    "pickerWorkingDir": "/home/jose/repos/curupa",
+    "windowsState": {
+        "lastActiveWindow": {
+            "workspaceIdentifier": {
+                "id": "0dc3641e70bc385864025c0deba10953",
+                "configURIPath": "file:///home/jose/repos/curupa/functions/~/.vscode-root/Workspaces/1578399855530/workspace.json"
+            },
+            "backupPath": "/home/jose/repos/curupa/functions/~/.vscode-root/Backups/0dc3641e70bc385864025c0deba10953",
+            "uiState": {
+                "mode": 1,
+                "x": 171,
+                "y": 33,
+                "width": 1024,
+                "height": 735
+            }
+        },
+        "openedWindows": []
+    }
 }
