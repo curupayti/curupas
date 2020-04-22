@@ -1,11 +1,10 @@
 
   import 'dart:async';
-  import 'package:cloud_functions/cloud_functions.dart';
-import 'package:curupas/models/HTML.dart';
+  import 'package:curupas/models/HTML.dart';
   import 'package:curupas/models/HTMLS.dart';
   import 'package:curupas/models/group_media.dart';
   import 'package:curupas/models/museum.dart';
-import 'package:curupas/models/notification.dart';
+  import 'package:curupas/models/notification.dart';
   import 'package:firebase_analytics/firebase_analytics.dart';
   import 'package:firebase_auth/firebase_auth.dart';
   import 'package:cloud_firestore/cloud_firestore.dart';
@@ -218,18 +217,6 @@ import 'package:curupas/models/notification.dart';
       });
     }
 
-
-    static getGroupVideoMediaByType(String documentId) async {
-      Firestore.instance.document("years/${documentId}").get().then((DocumentSnapshot document) async {
-        if (document.exists) {
-          await getMedias(document).then((listGroupMedia) {
-            _globals.group.medias = listGroupMedia;
-            setMediaListener(documentId);
-          });
-        }
-      });
-    }
-
     static setMediaListener(String documentId) {
       CollectionReference reference = Firestore.instance.collection("years/${documentId}/media");
       reference.snapshots().listen((querySnapshot) {
@@ -403,6 +390,20 @@ import 'package:curupas/models/notification.dart';
       }).toList();
       return list;
     }
+
+    static Future<List<GroupMedia>> getGroupVideoMediaByType(String documentId) async {
+      List<GroupMedia> list = new List();
+      await Firestore.instance.document("years/${documentId}").get().then((DocumentSnapshot document) async {
+        if (document.exists) {
+          await getMedias(document).then((listGroupMedia) {
+            setMediaListener(documentId);
+            list = listGroupMedia;
+          });
+        }
+      });
+      return list;
+    }
+
 
     static Future<List<User>> getFriends() async {
       List<DocumentSnapshot> templist;

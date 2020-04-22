@@ -2,20 +2,19 @@
   import 'dart:async';
   import 'dart:io';
   import 'package:curupas/models/HTML.dart';
+  import 'package:curupas/ui/pages/calendar_page.dart';
+  import 'package:curupas/ui/pages/group_page.dart';
+  import 'package:curupas/ui/pages/home_page.dart';
+  import 'package:curupas/ui/pages/profile_page.dart';
+  import 'package:curupas/ui/pages/streaming_page.dart';
   import 'package:curupas/ui/screens/friend_screen.dart';
   import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
-import 'package:event_bus/event_bus.dart';
   import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
   import 'package:firebase_messaging/firebase_messaging.dart';
   import 'package:flutter/gestures.dart';
   import 'package:flutter/material.dart';
   import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:curupas/business/auth.dart';
-  import 'package:curupas/ui/screens/pages/calendar_page.dart';
-  import 'package:curupas/ui/screens/pages/group_page.dart';
-  import 'package:curupas/ui/screens/pages/home_page.dart';
-  import 'package:curupas/ui/screens/pages/profile_page.dart';
-  import 'package:curupas/ui/screens/pages/streaming_page.dart';
   import 'package:shared_preferences/shared_preferences.dart';
   import 'package:curupas/globals.dart' as _globals;
 
@@ -91,6 +90,7 @@ import 'package:event_bus/event_bus.dart';
       isRegistered().then((result) {
 
         if (result) {
+
           _globals.setFilePickerGlobal();
           String userId = prefs.getString('userId');
           _globals.getUserData(userId).then((user) {
@@ -105,8 +105,8 @@ import 'package:event_bus/event_bus.dart';
             });
 
             _globals.user = user;
-            _globals.getDrawers();
             _globals.initData();
+            _globals.getDrawers();
 
             if (!user.smsChecked) {
 
@@ -187,17 +187,15 @@ import 'package:event_bus/event_bus.dart';
       listenNotifications();
 
       _globals.eventBus.on().listen((event) {
-
-        int eventResult = int.parse(event.toString());
-
-        if (eventResult==1) {
+        String _event = event.toString();
+        if (_event.contains("main")) {
           setState(() {
             updeteWidget();
             _loading = false;
           });
         }
-
       });
+
     }
 
     Future<bool> isRegistered() async {
@@ -529,7 +527,6 @@ import 'package:event_bus/event_bus.dart';
           //_navigateToItemDetail(message);
         },
       );
-
     }
 
     void iOS_Permission() {

@@ -11,6 +11,7 @@
   import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
   import 'package:curupas/globals.dart' as _globals;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
   import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
   import 'package:shared_preferences/shared_preferences.dart';
   import 'dart:ui' as ui;
@@ -34,10 +35,13 @@
     //File vars
     String _imagePath;
 
+    bool _loading = true;
+    int _counting = 0;
+
     @override
     Widget build(BuildContext context) {
       return Scaffold(
-        body: GroupStream(),
+        body: GroupStream(_loading),
         floatingActionButton: buildSpeedDial(context),
       );
     }
@@ -46,12 +50,24 @@
     void initState() {
       super.initState();
 
-      _globals.eventBus
-          .on()
-          .listen((event) {
-        //print(event.toString());
-        setState(() {});
+      _globals.getGroupVideoMedia();
+      _globals.getAnecdotes();
+
+      _globals.eventBus.on().listen((event) {
+        String _event = event.toString();
+        if (_event.contains("group")) {
+          _counting = _counting + 1;
+          if (_counting == 2) {
+            _globals.setDataFromGlobal();
+            _counting = 0;
+            setState(() {
+              _loading = false;
+            });
+          }
+          print("Counting : ${_counting}");
+        }
       });
+
     }
 
     SpeedDial buildSpeedDial(BuildContext context) {
@@ -153,6 +169,12 @@
   }
 
   class GroupStream extends StatefulWidget {
+
+    final bool loading;
+
+    GroupStream(this.loading);
+
+
     @override
     _GroupStreamState createState() => new _GroupStreamState();
   }
@@ -166,7 +188,7 @@
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              Container(height: _height, child: GroupBackground())
+              Container(height: _height, child: GroupBackground(widget.loading))
             ],
           ),
         ),
@@ -175,6 +197,11 @@
   }
 
   class GroupBackground extends StatelessWidget {
+
+    final bool loading;
+
+    GroupBackground(this.loading);
+
     @override
     Widget build(BuildContext context) {
       double bottomPadding =
@@ -194,7 +221,7 @@
                 filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                 child: Container(
                   color: Colors.black.withOpacity(0.5),
-                  child: _buildContent(),
+                  child: _buildContent(loading),
                 ),
               ),
             ),
@@ -211,18 +238,33 @@
     }
   }
 
-  Widget _buildContent() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          UpperSection(),
-          //AnecdoteSection(),
-          _buildMuseumTimeline(),
-          StaggeredSection(),
-        ],
-      ),
-    );
+  Widget _buildContent(bool loading) {
+
+    if (loading) {
+
+      return SpinKitFadingCircle(
+        itemBuilder: (BuildContext context, int index) {
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              color: index.isEven ? Colors.red : Colors.green,
+            ),
+          );
+        },
+      );
+
+    } else {
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            UpperSection(),
+            //AnecdoteSection(),
+            _buildMuseumTimeline(),
+            StaggeredSection(),
+          ],
+        ),
+      );
+    }
   }
 
   class UpperSection extends StatelessWidget {

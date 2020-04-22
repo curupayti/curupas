@@ -6,6 +6,7 @@
   import "package:flutter/material.dart";
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
   import 'package:curupas/globals.dart' as _globals;
+  import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 
   //https://github.com/mattgraham1/FlutterCalendar
@@ -17,6 +18,12 @@
   }
 
   class _CalendarPageState extends State<CalendarPage> {
+
+    bool _loading = true;
+    int _counting = 0;
+
+    DateTime dateTime;
+
     @override
     Widget build(BuildContext context) {
       return Container(
@@ -27,10 +34,12 @@
     @override
     void initState() {
       super.initState();
-  }
+
+    }
   }
 
   class CalendarPageScreen extends StatelessWidget {
+
     @override
     Widget build(BuildContext context) {
       double height = MediaQuery.of(context).size.height + 80;
@@ -46,6 +55,7 @@
   }
 
   class CalendarBody extends StatelessWidget {
+
     @override
     Widget build(BuildContext context) {
       return Scaffold(
@@ -92,19 +102,24 @@
   }
 
   class CalendarSection extends StatefulWidget {
+
+    CalendarSection();
+
     @override
     _CalendarState createState() => _CalendarState();
   }
 
   class _CalendarState extends State<CalendarSection> {
 
-    DateTime _dateTime;
-    int _beginMonthPadding=0;
+    bool loading;
 
-    QuerySnapshot _userEventSnapshot;
+    Future<QuerySnapshot> futureCalendarSnapshot;
+    QuerySnapshot calendarSnapshot;
+
+    int _beginMonthPadding = 0;
+    DateTime _dateTime;
 
     _CalendarState() {
-      _dateTime = DateTime.now();
       setMonthPadding();
     }
 
@@ -114,31 +129,62 @@
     }
 
     @override
+    void initState() {
+      super.initState();
+
+      futureCalendarSnapshot = _globals.getCalendar(DateTime.now()).then((snapshot) {
+        calendarSnapshot = snapshot;
+        setState(() {
+          loading = false;
+        });
+      });
+    }
+
+    @override
     Widget build(BuildContext context) {
 
-      final int numWeekDays = 7;
-      var size = MediaQuery.of(context).size;
+      if (loading) {
 
-      /*24 is for notification bar on Android*/
-      /*28 is for weekday labels of the row*/
-      // 55 is for iPhoneX clipping issue.
-      final double itemHeight = (size.height - kToolbarHeight-kBottomNavigationBarHeight-24-28-55) / 6;
-      final double itemWidth = size.width / numWeekDays;
+        return SpinKitFadingCircle(
+          itemBuilder: (BuildContext context, int index) {
+            return DecoratedBox(
+              decoration: BoxDecoration(
+                color: index.isEven ? Colors.red : Colors.green,
+              ),
+            );
+          },
+        );
 
-      double button_width = MediaQuery.of(context).size.width / 3;
+      } else {
 
-      return new FutureBuilder(
-        future: Auth.getCalendarData(_dateTime).then((snapshot) {
-          _userEventSnapshot = snapshot;
-        }),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          return new Column(
-              children: <Widget>[
-                new Column(
-                  children: <Widget>[
-                    new Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      mainAxisSize: MainAxisSize.max,
+        final int numWeekDays = 7;
+        var size = MediaQuery
+            .of(context)
+            .size;
+
+        /*24 is for notification bar on Android*/
+        /*28 is for weekday labels of the row*/
+        // 55 is for iPhoneX clipping issue.
+
+        final double itemHeight = (size.height - kToolbarHeight -
+            kBottomNavigationBarHeight - 24 - 28 - 55) / 6;
+        final double itemWidth = size.width / numWeekDays;
+
+        double button_width = MediaQuery
+            .of(context)
+            .size
+            .width / 3;
+
+        return new FutureBuilder(
+            future: futureCalendarSnapshot,
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              return new Column(
+                children: <Widget>[
+                  new Column(
+                    children: <Widget>[
+                      new Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisSize: MainAxisSize.max,
                         children: <Widget>[
                           SizedBox(
                             height: 50.0,
@@ -153,7 +199,7 @@
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                onPressed: (){
+                                onPressed: () {
 
                                 }
                             ),
@@ -171,7 +217,7 @@
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                onPressed: (){
+                                onPressed: () {
 
                                 }
                             ),
@@ -189,137 +235,160 @@
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                onPressed: (){
+                                onPressed: () {
 
                                 }
                             ),
                           ),
                         ],
-                    ),
-                  ],
-                ),
-                new Column(
-                  children: <Widget>[
-                    SizedBox(
-                      height: 70.0,
-                      child:
+                      ),
+                    ],
+                  ),
+                  new Column(
+                    children: <Widget>[
+                      SizedBox(
+                        height: 70.0,
+                        child:
                         Padding(
-                        padding: EdgeInsets.only(bottom: 15.0),
+                          padding: EdgeInsets.only(bottom: 15.0),
                           child:
-                            new Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: <Widget>[
-                                  new Padding(
-                                    padding: EdgeInsets.only(bottom: 8.0),
-                                    child: new Text(
-                                      getMonthNameSpanish(_dateTime.month) + " " + _dateTime.year.toString(),
-                                      style: new TextStyle(
-                                        fontSize: 22.0,
-                                        color: Colors.black,
-                                      ),
-                                    ),
+                          new Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              new Padding(
+                                padding: EdgeInsets.only(bottom: 8.0),
+                                child: new Text(
+                                  getMonthNameSpanish(_dateTime.month) + " " +
+                                      _dateTime.year.toString(),
+                                  style: new TextStyle(
+                                    fontSize: 22.0,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                                IconButton(
+                              ),
+                              IconButton(
                                   icon: Icon(
                                     Icons.today,
                                     color: Colors.black,
                                     size: 30,
                                   ),
                                   onPressed: _goToToday
-                                ),
-                                IconButton(
+                              ),
+                              IconButton(
                                   icon: Icon(
                                     Icons.chevron_left,
                                     color: Colors.black,
                                     size: 40,
                                   ),
                                   onPressed: _previousMonthSelected
-                                ),
-                                IconButton(
+                              ),
+                              IconButton(
                                   icon: Icon(
                                     Icons.chevron_right,
                                     color: Colors.black,
                                     size: 40,
                                   ),
                                   onPressed: _nextMonthSelected
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
+                          ),
                         ),
-                    ),
-                  ],
-                ),
-                new Column(
-                  children: <Widget>[
-                    new Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        new Expanded(
-                            child: new Text('D',//'S',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.subtitle)),
-                        new Expanded(
-                            child: new Text('L',//'M',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.subtitle)),
-                        new Expanded(
-                            child: new Text('M',//'T',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.subtitle)),
-                        new Expanded(
-                            child: new Text('M',//'W',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.subtitle)),
-                        new Expanded(
-                            child: new Text('J',//'T',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.subtitle)),
-                        new Expanded(
-                            child: new Text('V',//'F',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.subtitle)),
-                        new Expanded(
-                            child: new Text('S',//'S',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.subtitle)),
-                      ],
-                    ),
-                    new GridView.count(
-                      crossAxisCount: numWeekDays,
-                      childAspectRatio: (itemWidth / itemHeight),
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      children: List.generate(
-                          getNumberOfDaysInMonth(_dateTime.month),
-                            (index) {
+                      ),
+                    ],
+                  ),
+                  new Column(
+                    children: <Widget>[
+                      new Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          new Expanded(
+                              child: new Text('D', //'S',
+                                  textAlign: TextAlign.center,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .subtitle)),
+                          new Expanded(
+                              child: new Text('L', //'M',
+                                  textAlign: TextAlign.center,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .subtitle)),
+                          new Expanded(
+                              child: new Text('M', //'T',
+                                  textAlign: TextAlign.center,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .subtitle)),
+                          new Expanded(
+                              child: new Text('M', //'W',
+                                  textAlign: TextAlign.center,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .subtitle)),
+                          new Expanded(
+                              child: new Text('J', //'T',
+                                  textAlign: TextAlign.center,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .subtitle)),
+                          new Expanded(
+                              child: new Text('V', //'F',
+                                  textAlign: TextAlign.center,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .subtitle)),
+                          new Expanded(
+                              child: new Text('S', //'S',
+                                  textAlign: TextAlign.center,
+                                  style: Theme
+                                      .of(context)
+                                      .textTheme
+                                      .subtitle)),
+                        ],
+                      ),
+                      new GridView.count(
+                        crossAxisCount: numWeekDays,
+                        childAspectRatio: (itemWidth / itemHeight),
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        children: List.generate(
+                            getNumberOfDaysInMonth(_dateTime.month),
+                                (index) {
                               int dayNumber = index + 1;
                               return new GestureDetector(
                                 // Used for handling tap on each day view
-                                onTap: () =>
-                                    _onDayTapped(
-                                        dayNumber - _beginMonthPadding),
-                                child: new Container(
-                                    margin: const EdgeInsets.all(2.0),
-                                    padding: const EdgeInsets.all(1.0),
-                                    decoration: new BoxDecoration(
-                                        border: new Border.all(
-                                            color: Colors.grey)),
-                                    child: new Column(
-                                      children: <Widget>[
-                                        buildDayNumberWidget(dayNumber),
-                                        buildDayEventInfoWidget(dayNumber)
-                                      ],
-                                    )));
-                          }),
-                        ),
-                      ],
-                    ),
-                  ],
-             );
-        });
+                                  onTap: () =>
+                                      _onDayTapped(
+                                          dayNumber - _beginMonthPadding),
+                                  child: new Container(
+                                      margin: const EdgeInsets.all(2.0),
+                                      padding: const EdgeInsets.all(1.0),
+                                      decoration: new BoxDecoration(
+                                          border: new Border.all(
+                                              color: Colors.grey)),
+                                      child: new Column(
+                                        children: <Widget>[
+                                          buildDayNumberWidget(dayNumber),
+                                          buildDayEventInfoWidget(dayNumber)
+                                        ],
+                                      )));
+                            }),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            });
+      }
     }
 
     Align buildDayNumberWidget(int dayNumber) {
@@ -369,7 +438,7 @@
       int eventCount = 0;
       DateTime eventDate;
 
-      _userEventSnapshot.documents.forEach((doc) {
+      calendarSnapshot.documents.forEach((doc) {
         eventDate = doc.data['time'];
         if (eventDate != null
             && eventDate.day == dayNumber - _beginMonthPadding

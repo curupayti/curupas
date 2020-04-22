@@ -1,24 +1,14 @@
 
-  import 'dart:async';
-import 'dart:io';
-
-import 'package:curupas/business/auth.dart';
-import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
-import 'package:curupas/ui/screens/widgets/museum.dart';
+  import 'package:curupas/ui/screens/widgets/museum.dart';
   import 'package:curupas/ui/screens/widgets/newsletter/newsletter_widget.dart';
-import 'package:event_bus/event_bus.dart';
-  import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:flutter/gestures.dart';
   import "package:flutter/material.dart";
   import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
   import 'package:curupas/globals.dart' as _globals;
   import 'dart:ui' as ui;
   import 'package:flutter_spinkit/flutter_spinkit.dart';
-
   import 'package:curupas/ui/screens/post/post_card.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+  import 'package:url_launcher/url_launcher.dart';
 
   class HomePage extends StatefulWidget {
     HomePage({Key key}) : super(key: key);
@@ -44,38 +34,33 @@ import 'package:url_launcher/url_launcher.dart';
       super.initState();
       initDynamicLinks(context);
 
-      loadHomeDate();
+      loadHomeData();
 
       _globals.eventBus.on().listen((event) {
-
-        int eventResult = int.parse(event.toString());
-        _counting = _counting + eventResult;
-
-        if (_counting==4) {
-
-          setState(() {
-            _loading = false;
-          });
+        String _event = event.toString();
+        if (_event.contains("home")) {
+          _counting = _counting + 1;
+          if (_counting == 4) {
+            _globals.setDataFromGlobal();
+            _counting = 0;
+            setState(() {
+              _loading = false;
+            });
+          }
         }
-
         print("Counting : ${_counting}");
-
       });
-
     }
 
-    void loadHomeDate() {
-
+    void loadHomeData() {
       setState(() {
         _loading = true;
       });
-
       _globals.getDescription();
       _globals.getPosts();
       _globals.getMuseums();
       _globals.getNewsletters();
     }
-
   }
 
 
@@ -177,10 +162,10 @@ import 'package:url_launcher/url_launcher.dart';
       );
     }
 
-    @override
+    /*@override
     void initState() {
 
-    }
+    }*/
 
   }
 

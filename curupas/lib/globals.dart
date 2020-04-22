@@ -19,6 +19,7 @@
     import 'business/auth.dart';
     import 'models/HTML.dart';
     import 'models/HTMLS.dart';
+    import 'models/group_media.dart';
     import 'models/museum.dart';
     import 'models/notification.dart';
     import 'models/streaming.dart';
@@ -30,6 +31,7 @@
     User user = new User();
     Group group = new Group();
 
+    //Events
     EventBus eventBus = EventBus();
 
     //App Data object
@@ -51,8 +53,6 @@
     YoutubeAPI ytApi = new YoutubeAPI(key);
 
     List<NotificationCloud> notifications = new List<NotificationCloud>();
-
-    //_globals.setData(desc, posts, museums, newsletters, _globals.anecdoteContent.contents);
 
     Streammer streammer;
     bool streamingReachable = false;
@@ -81,7 +81,6 @@
                       group = await Group.fromDocument(yearSnapshot);
                       userSnapshot.data["group"] = group;
                       _user = await User.fromDocument(userSnapshot);
-                      Auth.getGroupVideoMediaByType(group.documentID);
                       return _user;
                     } on Exception catch (exception) {
                       print(exception.toString());
@@ -156,21 +155,24 @@
     }
 
     void setDataFromGlobal() {
-      setData(description.description, posts, museums, newsletterContent.contents, anecdoteContent.contents);
+      setData(description.description, posts, museums, newsletterContent.contents); //, anecdoteContent.contents);
     }
 
     void setData(String desc,
         List<Post> posts,
         List<Museum> museums,
         List<HTML> newsletters,
-        List<HTML> anecdotes) {
+        //List<HTML> anecdotes
+        ) {
 
       appData.biography = desc;
       appData.posts = posts;
       appData.museums = museums;
       appData.newsletters = newsletters;
-      appData.anecdotes = anecdotes;
+      //appData.anecdotes = anecdotes;
     }
+
+
 
     void queryDevice() async {
 
@@ -281,9 +283,6 @@
           return true;
 
         });
-
-
-
       }
 
       Future<String> getStorageFileUrl(String childReference) async {
@@ -376,13 +375,26 @@
       }
     }
 
+    //MAIN
+
     void getDrawers() {
       Auth.getHtmlContentByType("drawer").then((HTMLS _drawer) {
         drawerContent = _drawer;
         drawerContent.contents.sort((a, b) {
           return a.name.toLowerCase().compareTo(b.name.toLowerCase());
         });
-        eventBus.fire("1");
+        eventBus.fire("main-drawer");
+      });
+    }
+
+    //HOME
+
+    void getMuseums() async {
+      Auth.getMuseumSnapshots().then((templist) {
+        Auth.getMuseum(templist).then((List<Museum> _museums) {
+          museums = _museums;
+          eventBus.fire("home-museum");
+        });
       });
     }
 
@@ -390,7 +402,7 @@
       Stream<Description> descStream = Auth.getDescription();
       descStream.listen((Description _desc) {
         description = _desc;
-        eventBus.fire("1");
+        eventBus.fire("home-description");
         return _desc;
       });
     }
@@ -400,16 +412,7 @@
       Auth.getPostSnapshots().then((templist) {
         Auth.getPost(templist).then((List<Post> _posts) {
           posts = _posts;
-          eventBus.fire("1");
-        });
-      });
-    }
-
-    void getMuseums() async {
-      Auth.getMuseumSnapshots().then((templist) {
-        Auth.getMuseum(templist).then((List<Museum> _museums) {
-          museums = _museums;
-          eventBus.fire("1");
+          eventBus.fire("home-posts");
         });
       });
     }
@@ -420,7 +423,32 @@
         newsletterContent.contents.sort((a, b) {
           return a.last_update.compareTo(b.last_update);
         });
-        eventBus.fire("1");
+        eventBus.fire("home-newsletter");
+      });
+    }
+
+    //CALENDAR
+    Future<QuerySnapshot> getCalendar(DateTime dateTime) {
+      Auth.getCalendarData(dateTime).then((snapshot) {
+        return snapshot;
+      });
+    }
+
+    Future<QuerySnapshot> getCalendarEvents(DateTime dateTime) {
+      Auth.getCalendarEvents(dateTime).then((snapshot) {
+        //_userEventSnapshot = snapshot;
+        eventBus.fire("calendar-event");
+        return snapshot;
+      });
+    }
+
+    //GROUP
+
+    void getGroupVideoMedia() {
+      String groupId = group.documentID;
+      Auth.getGroupVideoMediaByType(groupId).then((List<GroupMedia> listGroupMedia) {
+        group.medias = listGroupMedia;
+        eventBus.fire("group");
       });
     }
 
@@ -430,6 +458,7 @@
         anecdoteContent.contents.sort((a, b) {
           return a.last_update.compareTo(b.last_update);
         });
+        eventBus.fire("group-anecdotes");
       });
     }
 
@@ -439,6 +468,7 @@
         notifications.sort((a, b) {
           return a.last_update.compareTo(b.last_update);
         });
+        eventBus.fire("profile-notifications");
       });
     }
 
@@ -477,6 +507,7 @@
           streamingList.add(streaming);
         }
         streammer.serStreamings(streamingList);
+        eventBus.fire("streaming");
       }
     }
 

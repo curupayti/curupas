@@ -12,6 +12,7 @@
   }
 
   class _FriendsListPageState extends State<FriendsListPage> {
+
     List<User> _friends = [];
 
     @override
