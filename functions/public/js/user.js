@@ -2,8 +2,6 @@
 
         let _documents = {};       
         
-        window.jsonData = [];
-
         let deleteIDs = [];
         let lastVisible;
         let firstVisible;
@@ -36,7 +34,6 @@
         }); 
 
         function renderUser(document) {  
-
             _documents[document.id] = document;      
 
             let itemObj = {
@@ -46,97 +43,9 @@
                 year: document.data().year, 
                 phone: document.data().phone,
                 accepted: document.data().accepted
-            };            
+            };
 
-            window.datatable = $('#grid-users').DataTable( {
-                scrollY: "180px",
-                scrollCollapse: true,
-                paging:         false,
-                retrieve: true, 
-                bInfo : false,                                                       
-                columns: [                  
-                  { "data": "meta.id" },
-                  { "data": "meta.Imagen" },
-                  { "data": "meta.Nombre" },
-                  { "data": "meta.Camada" },                  
-                ],
-                columnDefs: [
-                  {
-                    "targets": [ 0 ],
-                    "visible": false,
-                    "searchable": false,                
-                  },                  
-                  {
-                    "visible": true,
-                    "searchable": true,
-                    "width": "30%"
-                  },
-                  {
-                    "targets": [ 2 ],
-                    "visible": true,
-                    "searchable": true,
-                    "width": "15%"
-                  },
-                  {
-                    "targets": [ 3 ],
-                    "visible": true,
-                    "searchable": false,
-                    "width": "20%"
-                  }
-                ],    
-                //dom: 'Bfrtip',
-                /*buttons: {
-                  buttons: [
-                    {
-                      text: "Nuevo",
-                      action: function(e, dt, node, config) 
-                      {
-                        $("#new-title").text(_new);
-                        $('#addModal').modal('show');
-                      },
-                      attr:  {                    
-                        id: 'new-button'
-                      }
-                    }, 
-                    {
-                      text: "Editar",
-                      action: function(e, dt, node, config) 
-                      {
-    
-                      },
-                      attr:  {                    
-                        id: 'edit-button',
-                        disabled: true
-                      }
-                    }
-                  ],
-                  dom: {
-                    button: {
-                      tag: "button",                  
-                      className: "btn btn-primary"
-                    },                
-                    buttonLiner: {
-                      tag: null
-                    }
-                  }
-                }*/ 
-              });  
-
-              let row = { 
-                "meta": {                    
-                  "id": itemObj.id, 
-                  "Imagen": "<img src='" + itemObj.avatar + "' style='height:30px; width:30px'>",                 
-                  "Nombre": itemObj.name, 
-                  "Camada": itemObj.year, 
-                 } 
-              };   
-   
-              window.jsonData.push(row);
-
-              window.datatable.rows.add(window.jsonData);
-              window.datatable.draw();  
-
-            /*let item = `<tbody onclick="rowClick('` 
+            let item = `<tbody onclick="rowClick('` 
                 + itemObj.id + `','`     
                 + itemObj.avatar + `','`               
                 + itemObj.name + `','` 
@@ -156,9 +65,9 @@
             <td>${itemObj.year}</td>       
             <td>${itemObj.phone}</td>
             </tr></tbody>`;        
-            $('#user-table').append(item);*/                   
+            $('#user-table').append(item);                   
             
-            /*var checkbox = $('table tbody input[type="checkbox"]');
+            var checkbox = $('table tbody input[type="checkbox"]');
             $("#selectAll").click(function () {
                 if (this.checked) {
                     checkbox.each(function () {
@@ -176,7 +85,7 @@
                 if (!this.checked) {
                     $("#selectAll").prop("checked", false);
                 }
-            });*/
+            });
 
             if (contLoded==(size-1)) {
                 homeLoader.hide();
@@ -185,9 +94,9 @@
         }               
 
         // VIEW IMAGES
-        //$(document).on('click', '.js-view-images', function () {
-        //    alert('clicked!');
-        //});               
+        $(document).on('click', '.js-view-images', function () {
+            alert('clicked!');
+        });               
 
         $("#edit-user-form").submit(function (event) {
             event.preventDefault();
@@ -236,9 +145,7 @@
             if ($(this).closest('.page-item').hasClass('disabled')) {
                 return false;
             }
-            
             $('#user-table tbody').html('');
-
             var next = db.collection("employees")
                 .startAfter(lastVisible)
                 .limit(3);
@@ -281,7 +188,7 @@
 
     let _roleSnapshot = [];   
 
-    /*function rowClick(id, avatar, name, year, phone, accepted) {              
+    function rowClick(id, avatar, name, year, phone, accepted) {              
         $('#edit-user-form').attr('edit-id', id);
         $('#edit-user-form #avatar-preview').attr("src", avatar);        
         $('#edit-user-form #user-name').val(name);
@@ -320,7 +227,7 @@
             $(this).closest('.drop-group').find('button').append('<span class="appended">' + $(this).text() + '</span>');
           
         });
-    }*/
+    }
 
 
     (function ($) {
