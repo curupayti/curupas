@@ -1,14 +1,15 @@
-import "package:flutter/material.dart";
 
-class Walkthrough {
-  String image;
-  String title;
-  String description;
-  Widget extraWidget;
+  import "package:flutter/material.dart";
 
-  Walkthrough({this.image, this.title, this.description, this.extraWidget}) {
-    if (extraWidget == null) {
-      extraWidget = new Container();
+  class Walkthrough {
+    String image;
+    String title;
+    String description;
+    Widget extraWidget;
+
+    Walkthrough({this.image, this.title, this.description, this.extraWidget}) {
+      if (extraWidget == null) {
+        extraWidget = new Container();
+      }
     }
   }
-}
