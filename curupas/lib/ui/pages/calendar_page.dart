@@ -1,6 +1,5 @@
 
   import 'package:cloud_firestore/cloud_firestore.dart';
-  import 'package:curupas/business/auth.dart';
   import 'package:curupas/models/event_calendar.dart';
   import 'package:curupas/ui/screens/calendar/event_view.dart';
   import "package:flutter/material.dart";
@@ -36,6 +35,7 @@
       super.initState();
 
     }
+
   }
 
   class CalendarPageScreen extends StatelessWidget {
@@ -46,7 +46,10 @@
       return Scaffold(
         body: SingleChildScrollView(
           child: Column(
-            children: <Widget>[Container(height: height, child: CalendarBody())],
+            children: <Widget>[
+              Container(height: height,
+                  child: CalendarBody(),
+              )],
           ),
         ),
         floatingActionButton: buildSpeedDial(),
@@ -67,6 +70,7 @@
         ),
       );
     }
+
   }
 
   SpeedDial buildSpeedDial() {
@@ -103,7 +107,7 @@
 
   class CalendarSection extends StatefulWidget {
 
-    CalendarSection();
+    //CalendarSection();
 
     @override
     _CalendarState createState() => _CalendarState();
@@ -111,7 +115,7 @@
 
   class _CalendarState extends State<CalendarSection> {
 
-    bool loading;
+    bool loading = true;
 
     Future<QuerySnapshot> futureCalendarSnapshot;
     QuerySnapshot calendarSnapshot;
@@ -120,6 +124,7 @@
     DateTime _dateTime;
 
     _CalendarState() {
+      _dateTime = DateTime.now();
       setMonthPadding();
     }
 
@@ -128,16 +133,24 @@
       _beginMonthPadding == 7 ? (_beginMonthPadding = 0) : _beginMonthPadding;
     }
 
+
     @override
     void initState() {
       super.initState();
 
-      futureCalendarSnapshot = _globals.getCalendar(DateTime.now()).then((snapshot) {
+      getCalendar();
+
+
+    }
+
+    void getCalendar() async {
+      futureCalendarSnapshot = await _globals.getCalendar(DateTime.now()).then((snapshot) {
         calendarSnapshot = snapshot;
         setState(() {
           loading = false;
         });
       });
+
     }
 
     @override

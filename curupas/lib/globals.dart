@@ -428,10 +428,12 @@
     }
 
     //CALENDAR
-    Future<QuerySnapshot> getCalendar(DateTime dateTime) {
-      Auth.getCalendarData(dateTime).then((snapshot) {
-        return snapshot;
+    Future<QuerySnapshot> getCalendar(DateTime dateTime) async {
+      QuerySnapshot querySnapshot;
+      await Auth.getCalendarData(dateTime).then((snapshot) {
+        querySnapshot = snapshot;
       });
+      return querySnapshot;
     }
 
     Future<QuerySnapshot> getCalendarEvents(DateTime dateTime) {
