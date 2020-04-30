@@ -9,6 +9,7 @@ import 'package:flutter_credit_card/credit_card_model.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
   import 'package:curupas/globals.dart' as _globals;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
   class ProfilePage extends StatefulWidget {
     ProfilePage({Key key}) : super(key: key);
@@ -33,10 +34,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
     DecorationImage _avatarImage;
 
+    bool _loading = true;
+    int _counting = 0;
+
     @override
     Widget build(BuildContext context) {
       return Container(
-        child: ProfilePageScreen(this),
+        child: ProfilePageScreen(this, _loading),
       );
     }
 
@@ -53,6 +57,25 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
         image: new NetworkImage(_globals.user.thumbnailPictureURL),
         fit: BoxFit.cover,
       );
+
+      _globals.getNotifications();
+
+      _globals.eventBus.on().listen((event) {
+        String _event = event.toString();
+        if (_event.contains("profile")) {
+          _counting = _counting + 1;
+          if (_counting == 1) {
+            _globals.setDataFromGlobal();
+            _counting = 0;
+            setState(() {
+              _loading = false;
+            });
+          }
+        }
+        print("Counting : ${_counting}");
+      });
+
+
     }
   }
 
@@ -60,66 +83,85 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
     _ProfilePageState parent;
 
-    ProfilePageScreen(this.parent);
+    final bool loading;
+
+    ProfilePageScreen(this.parent, this.loading);
 
     Widget build(BuildContext context) {
-      return DefaultTabController(
-          length: 3,
-          child: Scaffold(
-//                appBar: AppBar(
-//                  title: Text(title),
-//                ),
-              body: SafeArea(
-                  child: Column(children: <Widget>[
-                    Container(
-                      color: Colors.white,
-                      height: MediaQuery.of(context).size.height / 2.8,  // Also Including Tab-bar height.
-                        child: UpperSection(parent),
-                    ),
-                    PreferredSize(
-                      preferredSize: Size.fromHeight(50.0),
-                      child: TabBar(
-                        labelColor: Colors.black,
-                        tabs: [
-                          Tab(icon: Icon(Icons.notifications)),
-                          Tab(icon: Icon(Icons.payment)),
-                          Tab(icon: Icon(Icons.info)),
-                        ], // list of tabs
-                      ),
-                    ),
-                    //TabBarView(children: [ImageList(),])
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.green, Colors.blue],
-                            //begin: Alignment.topCenter,
-                            //end:Alignment.bottomCenter
-                          )),
-                          child:
-                            TabBarView(
-                              children: [
-                                Container(
-                                  color: Colors.white,
-                                  child: renderNotifications(context),
-                                ),
-                                Container(
-                                  color: Colors.red,
-                                  child: CreditCardBody(parent),
-                                ),
-                                Container(
-                                  color: Colors.yellowAccent,
-                                  child: ProfileDataBody(parent),
-                                ) // class name
-                              ],
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
+
+
+      if (loading) {
+
+        return SpinKitFadingCircle(
+          itemBuilder: (BuildContext context, int index) {
+            return DecoratedBox(
+              decoration: BoxDecoration(
+                color: index.isEven ? Colors.red : Colors.green,
               ),
-          ),
-      );
+            );
+          },
+        );
+
+      } else {
+
+        return DefaultTabController(
+            length: 3,
+            child: Scaffold(
+  //                appBar: AppBar(
+  //                  title: Text(title),
+  //                ),
+                body: SafeArea(
+                    child: Column(children: <Widget>[
+                      Container(
+                        color: Colors.white,
+                        height: MediaQuery.of(context).size.height / 2.8,  // Also Including Tab-bar height.
+                          child: UpperSection(parent),
+                      ),
+                      PreferredSize(
+                        preferredSize: Size.fromHeight(50.0),
+                        child: TabBar(
+                          labelColor: Colors.black,
+                          tabs: [
+                            Tab(icon: Icon(Icons.notifications)),
+                            Tab(icon: Icon(Icons.payment)),
+                            Tab(icon: Icon(Icons.info)),
+                          ], // list of tabs
+                        ),
+                      ),
+                      //TabBarView(children: [ImageList(),])
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.green, Colors.blue],
+                              //begin: Alignment.topCenter,
+                              //end:Alignment.bottomCenter
+                            )),
+                            child:
+                              TabBarView(
+                                children: [
+                                  Container(
+                                    color: Colors.white,
+                                    child: renderNotifications(context),
+                                  ),
+                                  Container(
+                                    color: Colors.red,
+                                    child: CreditCardBody(parent),
+                                  ),
+                                  Container(
+                                    color: Colors.yellowAccent,
+                                    child: ProfileDataBody(parent),
+                                  ) // class name
+                                ],
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ),
+        );
+      }
     }
 
     renderNotifications(BuildContext context) {
