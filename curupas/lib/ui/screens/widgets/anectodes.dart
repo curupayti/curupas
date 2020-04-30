@@ -1,7 +1,6 @@
 
   import 'package:circular_profile_avatar/circular_profile_avatar.dart';
-import 'package:curupas/models/HTML.dart';
-  import 'package:curupas/models/museum.dart';
+  import 'package:curupas/models/HTML.dart';
   import 'package:flutter/material.dart';
 
   class AnecdotesWidget extends StatelessWidget {
@@ -26,11 +25,11 @@ import 'package:curupas/models/HTML.dart';
             ),
         ),
         body: Container(
-          height:100,
+          height: 100,
           width: MediaQuery.of(context).size.width,
           child: Center(
             child: ListView(
-              padding: EdgeInsets.all(2.0),
+              padding: EdgeInsets.only(top: 5.0, left: 2.5, right: 2.5),
               scrollDirection: Axis.horizontal,
               children: anecdotes.map((anecdote) =>
                   CircularProfileAvatar (

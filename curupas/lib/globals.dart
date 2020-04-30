@@ -450,7 +450,7 @@
       String groupId = group.documentID;
       Auth.getGroupVideoMediaByType(groupId).then((List<GroupMedia> listGroupMedia) {
         group.medias = listGroupMedia;
-        eventBus.fire("group");
+        eventBus.fire("group-media");
       });
     }
 
