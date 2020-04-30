@@ -509,7 +509,7 @@
           streamingList.add(streaming);
         }
         streammer.serStreamings(streamingList);
-        eventBus.fire("streaming");
+        eventBus.fire("streaming-games-loaded");
       }
     }
 
