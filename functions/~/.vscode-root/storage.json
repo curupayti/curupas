@@ -4,7 +4,10 @@
         "workspaces3": [
             "file:///home/jose/repos/curupa/functions"
         ],
-        "files2": []
+        "files2": [
+            "file:///home/jose/repos/curupa/functions/public/js/textedit.js",
+            "file:///home/jose/repos/curupa/functions/public/html/content/textedit.html"
+        ]
     },
     "lastKnownMenubarData": {
         "menus": {
@@ -60,6 +63,31 @@
                                     "id": "vscode.menubar.separator"
                                 },
                                 {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
+                                        "external": "file:///home/jose/repos/curupa/functions/public/js/textedit.js",
+                                        "path": "/home/jose/repos/curupa/functions/public/js/textedit.js",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/repos/curupa/functions/public/js/textedit.js"
+                                },
+                                {
+                                    "id": "openRecentFile",
+                                    "uri": {
+                                        "$mid": 1,
+                                        "external": "file:///home/jose/repos/curupa/functions/public/html/content/textedit.html",
+                                        "path": "/home/jose/repos/curupa/functions/public/html/content/textedit.html",
+                                        "scheme": "file"
+                                    },
+                                    "enabled": true,
+                                    "label": "~/repos/curupa/functions/public/html/content/textedit.html"
+                                },
+                                {
+                                    "id": "vscode.menubar.separator"
+                                },
+                                {
                                     "id": "workbench.action.openRecent",
                                     "label": "&&More..."
                                 },
@@ -89,13 +117,11 @@
                     },
                     {
                         "id": "workbench.action.files.save",
-                        "label": "&&Save",
-                        "enabled": false
+                        "label": "&&Save"
                     },
                     {
                         "id": "workbench.action.files.saveAs",
-                        "label": "Save &&As...",
-                        "enabled": false
+                        "label": "Save &&As..."
                     },
                     {
                         "id": "workbench.action.files.saveAll",
@@ -544,8 +570,7 @@
                 "items": [
                     {
                         "id": "workbench.action.navigateBack",
-                        "label": "&&Back",
-                        "enabled": false
+                        "label": "&&Back"
                     },
                     {
                         "id": "workbench.action.navigateForward",
@@ -554,8 +579,7 @@
                     },
                     {
                         "id": "workbench.action.navigateToLastEditLocation",
-                        "label": "&&Last Edit Location",
-                        "enabled": false
+                        "label": "&&Last Edit Location"
                     },
                     {
                         "id": "vscode.menubar.separator"

@@ -1,753 +1,428 @@
-$(document).ready(function () {        
+$(document).ready(function () {
 
-    homeLoader.show();  
+    let _documents = {};
+    let _imageSnapshot = {};
+    
+    let deleteIDs = [];
+    let lastVisible;
+    let firstVisible;
 
-    window.jsonDataMain = [];
+    //ESTA
 
-    var edit_references = _role.edit_references;
-
-    var length = edit_references.length;
-
-    for (let i = 0; i < length; i++) {
-
-      let editRef = edit_references[i]; 
-
-      let refId = editRef.id;
-
-      var count = 0;
-      var flag = 0;
-
-      db.collection("contents").doc(refId).get().then(function(_doc) {
-
-          var data = _doc.data();          
-
-          var _name = data.name;  
-          var _new =  data.new;
-          var _short = data.short;   
-          var _id = _doc.id; 
-          let _amount = data.amount;            
-          let _time =  data.last_update;  
-
-          let last_update = getDateFrom(_time.toDate());
-          window.datatable_main = $('#grid-main').DataTable({
-            scrollY: "500px",
-            scrollCollapse: true,
-            paging:         false,
-            retrieve: true, 
-            bInfo : false, 
-            searching: false,     
-            columns: [             
-              { "data": "meta.id" },
-              { "data": "meta.new" },
-              { "data": "meta.short" },
-              { "data": "meta.Nombre" },
-              { "data": "meta.Cantidad" }                        
-            ],
-            columnDefs: [
-              {
-                "targets": [ 0 ],
-                "visible": false,
-                "searchable": false,                
-              },
-              {
-                "targets": [ 1 ],
-                "visible": false,
-                "searchable": false,                
-              },
-              {
-                "targets": [ 2 ],
-                "visible": false,
-                "searchable": false,                                
-              },
-              {
-                "targets": [ 3 ],
-                "visible": true,
-                "searchable": true,
-                "width": "50%"
-              },
-              {
-                "targets": [ 4 ],
-                "visible": true,
-                "searchable": false,
-                "width": "5%"
-              },              
-            ],
-            dom: '<"toolbar_main"><br>frtip',   
-            fnInitComplete: function(oSettings) {
-              $('.dataTables_scrollHead thead').hide();
-            }              
-          });                
-
-          let row = { 
-            "meta": {                
-              "id": _id, 
-              "new": _new, 
-              "short": _short, 
-              "Nombre": _name, 
-              "Cantidad": _amount              
-             } 
-          };   
-
-          window.jsonDataMain.push(row);
-
-          $("div.toolbar_main").html('<H2><b>Editor de contenidos Curupas</b></H2>');
-
-          //$('#grid-main tbody').on('click', 'tr', function () {
-
-          $('#grid-main tbody').off( 'click.rowClick' ).on('click.rowClick', 'td', function () {              
-          
-              var data = window.datatable_main.row( this ).data();
-              
-              window._id_document_collection = data.meta.id;  
-              
-              let _new = data.meta.new;
-              let _short = data.meta.short;   
-
-              window.datatable_main.clear();                        
-              
-              
-              if ( $(this).hasClass('selected') ) {
-                  $(this).removeClass('selected');                  
-              } else {
-                
-                window.datatable_main.$('tr.selected').removeClass('selected');
-                  $(this).addClass('selected');                  
-                  loadEditsList(_new, _short);
-              }
-              
-          });   
-  
-          editObjects[_id] = _doc;
-
-          if (count == (length-1)) {    
-            
-            window.datatable_main.rows.add(window.jsonDataMain);
-            window.datatable_main.draw();    
-
-            homeLoader.hide();
-
-          }       
-          count++;      
-      });
-    }     
-
-    window.jsonDataDetail = [];
-    window.editDocuments = [];
-
-    window._short;
-    window._id_document_collection;
-    window.database_ref;
-  
-    window.loadEditsList = function(_new, _short) { 
-
-      window._short = _short;      
-      
-      clearFirepad();      
-
-      var _doc = editObjects[_short];   
-  
-      _doc.ref.collection("collection").get()
-      .then(function(querySnapshotEdit) {
-  
-           var editLength = querySnapshotEdit.docs.length;
-  
-           var countLines = 1;        
-
-          if (window.datatable_detail !=undefined ) {
-            window.datatable_detail.clear();            
-            $('#new-button').text(_new);
-          }
-
-          window.datatable_detail = $('#grid-details').DataTable({
-            scrollY: "180px",
-            scrollCollapse: true,
-            paging: false,
-            retrieve: true, 
-            bInfo : false,                                                       
-            columns: [
-              { "data": "meta.database_ref" },
-              { "data": "meta.id" },
-              { "data": "meta.Nombre" },
-              /*{ "data": "meta.Desc" },*/
-              /*{ "data": "meta.Actualizado" },*/
-              { "data": "meta.Imagen" }
-            ],
-            columnDefs: [
-              {
-                "targets": [ 0 ],
-                "visible": false,
-                "searchable": false,                
-              },
-              {
-                "targets": [ 1 ],
-                "visible": false,
-                "searchable": false,                
-              },
-              {
-                "targets": [ 2 ],
-                "visible": true,
-                "searchable": true,
-                "width": "80%"
-              },
-              {
-                "targets": [ 3 ],
-                "visible": true,
-                "searchable": true,
-                "width": "20%"
-              },
-             
-            ],    
-            dom: 'Bfrtip',
-            buttons: {
-              buttons: [
-                {
-                  text: _new,
-                  action: function(e, dt, node, config) 
-                  {
-                    $("#new-title").text(_new);
-                    $('#addModal').modal('show');
-                  },
-                  attr:  {                    
-                    id: 'new-button'
-                  }
-                }, 
-                {
-                  text: "Editar",
-                  action: function(e, dt, node, config) 
-                  {
-
-                  },
-                  attr:  {                    
-                    id: 'edit-button',
-                    disabled: true
-                  }
-                }
-              ],
-              dom: {
-                button: {
-                  tag: "button",                  
-                  className: "btn btn-primary"
-                },                
-                buttonLiner: {
-                  tag: null
-                }
-              }
-            } 
-          });
-                 
-          $('#grid-details tbody').on('click', 'tr', function () {             
-
-              var data = window.datatable_detail.row( this ).data();
-              console.log(data.meta.id);
-
-              window._id_document_collection = data.meta.id;
-              
-              //alert( 'You clicked on '+data.meta.id+'\'s row' );
-              if ( $(this).hasClass('selected') ) {
-                  $(this).removeClass('selected');
-                  $("#edit-button").prop('disabled', true);
-                  clearFirepad();            
-                  $("#publish-buttons").hide();
-                  //$("#firepad-container").hide();
-              }
-              else {
-                window.datatable_detail.$('tr.selected').removeClass('selected');
-                  $(this).addClass('selected');
-                  $("#edit-button").removeAttr('disabled');
-                  $("#publish-buttons").show();
-                  
-                  $("#firepad-container").show();                  
-                  
-                  $('#editModal').modal('show');
-
-                  $('#editModal').on('shown.bs.modal', function () {                       
-                    var height = $(document).height();
-                    $("#body-modal").css({'height': height + 'px'});
-                    setTimeout( function() {                          
-                        loadEdits(data.meta.database_ref, _short);   
-                    }, 500);
-                 });
-              }
-
-              $('#editModal').modal('show');
-              
-          });      
-          
-  
-          querySnapshotEdit.forEach(function(docEdit) {
-
-            let _doc_id_ = docEdit.id;
-            
-            window.editDocuments[_doc_id_] = docEdit;
-  
-             var editData = docEdit.data();   
-             
-             let _date = editData.last_update;
-
-             let last_update = getDateFrom(_date.toDate());
-
-             if (editData.html != undefined){
-               window.html = editData.html;
-             }
-
-             let _icon = editData.icon;
-  
-             let row = { 
-               "meta": {  
-                 "database_ref": editData.database_ref, 
-                 "id": _doc_id_, 
-                 "Nombre": editData.name, 
-                 //"Desc": editData.description.slice(0, 20) + "...", 
-                 //"Actualizado": last_update,
-                 "Imagen": "<img src='" + _icon + "' style='height:30px; width:30px'>",
-                } 
-             };   
-  
-             window.jsonDataDetail.push(row);
-  
-             let database_ref = editData.database_ref;    
-             
-             if (editLength == countLines) {                                                            
-                window.datatable_detail.rows.add(window.jsonDataDetail);
-                window.datatable_detail.draw();    
-             }
-             
-             countLines++;
-         });
-  
-     });  
-     
-    }
-     
-
-     function getDateFrom(_date) {      
-
-      var year = _date.getFullYear();
-      var month = _date.getMonth()+1;
-      var day = _date.getDate();
-
-      if (day < 10) {
-        day = '0' + day;
-      }
-      if (month < 10) {
-        month = '0' + month;
-      }
-
-      var formattedDate = day + '-' + month + '-' + year;
-
-      return formattedDate;
-     }
-
-     function clearFirepad() {
-
-        let hash_userlist = '#firepad-userlist';
-        let hash_firepad = '#firepad';
-
-        if($(hash_userlist).length){
-          $( hash_userlist ).remove();
+    // REAL TIME LISTENER
+    db.collection('contents').onSnapshot(snapshot => {
+        let size = snapshot.size;
+        $('.count').text(size);
+        if (size == 0) {
+            $('#selectAll').attr('disabled', true);
+        } else {
+            $('#selectAll').attr('disabled', false);
         }
+        let changes = snapshot.docChanges();
+        changes.forEach(change => {
+            if (change.type == 'added') {
+                renderPost(change.doc);
+            } else if (change.type == 'modified') {
+                $('tr[data-id=' + change.doc.id + ']').remove();
+                renderPost(change.doc);
+            } else if (change.type == 'removed') {
+                $('tr[data-id=' + change.doc.id + ']').remove();
+            }
+        });
+    });
 
-        if($(hash_firepad).length){
-          $( hash_firepad ).remove();
-        } 
-     }     
+    function renderPost(document) {  
+        _documents[document.id] = document;      
+        let _time = formatDate(Date(document.data().timeStamp));  
+        let _last_update = formatDate(Date(document.data().last_update));
 
-     $("#add-form").submit(function (event) {
+        document.ref.collection("images").get().then(function(imagesSnapshot) {
+            _imageSnapshot[document.id] = imagesSnapshot;
+            //let _size =  imagesSnapshot.size;
 
-        event.preventDefault(); 
+            //let item = `<tr data-id="${document.id}">
+            let item = `<tr class="clickable-row" data-id="${document.id}">
+            <td>
+                <span class="custom-checkbox">
+                    <input type="checkbox" id="${document.id}" name="options[]" value="${document.id}">
+                    <label for="${document.id}"></label>
+                </span>
+            </td>
+            <td>${document.data().name}</td>
+            <td>${document.data().amount}</td>            
+            <td>${_last_update}</td>              
+            <td>
+                <a href="#" id="${document.id}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
+                </a>
+                <a href="#" id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                </a>
+            </td>
+            </tr>`;
+            $('#main-table').append(item);            
+            // Select/Deselect checkboxes
+            var checkbox = $('table tbody input[type="checkbox"]');
+            $("#selectAll").click(function () {
+                if (this.checked) {
+                    checkbox.each(function () {
+                        console.log(this.id);
+                        deleteIDs.push(this.id);
+                        this.checked = true;
+                    });
+                } else {
+                    checkbox.each(function () {
+                        this.checked = false;
+                    });
+                }
+            });
+            checkbox.click(function () {
+                if (!this.checked) {
+                    $("#selectAll").prop("checked", false);
+                }
+            });
+        });        
+    }
 
-        window.datatable_detail.clear();
+    // VIEW IMAGES
+    $(document).on('click', '.clickable-row', function (event) {       
+
+        let dataid = $(this).data("id");
+
+        var checkboxes = $('table tbody input[type="checkbox"]');
+
+        checkboxes.each(function () {
+            this.checked = false;
+        });
+
+        $(this).find('input[type="checkbox"]').prop("checked", true);  
+
+
+        window._id_document_collection = dataid;        
+    });
+
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+    
+        if (month.length < 2) 
+            month = '0' + month;
+        if (day.length < 2) 
+            day = '0' + day;
+    
+        return [day, month, year].join('-');
+    }
+
+    // ADD EMPLOYEE
+    $("#add-post-form").submit(function (event) {
+        event.preventDefault();       
+
+        var title = $('#post-title').val();
         
-        var new_name = $('#new-name').val();
-        var new_desc = $('#new-desc').val();          
+        var description = $('#description').val();
 
-        var document_path = "contents/" + window._short + "/collection";
-
-        var _database_ref = makeid(28);        
-
-        var _time =  new Date();
-
-        var _desc = new_desc.slice(0, 20) + "...";
-
-        var timestamp =  new Date();
-
-        var thedate = getDateFrom(timestamp);            
-
-        let row = { "meta": {  
-          "database_ref": _database_ref, 
-          "id" : window._short,
-          "Nombre": new_name, 
-          "Desc": new_desc, 
-          "Actualizado": thedate } };   
-
-        window.jsonDataDetail.push(row); 
+        var storageRef = storage.ref("/posts");        
+        var file = document.getElementById("imgInp").files[0];       
+        var filePath =  title + ".png";        
+        var thisRef = storageRef.child(filePath);          
         
-        db.collection(document_path).add( {
-          
-          group_ref : _user.yearReference,
-          name : new_name,
-          description : new_desc,
-          database_ref : _database_ref,
-          last_update : _time        
+        var postId;       
+        
+        $('.lds-dual-ring').css('visibility', 'visible');
 
-        }).then(function(doc){   
-          
-            let _id = doc.id;
-          
-            var storage_path = "contents/" + window._short + "/" + _id;
-
-            var storageRef = storage.ref(storage_path);        
-            var file = document.getElementById("imgInp").files[0];                 
-            let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
-            var filePath = window._short + "_" +  rnd + ".png";            
-            
-            var thisRef = storageRef.child(filePath);                         
-
+        db.collection("posts").add({
+            title: title,
+            description: description,
+            //author: user.email
+        })
+        .then(function(docRef) {
+            postId = docRef.id;            
             var metadata = {
                 customMetadata: {
                     'thumbnail': 'true',
-                    'type' : '3',
-                    'short' : window._short,
-                    'id' : _id                   
+                    'type' : '1',
+                    'id' : postId,
+                    'collection' : 'posts'                   
                 }
             }
-
-            thisRef.put(file, metadata);
-
-            window.datatable_detail.rows.add(window.jsonDataDetail);
-            window.datatable_detail.draw(); 
-              
-            $('#addModal').modal('hide');
-
-            //$("#firepad-container").show();
-
-            loadEdits(_database_ref, window._short);
-
-            var num = parseInt($("#" + window._short).text());
-
-            num++;
-
-            $("#" + window._short).text(num);
-            $('#addPostModal').modal('hide');  
-
-
-        }).catch(function(error) {
-          console.error("Error adding document: ", error);
-        });   
-        
-
-     });
-
-     function makeid(length) {
-        var result           = '';
-        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var charactersLength = characters.length;
-        for ( var i = 0; i < length; i++ ) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return result;
-     }   
-
-     $('#button-publish').click(function() { 
-        $('#publishModal').modal('show');        
-      });
-
-    $('#publishModal').on('hidden.bs.modal', function () {
-      
-    });
-
-    $('#acceptCheckbox').change(function() {
-      if ($(this).prop('checked')) {
-        $('#button-accept').prop('disabled', false);       
-      } else  {
-        $('#button-accept').prop('disabled', true);
-      }
-    });
-
-    $('#button-accept').click(function(event) { 
-
-      event.preventDefault();
-
-      var _document = window.editDocuments[window._id_document_collection];
-        var _time =  new Date(); 
-        db.collection('contents')
-        .doc(window._short)
-        .collection("collection")
-        .doc(window._id_document_collection)
-        .update({        
-          "approved" : false,
-          "published" : false,
-          "last_update" : _time        
-        })
-        .then(function(documentUpdated) {
-
-          $('#publishModal').modal('hide');
-
-        })
-        .catch(function(error) {
-          console.error("Error adding document: ", error);
-        }); 
-
-    });
-
-     $('#button-save').click(function() {     
-      
-      var settings = {
-          "url": "https://us-central1-curupas-app.cloudfunctions.net/publish",
-          "method": "POST",
-          "timeout": 0,
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "data": JSON.stringify({
-            "database_ref":window.database_ref,
-            "contentType":window._short,
-            "documentId":window._id_document_collection
-          }),
-        };
-
-        homeLoader.show();  
-        
-        $.ajax(settings).done(function (response) {
-
-          console.log(response);
-
-          if (response.data.result) {
-            homeLoader.hide();  
-            //$('#view-save').prop('disabled', false);
-            window.html = response.data.html;           
-          } 
-          
-        });     
-    });
-
-    $('#view-save').click(function() { 
-        $('#previewModal').modal('show');
-        $('#modal-content').append("<div id='modal-container'>" + window.html + "</div>");
-    });
-
-    $('#previewModal').on('hidden.bs.modal', function () {
-      $('#modal-container').remove();
-    });     
-     
-    function loadEdits(database_ref, _short) { 
-
-      window.database_ref = database_ref;     
-      
-      //$('#button-publish').prop('disabled', true);
-      
-      $('#button-save').prop('disabled', true);
-      $('#button-accept').prop('disabled', true);      
-
-      //$('#view-save').prop('disabled', true);
-
-      var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );
-      
-      var firepad_div = $( "<div id='firepad'></div>" );
-      
-      $( "#firepad-container" ).append( firepad_userlist_div );
-      $( "#firepad-container" ).append( firepad_div );    
-  
-      var firepad = null, userList = null, codeMirror = null;
-  
-      if (firepad) {
-        // Clean up.
-        firepad.dispose();
-        userList.dispose();
-        $('.CodeMirror').remove();
-      }      
-    
-      var firepadRef = new Firebase( 'https://curupas-app.firebaseio.com/' + _short ).child(database_ref);
-
-      codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });          
-      
-      codeMirror.on('drop', function(data, e) {
-        var file;
-        var files;
-        // Check if files were dropped
-        var _URL = window.URL || window.webkitURL;
-        files = e.dataTransfer.files;
-        if (files.length > 0) {
-          e.preventDefault();
-          e.stopPropagation();
-          _file = files[0];
-          //alert('File: ' + file.name);
-          var img = new Image();    
-          img = new Image();
-          var objectUrl = _URL.createObjectURL(_file);
-          img.onload = function () {
-
-              var _width = this.width;
-              var _height = this.height;
-              
-              var metadataFiles = {
+            return thisRef.put(file, metadata);                    
+        })       
+        .then(function(snapshot) {                                    
+            var metadataFiles = {
                 customMetadata: {
                     'thumbnail': 'false',
                     'type' : '0'
                 }
-              }              
+            }
+            var prefArray = [];
+            var input = document.getElementById("proImage");
+            var j=0, k=0;
+            var length = input.files.length;
 
-              var storageRef = storage.ref("contents/" + _short + "/" + window._id_document_collection + "/images");       
+            for (var i = 0; i < length; ++i) {            
+                var _file = input.files.item(i);                                                  
+                var filePathPost = title + "_" + i + "_original.png";        
+                const postRef = storageRef.child(filePathPost);
+                const putRef = postRef.put(_file, metadataFiles);  
+                prefArray.push(putRef);  
+                putRef.on('state_changed', function(snapshot) {
+                    var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload is ' + progress + '% done');
+                    switch (snapshot.state) {
+                      case firebase.storage.TaskState.PAUSED: // or 'paused'
+                        console.log('Upload is paused');
+                        break;
+                      case firebase.storage.TaskState.RUNNING: // or 'running'
+                        console.log('Upload is running');
+                        break;
+                    }
+                  }, function(error) {
+                    // Handle unsuccessful uploads
+                  }, function() {                                        
+                    var putRefFromArray = prefArray[j];
+                    putRefFromArray.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
+                        db.collection("posts").doc(postId).collection("images").add({downloadURL});
+                        if (k==(length-1)){
+                            $('#addPostModal').modal('hide');
+                        }
+                        k++;
+                    });
+                    j++;
+                });   
+            }
+            console.log("termino");
+        })        
+        .catch(function(error) {
+            console.error("Error adding document: ", error);
+        });   
+    });
 
-              let rnd = Math.floor((Math.random()) * 0x10000).toString(7);
-                                                              
-              var filePathPost = _short + "_" +  rnd + ".png";        
-              const postRef = storageRef.child(filePathPost);
-              const putRef = postRef.put(_file, metadataFiles);  
-              //prefArray.push(putRef);  
-              putRef.on('state_changed', function(snapshot) {
-                  var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                  console.log('Upload is ' + progress + '% done');
-                  switch (snapshot.state) {
-                    case firebase.storage.TaskState.PAUSED: // or 'paused'
-                      console.log('Upload is paused');
-                      break;
-                    case firebase.storage.TaskState.RUNNING: // or 'running'
-                      console.log('Upload is running');
-                      break;
-                  }
-                }, function(error) {
-                  // Handle unsuccessful uploads
-                }, function() {                                                          
-                  putRef.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
-                      firepad.insertEntity('img', {
-                        'src' : downloadURL,
-                        'width' : _width,
-                        'height' : _height
-                      });
-                       
-                  });                  
-              });             
-              
-          };          
-          img.src = objectUrl;
-          return false;
-        }        
+    // DELETE POST
+    $(document).on('click', '.js-delete-post', function () {
+        let id = $(this).attr('id');
+        $('#delete-post-form').attr('delete-id', id);
+        $('#deletePostModal').modal('show');
+    });
 
-      });
+    $("#delete-post-form").submit(function (event) {
+        event.preventDefault();
+        let id = $(this).attr('delete-id');        
+        deleteAllImagesOnPost(id);
+        if (id != undefined) {            
+            let _path = "posts/" + id;
+            deleteDocumentAtPath(_path);
+        } else {
+            let checkbox = $('table tbody input:checked');
+            checkbox.each(function () {
+                let _path = "posts/" + this.value;
+                deleteDocumentAtPath(_path);               
+            });
+            $("#deletePostModal").modal('hide');
+        }
+    });
 
-      //LISTENER DRAG
-      //https://gist.github.com/mikelehen/fa5ceab5ad6f241b6544
-      //https://groups.google.com/forum/#!topic/firepad-io/d9HRHfd9NcE         
-
-      firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
-          { richTextToolbar: true, richTextShortcuts: true, userId: _user.userId});
-      userList = FirepadUserList.fromDiv(firepadRef.child('users'),
-          document.getElementById('firepad-userlist'), _user.userId);
-
-        firepad.on('ready', function() {
-          if (firepad.isHistoryEmpty()) {
-            firepad.setText('Welcome to your own private pad!\n\nShare the URL below and collaborate with your friends.');
-          }          
-
-          ensurePadInList(database_ref);
-          buildPadList();
-        });
+    function deleteAllImagesOnPost(id){        
+        //Delete Thumbnail
         
-        firepad.on('newLine', function() {
+        //let _SelectedDocument = _documents[id];
+        //deleteImageByUrl(_SelectedDocument.data().thumbnailSmallUrl);
+        
+        let _images = _imageSnapshot[id];
 
-          $('#button-save').prop('disabled', false);        
-          
-        });        
+        _images.docs.forEach(doc => {
+            //doc.data()
+            let _url = doc.data().downloadURL;
+            deleteImageByUrl(_url);
 
+        });          
+    }
 
-        codeMirror.focus();
-
-        codeMirror.setOption('dragDrop', true);        
-       
-
-      function padListEnabled() {
-        return (typeof localStorage !== 'undefined' && typeof JSON !== 'undefined' && localStorage.setItem &&
-            localStorage.getItem && JSON.parse && JSON.stringify);
-      }
-
-      function ensurePadInList(id) {
-        if (!padListEnabled()) { return; }
-        var list = JSON.parse(localStorage.getItem('demo-pad-list') || "{ }");
-        if (!(id in list)) {
-          var now = new Date();
-          var year = now.getFullYear(), month = now.getMonth() + 1, day = now.getDate();
-          var hours = now.getHours(), minutes = now.getMinutes();
-          if (hours < 10) { hours = '0' + hours; }
-          if (minutes < 10) { minutes = '0' + minutes; }
-
-          list[id] = [year, month, day].join('/') + ' ' + hours + ':' + minutes;
-
-          localStorage.setItem('demo-pad-list', JSON.stringify(list));
-          buildPadList();
-        }
-      }
-
-      function buildPadList() {
-        if (!padListEnabled()) { return; }
-        $('#my-pads-list').empty();
-
-        var list = JSON.parse(localStorage.getItem('demo-pad-list') || '{ }');
-        for(var id in list) {
-          $('#my-pads-list').append(
-              $('<div></div>').addClass('my-pads-item').append(
-                  makePadLink(id, list[id])
-          ));
-        }
-      }
-
-      function makePadLink(id, name) {
-        return $('<a></a>')
-            .text(name)
-            .on('click', function() {
-              window.location = window.location.toString().replace(/#.*/, '') + '#' + id;
-              $('#my-pads-list').hide();
-              return false;
+    function deleteImageByUrl(url) {
+        // Create a reference to the file to delete
+        var desertRef = firebase.storage().refFromURL("gs://" + url);
+        // Delete the file
+        desertRef.delete().then(function() {
+        // File deleted successfully
+        }).catch(function(error) {
+        // Uh-oh, an error occurred!
         });
-      }
+    }
 
-      function randomString(length) {
-        var text = "";
-        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        for(var i=0; i < length; i++)
-          text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-        return text;
-      }
+    function deleteDocumentAtPath(path) {
+        var deleteFn = firebase.functions().httpsCallable('recursiveDelete');
+        deleteFn({ path: path })
+            .then(function(result) {
+                console.log('Delete success: ' + JSON.stringify(result));
+                $("#deletePostModal").modal('hide');
+            })
+            .catch(function(err) {
+                console.log('Delete failed, see console,');
+                console.warn(err);
+            });
+    }
     
-      function displayPads() {
-        $('#my-pads-list').toggle();
-      }
 
-      $(".firepad-tb-insert-image").parent().parent().hide();   
+    // UPDATE EMPLOYEE
+    $(document).on('click', '.js-edit-post', function () {
+        let id = $(this).attr('id');
+        $('#edit-employee-form').attr('edit-id', id);
+        db.collection('employees').doc(id).get().then(function (document) {
+            if (document.exists) {
+                $('#edit-employee-form #employee-name').val(document.data().name);
+                $('#edit-employee-form #employee-email').val(document.data().email);
+                $('#edit-employee-form #employee-address').val(document.data().address);
+                $('#edit-employee-form #employee-phone').val(document.data().phone);
+                $('#editEmployeeModal').modal('show');
+            } else {
+                console.log("No such document!");
+            }
+        }).catch(function (error) {
+            console.log("Error getting document:", error);
+        });
+    });
 
+    $("#edit-employee-form").submit(function (event) {
+        event.preventDefault();
+        let id = $(this).attr('edit-id');
+        db.collection('employees').doc(id).update({
+            name: $('#edit-employee-form #employee-name').val(),
+            email: $('#edit-employee-form #employee-email').val(),
+            address: $('#edit-employee-form #employee-address').val(),
+            phone: $('#edit-employee-form  #employee-phone').val()
+        });
+        $('#editEmployeeModal').modal('hide');
+    });
 
-    }     
+    $("#addPostModal").on('hidden.bs.modal', function () {
+        $('#add-post-form .form-control').val('');
+    });
+
+    $("#editEmployeeModal").on('hidden.bs.modal', function () {
+        $('#edit-employee-form .form-control').val('');
+    });
+
+    // PAGINATION
+    $("#js-previous").on('click', function () {
+        $('#main-table tbody').html('');
+        var previous = db.collection("employees")
+            .orderBy(firebase.firestore.FieldPath.documentId(), "desc")
+            .startAt(firstVisible)
+            .limit(3);
+        previous.get().then(function (documentSnapshots) {
+            documentSnapshots.docs.forEach(doc => {
+                renderPost(doc);
+            });
+        });
+    });
+
+    $('#js-next').on('click', function () {
+        if ($(this).closest('.page-item').hasClass('disabled')) {
+            return false;
+        }
+        $('#main-table tbody').html('');
+        var next = db.collection("employees")
+            .startAfter(lastVisible)
+            .limit(3);
+        next.get().then(function (documentSnapshots) {
+            documentSnapshots.docs.forEach(doc => {
+                renderPost(doc);
+            });
+            lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+            firstVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+            let nextChecker = documentSnapshots.docs.length - 1;
+            if (nextChecker == 0) {
+                $('#js-next').closest('.page-item').addClass('disabled');
+            }
+        });
+    });
+
+    //--
+    //-- Image Picker
+    //--   
+
+    document.getElementById('proImage').addEventListener('change', readImage, false);        
     
+    $(document).on('click', '.image-cancel', function() {
+        let no = $(this).data('no');
+        $(".preview-image.preview-show-"+no).remove();
+    });    
+    
+    var num = 4;
+    function readImage() {
+        if (window.File && window.FileList && window.FileReader) {
+            var files = event.target.files; //FileList object
+            //$( ".preview-images-zone" ).sortable();
+            var output = $(".preview-images-zone");    
+            for (let i = 0; i < files.length; i++) {
+                var file = files[i];
+                if (!file.type.match('image')) continue;                
+                var picReader = new FileReader();                
+                picReader.addEventListener('load', function (event) {
+                    var picFile = event.target;
+                    var html =  '<div class="preview-image preview-show-' + num + '">' +
+                                '<div class="image-cancel" data-no="' + num + '">x</div>' +
+                                '<div class="image-zone"><img id="pro-img-' + num + '" src="' + picFile.result + '"></div>' +
+                                '<div class="tools-edit-image"><a href="javascript:void(0)" data-no="' + num + '" class="btn btn-light btn-edit-image">edit</a></div>' +
+                                '</div>';
+    
+                    output.append(html);
+                    num = num + 1;
+                });
+    
+                picReader.readAsDataURL(file);
+            }
+            $("#pro-image").val('');
+        } else {
+            console.log('Browser not support');
+        }
+    }
+
     function readURL(input) {
-      if (input.files && input.files[0]) {
-          var reader = new FileReader();            
-          reader.onload = function (e) {
-              $('#avatar-preview').attr('src', e.target.result);
-          }            
-          reader.readAsDataURL(input.files[0]);
-      }
-  }
-  
-  $("#imgInp").change(function(){
-      readURL(this);
-  });
-
-  /*Spinner*/
-
-  function modal(){
-     $('.modal').modal('show');
-     setTimeout(function () {
-       console.log('hejF');
-       $('.modal').modal('hide');
-     }, 3000);
-  }
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();            
+            reader.onload = function (e) {
+                $('#avatar-preview').attr('src', e.target.result);
+            }            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
     
-  //# sourceURL=textedit.js   
+    $("#imgInp").change(function(){
+        readURL(this);
+    });
 
-  });
+    /*Spinner*/
 
-  
+    function modal(){
+       $('.modal').modal('show');
+       setTimeout(function () {
+       	console.log('hejF');
+       	$('.modal').modal('hide');
+       }, 3000);
+    }
 
-   
+
+    //# sourceURL=textedit.js 
+
+});
+
+(function ($) {
+    "use strict";
+    function centerModal() {
+        $(this).css('display', 'block');
+        var $dialog = $(this).find(".modal-dialog"),
+            offset = ($(window).height() - $dialog.height()) / 2,
+            bottomMargin = parseInt($dialog.css('marginBottom'), 10);
+
+        // Make sure you don't hide the top part of the modal w/ a negative margin if it's longer than the screen height, and keep the margin equal to the bottom margin of the modal
+        if (offset < bottomMargin) offset = bottomMargin;
+        $dialog.css("margin-top", offset);
+    }
+
+    $(document).on('show.bs.modal', '.modal', centerModal);
+    $(window).on("resize", function () {
+        $('.modal:visible').each(centerModal);
+    });
+    
+}(jQuery));

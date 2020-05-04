@@ -81,7 +81,7 @@ $(document).ready(function () {
     }
 
     // VIEW IMAGES
-    $(document).on('click', '.js-view-images', function () {
+    $(document).on('click', '.js-view-images', function (event) {
        
     });
 
