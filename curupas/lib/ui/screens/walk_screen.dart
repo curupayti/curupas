@@ -13,8 +13,8 @@ class WalkthroughScreen extends StatefulWidget {
   final List<Walkthrough> pages = [
     Walkthrough(
       image: "assets/images/escudo.png",
-      title: "Curupa",
-      description: "Construyendo una base de datos de socios y ex jutadores",
+      title: "Curupas",
+      description: "La app para camadas desde casa",
     ),
     /*Walkthrough(
       image: "assets/images/curupa_anexo.png",
@@ -87,7 +87,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
                   softWrap: true,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.grey,
+                    color: Colors.black,
                     decoration: TextDecoration.none,
                     fontSize: ScreenUtil().setSp(100.0),
                     fontWeight: FontWeight.w700,
