@@ -7,6 +7,14 @@ $(document).ready(function () {
     let lastVisible;
     let firstVisible;
 
+    window.editDocuments = [];
+
+    window._short;
+    window._id_document_collection;
+    window.database_ref;
+
+    window.editObjects;
+
     //ESTA
 
     // REAL TIME LISTENER
@@ -31,36 +39,198 @@ $(document).ready(function () {
         });
     });
 
-    function renderPost(document) {  
-        _documents[document.id] = document;      
+    function renderPost(document) { 
+
+        window.editObjects[document.data().short] = document;      
+
         let _time = formatDate(Date(document.data().timeStamp));  
-        let _last_update = formatDate(Date(document.data().last_update));
+        let _last_update = formatDate(Date(document.data().last_update));        
 
         document.ref.collection("images").get().then(function(imagesSnapshot) {
             _imageSnapshot[document.id] = imagesSnapshot;
             //let _size =  imagesSnapshot.size;
 
             //let item = `<tr data-id="${document.id}">
-            let item = `<tr class="clickable-row" data-id="${document.id}">
+            let item = `<tr class="clickable-row-main" data-id="${document.id}" data-new="${document.data().new}" data-short="${document.data().short}">
             <td>
                 <span class="custom-checkbox">
                     <input type="checkbox" id="${document.id}" name="options[]" value="${document.id}">
                     <label for="${document.id}"></label>
                 </span>
             </td>
-            <td>${document.data().name}</td>
-            <td>${document.data().amount}</td>            
-            <td>${_last_update}</td>              
+            <td>${document.data().amount}</td>                 
+            <td>${document.data().name}</td>                              
+            <td>${document.data().desc}</td>  
             <td>
                 <a href="#" id="${document.id}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                 </a>
                 <a href="#" id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
                 </a>
             </td>
+            <td>${_last_update}</td>                          
             </tr>`;
             $('#main-table').append(item);            
             // Select/Deselect checkboxes
-            var checkbox = $('table tbody input[type="checkbox"]');
+            let checkbox = $('table tbody input[type="checkbox"]');
+
+            $("#selectAllMain").click(function () {
+                if (this.checked) {
+                    checkbox.each(function () {
+                        console.log(this.id);
+                        deleteIDs.push(this.id);
+                        this.checked = true;
+                    });
+                } else {
+                    checkbox.each(function () {
+                        this.checked = false;
+                    });
+                }
+            });
+            checkbox.click(function () {
+                if (!this.checked) {
+                    $("#selectAllMain").prop("checked", false);
+                }
+            });
+
+        });        
+    }
+
+    // VIEW IMAGES
+    $(document).on('click', '.clickable-row-main', function (event) {       
+
+        let dataid = $(this).data("id");
+        let _new = $(this).data("new");
+        let _short = $(this).data("short");
+
+        window._id_document_collection = dataid;     
+
+        var checkboxes = $('table tbody input[type="checkbox"]');
+
+        checkboxes.each(function () {
+            this.checked = false;
+        });
+
+        $(this).find('input[type="checkbox"]').prop("checked", true);         
+
+        $("#detail-grid").show();
+        
+        $("#detail-table").find("tr:gt(0)").remove();
+        
+        loadEditsList(_new, _short);       
+
+    });
+
+
+    window.jsonDataDetail = [];
+    window.editDocuments = [];
+
+    window._short;
+    window._id_document_collection;
+    window.database_ref;
+  
+    window.loadEditsList = function(_new, _short) { 
+
+      window._short = _short;      
+      
+      //clearFirepad();      
+
+      var _doc = window.editObjects[_short];   
+  
+      _doc.ref.collection("collection").get()
+      .then(function(querySnapshotEdit) {
+  
+           var editLength = querySnapshotEdit.docs.length;
+  
+           
+           
+                 
+          $('#grid-details tbody').on('click', 'tr', function () {             
+
+              var data = window.datatable_detail.row( this ).data();
+              
+              console.log(data.meta.id);
+
+              window._id_document_collection = data.meta.id;
+              
+              //alert( 'You clicked on '+data.meta.id+'\'s row' );
+              if ( $(this).hasClass('selected') ) {
+                  $(this).removeClass('selected');
+                  $("#edit-button").prop('disabled', true);
+                  clearFirepad();            
+                  $("#publish-buttons").hide();
+                  //$("#firepad-container").hide();
+              }
+              else {
+                window.datatable_detail.$('tr.selected').removeClass('selected');
+                  $(this).addClass('selected');
+                  $("#edit-button").removeAttr('disabled');
+                  $("#publish-buttons").show();
+                  
+                  $("#firepad-container").show();                  
+                  
+                  $('#editModal').modal('show');
+
+                  $('#editModal').on('shown.bs.modal', function () {                       
+                    var height = $(document).height();
+                    $("#body-modal").css({'height': height + 'px'});
+                    setTimeout( function() {                          
+                        loadEdits(data.meta.database_ref, _short);   
+                    }, 500);
+                 });
+              }
+
+              $('#editModal').modal('show');
+              
+          });      
+          
+  
+          querySnapshotEdit.forEach(function(docEdit) {
+
+            var editData = docEdit.data();
+              
+            window._id_document_collection = editData.id;  
+            
+            //let _new = editData.new;
+            //let _short = editData.short;          
+            
+            let _doc_id_ = docEdit.id;
+            
+            window.editDocuments[_doc_id_] = docEdit;          
+             
+            let _date = editData.last_update;
+
+            let last_update = getDateFrom(_date.toDate());
+
+             if (editData.html != undefined){
+               window.html = editData.html;
+             }
+
+             let _icon = editData.icon;
+
+            //let item = `<tr data-id="${document.id}">
+            let item = `<tr class="clickable-row-detail" data-ref="${editData.database_ref}" data-id="${_doc_id_}">
+            <td>
+                <span class="custom-checkbox">
+                    <input type="checkbox" id="${_doc_id_}" name="options[]" value="${_doc_id_}">
+                    <label for="${document.id}"></label>
+                </span>
+            </td>                      
+            <td>${editData.name}</td>                                            
+            <td>
+                <img id="image_${_doc_id_}" class="avatar-preview-list" src="${_icon}" alt="your image" />            
+            </td>
+            <td>
+                <a href="#" id="${_doc_id_}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
+                </a>
+                <a href="#" id="${_doc_id_}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                </a>
+            </td>
+            <td>${last_update}</td>                          
+            </tr>`;
+            $('#detail-table').append(item);            
+            
+            // Select/Deselect checkboxes
+            let checkbox = $('table tbody input[type="checkbox"]');
             $("#selectAll").click(function () {
                 if (this.checked) {
                     checkbox.each(function () {
@@ -79,25 +249,77 @@ $(document).ready(function () {
                     $("#selectAll").prop("checked", false);
                 }
             });
-        });        
+
+              // VIEW IMAGES
+            $(document).on('click', '.clickable-row-detail', function (event) {      
+
+                let docid = $(this).data("id");
+
+                let database_ref = $(this).data("ref");
+
+                //var data = window.datatable_detail.row( this ).data();
+              
+                console.log(data.meta.id);
+
+                window._id_document_collection = docid;
+              
+              //alert( 'You clicked on '+data.meta.id+'\'s row' );
+              /*if ( $(this).hasClass('selected') ) {
+                  $(this).removeClass('selected');
+                  $("#edit-button").prop('disabled', true);
+                  clearFirepad();            
+                  $("#publish-buttons").hide();
+                  //$("#firepad-container").hide();
+              }
+              else {
+                window.datatable_detail.$('tr.selected').removeClass('selected');
+                  $(this).addClass('selected');
+                  $("#edit-button").removeAttr('disabled');
+                  $("#publish-buttons").show();
+                  
+                  $("#firepad-container").show();                  
+                  
+                  $('#editModal').modal('show');
+
+                  $('#editModal').on('shown.bs.modal', function () {                       
+                    var height = $(document).height();
+                    $("#body-modal").css({'height': height + 'px'});
+                    setTimeout( function() {                          
+                        loadEdits(data.meta.database_ref, _short);   
+                    }, 500);
+                 });
+              }
+
+              $('#editModal').modal('show');*/
+
+
+
+            });
+
+
+        });
+  
+     });  
+     
     }
 
-    // VIEW IMAGES
-    $(document).on('click', '.clickable-row', function (event) {       
+    function getDateFrom(_date) {      
 
-        let dataid = $(this).data("id");
+        var year = _date.getFullYear();
+        var month = _date.getMonth()+1;
+        var day = _date.getDate();
 
-        var checkboxes = $('table tbody input[type="checkbox"]');
+        if (day < 10) {
+            day = '0' + day;
+        }
+        if (month < 10) {
+            month = '0' + month;
+        }
 
-        checkboxes.each(function () {
-            this.checked = false;
-        });
+        var formattedDate = day + '-' + month + '-' + year;
 
-        $(this).find('input[type="checkbox"]').prop("checked", true);  
-
-
-        window._id_document_collection = dataid;        
-    });
+        return formattedDate;
+    }
 
 
     function formatDate(date) {
