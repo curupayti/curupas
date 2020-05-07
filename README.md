@@ -143,7 +143,8 @@ sudo firebase deploy
 
 curl -X POST -H "Content-Type: application/json"  -d '{"data":{"name":"YOUR_NAME"}}'  http://localhost:5000/curupa-d830b/us-central1/helloWorld
 
+# Android Signature
 
-
-
+user: curupas
+pass: joselon
 
