@@ -2,7 +2,7 @@
   import 'dart:ui';
 
   import 'package:curupas/models/add_media.dart';
-  import 'package:curupas/ui/screens/widgets/text_field.dart';
+  import 'package:curupas/ui/widgets/text_field.dart';
   import 'package:diacritic/diacritic.dart';
   import 'package:firebase_storage/firebase_storage.dart';
   import 'package:flutter/cupertino.dart';

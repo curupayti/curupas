@@ -6,9 +6,9 @@
   import 'package:flutter/services.dart';
   import 'package:curupas/globals.dart' as _globals;
   import 'package:curupas/models/user.dart';
-  import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
-  import 'package:curupas/ui/screens/widgets/flat_button.dart';
-  import 'package:curupas/ui/screens/widgets/text_field.dart';
+  import 'package:curupas/ui/widgets/alert_sms_dialog.dart';
+  import 'package:curupas/ui/widgets/flat_button.dart';
+  import 'package:curupas/ui/widgets/text_field.dart';
 
   class SignInScreen extends StatefulWidget {
     _SignInScreenState createState() => _SignInScreenState();

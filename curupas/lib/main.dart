@@ -2,8 +2,8 @@
   import 'package:curupas/models/HTML.dart';
   import 'package:curupas/ui/screens/calendar/event_creator.dart';
   import 'package:curupas/ui/screens/drawer/content_viewer.dart';
-  import 'package:curupas/ui/screens/widgets/add_media_screen.dart';
-  import 'package:curupas/ui/screens/widgets/youtube/player_screen.dart';
+  import 'package:curupas/ui/widgets/add_media_screen.dart';
+  import 'package:curupas/ui/widgets/youtube/player_screen.dart';
   import 'package:flutter/material.dart';
   import 'package:flutter/services.dart';
   import 'package:notifier/notifier_provider.dart';

@@ -8,7 +8,7 @@
   import 'package:curupas/ui/pages/profile_page.dart';
   import 'package:curupas/ui/pages/streaming_page.dart';
   import 'package:curupas/ui/screens/friend_screen.dart';
-  import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
+  import 'package:curupas/ui/widgets/alert_sms_dialog.dart';
   import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
   import 'package:firebase_messaging/firebase_messaging.dart';
   import 'package:flutter/gestures.dart';

@@ -1,15 +1,13 @@
   import 'dart:io';
 
-import 'package:curupas/models/credit_card.dart';
-import 'package:curupas/ui/screens/widgets/flat_button.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import "package:flutter/material.dart";
-import 'package:flutter_credit_card/credit_card_model.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-  import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+  import 'package:curupas/models/credit_card.dart';
+  import 'package:curupas/ui/widgets/flat_button.dart';
+  import 'package:file_picker/file_picker.dart';
+  import 'package:firebase_storage/firebase_storage.dart';
+  import "package:flutter/material.dart";
+  import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:curupas/globals.dart' as _globals;
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+  import 'package:flutter_spinkit/flutter_spinkit.dart';
 
   class ProfilePage extends StatefulWidget {
     ProfilePage({Key key}) : super(key: key);
@@ -74,8 +72,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
         }
         print("Counting : ${_counting}");
       });
-
-
     }
   }
 
@@ -225,8 +221,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
     }
   }
 
-
-
   /*SpeedDial buildSpeedDial() {
     return SpeedDial(
       marginRight: 25,
@@ -265,7 +259,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
     UpperSection(this.parent);
 
-
     @override
     Widget build(BuildContext context) {
       return Column(
@@ -297,7 +290,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
                           new GestureDetector(
                             onTap: () {
                               _globals.filePickerGlobal
-                                  .getImagePath(FileType.IMAGE)
+                                  .getImagePath(FileType.image)
                                   .then((result) {
                                   showDialog(
                                     context: context,

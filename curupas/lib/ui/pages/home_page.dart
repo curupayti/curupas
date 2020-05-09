@@ -1,6 +1,6 @@
 
-  import 'package:curupas/ui/screens/widgets/museum.dart';
-  import 'package:curupas/ui/screens/widgets/newsletter/newsletter_widget.dart';
+  import 'package:curupas/ui/widgets/museum.dart';
+  import 'package:curupas/ui/widgets/newsletter/newsletter_widget.dart';
   import "package:flutter/material.dart";
   import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';

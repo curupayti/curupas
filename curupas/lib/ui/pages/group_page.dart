@@ -3,9 +3,9 @@
     import 'package:cloud_firestore/cloud_firestore.dart';
     import 'package:curupas/models/HTML.dart';
     import 'package:curupas/models/add_media.dart';
-    import 'package:curupas/ui/screens/widgets/anecdote/anecdote_widget.dart';
-    import 'package:curupas/ui/screens/widgets/anectodes.dart';
-  import 'package:curupas/ui/screens/widgets/staggered.dart';
+    import 'package:curupas/ui/widgets/anecdote/anecdote_widget.dart';
+    import 'package:curupas/ui/widgets/anectodes.dart';
+  import 'package:curupas/ui/widgets/staggered.dart';
     import 'package:file_picker/file_picker.dart';
     import 'package:flutter/gestures.dart';
     import "package:flutter/material.dart";
@@ -99,7 +99,7 @@
               labelStyle: TextStyle(fontSize: 18.0),
               onTap: () {
                 _globals.filePickerGlobal
-                    .getImagePath(FileType.IMAGE)
+                    .getImagePath(FileType.image)
                     .then((result) {
                   File _file = new File(result);
                   if (_file != null) {
@@ -129,7 +129,7 @@
               labelStyle: TextStyle(fontSize: 18.0),
               onTap: () {
                 _globals.filePickerGlobal
-                    .getImagePath(FileType.VIDEO)
+                    .getImagePath(FileType.video)
                     .then((result) {
                   File _file = new File(result);
                   if (_file != null) {

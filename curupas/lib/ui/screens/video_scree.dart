@@ -60,7 +60,7 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
         disableDragSeek: false,
         loop: false,
         isLive: false,
-        forceHideAnnotation: true,
+        //forceHideAnnotation: true,
       ),
     )..addListener(listener);
     _idController = TextEditingController();

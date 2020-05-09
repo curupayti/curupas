@@ -6,9 +6,10 @@
   import 'package:curupas/business/auth.dart';
   import 'package:curupas/business/validator.dart';
   import 'package:curupas/models/sms.dart';
-  import 'package:curupas/ui/screens/widgets/text_field.dart';
+  import 'package:curupas/ui/widgets/text_field.dart';
   import 'package:shared_preferences/shared_preferences.dart';
-  import 'package:keyboard_visibility/keyboard_visibility.dart';
+  //import 'package:keyboard_visibility/keyboard_visibility.dart';
+  import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
   import 'package:curupas/globals.dart' as _globals;
 
   import 'flat_button.dart';
@@ -55,8 +56,10 @@
         sms = smsUser;
       });*/
 
-      KeyboardVisibilityNotification().addNewListener(
-        onChange: (bool visible) {
+      //KeyboardVisibilityNotification().addNewListener(
+      //  onChange: (bool visible) {
+
+      KeyboardVisibility.onChange.listen((bool visible) {
           setState(() {
             if (visible) {
               _resendVisibility = false;

@@ -13,9 +13,9 @@
     import 'package:curupas/models/post.dart';
     import 'package:curupas/models/group.dart';
     import 'package:curupas/models/user.dart';
-    import 'package:curupas/ui/screens/widgets/alert_dialog.dart';
+    import 'package:curupas/ui/widgets/alert_dialog.dart';
     import 'package:video_thumbnail/video_thumbnail.dart';
-    import 'package:youtube_api/youtube_api.dart';
+    //import 'package:youtube_api/youtube_api.dart';
     import 'business/auth.dart';
     import 'models/HTML.dart';
     import 'models/HTMLS.dart';
@@ -50,7 +50,9 @@
     //Youtube
     String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";
     String channelId = "UCeLNPJoPAio9rT2GAdXDVmw";
-    YoutubeAPI ytApi = new YoutubeAPI(key);
+    //YoutubeAPI ytApi = new YoutubeAPI(key);
+
+    YT_API ytApi = new YT_API();
 
     List<NotificationCloud> notifications = new List<NotificationCloud>();
 
@@ -132,6 +134,15 @@
         streamings = _streamings;
       }
     }
+
+//TODO from backend
+class YT_API {
+  String id;
+  String title;
+  String kind;
+  String thubnailUrl;
+  String url;
+}
 
     void setFilePickerGlobal() {
       filePickerGlobal = new FilePickerGlobal();
@@ -223,7 +234,7 @@
         _hasValidMime = true;
         _paths = null;
         _path = await FilePicker.getFilePath(
-            type: _pickingType, fileExtension: _extension);
+            type: _pickingType); //, fileExtension: _extension);
         /*if (upload) {
           await uploadFile(_path).then((url) async {
             return url;
@@ -478,7 +489,7 @@
       List<YT_API> ytResult = [];
       List<Streaming> streamingList = [];
       try {
-        ytResult = await ytApi.channel(channelId);
+        //ytResult = await ytApi.channel(channelId);
       } on Exception catch (exception) {
         print(exception.toString());
       } catch (error) {
@@ -495,9 +506,9 @@
           streaming.id = ytapi.id;
           streaming.title = ytapi.title;
           streaming.kind = ytapi.kind;
-          Map _default = ytapi.thumbnail['high'];
-          String thubnailUrl = _default['url'];
-          streaming.thumnailUrl = thubnailUrl;
+          //Map _default = ytapi.thumbnail['high'];
+          //String thubnailUrl = _default['url'];
+          streaming.thumnailUrl = ytapi.thubnailUrl;
           streaming.videoUrl = ytapi.url;
           String kind = ytapi.kind;
           if (kind == "live") {

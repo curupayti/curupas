@@ -1,6 +1,5 @@
+import 'package:curupas/ui/widgets/flat_button.dart';
 import 'package:flutter/material.dart';
-
-import 'widgets/flat_button.dart';
 
 class WelcomeScreen extends StatelessWidget {
   @override

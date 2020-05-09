@@ -1,12 +1,9 @@
+import 'package:curupas/ui/widgets/flat_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import "package:flutter_swiper/flutter_swiper.dart";
-import 'package:curupas/business/auth.dart';
-import 'package:curupas/models/user.dart';
 import "package:curupas/models/walkthrough.dart";
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'widgets/flat_button.dart';
 
 class WalkthroughScreen extends StatefulWidget {
   final SharedPreferences prefs;

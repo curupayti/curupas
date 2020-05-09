@@ -14,9 +14,9 @@
   import 'package:curupas/models/user.dart';
   import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
   import 'package:intl/intl.dart';
-  import 'package:curupas/ui/screens/widgets/alert_sms_dialog.dart';
-  import 'package:curupas/ui/screens/widgets/flat_button.dart';
-  import 'package:curupas/ui/screens/widgets/text_field.dart';
+  import 'package:curupas/ui/widgets/alert_sms_dialog.dart';
+  import 'package:curupas/ui/widgets/flat_button.dart';
+  import 'package:curupas/ui/widgets/text_field.dart';
   import 'package:shared_preferences/shared_preferences.dart';
   import 'package:curupas/globals.dart' as _globals;
   import 'package:location/location.dart';
@@ -372,7 +372,7 @@
                                   new GestureDetector(
                                     onTap: () {
                                       _globals.filePickerGlobal
-                                          .getImagePath(FileType.IMAGE)
+                                          .getImagePath(FileType.image)
                                           .then((result) {
                                         File _file = new File(result);
                                         if (_file != null) {
