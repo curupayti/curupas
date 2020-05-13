@@ -301,9 +301,9 @@ $(document).ready(function () {
         
         $("#detail-table").find("tr:gt(0)").remove();               
         
-        //loadEditsList(_new, _short);      
+        loadEditsList(_new, _short);   
         
-        //$("#detail-grid").show();
+        $("#detail-grid").show();
 
         $('#btn-seleccionar-contenido').prop('disabled', false);
 
