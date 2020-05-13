@@ -1,5 +1,172 @@
 $(document).ready(function () {
 
+    //https://webdevtrick.com/bootstrap-multi-step-form-animations/
+
+    // Code By Webdevtrick ( https://webdevtrick.com )
+    const DOMstrings = {
+        stepsBtnClass: 'multisteps-form__progress-btn',
+        stepsBtns: document.querySelectorAll(`.multisteps-form__progress-btn`),
+        stepsBar: document.querySelector('.multisteps-form__progress'),
+        stepsForm: document.querySelector('.multisteps-form__form'),
+        stepsFormTextareas: document.querySelectorAll('.multisteps-form__textarea'),
+        stepFormPanelClass: 'multisteps-form__panel',
+        stepFormPanels: document.querySelectorAll('.multisteps-form__panel'),
+        stepPrevBtnClass: 'js-btn-prev',
+        stepNextBtnClass: 'js-btn-next' };
+    
+    
+    const removeClasses = (elemSet, className) => {
+    
+        elemSet.forEach(elem => {
+    
+        elem.classList.remove(className);
+    
+        });
+    
+    };
+    
+    const findParent = (elem, parentClass) => {
+    
+        let currentNode = elem;
+    
+        while (!currentNode.classList.contains(parentClass)) {
+        currentNode = currentNode.parentNode;
+        }
+    
+        return currentNode;
+    
+    };
+    
+    const getActiveStep = elem => {
+        return Array.from(DOMstrings.stepsBtns).indexOf(elem);
+    };
+    
+    const setActiveStep = activeStepNum => {
+    
+        removeClasses(DOMstrings.stepsBtns, 'js-active');
+    
+        DOMstrings.stepsBtns.forEach((elem, index) => {
+    
+        if (index <= activeStepNum) {
+            elem.classList.add('js-active');
+        }
+    
+        });
+    };
+    
+    const getActivePanel = () => {
+    
+        let activePanel;
+    
+        DOMstrings.stepFormPanels.forEach(elem => {
+    
+        if (elem.classList.contains('js-active')) {
+    
+            activePanel = elem;
+    
+        }
+    
+        });
+    
+        return activePanel;
+    
+    };
+    
+    const setActivePanel = activePanelNum => {
+    
+        removeClasses(DOMstrings.stepFormPanels, 'js-active');
+    
+        DOMstrings.stepFormPanels.forEach((elem, index) => {
+        if (index === activePanelNum) {
+    
+            elem.classList.add('js-active');
+    
+            setFormHeight(elem);
+    
+        }
+        });
+    
+    };
+    
+    const formHeight = activePanel => {
+    
+        const activePanelHeight = activePanel.offsetHeight;
+    
+        DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;
+    
+    };
+    
+    const setFormHeight = () => {
+        const activePanel = getActivePanel();
+    
+        formHeight(activePanel);
+    };
+    
+    DOMstrings.stepsBar.addEventListener('click', e => {
+    
+        const eventTarget = e.target;
+    
+        if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
+        return;
+        }
+    
+        const activeStep = getActiveStep(eventTarget);
+    
+        setActiveStep(activeStep);
+    
+        setActivePanel(activeStep);
+    });
+    
+    DOMstrings.stepsForm.addEventListener('click', e => {
+    
+        const eventTarget = e.target;
+    
+        if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`)))
+        {
+        return;
+        }
+    
+        const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);
+    
+        let activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);
+    
+        if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
+        activePanelNum--;
+    
+        } else {
+    
+        activePanelNum++;
+    
+        }
+    
+        setActiveStep(activePanelNum);
+        setActivePanel(activePanelNum);
+    
+    });    
+    
+    //window.addEventListener('load', setFormHeight, false);
+    
+    //window.addEventListener('resize', setFormHeight, false);
+    
+    
+    const setAnimationType = newType => {
+        DOMstrings.stepFormPanels.forEach(elem => {
+        elem.dataset.animation = newType;
+        });
+    };   
+    
+    //changing animation
+    /*const animationSelect = document.querySelector('.pick-animation__select');
+    
+    animationSelect.addEventListener('change', () => {
+        const newAnimationType = animationSelect.value;
+    
+        setAnimationType(newAnimationType);
+    });*/
+
+
+    $('#btn-seleccionar-contenido').prop('disabled', true);
+
     let _documents = {};
     let _imageSnapshot = {};
     
@@ -15,6 +182,12 @@ $(document).ready(function () {
 
     window.editObjects;
 
+    //var myStepper = new Stepper($('#stepper-editor'));
+    /*var myStepper = new Stepper(document.querySelector('#stepper-editor'),{
+        linear: false,
+        animation:true
+    });*/
+
     //ESTA
 
     // REAL TIME LISTENER
@@ -25,7 +198,8 @@ $(document).ready(function () {
             $('#selectAll').attr('disabled', true);
         } else {
             $('#selectAll').attr('disabled', false);
-        }
+        }      
+
         let changes = snapshot.docChanges();
         changes.forEach(change => {
             if (change.type == 'added') {
@@ -47,11 +221,17 @@ $(document).ready(function () {
         let _last_update = formatDate(Date(document.data().last_update));        
 
         document.ref.collection("images").get().then(function(imagesSnapshot) {
+            
             _imageSnapshot[document.id] = imagesSnapshot;
+
             //let _size =  imagesSnapshot.size;
 
             //let item = `<tr data-id="${document.id}">
-            let item = `<tr class="clickable-row-main" data-id="${document.id}" data-new="${document.data().new}" data-short="${document.data().short}">
+            let item = `<tr class="clickable-row-main" 
+                data-id="${document.id}" 
+                data-new="${document.data().new}" 
+                data-name="${document.data().name}" 
+                data-short="${document.data().short}">                
             <td>
                 <span class="custom-checkbox">
                     <input type="checkbox" id="${document.id}" name="options[]" value="${document.id}">
@@ -92,7 +272,11 @@ $(document).ready(function () {
                 }
             });
 
-        });        
+            $("#btn-categorias").click();
+
+        });    
+        
+        
     }
 
     // VIEW IMAGES
@@ -101,6 +285,7 @@ $(document).ready(function () {
         let dataid = $(this).data("id");
         let _new = $(this).data("new");
         let _short = $(this).data("short");
+        let _name = $(this).data("name");
 
         window._id_document_collection = dataid;     
 
@@ -114,9 +299,18 @@ $(document).ready(function () {
 
         $("#detail-grid").show();
         
-        $("#detail-table").find("tr:gt(0)").remove();
+        $("#detail-table").find("tr:gt(0)").remove();               
         
-        loadEditsList(_new, _short);       
+        //loadEditsList(_new, _short);      
+        
+        //$("#detail-grid").show();
+
+        $('#btn-seleccionar-contenido').prop('disabled', false);
+
+        $("#btn-categorias").text(_name);
+
+        
+        
 
     });
 
@@ -139,10 +333,7 @@ $(document).ready(function () {
       _doc.ref.collection("collection").get()
       .then(function(querySnapshotEdit) {
   
-           var editLength = querySnapshotEdit.docs.length;
-  
-           
-           
+           var editLength = querySnapshotEdit.docs.length;                     
                  
           $('#grid-details tbody').on('click', 'tr', function () {             
 
@@ -183,6 +374,10 @@ $(document).ready(function () {
               
           });      
           
+
+          var _count = 0;
+
+          var _length = querySnapshotEdit.size;
   
           querySnapshotEdit.forEach(function(docEdit) {
 
@@ -250,6 +445,15 @@ $(document).ready(function () {
                 }
             });
 
+
+            if (_count == (_length-1)) {
+
+                $("#btn-contenidos").click();               
+                
+            }
+
+            _count++;            
+
               // VIEW IMAGES
             $(document).on('click', '.clickable-row-detail', function (event) {      
 
@@ -290,12 +494,9 @@ $(document).ready(function () {
                  });
               }
 
-              $('#editModal').modal('show');*/
-
-
+              $('#editModal').modal('show');*/              
 
             });
-
 
         });
   
@@ -563,12 +764,12 @@ $(document).ready(function () {
     //-- Image Picker
     //--   
 
-    document.getElementById('proImage').addEventListener('change', readImage, false);        
+    /*document.getElementById('proImage').addEventListener('change', readImage, false);        
     
     $(document).on('click', '.image-cancel', function() {
         let no = $(this).data('no');
         $(".preview-image.preview-show-"+no).remove();
-    });    
+    });*/
     
     var num = 4;
     function readImage() {
