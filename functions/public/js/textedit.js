@@ -1,8 +1,7 @@
 $(document).ready(function () {
 
     //https://webdevtrick.com/bootstrap-multi-step-form-animations/
-
-    // Code By Webdevtrick ( https://webdevtrick.com )
+    
     const DOMstrings = {
         stepsBtnClass: 'multisteps-form__progress-btn',
         stepsBtns: document.querySelectorAll(`.multisteps-form__progress-btn`),
@@ -117,9 +116,13 @@ $(document).ready(function () {
         setActivePanel(activeStep);
     });
     
-    DOMstrings.stepsForm.addEventListener('click', e => {
+    DOMstrings.stepsForm.addEventListener('click', e => {  
     
         const eventTarget = e.target;
+
+        if (!window._main_row_selected) {
+            return;
+        }    
     
         if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`)))
         {
@@ -144,28 +147,14 @@ $(document).ready(function () {
     
     });    
     
-    //window.addEventListener('load', setFormHeight, false);
-    
-    //window.addEventListener('resize', setFormHeight, false);
-    
+    //window.addEventListener('load', setFormHeight, false);    
+    //window.addEventListener('resize', setFormHeight, false);    
     
     const setAnimationType = newType => {
         DOMstrings.stepFormPanels.forEach(elem => {
         elem.dataset.animation = newType;
         });
-    };   
-    
-    //changing animation
-    /*const animationSelect = document.querySelector('.pick-animation__select');
-    
-    animationSelect.addEventListener('change', () => {
-        const newAnimationType = animationSelect.value;
-    
-        setAnimationType(newAnimationType);
-    });*/
-
-
-    $('#btn-seleccionar-contenido').prop('disabled', true);
+    };       
 
     let _documents = {};
     let _imageSnapshot = {};
@@ -180,15 +169,7 @@ $(document).ready(function () {
     window._id_document_collection;
     window.database_ref;
 
-    window.editObjects;
-
-    //var myStepper = new Stepper($('#stepper-editor'));
-    /*var myStepper = new Stepper(document.querySelector('#stepper-editor'),{
-        linear: false,
-        animation:true
-    });*/
-
-    //ESTA
+    window.editObjects;    
 
     // REAL TIME LISTENER
     db.collection('contents').onSnapshot(snapshot => {
@@ -251,7 +232,7 @@ $(document).ready(function () {
             </tr>`;
             $('#main-table').append(item);            
             // Select/Deselect checkboxes
-            let checkbox = $('table tbody input[type="checkbox"]');
+            let checkbox = $('#main-table tbody input[type="checkbox"]');
 
             $("#selectAllMain").click(function () {
                 if (this.checked) {
@@ -289,15 +270,13 @@ $(document).ready(function () {
 
         window._id_document_collection = dataid;     
 
-        var checkboxes = $('table tbody input[type="checkbox"]');
+        var checkboxes = $('#main-table tbody input[type="checkbox"]');
 
         checkboxes.each(function () {
             this.checked = false;
         });
 
-        $(this).find('input[type="checkbox"]').prop("checked", true);         
-
-        $("#detail-grid").show();
+        $(this).find('input[type="checkbox"]').prop("checked", true);                 
         
         $("#detail-table").find("tr:gt(0)").remove();               
         
@@ -305,19 +284,18 @@ $(document).ready(function () {
         
         $("#detail-grid").show();
 
-        $('#btn-seleccionar-contenido').prop('disabled', false);
+        window._main_row_selected = true;
+
+        //$('#btn-seleccionar-contenido').prop('disabled', false);
 
         $("#btn-categorias").text(_name);
-
-        
-        
-
     });
 
 
     window.jsonDataDetail = [];
     window.editDocuments = [];
 
+    window._main_row_selected = false;
     window._short;
     window._id_document_collection;
     window.database_ref;
@@ -335,7 +313,7 @@ $(document).ready(function () {
   
            var editLength = querySnapshotEdit.docs.length;                     
                  
-          $('#grid-details tbody').on('click', 'tr', function () {             
+          /*$('#grid-details tbody').on('click', 'tr', function () {             
 
               var data = window.datatable_detail.row( this ).data();
               
@@ -372,7 +350,7 @@ $(document).ready(function () {
 
               $('#editModal').modal('show');
               
-          });      
+          });*/      
           
 
           var _count = 0;
@@ -403,7 +381,11 @@ $(document).ready(function () {
              let _icon = editData.icon;
 
             //let item = `<tr data-id="${document.id}">
-            let item = `<tr class="clickable-row-detail" data-ref="${editData.database_ref}" data-id="${_doc_id_}">
+            let item = `<tr class="clickable-row-detail" 
+            data-ref="${editData.database_ref}" 
+            data-short="${_short}" 
+            data-name="${editData.name}"             
+            data-id="${_doc_id_}">
             <td>
                 <span class="custom-checkbox">
                     <input type="checkbox" id="${_doc_id_}" name="options[]" value="${_doc_id_}">
@@ -446,26 +428,37 @@ $(document).ready(function () {
             });
 
 
-            if (_count == (_length-1)) {
-
-                $("#btn-contenidos").click();               
-                
-            }
-
-            _count++;            
+            //HABILITAR CUANDO ANDE 
+            //if (_count == (_length-1)) {
+                //$("#btn-contenidos").click();                               
+            //}
+            //_count++;            
 
               // VIEW IMAGES
             $(document).on('click', '.clickable-row-detail', function (event) {      
 
                 let docid = $(this).data("id");
-
                 let database_ref = $(this).data("ref");
-
-                //var data = window.datatable_detail.row( this ).data();
-              
-                console.log(data.meta.id);
+                let _short = $(this).data("short"); 
+                let _name = $(this).data("name");               
 
                 window._id_document_collection = docid;
+
+                var checkboxes = $('#detail-table tbody input[type="checkbox"]');
+
+                checkboxes.each(function () {
+                    this.checked = false;
+                });
+
+                $(this).find('input[type="checkbox"]').prop("checked", true);                 
+                
+                //$("#detail-table").find("tr:gt(0)").remove();     
+
+                $("#btn-contenidos").text(_name);
+
+                setTimeout( function() {                          
+                    loadEdits(database_ref, _short);   
+                }, 500);                
               
               //alert( 'You clicked on '+data.meta.id+'\'s row' );
               /*if ( $(this).hasClass('selected') ) {
@@ -536,6 +529,196 @@ $(document).ready(function () {
     
         return [day, month, year].join('-');
     }
+
+    function loadEdits(database_ref, _short) { 
+
+        window.database_ref = database_ref;     
+        
+        //$('#button-publish').prop('disabled', true);
+        
+        $('#button-save').prop('disabled', true);
+        $('#button-accept').prop('disabled', true);      
+  
+        //$('#view-save').prop('disabled', true);
+  
+        var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );
+        
+        var firepad_div = $( "<div id='firepad'></div>" );
+        
+        $( "#firepad-container" ).append( firepad_userlist_div );
+        $( "#firepad-container" ).append( firepad_div );    
+    
+        var firepad = null, userList = null, codeMirror = null;
+    
+        if (firepad) {
+          // Clean up.
+          firepad.dispose();
+          userList.dispose();
+          $('.CodeMirror').remove();
+        }      
+      
+        var firepadRef = new Firebase( 'https://curupas-app.firebaseio.com/' + _short ).child(database_ref);
+  
+        codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });          
+        
+        codeMirror.on('drop', function(data, e) {
+          var file;
+          var files;
+          // Check if files were dropped
+          var _URL = window.URL || window.webkitURL;
+          files = e.dataTransfer.files;
+          if (files.length > 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            _file = files[0];
+            //alert('File: ' + file.name);
+            var img = new Image();    
+            img = new Image();
+            var objectUrl = _URL.createObjectURL(_file);
+            img.onload = function () {
+  
+                var _width = this.width;
+                var _height = this.height;
+                
+                var metadataFiles = {
+                  customMetadata: {
+                      'thumbnail': 'false',
+                      'type' : '0'
+                  }
+                }              
+  
+                var storageRef = storage.ref("contents/" + _short + "/" + window._id_document_collection + "/images");       
+  
+                let rnd = Math.floor((Math.random()) * 0x10000).toString(7);
+                                                                
+                var filePathPost = _short + "_" +  rnd + ".png";        
+                const postRef = storageRef.child(filePathPost);
+                const putRef = postRef.put(_file, metadataFiles);  
+                //prefArray.push(putRef);  
+                putRef.on('state_changed', function(snapshot) {
+                    var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload is ' + progress + '% done');
+                    switch (snapshot.state) {
+                      case firebase.storage.TaskState.PAUSED: // or 'paused'
+                        console.log('Upload is paused');
+                        break;
+                      case firebase.storage.TaskState.RUNNING: // or 'running'
+                        console.log('Upload is running');
+                        break;
+                    }
+                  }, function(error) {
+                    // Handle unsuccessful uploads
+                  }, function() {                                                          
+                    putRef.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
+                        firepad.insertEntity('img', {
+                          'src' : downloadURL,
+                          'width' : _width,
+                          'height' : _height
+                        });
+                         
+                    });                  
+                });             
+                
+            };          
+            img.src = objectUrl;
+            return false;
+          }        
+  
+        });
+  
+        //LISTENER DRAG
+        //https://gist.github.com/mikelehen/fa5ceab5ad6f241b6544
+        //https://groups.google.com/forum/#!topic/firepad-io/d9HRHfd9NcE         
+  
+        firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
+            { richTextToolbar: true, richTextShortcuts: true, userId: _user.userId});
+        userList = FirepadUserList.fromDiv(firepadRef.child('users'),
+            document.getElementById('firepad-userlist'), _user.userId);
+  
+          firepad.on('ready', function() {
+            if (firepad.isHistoryEmpty()) {
+              firepad.setText('Welcome to your own private pad!\n\nShare the URL below and collaborate with your friends.');
+            }          
+  
+            ensurePadInList(database_ref);
+            buildPadList();
+          });
+          
+          firepad.on('newLine', function() {
+  
+            $('#button-save').prop('disabled', false);        
+            
+          });        
+  
+  
+          codeMirror.focus();
+  
+          codeMirror.setOption('dragDrop', true);        
+         
+  
+        function padListEnabled() {
+          return (typeof localStorage !== 'undefined' && typeof JSON !== 'undefined' && localStorage.setItem &&
+              localStorage.getItem && JSON.parse && JSON.stringify);
+        }
+  
+        function ensurePadInList(id) {
+          if (!padListEnabled()) { return; }
+          var list = JSON.parse(localStorage.getItem('demo-pad-list') || "{ }");
+          if (!(id in list)) {
+            var now = new Date();
+            var year = now.getFullYear(), month = now.getMonth() + 1, day = now.getDate();
+            var hours = now.getHours(), minutes = now.getMinutes();
+            if (hours < 10) { hours = '0' + hours; }
+            if (minutes < 10) { minutes = '0' + minutes; }
+  
+            list[id] = [year, month, day].join('/') + ' ' + hours + ':' + minutes;
+  
+            localStorage.setItem('demo-pad-list', JSON.stringify(list));
+            buildPadList();
+          }
+        }
+  
+        function buildPadList() {
+          if (!padListEnabled()) { return; }
+          $('#my-pads-list').empty();
+  
+          var list = JSON.parse(localStorage.getItem('demo-pad-list') || '{ }');
+          for(var id in list) {
+            $('#my-pads-list').append(
+                $('<div></div>').addClass('my-pads-item').append(
+                    makePadLink(id, list[id])
+            ));
+          }
+        }
+  
+        function makePadLink(id, name) {
+          return $('<a></a>')
+              .text(name)
+              .on('click', function() {
+                window.location = window.location.toString().replace(/#.*/, '') + '#' + id;
+                $('#my-pads-list').hide();
+                return false;
+          });
+        }
+  
+        function randomString(length) {
+          var text = "";
+          var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  
+          for(var i=0; i < length; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+  
+          return text;
+        }
+      
+        function displayPads() {
+          $('#my-pads-list').toggle();
+        }
+  
+        $(".firepad-tb-insert-image").parent().parent().hide();   
+  
+  
+      }
 
     // ADD EMPLOYEE
     $("#add-post-form").submit(function (event) {
@@ -830,22 +1013,3 @@ $(document).ready(function () {
 
 });
 
-(function ($) {
-    "use strict";
-    function centerModal() {
-        $(this).css('display', 'block');
-        var $dialog = $(this).find(".modal-dialog"),
-            offset = ($(window).height() - $dialog.height()) / 2,
-            bottomMargin = parseInt($dialog.css('marginBottom'), 10);
-
-        // Make sure you don't hide the top part of the modal w/ a negative margin if it's longer than the screen height, and keep the margin equal to the bottom margin of the modal
-        if (offset < bottomMargin) offset = bottomMargin;
-        $dialog.css("margin-top", offset);
-    }
-
-    $(document).on('show.bs.modal', '.modal', centerModal);
-    $(window).on("resize", function () {
-        $('.modal:visible').each(centerModal);
-    });
-    
-}(jQuery));
