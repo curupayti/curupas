@@ -12,6 +12,8 @@ $(document).ready(function () {
         stepFormPanels: document.querySelectorAll('.multisteps-form__panel'),
         stepPrevBtnClass: 'js-btn-prev',
         stepNextBtnClass: 'js-btn-next' };
+
+    window.activePanelNum = 0;
     
     
     const removeClasses = (elemSet, className) => {
@@ -89,9 +91,19 @@ $(document).ready(function () {
     
     const formHeight = activePanel => {
     
-        const activePanelHeight = activePanel.offsetHeight;
+        var activePanelHeight = activePanel.offsetHeight;        
+
+        if (window.activePanelNum ==2) {
+
+            $("#columna").removeClass("col-lg-8");                        
+
+            //$('#firepadform').height(1500);            
+
+        } else {
+            $("#columna").addClass("col-lg-8");
+        }
     
-        DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;
+        DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;        
     
     };
     
@@ -131,19 +143,19 @@ $(document).ready(function () {
     
         const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);
     
-        let activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);
+        window.activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);
     
         if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
-        activePanelNum--;
+            window.activePanelNum--;
     
         } else {
     
-        activePanelNum++;
+        window.activePanelNum++;
     
         }
     
-        setActiveStep(activePanelNum);
-        setActivePanel(activePanelNum);
+        setActiveStep(window.activePanelNum);
+        setActivePanel(window.activePanelNum);
     
     });    
     
@@ -284,11 +296,17 @@ $(document).ready(function () {
         
         $("#detail-grid").show();
 
-        window._main_row_selected = true;
-
-        //$('#btn-seleccionar-contenido').prop('disabled', false);
+        window._main_row_selected = true;        
 
         $("#btn-categorias").text(_name);
+
+        
+        $("#firepad-container").css("left", 0);
+        $("#firepad-container").css("height", 570);
+
+        $("#firepadform").css("height", 650);
+        $("#firepaditem").css("height", 570);               
+        
     });
 
 

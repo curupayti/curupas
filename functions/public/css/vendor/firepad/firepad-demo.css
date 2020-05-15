@@ -101,7 +101,7 @@
   #firepad-container {
     /*display: none;*/
     position: absolute;
-    left: 20px;
+    /*left: 20px;*/
     top: 0px !important; 
     /*width: 1075px;*/
     width: 100%;
