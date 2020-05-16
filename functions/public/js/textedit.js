@@ -43,6 +43,7 @@ $(document).ready(function () {
     };
     
     const setActiveStep = activeStepNum => {
+
     
         removeClasses(DOMstrings.stepsBtns, 'js-active');
     
@@ -93,7 +94,7 @@ $(document).ready(function () {
     
         var activePanelHeight = activePanel.offsetHeight;        
 
-        if (window.activePanelNum ==2) {
+        if (window.activePanelNum==2) {
 
             $("#columna").removeClass("col-lg-8");                        
 
@@ -119,7 +120,7 @@ $(document).ready(function () {
     
         if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
         return;
-        }
+        }        
     
         const activeStep = getActiveStep(eventTarget);
     
@@ -132,9 +133,13 @@ $(document).ready(function () {
     
         const eventTarget = e.target;
 
-        if (!window._main_row_selected) {
+        if (!window._main_row_selected && window.activePanelNum==0) {
             return;
         }    
+
+        if (!window._detail_row_selected && window.activePanelNum==1) {
+          return;
+        }     
     
         if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`)))
         {
@@ -216,10 +221,7 @@ $(document).ready(function () {
         document.ref.collection("images").get().then(function(imagesSnapshot) {
             
             _imageSnapshot[document.id] = imagesSnapshot;
-
-            //let _size =  imagesSnapshot.size;
-
-            //let item = `<tr data-id="${document.id}">
+        
             let item = `<tr class="clickable-row-main" 
                 data-id="${document.id}" 
                 data-new="${document.data().new}" 
@@ -243,7 +245,7 @@ $(document).ready(function () {
             <td>${_last_update}</td>                          
             </tr>`;
             $('#main-table').append(item);            
-            // Select/Deselect checkboxes
+
             let checkbox = $('#main-table tbody input[type="checkbox"]');
 
             $("#selectAllMain").click(function () {
@@ -309,11 +311,12 @@ $(document).ready(function () {
         
     });
 
-
     window.jsonDataDetail = [];
     window.editDocuments = [];
 
     window._main_row_selected = false;
+    window._detail_row_selected = false;
+
     window._short;
     window._id_document_collection;
     window.database_ref;
@@ -322,54 +325,14 @@ $(document).ready(function () {
 
       window._short = _short;      
       
-      //clearFirepad();      
+      clearFirepad();      
 
       var _doc = window.editObjects[_short];   
   
       _doc.ref.collection("collection").get()
       .then(function(querySnapshotEdit) {
   
-           var editLength = querySnapshotEdit.docs.length;                     
-                 
-          /*$('#grid-details tbody').on('click', 'tr', function () {             
-
-              var data = window.datatable_detail.row( this ).data();
-              
-              console.log(data.meta.id);
-
-              window._id_document_collection = data.meta.id;
-              
-              //alert( 'You clicked on '+data.meta.id+'\'s row' );
-              if ( $(this).hasClass('selected') ) {
-                  $(this).removeClass('selected');
-                  $("#edit-button").prop('disabled', true);
-                  clearFirepad();            
-                  $("#publish-buttons").hide();
-                  //$("#firepad-container").hide();
-              }
-              else {
-                window.datatable_detail.$('tr.selected').removeClass('selected');
-                  $(this).addClass('selected');
-                  $("#edit-button").removeAttr('disabled');
-                  $("#publish-buttons").show();
-                  
-                  $("#firepad-container").show();                  
-                  
-                  $('#editModal').modal('show');
-
-                  $('#editModal').on('shown.bs.modal', function () {                       
-                    var height = $(document).height();
-                    $("#body-modal").css({'height': height + 'px'});
-                    setTimeout( function() {                          
-                        loadEdits(data.meta.database_ref, _short);   
-                    }, 500);
-                 });
-              }
-
-              $('#editModal').modal('show');
-              
-          });*/      
-          
+          var editLength = querySnapshotEdit.docs.length;                     
 
           var _count = 0;
 
@@ -450,10 +413,13 @@ $(document).ready(function () {
             //if (_count == (_length-1)) {
                 //$("#btn-contenidos").click();                               
             //}
-            //_count++;            
+            //_count++;         
+
 
               // VIEW IMAGES
-            $(document).on('click', '.clickable-row-detail', function (event) {      
+            $(document).on('click', '.clickable-row-detail', function (event) {    
+              
+                window._detail_row_selected = true; 
 
                 let docid = $(this).data("id");
                 let database_ref = $(this).data("ref");
@@ -468,44 +434,14 @@ $(document).ready(function () {
                     this.checked = false;
                 });
 
-                $(this).find('input[type="checkbox"]').prop("checked", true);                 
-                
-                //$("#detail-table").find("tr:gt(0)").remove();     
+                $(this).find('input[type="checkbox"]').prop("checked", true);                               
+            
 
                 $("#btn-contenidos").text(_name);
 
                 setTimeout( function() {                          
                     loadEdits(database_ref, _short);   
-                }, 500);                
-              
-              //alert( 'You clicked on '+data.meta.id+'\'s row' );
-              /*if ( $(this).hasClass('selected') ) {
-                  $(this).removeClass('selected');
-                  $("#edit-button").prop('disabled', true);
-                  clearFirepad();            
-                  $("#publish-buttons").hide();
-                  //$("#firepad-container").hide();
-              }
-              else {
-                window.datatable_detail.$('tr.selected').removeClass('selected');
-                  $(this).addClass('selected');
-                  $("#edit-button").removeAttr('disabled');
-                  $("#publish-buttons").show();
-                  
-                  $("#firepad-container").show();                  
-                  
-                  $('#editModal').modal('show');
-
-                  $('#editModal').on('shown.bs.modal', function () {                       
-                    var height = $(document).height();
-                    $("#body-modal").css({'height': height + 'px'});
-                    setTimeout( function() {                          
-                        loadEdits(data.meta.database_ref, _short);   
-                    }, 500);
-                 });
-              }
-
-              $('#editModal').modal('show');*/              
+                }, 500);                                 
 
             });
 
@@ -515,50 +451,234 @@ $(document).ready(function () {
      
     }
 
+
     function getDateFrom(_date) {      
 
         var year = _date.getFullYear();
         var month = _date.getMonth()+1;
         var day = _date.getDate();
-
+  
         if (day < 10) {
-            day = '0' + day;
+          day = '0' + day;
         }
         if (month < 10) {
-            month = '0' + month;
+          month = '0' + month;
         }
-
+  
         var formattedDate = day + '-' + month + '-' + year;
-
+  
         return formattedDate;
-    }
+       }
 
+       function formatDate(date) {
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+        
+            if (month.length < 2) 
+                month = '0' + month;
+            if (day.length < 2) 
+                day = '0' + day;
+        
+            return [day, month, year].join('-');
+        }
+  
+       function clearFirepad() {
+  
+          let hash_userlist = '#firepad-userlist';
+          let hash_firepad = '#firepad';
+  
+          if($(hash_userlist).length){
+            $( hash_userlist ).remove();
+          }
+  
+          if($(hash_firepad).length){
+            $( hash_firepad ).remove();
+          } 
+       }     
+  
+       $("#add-form").submit(function (event) {
+  
+          event.preventDefault(); 
+  
+          window.datatable_detail.clear();
+          
+          var new_name = $('#new-name').val();
+          var new_desc = $('#new-desc').val();          
+  
+          var document_path = "contents/" + window._short + "/collection";
+  
+          var _database_ref = makeid(28);        
+  
+          var _time =  new Date();
+  
+          var _desc = new_desc.slice(0, 20) + "...";
+  
+          var timestamp =  new Date();
+  
+          var thedate = getDateFrom(timestamp);            
+  
+          let row = { "meta": {  
+            "database_ref": _database_ref, 
+            "id" : window._short,
+            "Nombre": new_name, 
+            "Desc": new_desc, 
+            "Actualizado": thedate } };   
+  
+          window.jsonDataDetail.push(row); 
+          
+          db.collection(document_path).add( {
+            
+            group_ref : _user.yearReference,
+            name : new_name,
+            description : new_desc,
+            database_ref : _database_ref,
+            last_update : _time        
+  
+          }).then(function(doc){   
+            
+              let _id = doc.id;
+            
+              var storage_path = "contents/" + window._short + "/" + _id;
+  
+              var storageRef = storage.ref(storage_path);        
+              var file = document.getElementById("imgInp").files[0];                 
+              let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
+              var filePath = window._short + "_" +  rnd + ".png";            
+              
+              var thisRef = storageRef.child(filePath);                         
+  
+              var metadata = {
+                  customMetadata: {
+                      'thumbnail': 'true',
+                      'type' : '3',
+                      'short' : window._short,
+                      'id' : _id                   
+                  }
+              }
+  
+              thisRef.put(file, metadata);
+  
+              window.datatable_detail.rows.add(window.jsonDataDetail);
+              window.datatable_detail.draw();          
+  
+              //$("#firepad-container").show();
+  
+              loadEdits(_database_ref, window._short);
+  
+              var num = parseInt($("#" + window._short).text());
+  
+              num++;
+  
+              $("#" + window._short).text(num);
 
-    function formatDate(date) {
-        var d = new Date(date),
-            month = '' + (d.getMonth() + 1),
-            day = '' + d.getDate(),
-            year = d.getFullYear();
-    
-        if (month.length < 2) 
-            month = '0' + month;
-        if (day.length < 2) 
-            day = '0' + day;
-    
-        return [day, month, year].join('-');
-    }
-
-    function loadEdits(database_ref, _short) { 
-
+              $('#mainModal').modal('hide');  
+  
+  
+          }).catch(function(error) {
+            console.error("Error adding document: ", error);
+          });   
+          
+  
+       });
+  
+       function makeid(length) {
+          var result           = '';
+          var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+          var charactersLength = characters.length;
+          for ( var i = 0; i < length; i++ ) {
+              result += characters.charAt(Math.floor(Math.random() * charactersLength));
+          }
+          return result;
+       }   
+  
+       $('#button-publish').click(function() { 
+          $('#publishModal').modal('show');        
+        });
+  
+      $('#publishModal').on('hidden.bs.modal', function () {
+        
+      });
+  
+      $('#acceptCheckbox').change(function() {
+        if ($(this).prop('checked')) {
+          $('#button-accept').prop('disabled', false);       
+        } else  {
+          $('#button-accept').prop('disabled', true);
+        }
+      });
+  
+      $('#button-accept').click(function(event) { 
+  
+        event.preventDefault();  
+        var _document = window.editDocuments[window._id_document_collection];
+        var _time =  new Date(); 
+      
+        db.collection('contents')
+          .doc(window._short)
+          .collection("collection")
+          .doc(window._id_document_collection)
+          .update({        
+            "approved" : false,
+            "published" : false,
+            "last_update" : _time        
+          })
+          .then(function(documentUpdated) {
+  
+            $('#publishModal').modal('hide');
+  
+          })
+          .catch(function(error) {
+            console.error("Error adding document: ", error);
+          }); 
+  
+      });
+  
+       $('#button-save').click(function() {     
+        
+        var settings = {
+            "url": "https://us-central1-curupas-app.cloudfunctions.net/publish",
+            "method": "POST",
+            "timeout": 0,
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "data": JSON.stringify({
+              "database_ref":window.database_ref,
+              "contentType":window._short,
+              "documentId":window._id_document_collection
+            }),
+          };
+  
+          homeLoader.show();  
+          
+          $.ajax(settings).done(function (response) {
+  
+            console.log(response);
+  
+            if (response.data.result) {
+              homeLoader.hide();  
+              //$('#view-save').prop('disabled', false);
+              window.html = response.data.html;           
+            } 
+            
+          });     
+      });
+  
+      $('#view-save').click(function() { 
+          $('#previewModal').modal('show');
+          $('#modal-content').append("<div id='modal-container'>" + window.html + "</div>");
+      });
+  
+      $('#previewModal').on('hidden.bs.modal', function () {
+        $('#modal-container').remove();
+      });     
+       
+      function loadEdits(database_ref, _short) { 
+  
         window.database_ref = database_ref;     
-        
-        //$('#button-publish').prop('disabled', true);
-        
-        $('#button-save').prop('disabled', true);
-        $('#button-accept').prop('disabled', true);      
-  
-        //$('#view-save').prop('disabled', true);
-  
+
         var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );
         
         var firepad_div = $( "<div id='firepad'></div>" );
@@ -662,12 +782,9 @@ $(document).ready(function () {
             buildPadList();
           });
           
-          firepad.on('newLine', function() {
-  
-            $('#button-save').prop('disabled', false);        
-            
-          });        
-  
+          firepad.on('newLine', function() {  
+            //$('#button-save').prop('disabled', false);                    
+          });          
   
           codeMirror.focus();
   
@@ -736,273 +853,9 @@ $(document).ready(function () {
         $(".firepad-tb-insert-image").parent().parent().hide();   
   
   
-      }
-
-    // ADD EMPLOYEE
-    $("#add-post-form").submit(function (event) {
-        event.preventDefault();       
-
-        var title = $('#post-title').val();
-        
-        var description = $('#description').val();
-
-        var storageRef = storage.ref("/posts");        
-        var file = document.getElementById("imgInp").files[0];       
-        var filePath =  title + ".png";        
-        var thisRef = storageRef.child(filePath);          
-        
-        var postId;       
-        
-        $('.lds-dual-ring').css('visibility', 'visible');
-
-        db.collection("posts").add({
-            title: title,
-            description: description,
-            //author: user.email
-        })
-        .then(function(docRef) {
-            postId = docRef.id;            
-            var metadata = {
-                customMetadata: {
-                    'thumbnail': 'true',
-                    'type' : '1',
-                    'id' : postId,
-                    'collection' : 'posts'                   
-                }
-            }
-            return thisRef.put(file, metadata);                    
-        })       
-        .then(function(snapshot) {                                    
-            var metadataFiles = {
-                customMetadata: {
-                    'thumbnail': 'false',
-                    'type' : '0'
-                }
-            }
-            var prefArray = [];
-            var input = document.getElementById("proImage");
-            var j=0, k=0;
-            var length = input.files.length;
-
-            for (var i = 0; i < length; ++i) {            
-                var _file = input.files.item(i);                                                  
-                var filePathPost = title + "_" + i + "_original.png";        
-                const postRef = storageRef.child(filePathPost);
-                const putRef = postRef.put(_file, metadataFiles);  
-                prefArray.push(putRef);  
-                putRef.on('state_changed', function(snapshot) {
-                    var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    console.log('Upload is ' + progress + '% done');
-                    switch (snapshot.state) {
-                      case firebase.storage.TaskState.PAUSED: // or 'paused'
-                        console.log('Upload is paused');
-                        break;
-                      case firebase.storage.TaskState.RUNNING: // or 'running'
-                        console.log('Upload is running');
-                        break;
-                    }
-                  }, function(error) {
-                    // Handle unsuccessful uploads
-                  }, function() {                                        
-                    var putRefFromArray = prefArray[j];
-                    putRefFromArray.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
-                        db.collection("posts").doc(postId).collection("images").add({downloadURL});
-                        if (k==(length-1)){
-                            $('#addPostModal').modal('hide');
-                        }
-                        k++;
-                    });
-                    j++;
-                });   
-            }
-            console.log("termino");
-        })        
-        .catch(function(error) {
-            console.error("Error adding document: ", error);
-        });   
-    });
-
-    // DELETE POST
-    $(document).on('click', '.js-delete-post', function () {
-        let id = $(this).attr('id');
-        $('#delete-post-form').attr('delete-id', id);
-        $('#deletePostModal').modal('show');
-    });
-
-    $("#delete-post-form").submit(function (event) {
-        event.preventDefault();
-        let id = $(this).attr('delete-id');        
-        deleteAllImagesOnPost(id);
-        if (id != undefined) {            
-            let _path = "posts/" + id;
-            deleteDocumentAtPath(_path);
-        } else {
-            let checkbox = $('table tbody input:checked');
-            checkbox.each(function () {
-                let _path = "posts/" + this.value;
-                deleteDocumentAtPath(_path);               
-            });
-            $("#deletePostModal").modal('hide');
-        }
-    });
-
-    function deleteAllImagesOnPost(id){        
-        //Delete Thumbnail
-        
-        //let _SelectedDocument = _documents[id];
-        //deleteImageByUrl(_SelectedDocument.data().thumbnailSmallUrl);
-        
-        let _images = _imageSnapshot[id];
-
-        _images.docs.forEach(doc => {
-            //doc.data()
-            let _url = doc.data().downloadURL;
-            deleteImageByUrl(_url);
-
-        });          
-    }
-
-    function deleteImageByUrl(url) {
-        // Create a reference to the file to delete
-        var desertRef = firebase.storage().refFromURL("gs://" + url);
-        // Delete the file
-        desertRef.delete().then(function() {
-        // File deleted successfully
-        }).catch(function(error) {
-        // Uh-oh, an error occurred!
-        });
-    }
-
-    function deleteDocumentAtPath(path) {
-        var deleteFn = firebase.functions().httpsCallable('recursiveDelete');
-        deleteFn({ path: path })
-            .then(function(result) {
-                console.log('Delete success: ' + JSON.stringify(result));
-                $("#deletePostModal").modal('hide');
-            })
-            .catch(function(err) {
-                console.log('Delete failed, see console,');
-                console.warn(err);
-            });
-    }
-    
-
-    // UPDATE EMPLOYEE
-    $(document).on('click', '.js-edit-post', function () {
-        let id = $(this).attr('id');
-        $('#edit-employee-form').attr('edit-id', id);
-        db.collection('employees').doc(id).get().then(function (document) {
-            if (document.exists) {
-                $('#edit-employee-form #employee-name').val(document.data().name);
-                $('#edit-employee-form #employee-email').val(document.data().email);
-                $('#edit-employee-form #employee-address').val(document.data().address);
-                $('#edit-employee-form #employee-phone').val(document.data().phone);
-                $('#editEmployeeModal').modal('show');
-            } else {
-                console.log("No such document!");
-            }
-        }).catch(function (error) {
-            console.log("Error getting document:", error);
-        });
-    });
-
-    $("#edit-employee-form").submit(function (event) {
-        event.preventDefault();
-        let id = $(this).attr('edit-id');
-        db.collection('employees').doc(id).update({
-            name: $('#edit-employee-form #employee-name').val(),
-            email: $('#edit-employee-form #employee-email').val(),
-            address: $('#edit-employee-form #employee-address').val(),
-            phone: $('#edit-employee-form  #employee-phone').val()
-        });
-        $('#editEmployeeModal').modal('hide');
-    });
-
-    $("#addPostModal").on('hidden.bs.modal', function () {
-        $('#add-post-form .form-control').val('');
-    });
-
-    $("#editEmployeeModal").on('hidden.bs.modal', function () {
-        $('#edit-employee-form .form-control').val('');
-    });
-
-    // PAGINATION
-    $("#js-previous").on('click', function () {
-        $('#main-table tbody').html('');
-        var previous = db.collection("employees")
-            .orderBy(firebase.firestore.FieldPath.documentId(), "desc")
-            .startAt(firstVisible)
-            .limit(3);
-        previous.get().then(function (documentSnapshots) {
-            documentSnapshots.docs.forEach(doc => {
-                renderPost(doc);
-            });
-        });
-    });
-
-    $('#js-next').on('click', function () {
-        if ($(this).closest('.page-item').hasClass('disabled')) {
-            return false;
-        }
-        $('#main-table tbody').html('');
-        var next = db.collection("employees")
-            .startAfter(lastVisible)
-            .limit(3);
-        next.get().then(function (documentSnapshots) {
-            documentSnapshots.docs.forEach(doc => {
-                renderPost(doc);
-            });
-            lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-            firstVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-            let nextChecker = documentSnapshots.docs.length - 1;
-            if (nextChecker == 0) {
-                $('#js-next').closest('.page-item').addClass('disabled');
-            }
-        });
-    });
-
-    //--
-    //-- Image Picker
-    //--   
-
-    /*document.getElementById('proImage').addEventListener('change', readImage, false);        
-    
-    $(document).on('click', '.image-cancel', function() {
-        let no = $(this).data('no');
-        $(".preview-image.preview-show-"+no).remove();
-    });*/
-    
-    var num = 4;
-    function readImage() {
-        if (window.File && window.FileList && window.FileReader) {
-            var files = event.target.files; //FileList object
-            //$( ".preview-images-zone" ).sortable();
-            var output = $(".preview-images-zone");    
-            for (let i = 0; i < files.length; i++) {
-                var file = files[i];
-                if (!file.type.match('image')) continue;                
-                var picReader = new FileReader();                
-                picReader.addEventListener('load', function (event) {
-                    var picFile = event.target;
-                    var html =  '<div class="preview-image preview-show-' + num + '">' +
-                                '<div class="image-cancel" data-no="' + num + '">x</div>' +
-                                '<div class="image-zone"><img id="pro-img-' + num + '" src="' + picFile.result + '"></div>' +
-                                '<div class="tools-edit-image"><a href="javascript:void(0)" data-no="' + num + '" class="btn btn-light btn-edit-image">edit</a></div>' +
-                                '</div>';
-    
-                    output.append(html);
-                    num = num + 1;
-                });
-    
-                picReader.readAsDataURL(file);
-            }
-            $("#pro-image").val('');
-        } else {
-            console.log('Browser not support');
-        }
-    }
-
-    function readURL(input) {
+      }     
+      
+      function readURL(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();            
             reader.onload = function (e) {
@@ -1015,19 +868,52 @@ $(document).ready(function () {
     $("#imgInp").change(function(){
         readURL(this);
     });
-
+  
     /*Spinner*/
-
+  
     function modal(){
        $('.modal').modal('show');
        setTimeout(function () {
-       	console.log('hejF');
-       	$('.modal').modal('hide');
+         console.log('hejF');
+         $('.modal').modal('hide');
        }, 3000);
     }
-
-
-    //# sourceURL=textedit.js 
-
+      
+    //# sourceURL=textedit.js   
+  
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

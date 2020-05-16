@@ -6,17 +6,16 @@
 
                 <div class="col-12">
 
-
                     <div class="container overflow-hidden">
                         <div class="multisteps-form">
                             <div class="row">
-                            <div class="col-12 col-lg-8 ml-auto mr-auto mb-4">
-                                <div class="multisteps-form__progress">
-                                <button id="btn-categorias" class="multisteps-form__progress-btn js-active" type="button" title="Categorías">Categorías</button>
-                                <button id="btn-contenidos" class="multisteps-form__progress-btn" type="button" title="Contenidos">Contenidos</button>
-                                <button class="multisteps-form__progress-btn" type="button" title="Editor">Editor</button>                                
+                                <div class="col-12 col-lg-8 ml-auto mr-auto mb-4">
+                                    <div class="multisteps-form__progress">
+                                    <button id="btn-categorias" class="multisteps-form__progress-btn js-active" type="button" title="Categorías">Categorías</button>
+                                    <button id="btn-contenidos" class="multisteps-form__progress-btn" type="button" title="Contenidos">Contenidos</button>
+                                    <button class="multisteps-form__progress-btn" type="button" title="Editor">Editor</button>                                
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                             <div class="row">
 
@@ -35,7 +34,7 @@
                                                                         ias editor de contenido</h2>
                                                                 </div>-->
                                                                 <!--<div class="col-sm-12">-->
-                                                                    <a href="#addPostModal" class="btn btn-success" data-toggle="modal"><i
+                                                                    <a href="#mainModal" class="btn btn-success" data-toggle="modal"><i
                                                                             class="material-icons">&#xE147;</i> <span>Agregar Categoria</span></a>                                    
                                                                 <!--</div>-->
                                                             </div>
@@ -63,37 +62,8 @@
                                                         </div> 
                                                     </div> 
 
-
-                                            <!--<div class="form-row mt-4">
-                                                <div class="col-12 col-sm-6">
-                                                <input class="multisteps-form__input form-control" type="text" placeholder="First Name"/>
-                                                </div>
-                                                <div class="col-12 col-sm-6 mt-4 mt-sm-0">
-                                                <input class="multisteps-form__input form-control" type="text" placeholder="Last Name"/>
-                                                </div>
-                                            </div>
-                                            <div class="form-row mt-4">
-                                                <div class="col-12 col-sm-6">
-                                                <input class="multisteps-form__input form-control" type="text" placeholder="Login"/>
-                                                </div>
-                                                <div class="col-12 col-sm-6 mt-4 mt-sm-0">
-                                                <input class="multisteps-form__input form-control" type="email" placeholder="Email"/>
-                                                </div>
-                                            </div>
-                                            <div class="form-row mt-4">
-                                                <div class="col-12 col-sm-6">
-                                                <input class="multisteps-form__input form-control" type="password" placeholder="Password"/>
-                                                </div>
-                                                <div class="col-12 col-sm-6 mt-4 mt-sm-0">
-                                                <input class="multisteps-form__input form-control" type="password" placeholder="Repeat Password"/>
-                                                </div>
-                                            </div>
                                             <div class="button-row d-flex mt-4">
-                                                <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Next">Next</button>
-                                            </div>-->
-
-                                            <div class="button-row d-flex mt-4">
-                                                <button id="btn-seleccionar-contenido" class="btn btn-primary ml-auto js-btn-next disabled" type="button" title="Siguiente">Siguiente</button>
+                                                <button id="btn-seleccionar-contenido" class="btn btn-primary ml-auto js-btn-next" type="button" title="Siguiente">Siguiente >></button>
                                             </div>                                        
 
                                         </div>
@@ -111,7 +81,7 @@
                                                                     <h2>Posts</h2>
                                                                 </div>-->
                                                                 <!--<div class="col-sm-6">-->
-                                                                    <a href="#addPostModal" class="btn btn-success" data-toggle="modal"><i
+                                                                    <a href="#editModal" class="btn btn-success" data-toggle="modal"><i
                                                                             class="material-icons">&#xE147;</i> <span>Agregar Contenido</span></a>                                    
                                                                 <!--</div>-->
                                                             </div>
@@ -154,8 +124,8 @@
                                         
                                             
                                             <div class="button-row d-flex mt-4">
-                                                <button class="btn btn-primary js-btn-prev" type="button" title="Prev">Prev</button>
-                                                <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Next">Next</button>
+                                                <button class="btn btn-primary js-btn-prev" type="button" title="Prev"><< Anterior</button>
+                                                <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Next">Siguiente >></button>
                                             </div>
 
                                         </div>
@@ -176,12 +146,18 @@
                                                 </li>  
                                                 
                                                 <li class="list-group-item">                                                
-                                                    <div class="row">
-                                                        <div class="button-row d-flex mt-4 col-12">
-                                                        <button class="btn btn-primary js-btn-prev" type="button" title="Prev">Prev</button>                                        
+                                                    <div class="row d-flex">
+                                                        <div class="button-row mt-4 col-12">
+                                                            <button class="btn btn-primary js-btn-prev" type="button" title="Anterior"> << Anterior</button>   
+                                                            <div class="float-right">
+                                                                <button id="button-save" class="btn ml-auto btn btn-success">Guardar</button>
+                                                                <button id="view-save" class="btn ml-auto btn btn-secondary">Vista Previa</button>                    
+                                                                <button id="button-publish" class="btn ml-auto btn btn-danger">Publicar</button>                              
+                                                            </div>                                       
                                                         </div>
                                                     </div>
-                                                </li>  
+                                                </li>
+                                            </ul>   
                                         </div>
 
                                     </div>
@@ -194,8 +170,8 @@
                 </div>                   
 
                     
-                    <!-- Edit Modal HTML -->
-                <div id="addModal" class="modal fade" data-backdrop="static" data-keyboard="false">
+                    <!-- Add Modal HTML -->
+                <div id="mainModal" class="modal fade" data-backdrop="static" data-keyboard="false">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <form id="add-form">
