@@ -79,6 +79,7 @@ $(document).ready(function () {
         removeClasses(DOMstrings.stepFormPanels, 'js-active');
     
         DOMstrings.stepFormPanels.forEach((elem, index) => {
+
         if (index === activePanelNum) {
     
             elem.classList.add('js-active');
@@ -361,7 +362,7 @@ $(document).ready(function () {
                window.html = editData.html;
              }
 
-             let _icon = editData.icon;
+             let _icon = editData.icon;             
 
             //let item = `<tr data-id="${document.id}">
             let item = `<tr class="clickable-row-detail" 
@@ -376,16 +377,20 @@ $(document).ready(function () {
                 </span>
             </td>                      
             <td>${editData.name}</td>                                            
-            <td>
-                <img id="image_${_doc_id_}" class="avatar-preview-list" src="${_icon}" alt="your image" />            
-            </td>
+            <td>`;
+            if (!window._is_detail_drawer) {
+              item += `<img id="image_${_doc_id_}" class="avatar-preview-list" src="${_icon}" alt="your image" />`;            
+            } else {              
+              item += `<i id="codepoint" class="material-icons material-icon-picker-prefix prefix">${editData.codepoints}</i>`;
+            }            
+            item += `</td>
+            <td>${last_update}</td>                          
             <td>
                 <a href="#" id="${_doc_id_}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                 </a>
                 <a href="#" id="${_doc_id_}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
                 </a>
-            </td>
-            <td>${last_update}</td>                          
+            </td>            
             </tr>`;
             $('#detail-table').append(item);            
             
@@ -409,7 +414,6 @@ $(document).ready(function () {
                     $("#selectAll").prop("checked", false);
                 }
             });
-
 
             //HABILITAR CUANDO ANDE 
             //if (_count == (_length-1)) {
@@ -459,7 +463,7 @@ $(document).ready(function () {
 
       if (!window._is_detail_drawer) {
 
-        input_type = `<div class="form-group">                        
+        input_type = `<div id="mediapick" class="form-group">                        
           <label>Thumbnail</label><br>                  
           <input type='file' id="imgInp" name="files[]"/>
           <img id="avatar-preview" class="avatar-preview" src="images/picture.png" alt="your image" />
@@ -467,7 +471,7 @@ $(document).ready(function () {
         
       } else {      
 
-        input_type = `<div class="form-group">                                  
+        input_type = `<div id="mediapick" class="form-group">                                  
           <label for="icon">Icono</label>&nbsp;<input type="text" class="use-material-icon-picker" value="android" name="icon">
         </div>`;  
 
@@ -577,11 +581,9 @@ $(document).ready(function () {
           } 
        }     
   
-       $("#add-form").submit(function (event) {
+       $("#add-detail-form").submit(function (event) {
   
-          event.preventDefault(); 
-  
-          window.datatable_detail.clear();
+          event.preventDefault();          
           
           var new_name = $('#new-name').val();
           var new_desc = $('#new-desc').val();          
@@ -606,43 +608,52 @@ $(document).ready(function () {
             "Actualizado": thedate } };   
   
           window.jsonDataDetail.push(row); 
-          
-          db.collection(document_path).add( {
-            
+
+          var newData = {            
             group_ref : _user.yearReference,
             name : new_name,
             description : new_desc,
             database_ref : _database_ref,
-            last_update : _time        
-  
-          }).then(function(doc){   
+            last_update : _time          
+          };
+
+          if (window._is_detail_drawer) {   
             
-              let _id = doc.id;
+            let codepoint = $("#codepoint").text(); 
             
-              var storage_path = "contents/" + window._short + "/" + _id;
-  
-              var storageRef = storage.ref(storage_path);        
-              var file = document.getElementById("imgInp").files[0];                 
-              let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
-              var filePath = window._short + "_" +  rnd + ".png";            
+            newData['codepoints'] = codepoint;
+            //SACAR EL CODIGO
+            newData['icon'] = 'foo';
+
+          } 
+
+          db.collection(document_path).add(newData).then(function(doc){   
+
+              if (!window._is_detail_drawer) {   
+            
+                let _id = doc.id;
               
-              var thisRef = storageRef.child(filePath);                         
-  
-              var metadata = {
-                  customMetadata: {
-                      'thumbnail': 'true',
-                      'type' : '3',
-                      'short' : window._short,
-                      'id' : _id                   
-                  }
-              }
-  
-              thisRef.put(file, metadata);
-  
-              window.datatable_detail.rows.add(window.jsonDataDetail);
-              window.datatable_detail.draw();          
-  
-              //$("#firepad-container").show();
+                var storage_path = "contents/" + window._short + "/" + _id;
+    
+                var storageRef = storage.ref(storage_path);        
+                var file = document.getElementById("imgInp").files[0];                 
+                let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
+                var filePath = window._short + "_" +  rnd + ".png";            
+                
+                var thisRef = storageRef.child(filePath);                         
+    
+                var metadata = {
+                    customMetadata: {
+                        'thumbnail': 'true',
+                        'type' : '3',
+                        'short' : window._short,
+                        'id' : _id                   
+                    }
+                }
+    
+                thisRef.put(file, metadata);
+
+              }             
   
               loadEdits(_database_ref, window._short);
   
@@ -657,11 +668,24 @@ $(document).ready(function () {
   
           }).catch(function(error) {
             console.error("Error adding document: ", error);
-          });   
+          }); 
+
+
+          
           
   
        });
+
+       function saveDetailWithImage() {
+
+          
+
+       }
   
+       function saveDetailWithIcon() {
+         
+       }
+
        function makeid(length) {
           var result           = '';
           var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -672,12 +696,15 @@ $(document).ready(function () {
           return result;
        }   
   
-       $('#button-publish').click(function() { 
+      $('#button-publish').click(function() { 
           $('#publishModal').modal('show');        
-        });
+      });
   
-      $('#publishModal').on('hidden.bs.modal', function () {
+      $('#detailModal').on('hidden.bs.modal', function () {
         
+
+        $("#mediapick").remove();
+
       });
   
       $('#acceptCheckbox').change(function() {
