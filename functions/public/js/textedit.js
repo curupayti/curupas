@@ -133,20 +133,24 @@ $(document).ready(function () {
     DOMstrings.stepsForm.addEventListener('click', e => {  
     
         const eventTarget = e.target;
+        
+        if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)))  {
+        
+          if (!window._main_row_selected && window.activePanelNum==0) {
+              return;
+          }    
 
-        if (!window._main_row_selected && window.activePanelNum==0) {
+          if (!window._detail_row_selected && window.activePanelNum==1) {
             return;
-        }    
-
-        if (!window._detail_row_selected && window.activePanelNum==1) {
+          }     
+      
+          if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`)))
+          {
           return;
-        }     
-    
-        if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`)))
-        {
-        return;
+          }
+
         }
-    
+      
         const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);
     
         window.activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);
@@ -328,8 +332,6 @@ $(document).ready(function () {
 
       window._short = _short;      
       
-      clearFirepad();      
-
       var _doc = window.editObjects[_short];   
   
       _doc.ref.collection("collection").get()
@@ -696,7 +698,10 @@ $(document).ready(function () {
           return result;
        }   
   
-      $('#button-publish').click(function() { 
+      $('#button-publish').click(function(event) { 
+
+        event.preventDefault();
+
           $('#publishModal').modal('show');        
       });
   
@@ -782,6 +787,8 @@ $(document).ready(function () {
       });     
        
       function loadEdits(database_ref, _short) { 
+
+        clearFirepad(); 
   
         window.database_ref = database_ref;     
 
