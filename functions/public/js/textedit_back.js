@@ -297,9 +297,7 @@ $(document).ready(function () {
                "meta": {  
                  "database_ref": editData.database_ref, 
                  "id": _doc_id_, 
-                 "Nombre": editData.name, 
-                 //"Desc": editData.description.slice(0, 20) + "...", 
-                 //"Actualizado": last_update,
+                 "Nombre": editData.name,                  
                  "Imagen": "<img src='" + _icon + "' style='height:30px; width:30px'>",
                 } 
              };   

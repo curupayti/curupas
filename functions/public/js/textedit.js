@@ -238,13 +238,13 @@ $(document).ready(function () {
             <td>${document.data().amount}</td>                 
             <td>${document.data().name}</td>                              
             <td>${document.data().desc}</td>  
+            <td>${_last_update}</td>    
             <td>
-                <a href="#" id="${document.id}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
+                <a href="#" id="${document.id}" class="edit js-edit-main"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                 </a>
-                <a href="#" id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                <a href="#" id="${document.id}" class="delete js-delete-main"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
                 </a>
-            </td>
-            <td>${_last_update}</td>                          
+            </td>                                  
             </tr>`;
             $('#main-table').append(item);            
 
@@ -271,10 +271,28 @@ $(document).ready(function () {
 
             $("#btn-categorias").click();
 
-        });    
-        
-        
+        });            
     }
+
+    // Edit Main
+    $(document).on('click', '.js-edit-main', function () {
+      let id = $(this).attr('id');
+
+      $('#edit-employee-form').attr('edit-id', id);
+      
+      $('#messageModal').modal('show');
+      $('#message-title').text("Atención");
+      $('#message-body').text("No tener permisos para realizar esta operación, consultalo con el administrador del sistema.");     
+    });
+
+
+    // Delete Main
+    $(document).on('click', '.js-delete-main', function () {
+      let id = $(this).attr('id');
+      $('#messageModal').modal('show');
+      $('#message-title').text("Atención");
+      $('#message-body').text("No tener permisos para realizar esta operación, consultalo con el administrador del sistema.");     
+    });
 
     // VIEW IMAGES
     $(document).on('click', '.clickable-row-main', function (event) {       
@@ -337,11 +355,9 @@ $(document).ready(function () {
       _doc.ref.collection("collection").get()
       .then(function(querySnapshotEdit) {
   
-          var editLength = querySnapshotEdit.docs.length;                     
-
-          var _count = 0;
-
-          var _length = querySnapshotEdit.size;
+          //var editLength = querySnapshotEdit.docs.length;                     
+          //var _count = 0;
+          //var _length = querySnapshotEdit.size;
   
           querySnapshotEdit.forEach(function(docEdit) {
 
@@ -349,10 +365,8 @@ $(document).ready(function () {
               
             window._id_document_collection = editData.id;  
             
-            //let _new = editData.new;
-            //let _short = editData.short;          
-            
-            let _doc_id_ = docEdit.id;
+            var _doc_id_ = docEdit.id;
+            var _database_ref_ = editData.database_ref;
             
             window.editDocuments[_doc_id_] = docEdit;          
              
@@ -365,10 +379,9 @@ $(document).ready(function () {
              }
 
              let _icon = editData.icon;             
-
-            //let item = `<tr data-id="${document.id}">
+            
             let item = `<tr class="clickable-row-detail" 
-            data-ref="${editData.database_ref}" 
+            data-ref="${_database_ref_}" 
             data-short="${_short}" 
             data-name="${editData.name}"             
             data-id="${_doc_id_}">
@@ -385,14 +398,18 @@ $(document).ready(function () {
             } else {              
               item += `<i id="codepoint" class="material-icons material-icon-picker-prefix prefix">${editData.codepoints}</i>`;
             }            
-            item += `</td>
-            <td>${last_update}</td>                          
+            item += `</td> 
+            <td>${last_update}</td>                                     
             <td>
-                <a href="#" id="${_doc_id_}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
+                <a href="#" id="${_doc_id_}" class="edit js-edit-detail"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                 </a>
-                <a href="#" id="${_doc_id_}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                <a href="#" id="${_doc_id_}" class="delete js-delete-detail" 
+                data-name="${editData.name}"             
+                data-id="${_doc_id_}"  
+                data-ref="${_database_ref_}" 
+                data-short="${_short}"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
                 </a>
-            </td>            
+            </td>                        
             </tr>`;
             $('#detail-table').append(item);            
             
@@ -452,12 +469,63 @@ $(document).ready(function () {
                 }, 500);                                 
 
             });
-
-        });
-  
+        });  
      });  
      
     }
+
+     // Edit Detail
+     $(document).on('click', '.js-edit-detail', function () {
+      let id = $(this).data('id');
+      let name = $(this).data('name');
+
+      $('#edit-employee-form').attr('id', id);      
+      
+
+    });
+    
+    // Delete Detail
+    $(document).on('click', '.js-delete-detail', function () {
+      
+      let id = $(this).data('id');      
+      let name = $(this).data('name');
+      let ref = $(this).data('ref');
+      let short = $(this).data('short');    
+
+      $('#deleteConfirmModal').modal('show');           
+
+      $('#delete-element').text(name);   
+
+      $('#delete-detail').data('id', id);   
+      $('#delete-detail').data('name', name);   
+      $('#delete-detail').data('ref', ref);  
+      $('#delete-detail').data('short', short);   
+
+    });
+
+    $("#delete-detail").on("click", function() { 
+
+      let id = $(this).data('id');      
+      let name = $(this).data('name');
+      let ref = $(this).data('ref');
+      let short = $(this).data('short');
+
+      let doc = window.editDocuments[id];
+
+      doc.ref.delete().then(function() {  
+
+        let docRef = database.ref("/" + short + "/" +  ref);
+        docRef.remove();        
+
+        $('#deleteConfirmModal').modal('hide');     
+        
+
+      }).catch(function(error) {
+        console.error("Error removing document: ", error);
+      });  
+      
+
+    });      
 
     $(document).on('show.bs.modal', '.modal',  function () {
 
@@ -672,10 +740,6 @@ $(document).ready(function () {
             console.error("Error adding document: ", error);
           }); 
 
-
-          
-          
-  
        });
 
        function saveDetailWithImage() {
@@ -723,7 +787,7 @@ $(document).ready(function () {
       $('#button-accept').click(function(event) { 
   
         event.preventDefault();  
-        var _document = window.editDocuments[window._id_document_collection];
+        //var _document = window.editDocuments[window._id_document_collection];
         var _time =  new Date(); 
       
         db.collection('contents')
@@ -746,7 +810,9 @@ $(document).ready(function () {
   
       });
   
-       $('#button-save').click(function() {     
+       $('#button-save').click(function(event) {     
+
+        event.preventDefault();  
         
         var settings = {
             "url": "https://us-central1-curupas-app.cloudfunctions.net/publish",
