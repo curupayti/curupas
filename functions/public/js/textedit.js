@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(document).ready(function () {  
 
     //https://webdevtrick.com/bootstrap-multi-step-form-animations/
     
@@ -16,166 +16,110 @@ $(document).ready(function () {
     window.activePanelNum = 0;
     
     
-    const removeClasses = (elemSet, className) => {
-    
-        elemSet.forEach(elem => {
-    
-        elem.classList.remove(className);
-    
-        });
-    
+    const removeClasses = (elemSet, className) => {    
+      elemSet.forEach(elem => {    
+        elem.classList.remove(className);    
+      });    
     };
     
-    const findParent = (elem, parentClass) => {
-    
-        let currentNode = elem;
-    
-        while (!currentNode.classList.contains(parentClass)) {
+    const findParent = (elem, parentClass) => {    
+      let currentNode = elem;    
+      while (!currentNode.classList.contains(parentClass)) {
         currentNode = currentNode.parentNode;
-        }
-    
-        return currentNode;
-    
+      }    
+      return currentNode;    
     };
     
     const getActiveStep = elem => {
         return Array.from(DOMstrings.stepsBtns).indexOf(elem);
     };
     
-    const setActiveStep = activeStepNum => {
-
-    
-        removeClasses(DOMstrings.stepsBtns, 'js-active');
-    
-        DOMstrings.stepsBtns.forEach((elem, index) => {
-    
+    const setActiveStep = activeStepNum => {    
+      removeClasses(DOMstrings.stepsBtns, 'js-active');    
+      DOMstrings.stepsBtns.forEach((elem, index) => {    
         if (index <= activeStepNum) {
             elem.classList.add('js-active');
-        }
-    
-        });
+        }    
+      });
     };
     
-    const getActivePanel = () => {
-    
-        let activePanel;
-    
-        DOMstrings.stepFormPanels.forEach(elem => {
-    
-        if (elem.classList.contains('js-active')) {
-    
-            activePanel = elem;
-    
-        }
-    
-        });
-    
-        return activePanel;
-    
+    const getActivePanel = () => {    
+      let activePanel;    
+      DOMstrings.stepFormPanels.forEach(elem => {    
+        if (elem.classList.contains('js-active')) {      
+            activePanel = elem;      
+        }    
+      });    
+      return activePanel;    
     };
     
-    const setActivePanel = activePanelNum => {
-    
-        removeClasses(DOMstrings.stepFormPanels, 'js-active');
-    
-        DOMstrings.stepFormPanels.forEach((elem, index) => {
-
-        if (index === activePanelNum) {
-    
-            elem.classList.add('js-active');
-    
-            setFormHeight(elem);
-    
+    const setActivePanel = activePanelNum => {    
+      removeClasses(DOMstrings.stepFormPanels, 'js-active');    
+      DOMstrings.stepFormPanels.forEach((elem, index) => {
+        if (index === activePanelNum) {      
+            elem.classList.add('js-active');      
+            setFormHeight(elem);      
         }
-        });
-    
+      });    
     };
     
-    const formHeight = activePanel => {
-    
-        var activePanelHeight = activePanel.offsetHeight;        
-
-        if (window.activePanelNum==2) {
-
-            $("#columna").removeClass("col-lg-8");                        
-
-            //$('#firepadform').height(1500);            
-
-        } else {
-            $("#columna").addClass("col-lg-8");
-        }
-    
-        DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;        
-    
+    const formHeight = activePanel => {    
+      var activePanelHeight = activePanel.offsetHeight;        
+      if (window.activePanelNum==2) {
+          $("#columna").removeClass("col-lg-8");                        
+          //$('#firepadform').height(1500);            
+      } else {
+          $("#columna").addClass("col-lg-8");
+      }    
+      DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;            
     };
     
     const setFormHeight = () => {
-        const activePanel = getActivePanel();
-    
-        formHeight(activePanel);
+      const activePanel = getActivePanel();    
+      formHeight(activePanel);
     };
     
-    DOMstrings.stepsBar.addEventListener('click', e => {
-    
-        const eventTarget = e.target;
-    
-        if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
+    DOMstrings.stepsBar.addEventListener('click', e => {    
+      const eventTarget = e.target;    
+      if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
         return;
-        }        
-    
-        const activeStep = getActiveStep(eventTarget);
-    
-        setActiveStep(activeStep);
-    
-        setActivePanel(activeStep);
+      }   
+      const activeStep = getActiveStep(eventTarget);    
+      setActiveStep(activeStep);    
+      setActivePanel(activeStep);
     });
     
-    DOMstrings.stepsForm.addEventListener('click', e => {  
-    
-        const eventTarget = e.target;
-        
-        if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)))  {
-        
-          if (!window._main_row_selected && window.activePanelNum==0) {
-              return;
-          }    
-
-          if (!window._detail_row_selected && window.activePanelNum==1) {
+    DOMstrings.stepsForm.addEventListener('click', e => {   
+      const eventTarget = e.target;        
+      if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)))  {        
+        if (!window._main_row_selected && window.activePanelNum==0) {
             return;
-          }     
-      
-          if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`)))
-          {
+        }    
+        if (!window._detail_row_selected && window.activePanelNum==1) {
           return;
-          }
-
+        }          
+        if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`))) {
+          return;
         }
-      
-        const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);
-    
-        window.activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);
-    
-        if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
-            window.activePanelNum--;
-    
-        } else {
-    
-        window.activePanelNum++;
-    
-        }
-    
-        setActiveStep(window.activePanelNum);
-        setActivePanel(window.activePanelNum);
-    
+      }      
+      const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);    
+      window.activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);    
+      if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
+          window.activePanelNum--;    
+      } else {    
+        window.activePanelNum++;    
+      }    
+      setActiveStep(window.activePanelNum);
+      setActivePanel(window.activePanelNum);    
     });    
     
     //window.addEventListener('load', setFormHeight, false);    
     //window.addEventListener('resize', setFormHeight, false);    
     
     const setAnimationType = newType => {
-        DOMstrings.stepFormPanels.forEach(elem => {
+      DOMstrings.stepFormPanels.forEach(elem => {
         elem.dataset.animation = newType;
-        });
+      });
     };       
     
     let _imageSnapshot = {};    
@@ -188,7 +132,7 @@ $(document).ready(function () {
     window._id_document_collection;
     window.database_ref;
 
-    window.editObjects;    
+    window.editObjects;      
 
     // REAL TIME LISTENER
     db.collection('contents').onSnapshot(snapshot => {
@@ -198,8 +142,7 @@ $(document).ready(function () {
             $('#selectAll').attr('disabled', true);
         } else {
             $('#selectAll').attr('disabled', false);
-        }      
-
+        }
         let changes = snapshot.docChanges();
         changes.forEach(change => {
             if (change.type == 'added') {
@@ -216,8 +159,7 @@ $(document).ready(function () {
     function renderPost(document) { 
 
         window.editObjects[document.data().short] = document;      
-
-        let _time = formatDate(Date(document.data().timeStamp));  
+        //let _time = formatDate(Date(document.data().timeStamp));  
         let _last_update = formatDate(Date(document.data().last_update));        
 
         document.ref.collection("images").get().then(function(imagesSnapshot) {
@@ -249,7 +191,6 @@ $(document).ready(function () {
             $('#main-table').append(item);            
 
             let checkbox = $('#main-table tbody input[type="checkbox"]');
-
             $("#selectAllMain").click(function () {
                 if (this.checked) {
                     checkbox.each(function () {
@@ -268,18 +209,14 @@ $(document).ready(function () {
                     $("#selectAllMain").prop("checked", false);
                 }
             });
-
             $("#btn-categorias").click();
-
         });            
     }
 
     // Edit Main
     $(document).on('click', '.js-edit-main', function () {
       let id = $(this).attr('id');
-
-      $('#edit-employee-form').attr('edit-id', id);
-      
+      $('#edit-employee-form').attr('edit-id', id);      
       $('#messageModal').modal('show');
       $('#message-title').text("Atención");
       $('#message-body').text("No tener permisos para realizar esta operación, consultalo con el administrador del sistema.");     
@@ -348,17 +285,13 @@ $(document).ready(function () {
   
     window.loadEditsList = function(_new, _short) { 
 
-      window._short = _short;      
+      window._short = _short;    
       
       var _doc = window.editObjects[_short];   
-  
+
       _doc.ref.collection("collection").get()
-      .then(function(querySnapshotEdit) {
-  
-          //var editLength = querySnapshotEdit.docs.length;                     
-          //var _count = 0;
-          //var _length = querySnapshotEdit.size;
-  
+      .then(function(querySnapshotEdit) {  
+          
           querySnapshotEdit.forEach(function(docEdit) {
 
             var editData = docEdit.data();
@@ -439,7 +372,6 @@ $(document).ready(function () {
                 //$("#btn-contenidos").click();                               
             //}
             //_count++;         
-
 
               // VIEW IMAGES
             $(document).on('click', '.clickable-row-detail', function (event) {    
@@ -689,11 +621,10 @@ $(document).ready(function () {
 
           if (window._is_detail_drawer) {   
             
-            let codepoint = $("#codepoint").text(); 
-            
+            let codepoint = $("#codepoint").text();             
             newData['codepoints'] = codepoint;
-            //SACAR EL CODIGO
-            newData['icon'] = 'foo';
+            let code = getIconCode(codepoint);
+            newData['icon'] = code;
 
           } 
 
@@ -719,22 +650,15 @@ $(document).ready(function () {
                         'short' : window._short,
                         'id' : _id                   
                     }
-                }
-    
+                }    
                 thisRef.put(file, metadata);
-
               }             
   
-              loadEdits(_database_ref, window._short);
-  
-              var num = parseInt($("#" + window._short).text());
-  
-              num++;
-  
+              loadEdits(_database_ref, window._short);  
+              var num = parseInt($("#" + window._short).text());  
+              num++;  
               $("#" + window._short).text(num);
-
               $('#detailModal').modal('hide');  
-  
   
           }).catch(function(error) {
             console.error("Error adding document: ", error);
@@ -742,15 +666,8 @@ $(document).ready(function () {
 
        });
 
-       function saveDetailWithImage() {
-
-          
-
-       }
-  
-       function saveDetailWithIcon() {
-         
-       }
+       function saveDetailWithImage() {}  
+       function saveDetailWithIcon() {}
 
        function makeid(length) {
           var result           = '';
@@ -763,18 +680,31 @@ $(document).ready(function () {
        }   
   
       $('#button-publish').click(function(event) { 
-
         event.preventDefault();
-
-          $('#publishModal').modal('show');        
+        $('#publishModal').modal('show');        
       });
   
       $('#detailModal').on('hidden.bs.modal', function () {
-        
-
         $("#mediapick").remove();
+      });    
+      
+      var icons = [];
+
+      $('#detailModal').on('show.bs.modal', function () {
+
+        if (window._is_detail_drawer) {
+          fetch('./json/icons.json').then(res => res.json()).then(data => {            
+            console.log(data);
+            icons = data;
+          }).catch(err => console.error(err));
+        }     
 
       });
+
+      function getIconCode(name) {
+        let obj = icons.filter(item => item.name === name);
+        return "0x" +  obj[0].code;
+      }
   
       $('#acceptCheckbox').change(function() {
         if ($(this).prop('checked')) {
