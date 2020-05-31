@@ -1,129 +1,10 @@
-$(document).ready(function () {  
+$(document).ready(function () { 
 
-    //https://webdevtrick.com/bootstrap-multi-step-form-animations/
-    
-    const DOMstrings = {
-        stepsBtnClass: 'multisteps-form__progress-btn',
-        stepsBtns: document.querySelectorAll(`.multisteps-form__progress-btn`),
-        stepsBar: document.querySelector('.multisteps-form__progress'),
-        stepsForm: document.querySelector('.multisteps-form__form'),
-        stepsFormTextareas: document.querySelectorAll('.multisteps-form__textarea'),
-        stepFormPanelClass: 'multisteps-form__panel',
-        stepFormPanels: document.querySelectorAll('.multisteps-form__panel'),
-        stepPrevBtnClass: 'js-btn-prev',
-        stepNextBtnClass: 'js-btn-next' };
+    let deleteIDs = [];
+    let lastVisible;
+    let firstVisible;          
 
-    window.activePanelNum = 0;
-    
-    
-    const removeClasses = (elemSet, className) => {    
-      elemSet.forEach(elem => {    
-        elem.classList.remove(className);    
-      });    
-    };
-    
-    const findParent = (elem, parentClass) => {    
-      let currentNode = elem;    
-      while (!currentNode.classList.contains(parentClass)) {
-        currentNode = currentNode.parentNode;
-      }    
-      return currentNode;    
-    };
-    
-    const getActiveStep = elem => {
-        return Array.from(DOMstrings.stepsBtns).indexOf(elem);
-    };
-    
-    const setActiveStep = activeStepNum => {    
-      removeClasses(DOMstrings.stepsBtns, 'js-active');    
-      DOMstrings.stepsBtns.forEach((elem, index) => {    
-        if (index <= activeStepNum) {
-            elem.classList.add('js-active');
-        }    
-      });
-    };
-    
-    const getActivePanel = () => {    
-      let activePanel;    
-      DOMstrings.stepFormPanels.forEach(elem => {    
-        if (elem.classList.contains('js-active')) {      
-            activePanel = elem;      
-        }    
-      });    
-      return activePanel;    
-    };
-    
-    const setActivePanel = activePanelNum => {    
-      removeClasses(DOMstrings.stepFormPanels, 'js-active');    
-      DOMstrings.stepFormPanels.forEach((elem, index) => {
-        if (index === activePanelNum) {      
-            elem.classList.add('js-active');      
-            setFormHeight(elem);      
-        }
-      });    
-    };
-    
-    const formHeight = activePanel => {    
-      var activePanelHeight = activePanel.offsetHeight;        
-      if (window.activePanelNum==2) {
-          $("#columna").removeClass("col-lg-8");                        
-          //$('#firepadform').height(1500);            
-      } else {
-          $("#columna").addClass("col-lg-8");
-      }    
-      DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;            
-    };
-    
-    const setFormHeight = () => {
-      const activePanel = getActivePanel();    
-      formHeight(activePanel);
-    };
-    
-    DOMstrings.stepsBar.addEventListener('click', e => {    
-      const eventTarget = e.target;    
-      if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
-        return;
-      }   
-      const activeStep = getActiveStep(eventTarget);    
-      setActiveStep(activeStep);    
-      setActivePanel(activeStep);
-    });
-    
-    DOMstrings.stepsForm.addEventListener('click', e => {   
-      const eventTarget = e.target;        
-      if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)))  {        
-        if (!window._main_row_selected && window.activePanelNum==0) {
-            return;
-        }    
-        if (!window._detail_row_selected && window.activePanelNum==1) {
-          return;
-        }          
-        if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`))) {
-          return;
-        }
-      }      
-      const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);    
-      window.activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);    
-      if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
-          window.activePanelNum--;    
-      } else {    
-        window.activePanelNum++;    
-      }    
-      setActiveStep(window.activePanelNum);
-      setActivePanel(window.activePanelNum);    
-    });    
-    
-    //window.addEventListener('load', setFormHeight, false);    
-    //window.addEventListener('resize', setFormHeight, false);    
-    
-    const setAnimationType = newType => {
-      DOMstrings.stepFormPanels.forEach(elem => {
-        elem.dataset.animation = newType;
-      });
-    };       
-    
-    let _imageSnapshot = {};    
-    let deleteIDs = [];   
+    let _imageSnapshot = {};        
 
     window.editDocuments = [];
 
@@ -132,10 +13,125 @@ $(document).ready(function () {
     window._id_document_collection;
     window.database_ref;
 
-    window.editObjects;      
+    window.editObjects; 
+
+    window.activeTable = 0;
+    window.totalMain = 0;
+    window.stepsMain = 0;
+
+    db.collection('contents').onSnapshot(snapshot => {
+        window.totalMain = snapshot.size;
+        window.stepsMain = Math.round(window.totalMain/3);
+        $('.count-visible').text(3);
+        $('.count-total').text(window.totalMain);    
+    });  
+    
+    var first = db.collection("contents").limit(3);
+
+    first.get().then(function (documentSnapshots) {
+         
+         var count = 0;
+
+         documentSnapshots.docs.forEach(doc => {
+            
+            if (count==0) {
+              firstVisible = doc;              
+            } else if (count==2) {
+              lastVisible = doc;
+            }
+            
+            renderPost(doc);
+
+            count++;
+         });
+         
+         //lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+         //console.log(documentSnapshots.docs.length - 1);
+
+    });   
+
+    $('#js-next').on('click', function () {        
+      
+      window.activeTable++;    
+      
+      if ($(this).closest('.page-item').hasClass('disabled')) {
+          return false;
+      }      
+
+      $('#main-table tbody').html('');   
+
+      var next = db.collection("contents")
+          .startAfter(lastVisible)
+          .limit(3);
+
+      next.get().then(function (documentSnapshots) { 
+          
+        var count = 0; 
+
+        documentSnapshots.docs.forEach(doc => {             
+          if (count==0) {
+            firstVisible = doc;              
+          } else if (count==2) {
+            lastVisible = doc;
+          }
+          renderPost(doc);   
+          count++;           
+        });
+          
+        //lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+        //firstVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];    
+        
+        if (window.stepsMain == window.activeTable) {
+          $('#js-next').closest('.page-item').addClass('disabled');
+        }
+          
+        /*let nextChecker = documentSnapshots.docs.length - 1;
+        if (nextChecker == 0) {
+          $('#js-next').closest('.page-item').addClass('disabled');
+        }*/
+
+      });
+
+    });
+
+    // PAGINATION
+    $("#js-previous").on('click', function () {
+
+      window.activeTable--;
+
+      $('#main-table tbody').html('');
+
+      var previous;
+
+      if (window.activeTable == 0) {
+        previous = db.collection("contents").limit(3);
+        $('#js-next').closest('.page-item').addClass('enabled');
+      } else  {
+        var previous = db.collection("contents")          
+          //.orderBy(firebase.firestore.FieldPath.documentId(), "desc")
+          .startAt(firstVisible)
+          .limit(3);
+      }     
+
+      previous.get().then(function (documentSnapshots) {
+          documentSnapshots.docs.forEach(doc => {  
+            /*if (count==0) {
+              firstVisible = doc;              
+            } else if (count==2) {
+              lastVisible = doc;
+            }*/
+            renderPost(doc);
+          });
+      });
+
+      if (window.activeTable == 0) {
+        $('#js-next').closest('.page-item').removeClass('disabled');
+      }
+
+    });
 
     // REAL TIME LISTENER
-    db.collection('contents').onSnapshot(snapshot => {
+    /*db.collection('contents').onSnapshot(snapshot => {
         let size = snapshot.size;
         $('.count').text(size);
         if (size == 0) {
@@ -154,7 +150,8 @@ $(document).ready(function () {
                 $('tr[data-id=' + change.doc.id + ']').remove();
             }
         });
-    });
+
+    });*/
 
     function renderPost(document) { 
 
@@ -987,8 +984,168 @@ $(document).ready(function () {
          $('.modal').modal('hide');
        }, 3000);
     }
+
+    // Bootstrap Stepper 
+
+    //https://webdevtrick.com/bootstrap-multi-step-form-animations/
+    
+    const DOMstrings = {
+      stepsBtnClass: 'multisteps-form__progress-btn',
+      stepsBtns: document.querySelectorAll(`.multisteps-form__progress-btn`),
+      stepsBar: document.querySelector('.multisteps-form__progress'),
+      stepsForm: document.querySelector('.multisteps-form__form'),
+      stepsFormTextareas: document.querySelectorAll('.multisteps-form__textarea'),
+      stepFormPanelClass: 'multisteps-form__panel',
+      stepFormPanels: document.querySelectorAll('.multisteps-form__panel'),
+      stepPrevBtnClass: 'js-btn-prev',
+      stepNextBtnClass: 'js-btn-next' };
+
+  window.activePanelNum = 0;
+  
+  
+  const removeClasses = (elemSet, className) => {    
+    elemSet.forEach(elem => {    
+      elem.classList.remove(className);    
+    });    
+  };
+  
+  const findParent = (elem, parentClass) => {    
+    let currentNode = elem;    
+    while (!currentNode.classList.contains(parentClass)) {
+      currentNode = currentNode.parentNode;
+    }    
+    return currentNode;    
+  };
+  
+  const getActiveStep = elem => {
+      return Array.from(DOMstrings.stepsBtns).indexOf(elem);
+  };
+  
+  const setActiveStep = activeStepNum => {    
+    removeClasses(DOMstrings.stepsBtns, 'js-active');    
+    DOMstrings.stepsBtns.forEach((elem, index) => {    
+      if (index <= activeStepNum) {
+          elem.classList.add('js-active');
+      }    
+    });
+  };
+  
+  const getActivePanel = () => {    
+    let activePanel;    
+    DOMstrings.stepFormPanels.forEach(elem => {    
+      if (elem.classList.contains('js-active')) {      
+          activePanel = elem;      
+      }    
+    });    
+    return activePanel;    
+  };
+  
+  const setActivePanel = activePanelNum => {    
+    removeClasses(DOMstrings.stepFormPanels, 'js-active');    
+    DOMstrings.stepFormPanels.forEach((elem, index) => {
+      if (index === activePanelNum) {      
+          elem.classList.add('js-active');      
+          setFormHeight(elem);      
+      }
+    });    
+  };
+  
+  const formHeight = activePanel => {    
+    var activePanelHeight = activePanel.offsetHeight;        
+    if (window.activePanelNum==2) {
+        $("#columna").removeClass("col-lg-8");                        
+        //$('#firepadform').height(1500);            
+    } else {
+        $("#columna").addClass("col-lg-8");
+    }    
+    DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;            
+  };
+  
+  const setFormHeight = () => {
+    const activePanel = getActivePanel();    
+    formHeight(activePanel);
+  };
+  
+  DOMstrings.stepsBar.addEventListener('click', e => {    
+    const eventTarget = e.target;    
+    if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
+      return;
+    }   
+    const activeStep = getActiveStep(eventTarget);    
+    setActiveStep(activeStep);    
+    setActivePanel(activeStep);
+  });
+  
+  DOMstrings.stepsForm.addEventListener('click', e => {   
+    const eventTarget = e.target;        
+    if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)))  {        
+      if (!window._main_row_selected && window.activePanelNum==0) {
+          return;
+      }    
+      if (!window._detail_row_selected && window.activePanelNum==1) {
+        return;
+      }          
+      if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`))) {
+        return;
+      }
+    }      
+    const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);    
+    window.activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);    
+    if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
+        window.activePanelNum--;    
+    } else {    
+      window.activePanelNum++;    
+    }    
+    setActiveStep(window.activePanelNum);
+    setActivePanel(window.activePanelNum);    
+  });    
+  
+  //window.addEventListener('load', setFormHeight, false);    
+  //window.addEventListener('resize', setFormHeight, false);    
+  
+  const setAnimationType = newType => {
+    DOMstrings.stepFormPanels.forEach(elem => {
+      elem.dataset.animation = newType;
+    });
+  };  
+  
+
+  // PAGINATION
+  /*$("#js-previous").on('click', function () {
+    $('#employee-table tbody').html('');
+    var previous = db.collection("employees")
+        .orderBy(firebase.firestore.FieldPath.documentId(), "desc")
+        .startAt(firstVisible)
+        .limit(3);
+    previous.get().then(function (documentSnapshots) {
+        documentSnapshots.docs.forEach(doc => {
+            renderEmployee(doc);
+        });
+    });
+  });
+
+  $('#js-next').on('click', function () {
+      if ($(this).closest('.page-item').hasClass('disabled')) {
+          return false;
+      }
+      $('#employee-table tbody').html('');
+      var next = db.collection("employees")
+          .startAfter(lastVisible)
+          .limit(3);
+      next.get().then(function (documentSnapshots) {
+          documentSnapshots.docs.forEach(doc => {
+              renderEmployee(doc);
+          });
+          lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+          firstVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+          let nextChecker = documentSnapshots.docs.length - 1;
+          if (nextChecker == 0) {
+              $('#js-next').closest('.page-item').addClass('disabled');
+          }
+      });
+  });*/
       
-    //# sourceURL=textedit.js   
+  //# sourceURL=textedit.js   
   
 });
 
