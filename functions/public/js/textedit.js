@@ -18,6 +18,7 @@ $(document).ready(function () {
     window.activeTable = 0;
     window.totalMain = 0;
     window.stepsMain = 0;
+    window.partialMain = 0;
 
     db.collection('contents').onSnapshot(snapshot => {
         window.totalMain = snapshot.size;
@@ -41,12 +42,11 @@ $(document).ready(function () {
             }
             
             renderPost(doc);
-
             count++;
+
          });
-         
-         //lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-         //console.log(documentSnapshots.docs.length - 1);
+
+         window.partialMain = documentSnapshots.docs.length;
 
     });   
 
@@ -68,7 +68,10 @@ $(document).ready(function () {
           
         var count = 0; 
 
-        documentSnapshots.docs.forEach(doc => {             
+        var length = documentSnapshots.docs.length;
+
+        documentSnapshots.docs.forEach(doc => {   
+
           if (count==0) {
             firstVisible = doc;              
           } else if (count==2) {
@@ -76,21 +79,16 @@ $(document).ready(function () {
           }
           renderPost(doc);   
           count++;           
-        });
-          
-        //lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-        //firstVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];    
+        });   
+        
+        window.partialMain = (window.partialMain + length);
+        $('.count-visible').text(window.partialMain);
         
         if (window.stepsMain == window.activeTable) {
           $('#js-next').closest('.page-item').addClass('disabled');
-        }
-          
-        /*let nextChecker = documentSnapshots.docs.length - 1;
-        if (nextChecker == 0) {
-          $('#js-next').closest('.page-item').addClass('disabled');
-        }*/
+        }                 
 
-      });
+      });    
 
     });
 
@@ -122,6 +120,13 @@ $(document).ready(function () {
             }*/
             renderPost(doc);
           });
+
+          if (window.activeTable == 0) {
+            window.partialMain = documentSnapshots.docs.length;            
+          } 
+
+          $('.count-visible').text(window.partialMain);  
+
       });
 
       if (window.activeTable == 0) {
