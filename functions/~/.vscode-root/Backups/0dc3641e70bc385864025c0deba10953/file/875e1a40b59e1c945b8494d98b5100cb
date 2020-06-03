@@ -1,6 +1,8 @@
+file:///home/jose/repos/curupa/functions/public/js/textedit.js {"mtime":1591160268768,"size":54234,"etag":"3570b48om1pdf","orphaned":false}
 $(document).ready(function () { 
 
     let deleteIDs = [];
+    
     let lastVisible;
     let firstVisible;          
 
