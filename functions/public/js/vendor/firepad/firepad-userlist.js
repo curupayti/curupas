@@ -8,7 +8,9 @@ var FirepadUserList = (function() {
     this.firebaseCallbacks_ = [];
 
     var self = this;
-    this.displayName_ = 'Guest ' + Math.floor(Math.random() * 1000);
+    //this.displayName_ = 'Guest ' + Math.floor(Math.random() * 1000);
+
+    this.displayName_ = _user.name;
     this.firebaseOn_(ref.root().child('.info/connected'), 'value', function(s) {
       if (s.val() === true && self.displayName_) {
         var nameRef = ref.child(self.userId_).child('name');
@@ -70,6 +72,8 @@ var FirepadUserList = (function() {
 
     var nameInput = elt('input', null, { type: 'text', 'class': 'firepad-userlist-name-input'} );
     nameInput.value = this.displayName_;
+    nameInput.disabled = true;
+    
  
     var nameHint = elt('div', 'ENTER YOUR NAME', { 'class': 'firepad-userlist-name-hint'} );
 
