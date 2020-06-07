@@ -1,6 +1,6 @@
 # Curupas
 
-Mobile project with Flutter and Firebase
+Mobile project with Flutter and Firebase, this guide was created for Ubuntu Linux but can be useful for Windows and Mac.
 
 # Setup Firebase CLI reference and install local environment
 
@@ -39,7 +39,7 @@ git clone git@gitlab.com:JoseVigil/curupa.git
 cd curupa
 git remote update
 git fetch 
-git checkout --track origin/<BRANCH-NAME>
+git checkout --track origin/<BRANCH-NAME> -use functions branch
 ```
 
 Init commands
