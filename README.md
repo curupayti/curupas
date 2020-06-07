@@ -24,7 +24,7 @@ In order to link a local account with a firebase account, you must initialize fi
 firebase login
 ```
 
-## Functions
+## Functions (firebase backend endpoints)
 
 To initialize the functions it is necessary to clone the branch 'functions' and install the firebase command line following [this guide] (https://firebase.google.com/docs/functions/local-emulator) and run the command.
 
