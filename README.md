@@ -72,11 +72,13 @@ If the port is busy, start with
 sudo firebase serve
 ```
 
-Deploy
+Deploy (only Jose)
 
 ```sh
 sudo firebase deploy
 ```
+
+Local port test 
 
 curl -X POST -H "Content-Type: application/json"  -d '{"data":{"name":"YOUR_NAME"}}'  http://localhost:5000/curupa-d830b/us-central1/helloWorld
 
