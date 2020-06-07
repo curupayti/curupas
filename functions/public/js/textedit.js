@@ -48,8 +48,8 @@ $(document).ready(function () {
       window.mainActiveTable++;     
       if ($(this).closest('.page-item').hasClass('disabled')) {
           return false;
-      }      
-      $('#detail-table tbody').html('');   
+      }   
+      $('#main-table tbody').html('');   
       var next = db.collection("contents")
           .startAfter(lastVisible)
           .limit(3);
@@ -217,7 +217,9 @@ $(document).ready(function () {
           window._is_detail_drawer = false;
         }
 
-        window._id_document_collection = dataid;     
+        window._id_document_collection = dataid;           
+
+        window._detail_name = _name;           
 
         var checkboxes = $('#main-table tbody input[type="checkbox"]');
 
@@ -302,6 +304,7 @@ $(document).ready(function () {
         
         window.detailTotal = querySnapshotDetail.lenght;     
         window.detailSteps = Math.round(window.detailTotal/3);
+
         $('.count-visible-detail').text(3);
         $('.count-total-detail').text(window.detailTotal);         
         
@@ -318,27 +321,8 @@ $(document).ready(function () {
         renderDetail(docEdit);
 
       }); 
-
     } 
 
-    /*function loadDetails(querySnapshotDetail) {
-      
-      window.detailDocuments.ref.collection("collection").limit(3).get()
-      .then(function(querySnapshotDetail) {  
-
-          //sacar cantidad para tope y hacer otro con logica limit.
-          
-          querySnapshotDetail.forEach(function(docEdit) {
-
-            
-            //Aca loginca del paginado
-
-            renderDetail(docEdit);
-            
-        }); 
-
-      });
-    }*/
 
     function renderDetail(docEdit) { 
             
@@ -455,11 +439,10 @@ $(document).ready(function () {
      // Edit Detail
      $(document).on('click', '.js-edit-detail', function () {
       let id = $(this).data('id');
-      let name = $(this).data('name');
+      let _name = $(this).data('name');
 
-      $('#edit-employee-form').attr('id', id);      
+      $('#edit-employee-form').attr('id', id);          
       
-
     });
     
     // Delete Detail
@@ -1141,8 +1124,18 @@ $(document).ready(function () {
     if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
         window.activePanelNum--;    
     } else {    
-      window.activePanelNum++;    
+      window.activePanelNum++;       
     }    
+   
+    let button_name_detail;
+    if (window.activePanelNum==0) {
+      button_name_detail = "contenido";      
+      $('#btn-contenidos').text('Contenidos'); 
+    } else if (window.activePanelNum==1) {      
+      button_name_detail = window._detail_name;
+    }    
+    $('#add-content').text('Agregar ' + button_name_detail); 
+    
     setActiveStep(window.activePanelNum);
     setActivePanel(window.activePanelNum);    
   });    
@@ -1221,7 +1214,7 @@ $(document).ready(function () {
   $("#js-previous-detail").on('click', function () {
 
     window.detailActiveTable--;
-    
+
     $('#detail-table tbody').html('');
 
     loadDetails(window.detailActiveTable);
