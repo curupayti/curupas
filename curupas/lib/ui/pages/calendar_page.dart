@@ -133,7 +133,6 @@
       _beginMonthPadding == 7 ? (_beginMonthPadding = 0) : _beginMonthPadding;
     }
 
-
     @override
     void initState() {
       super.initState();

@@ -1,32 +1,16 @@
 
+  import 'dart:async';
+  import 'dart:convert';
   import 'package:curupas/models/HTML.dart';
   import 'package:flutter/material.dart';
-  //import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+  import 'package:flutter/services.dart';
   import 'package:webview_media/webview_flutter.dart';
 
-
-  /*class ContentViewer extends StatelessWidget {
-    final HTML contentHtml;
-
-    ContentViewer({Key key, @required this.contentHtml}) : super(key: key);
-
-    @override
-    Widget build(BuildContext context) {
-      return WebviewScaffold(
-        url: new Uri.dataFromString(contentHtml.html, mimeType: 'text/html').toString(),
-        hidden: false,
-        withLocalUrl: true,
-        withZoom: true, //change to true or false to use webview with zoom or not
-        appBar: AppBar(title: Text(contentHtml.name)),
-      );
-    }
-  }*/
+  //https://pub.dev/packages/webview_media#-example-tab-
 
   class ContentViewer extends StatefulWidget {
     final HTML contentHtml;
-
     ContentViewer({Key key, @required this.contentHtml}) : super(key: key);
-
     @override
     createState() => _WebViewContentViewer(this.contentHtml);
   }
@@ -35,22 +19,40 @@
     HTML contentHtml;
     final _key = UniqueKey();
     _WebViewContentViewer(this.contentHtml);
+    WebViewController webViewController;
+    String htmlFilePath = 'assets/html/drawer_base.html';
+    bool _isLoadingPage = true;
+
+    loadLocalHTML() async {
+      String fileHtmlContents = await rootBundle.loadString(htmlFilePath);
+      String html_content = fileHtmlContents.replaceFirst("replace", contentHtml.html);
+      webViewController.loadUrl(Uri.dataFromString(html_content,
+          mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
+          .toString());
+    }
 
     @override
     Widget build(BuildContext context) {
       return Scaffold(
-          appBar: AppBar(title:
-          Text(contentHtml.name)),
-          body: Column(
-            children: [
-              Expanded(
-                  child: WebView(
-                      key: _key,
-                      javascriptMode: JavascriptMode.unrestricted,
-                      initialUrl: contentHtml.name))
-              ],
-           ),
-        );
+        appBar: AppBar(title: Text(contentHtml.name)),
+        body: Stack(
+          children: <Widget>[
+            WebView(
+              initialUrl: '',
+              javascriptMode: JavascriptMode.unrestricted,
+              onWebViewCreated: (WebViewController tmp) {
+                webViewController = tmp;
+                loadLocalHTML();
+              },
+              onPageFinished: (finish) {
+                setState(() {
+                  _isLoadingPage = false;
+                });
+              },
+            ),
+            _isLoadingPage ? Center( child: CircularProgressIndicator()) : Container(),
+          ],
+        ),
+      );
     }
-
   }

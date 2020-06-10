@@ -33,11 +33,10 @@ dependencies:
   intl: ^0.15.8
   notifier: ^1.0.2
   cached_network_image: ^2.0.0-rc
-  #youtube_api: ^0.7.2
+  youtube_api: ^0.7.2
   youtube_player_flutter: ^6.1.1
   fancy_bottom_navigation: ^0.3.2
   keyboard_actions: ^2.1.2
-  #keyboard_visibility keyboard_visibility: ^0.5.6
   flutter_keyboard_visibility: ^2.0.0
   flutter_speed_dial: ^1.2.1
   flutter_screenutil: ^0.5.3
@@ -50,7 +49,6 @@ dependencies:
   location: ^2.3.5
   geolocator: ^5.3.1
   photo_view: ^0.9.0
-  flutter_svg: ^0.15.0
   circular_profile_avatar: ^1.0.6
   #flutter_webview_plugin: 0.3.0+2
   #webview_flutter: ^0.3.21
@@ -64,7 +62,6 @@ dependencies:
   mercadopago_sdk: ^1.1.3
   flutter_credit_card: ^0.1.3
   flutter_spinkit: ^4.1.2
-
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -93,6 +90,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/html/drawer_base.html
     - assets/images/default.png
     - assets/images/escudo.png
     - assets/images/curupa_anexo.png
