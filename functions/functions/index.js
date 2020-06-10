@@ -516,4 +516,28 @@
   });
 
 
+  function buildHtmlWithPost (post) {
+    const string = '<!DOCTYPE html><head>' +
+      '<title>' + post.title + ' | Example Website</title>' +
+      '<meta property="og:title" content="' + post.title + '">' +
+      '<meta property="twitter:title" content="' + post.title + '">' +
+      '<link rel="icon" href="https://example.com/favicon.png">' +
+      '</head><body>' +
+      '<script>window.location="https://example.com/?post=' + post.id + '";</script>' +
+      '</body></html>';
+    return string;
+  }
+  
+  exports.buildHtmlWithContent = function(req, res) {
+    const path = req.path.split('/');
+    const postId = path[2];
+    admin.database().ref('/posts').child(postId).once('value').then(snapshot => {
+      const post = snapshot.val();
+      post.id = snapshot.key;
+      const htmlString = buildHtmlWithPost(post);
+      res.status(200).end(htmlString);
+    });
+  };
+
+
   

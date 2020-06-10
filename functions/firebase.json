@@ -12,9 +12,12 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      { "source": "/contenido/**", "function": "buildHtmlWithContent" }
     ]      
   },
   "storage": {
     "rules": "storage.rules"
-  }
+  }  
 }
