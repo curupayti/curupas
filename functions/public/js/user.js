@@ -33,6 +33,20 @@
             });
         }); 
 
+        $("#search-keyword").change(function (e){
+            const filteredDocuments = [];
+            for(doc in _documents){
+                if(_documents[doc].data().name && _documents[doc].data().name.includes(e.target.value)) {
+                    filteredDocuments.push(_documents[doc]);
+                }
+            }
+            $('#user-table tbody').html("");
+            filteredDocuments.forEach(function(doc) {
+                renderUser(doc);
+            } )
+        });
+    
+
         function renderUser(document) {  
             _documents[document.id] = document;      
 
