@@ -39,7 +39,7 @@ git clone git@gitlab.com:JoseVigil/curupa.git
 cd curupa
 git remote update
 git fetch 
-git checkout --track origin/<BRANCH-NAME> -use functions branch
+git checkout --track origin/<BRANCH-NAME> 
 ```
 
 Init commands
