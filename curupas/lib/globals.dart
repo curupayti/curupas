@@ -16,13 +16,13 @@
     import 'package:curupas/ui/widgets/alert_dialog.dart';
     import 'package:video_thumbnail/video_thumbnail.dart';
     import 'package:youtube_api/youtube_api.dart';
-    import 'package:youtube_api/youtube_api.dart';
     import 'business/auth.dart';
     import 'models/HTML.dart';
     import 'models/HTMLS.dart';
     import 'models/group_media.dart';
     import 'models/museum.dart';
     import 'models/notification.dart';
+    import 'models/pumas.dart';
     import 'models/streaming.dart';
     import 'package:path/path.dart' as p;
     import 'dart:math' as math;
@@ -42,11 +42,13 @@
     Description description = new Description();
     List<Post> posts = new List<Post>();
     List<Museum> museums = new List<Museum>();
+    List<Pumas> pumas = new List<Pumas>();
 
     //HTML CONTENT
     HTMLS drawerContent = new HTMLS();
     HTMLS newsletterContent = new HTMLS();
     HTMLS anecdoteContent = new HTMLS();
+    HTMLS pumasContent = new HTMLS();
 
     //Youtube
     String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";
@@ -108,11 +110,9 @@
       IconData videoIcon;
       String showLivestreamingMessage;
       Streaming activeStreaming;
-
       Streammer() {
         setIsLiveStreaming(false);
       }
-
       void setIsLiveStreaming(bool _isLive) {
         if (_isLive) {
           showLivestreamingMessage = "Transmisión en vivo";
@@ -123,11 +123,9 @@
         }
         _isLiveStreaming = _isLive;
       }
-
       void setYtResutl(List<YT_API> _ytResult) {
         ytResult = _ytResult;
       }
-
       void serStreamings(List<Streaming> _streamings) {
         activeStreaming = _streamings[0];
         streamings = _streamings;
@@ -165,13 +163,19 @@
     }
 
     void setDataFromGlobal() {
-      setData(description.description, posts, museums, newsletterContent.contents); //, anecdoteContent.contents);
+      setData(description.description,
+          posts,
+          museums,
+          newsletterContent.contents,
+          pumas,
+        ); //, anecdoteContent.contents);
     }
 
     void setData(String desc,
         List<Post> posts,
         List<Museum> museums,
         List<HTML> newsletters,
+        List<Pumas> pumas,
         //List<HTML> anecdotes
         ) {
 
@@ -314,6 +318,7 @@
         this.biography,
         this.posts,
         this.museums,
+        this.pumas,
         this.drawers,
         this.newsletters,
         this.anecdotes,
@@ -327,6 +332,7 @@
       String biography;
       List<Post> posts;
       List<Museum> museums;
+      List<Pumas> pumas;
       final List<HTML> drawers;
       List<HTML> newsletters;
       List<HTML> anecdotes;
@@ -408,6 +414,16 @@
       });
     }
 
+    void getPumas() {
+      Auth.getHtmlContentByType("pumas").then((HTMLS _pumasContent) {
+        pumasContent = _pumasContent;
+        pumasContent.contents.sort((a, b) {
+          return a.last_update.compareTo(b.last_update);
+        });
+        eventBus.fire("home-pumas");
+      });
+    }
+
     void getDescription() {
       Stream<Description> descStream = Auth.getDescription();
       descStream.listen((Description _desc) {
@@ -416,7 +432,6 @@
         return _desc;
       });
     }
-
 
     void getPosts() {
       Auth.getPostSnapshots().then((templist) {

@@ -1,6 +1,7 @@
 
   import 'package:curupas/ui/widgets/museum.dart';
   import 'package:curupas/ui/widgets/newsletter/newsletter_widget.dart';
+import 'package:curupas/ui/widgets/pumas.dart';
   import "package:flutter/material.dart";
   import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -40,7 +41,7 @@
         String _event = event.toString();
         if (_event.contains("home")) {
           _counting = _counting + 1;
-          if (_counting == 4) {
+          if (_counting == 5) {
             _globals.setDataFromGlobal();
             _counting = 0;
             setState(() {
@@ -59,6 +60,7 @@
       _globals.getDescription();
       _globals.getPosts();
       _globals.getMuseums();
+      _globals.getPumas();
       _globals.getNewsletters();
     }
   }
@@ -232,6 +234,7 @@
               _buildPostScroller(),
               _buildNewsletterTimeline(),
               _buildMuseumTimeline(),
+              _buildPumasTimeline(),
             ],
           ),
         );
@@ -338,6 +341,16 @@
         );
       }
 
+      Widget _buildNewsletterTimeline() {
+        return Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: SizedBox.fromSize(
+            size: Size.fromHeight(200.0),
+            child: new NewsletterWidget(newsletters: _globals.appData.newsletters),
+          ),
+        );
+      }
+
       Widget _buildMuseumTimeline() {
         return Padding(
           padding: const EdgeInsets.only(top: 16.0),
@@ -348,12 +361,12 @@
         );
       }
 
-      Widget _buildNewsletterTimeline() {
+      Widget _buildPumasTimeline() {
         return Padding(
           padding: const EdgeInsets.only(top: 16.0),
           child: SizedBox.fromSize(
-            size: Size.fromHeight(200.0),
-            child: new NewsletterWidget(newsletters: _globals.appData.newsletters),
+            size: Size.fromHeight(170.0),
+            child: new PumasWidget(pumas: _globals.appData.pumas),
           ),
         );
       }

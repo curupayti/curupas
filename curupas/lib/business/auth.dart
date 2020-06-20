@@ -5,6 +5,7 @@
   import 'package:curupas/models/group_media.dart';
   import 'package:curupas/models/museum.dart';
   import 'package:curupas/models/notification.dart';
+import 'package:curupas/models/pumas.dart';
   import 'package:firebase_analytics/firebase_analytics.dart';
   import 'package:firebase_auth/firebase_auth.dart';
   import 'package:cloud_firestore/cloud_firestore.dart';
@@ -308,6 +309,7 @@
 
     static Future<HTMLS> getHtmlContentByType(String type) async {
       HTMLS _drawerContent = HTMLS();
+      String carajo_la_puta_madre = type;
       await Firestore.instance.document("contents/${type}").get().then((document) async {
         if (document.exists) {
          await getContenHtmls(document).then((listContentHtml) {
@@ -492,6 +494,41 @@
       }
       return museums;
     }
+
+    /*static Future<List<DocumentSnapshot>> getPumasSnapshots() async {
+      List<DocumentSnapshot> templist;
+      List<Museum> list = new List();
+      CollectionReference collectionRef = Firestore.instance.collection("pumas");
+      QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
+      return collectionSnapshot.documents;
+    }
+
+    static Future<List<Pumas>> getPumas(List<DocumentSnapshot> snapshots) async {
+      var length = snapshots.length;
+      List<Pumas> pumas = new List();
+      List<DocumentSnapshot> templist;
+      for (var snapshot in snapshots) {
+        CollectionReference collectionRef = Firestore.instance
+            .collection('pumas')
+            .document(snapshot.documentID)
+            .collection('images');
+        QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
+        templist = collectionSnapshot.documents; // <--- ERROR
+        try {
+          List<String> imageList = new List();
+          templist.map((DocumentSnapshot docSnapshot) {
+            Map<String, Object> doc = docSnapshot.data;
+            String url = doc["downloadURL"];
+            imageList.add(url);
+          }).toList();
+          Pumas _pumas = Pumas.fromDocument(snapshot, imageList);
+          pumas.add(_pumas);
+        } on Exception catch (_) {
+          print("Error: " + _.toString());
+        }
+      }
+      return pumas;
+    }*/
 
     static Future<QuerySnapshot> getCalendarData(DateTime _dateTime) async {
       QuerySnapshot userEvents = await Firestore.instance
