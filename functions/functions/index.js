@@ -1,32 +1,45 @@
-  /**
-   * Copyright 2016 Google Inc. All Rights Reserved.
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *      http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for t`he specific language governing permissions and
-   * limitations under the License.
-   */
-  'use strict';
-
+'use strict';
+ 
   const functions = require('firebase-functions');
   var admin = require('firebase-admin');
+  const firebase = require('firebase');
 
+  const Firepad  = require('firepad');
+  const jsdom = require("jsdom");
+  const { JSDOM } = jsdom;
+  
+  const cors = require('cors')({origin: true});
+
+  const mkdirp = require('mkdirp-promise');
+  const request = require('request');
+
+  const spawn = require('child-process-promise').spawn;
+  const path = require('path');
+  const os = require('os');
+  const fs = require('fs');
+
+  const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+
+  const app = express();
+
+  // Runs before every route. Launches headless Chrome.
+  app.all('*', async (req, res, next) => {
+      // Note: --no-sandbox is required in this env.
+      // Could also launch chrome and reuse the instance
+      // using puppeteer.connect()
+      res.locals.browser = await puppeteer.launch({
+        args: ['--no-sandbox']
+      });
+      next(); // pass control to next route.
+  }); 
+  
   var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
   var db_url = "https://curupas-app.firebaseio.com";
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: db_url
   });
-  const firestore = admin.firestore();
-
-  const firebase = require('firebase');
+  const firestore = admin.firestore(); 
 
   const firebaseConfig = {
     apiKey: "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg",
@@ -40,34 +53,12 @@
   };
   firebase.initializeApp(firebaseConfig);
 
-  const Firepad  = require('firepad');
-  const jsdom = require("jsdom");
-  const { JSDOM } = jsdom;
-
-  const cors = require('cors')({origin: true});
-
-  const mkdirp = require('mkdirp-promise');
-  const request = require('request');
-
-  const spawn = require('child-process-promise').spawn;
-  const path = require('path');
-  const os = require('os');
-  const fs = require('fs');
-
-  const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-
   // Max height and width of the thumbnail in pixels.
   const THUMB_MAX_HEIGHT = 200;
   const THUMB_MAX_WIDTH = 200;
   // Thumbnail prefix added to file names.
   const THUMB_PREFIX = 'thumb_';
 
-  /**
-   * When an image is uploaded in the Storage bucket We generate a thumbnail automatically using
-   * ImageMagick.
-   * After the thumbnail has been generated and uploaded to Cloud Storage,
-   * we write the public URL to the Firebase Realtime Database.
-   */
   exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(async (object) => {  
     
     const filePath = object.name;
@@ -75,10 +66,6 @@
     var isThumbnail = false;  
     isThumbnail = (customMetadata.thumbnail == 'true');
     var customMetadataType = parseInt(customMetadata.type);       
-    
-    //console.log("=============== customMetadataType:" + customMetadataType);
-
-    //console.log("isThumbnail:" + isThumbnail);  
 
     // Cloud Storage files.
     const bucket = admin.storage().bucket(object.bucket);
@@ -103,7 +90,6 @@
         return console.log('This is not an image.');
       }
 
-      // Exit if the image is already a thumbnail.
       if (fileName.startsWith(THUMB_PREFIX)) {
         return console.log('Already a Thumbnail.');
       }    
@@ -114,24 +100,15 @@
         contentType: contentType,
         // To enable Client-side caching you can set the Cache-Control headers here. Uncomment below.
         // 'Cache-Control': 'public,max-age=3600',
-      };    
+      };          
       
-      // Create the temp directory where the storage file will be downloaded.
-      await mkdirp(tempLocalDir);
-      // Download file from bucket.
+      await mkdirp(tempLocalDir);      
       await file.download({destination: tempLocalFile});
-      //console.log('The file has been downloaded to', tempLocalFile);
-      // Generate a thumbnail using ImageMagick.
-      await spawn('convert', [tempLocalFile, '-thumbnail', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});
-      //console.log('Thumbnail created at', tempLocalThumbFile);
-      // Uploading the Thumbnail.
+      await spawn('convert', [tempLocalFile, '-thumbnail', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});      
       await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath, metadata: metadata});
-      //console.log('Thumbnail uploaded to Storage at', thumbFilePath);
-      // Once the image has been uploaded delete the local files to free up disk space.
       fs.unlinkSync(tempLocalFile);
       fs.unlinkSync(tempLocalThumbFile);
       
-      // Get the Signed URLs for the thumbnail and original image.
       const results = await Promise.all([
         thumbFile.getSignedUrl(config),
         file.getSignedUrl(config),
@@ -147,9 +124,7 @@
     
         var _id = customMetadata.id;
         var _collection = customMetadata.collection; 
-        //console.log('_id: '+ _id + " _collection: " + _collection);          
         let _time = admin.firestore.FieldValue.serverTimestamp();
-        //console.log("_time: " + _time);         
         await firestore.collection(_collection).doc(_id).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
     
       //Save User Thumbnail
@@ -225,9 +200,6 @@
           var profilePictureToDelete = customMetadata.profilePictureToDelete;         
           var thumbnailPictureToDelete = customMetadata.thumbnailPictureToDelete;           
 
-          //console.log("::profilePicture:: " + profilePicture); 
-          //console.log("::thumbnailPicture:: " + thumbnailPicture);         
-
           let _time = admin.firestore.FieldValue.serverTimestamp();
 
           firestore.collection("users").doc(userId).update(
@@ -266,9 +238,7 @@
 
       //console.log("::customMetadataType:: " + customMetadataType);  
 
-      if (customMetadataType == 1) {  
-
-        //console.log("::entra::");
+      if (customMetadataType == 1) {         
         
         const file = object.name;
         const thumbFileExt       = 'jpg';
@@ -282,21 +252,13 @@
         const tempLocalDir       = path.join(os.tmpdir(), fileDir);
       
         await mkdirp(tempLocalDir);
-
         console.log("tempLocalThumbFile:: " + tempLocalThumbFile);
-
         const videoFile = bucket.file(file);
-
-        const signedVideoUrl = await videoFile.getSignedUrl(config);         
-    
-        const videoUrl = signedVideoUrl[0];
-        
-        console.log("videoUrl:: " + videoUrl);
-        
+        const signedVideoUrl = await videoFile.getSignedUrl(config);             
+        const videoUrl = signedVideoUrl[0];        
+        console.log("videoUrl:: " + videoUrl);        
         await spawn(ffmpegPath, ['-ss', '0', '-i', videoUrl, '-f', 'image2', '-vframes', '1', '-vf', `scale=${THUMB_MAX_WIDTH}:-1`, tempLocalThumbFile]);
-
         await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath});      
-
         await fs.unlinkSync(tempLocalThumbFile);   
 
         var documentId = customMetadata.documentId;
@@ -305,8 +267,7 @@
         var desc = customMetadata.desc; 
         var userId = customMetadata.userId;              
         
-        let _time = admin.firestore.FieldValue.serverTimestamp();    
-        
+        let _time = admin.firestore.FieldValue.serverTimestamp();            
         const fileThumb = bucket.file(thumbFilePath);
         
         // Get the Signed URLs for the thumbnail and original image.
@@ -420,15 +381,11 @@
           if (!error) {
 
               var body = JSON.parse(body);
-              console.log("body: " + JSON.stringify(body));
-              
+              console.log("body: " + JSON.stringify(body));              
               var data = body["data"];
-              console.log("data: " + JSON.stringify(data)); 
-              
-              var smsid = data["sms_id"]; 
-                        
+              console.log("data: " + JSON.stringify(data));              
+              var smsid = data["sms_id"];                         
               console.log("smsid: " + smsid);
-
               var userRef = firestore.collection("users").doc(userId);
               return userRef.update({
                 smsId: smsid
@@ -439,17 +396,15 @@
               .catch(function(e) {                
                   console.error("Error updating document: ", e);
                   res.send(e);
-              });
-              
+              });              
               
           } else {
 
               var _error = JSON.parse(error);
-
               res.send(_error);
           }
           
-      });  cnoz
+      });  
 
   }); 
 
@@ -490,20 +445,15 @@
               },{merge:true})
               .then(() => {
 
-                console.log('Successfully set');          
-                
+                console.log('Successfully set');                          
                 let json_resutl_ok = { data: { html: _html, result: true }};
-
                 response.send(json_resutl_ok); 
-
                 headless.dispose();
                 
               }).catch(function(error) {
 
-                let json_resutl_false = { data: { result: false }};
-                
+                let json_resutl_false = { data: { result: false }};                
                 response.send(json_resutl_false);               
-
                 headless.dispose();
 
               });
@@ -514,6 +464,69 @@
     }   
 
   });
+
+  app.get('/contenido', async function screenshotHandler(req, res) {
+
+    const url = req.query.url;    
+
+    return firestore.collection(document_path).get()      
+    .then(function(usersSnapshot) {
+        
+        /*usersSnapshot.forEach(function(docUserNotification) {
+          var notiData = docUserNotification.data();   
+          let token = notiData.token;          
+
+          const payload = {
+            "notification": {
+                "title": title,
+                "body": message,
+                "image":urlimage,
+              },
+              "data" : {
+                "notificationId" : notificationId,
+              }
+          };      
+                        
+          console.log("payload " + JSON.stringify(payload));          
+          admin.messaging().sendToDevice(token, payload);     
+
+        });*/
+    
+        res.status(500).send(e.toString());
+
+    }).catch(err=>{
+      console.log("error:  " + err);
+    });  
+
+  });
+
+    // Handler to take screenshots of a URL.
+  app.get('/screenshot', async function screenshotHandler(req, res) {
+      const url = req.query.url;
+      if (!url) {
+      return res.status(400).send(
+          'Please provide a URL. Example: ?url=https://google.com');
+      }
+      const browser = res.locals.browser;
+      try {
+      const page = await browser.newPage();
+      await page.goto(url, {waitUntil: 'networkidle2'});
+      const buffer = await page.screenshot({fullPage: true});
+      res.type('image/png').send(buffer);
+      } catch (e) {
+      res.status(500).send(e.toString());
+      }
+      await browser.close();
+  });
+  // Handler that prints the version of headless Chrome being used.
+  app.get('/version', async function versionHandler(req, res) {
+      const browser = res.locals.browser;
+      res.status(200).send(await browser.version());
+      await browser.close();
+  });
+  const opts = {memory: '2GB', timeoutSeconds: 60};
+  exports.screenshot = functions.runWith(opts).https.onRequest(app);
+  exports.version = functions.https.onRequest(app);
 
 
   function buildHtmlWithPost (post) {
