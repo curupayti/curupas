@@ -9,7 +9,7 @@
   const jsdom = require("jsdom");
   const { JSDOM } = jsdom;
   
-  const cors = require('cors')({origin: true});
+  const cors = require('cors')({ origin: true });
 
   const mkdirp = require('mkdirp-promise');
   const request = require('request');
@@ -21,6 +21,7 @@
 
   const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; 
 
+  const express = require('express');
   const app = express();
 
   // Runs before every route. Launches headless Chrome.
@@ -37,16 +38,11 @@
   var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
   var db_url = "https://curupas-app.firebaseio.com";
   
-  admin.initializeApp({
+  var bs = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: db_url
   });
-
-  var bs = backupService.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: db_url
-  });
-
+  
   const firestore = admin.firestore(); 
 
   const firebaseConfig = {
@@ -418,8 +414,8 @@
 
   exports.getClassBuckup = functions.https.onRequest((req, res) => {       
 
-        const collections = req.body.data.phone; //['languages', 'roles'];
-
+        const collection = req.body.collections; //['languages', 'roles'];        
+    
         let promises = [];       
         
         try {
