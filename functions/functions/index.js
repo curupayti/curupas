@@ -68,7 +68,10 @@
     const filePath = object.name;
     const customMetadata = object.metadata;
     var isThumbnail = false;  
-    isThumbnail = (customMetadata.thumbnail == 'true');
+    if (customMetadata.thumbnail === "true") {
+      isThumbnail = true;
+    }
+    
     var customMetadataType = parseInt(customMetadata.type);       
 
     // Cloud Storage files.
@@ -78,7 +81,7 @@
       expires: '03-01-2500',
     };  
 
-    if (isThumbnail == true) {    
+    if (isThumbnail === true) {    
 
       const file = bucket.file(filePath);
       const contentType = object.contentType; // This is the image MIME type
@@ -124,18 +127,18 @@
       const thumbFileUrl = thumbResult[0];     
 
       //Save Post/Museum Thumbnail
-      if (customMetadataType == 1) {  
+      if (customMetadataType === 1) {  
     
-        var _id = customMetadata.id;
-        var _collection = customMetadata.collection; 
+        let _id1 = customMetadata.id;
+        let _collection = customMetadata.collection; 
         let _time = admin.firestore.FieldValue.serverTimestamp();
-        await firestore.collection(_collection).doc(_id).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
+        await firestore.collection(_collection).doc(_id1).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
     
       //Save User Thumbnail
-      } else if (customMetadataType == 2) {  
+      } else if (customMetadataType === 2) {  
 
         const fileUrl = originalResult[0];    
-        var userId = customMetadata.userId;           
+        let userId = customMetadata.userId;           
         
         let _time = admin.firestore.FieldValue.serverTimestamp();     
         
@@ -149,17 +152,17 @@
         });
 
       // Update content  
-      } else if (customMetadataType == 3) {  
+      } else if (customMetadataType === 3) {  
 
-          const fileUrl = originalResult[0];            
-          var _short = customMetadata.short;          
-          var _id = customMetadata.id;    
+          let fileUrl = originalResult[0];            
+          let _short = customMetadata.short;          
+          let _id2 = customMetadata.id;    
           let _time = admin.firestore.FieldValue.serverTimestamp();             
 
           await firestore.collection('contents')
           .doc(_short)
           .collection("collection")
-          .doc(_id)
+          .doc(_id2)
           .update({ 
             storage_icon_ref : filePath,
             storage_thumbFile_ref : thumbFilePath,
@@ -169,17 +172,17 @@
           });                     
       
         // Save Media thumbnail image and video  
-        } else if (customMetadataType == 4) {  
+        } else if (customMetadataType === 4) {  
 
-          var documentId = customMetadata.documentId;
-          var doc_name_title = customMetadata.doc_name_title;
-          var title = customMetadata.title;
-          var desc = customMetadata.desc; 
-          var userId = customMetadata.userId;              
+          let documentId = customMetadata.documentId;
+          let doc_name_title = customMetadata.doc_name_title;
+          let title = customMetadata.title;
+          let desc = customMetadata.desc; 
+          let userId = customMetadata.userId;              
           
           let _time = admin.firestore.FieldValue.serverTimestamp();    
 
-          const fileUrl = originalResult[0]; 
+          let fileUrl = originalResult[0]; 
 
           await firestore.collection('years')
           .doc(documentId)
@@ -197,12 +200,12 @@
           });    
       
         // Udate user avatar
-        } else if (customMetadataType == 5) {  
+        } else if (customMetadataType === 5) {  
 
-          const fileUrl = originalResult[0];    
-          var userId = customMetadata.userId; 
-          var profilePictureToDelete = customMetadata.profilePictureToDelete;         
-          var thumbnailPictureToDelete = customMetadata.thumbnailPictureToDelete;           
+          let fileUrl = originalResult[0];    
+          let userId = customMetadata.userId; 
+          let profilePictureToDelete = customMetadata.profilePictureToDelete;         
+          let thumbnailPictureToDelete = customMetadata.thumbnailPictureToDelete;           
 
           let _time = admin.firestore.FieldValue.serverTimestamp();
 
@@ -220,10 +223,10 @@
           bucket.file(thumbnailPictureToDelete).delete();
 
       // Notification
-      } else if (customMetadataType == 6) { 
+      } else if (customMetadataType === 6) { 
 
-          const fileUrl = originalResult[0];             
-          var notificationId = customMetadata.notificationId;        
+          let fileUrl = originalResult[0];             
+          let notificationId = customMetadata.notificationId;        
 
           //console.log("::notificationId:: " + notificationId);         
 
@@ -238,45 +241,45 @@
         
       }
       
-    }  else { // not isThiumbnail
+    } else { // not isThiumbnail
 
       //console.log("::customMetadataType:: " + customMetadataType);  
 
-      if (customMetadataType == 1) {         
+      if (customMetadataType === 1) {         
         
-        const file = object.name;
-        const thumbFileExt       = 'jpg';
-        const fileDir = path.dirname(filePath);
-        //const fileName = path.basename(filePath);
+        let file = object.name;
+        let thumbFileExt       = 'jpg';
+        let fileDir = path.dirname(filePath);
+        //let fileName = path.basename(filePath);
 
-        const fileInfo = parseName(file);
+        let fileInfo = parseName(file);
 
-        const thumbFilePath = path.normalize(path.join(fileDir, `${fileInfo.name}-thumbnail.${thumbFileExt}`));
-        const tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
-        const tempLocalDir       = path.join(os.tmpdir(), fileDir);
+        let thumbFilePath = path.normalize(path.join(fileDir, `${fileInfo.name}-thumbnail.${thumbFileExt}`));
+        let tempLocalThumbFile = path.join(os.tmpdir(), thumbFilePath);
+        let tempLocalDir       = path.join(os.tmpdir(), fileDir);
       
         await mkdirp(tempLocalDir);
         console.log("tempLocalThumbFile:: " + tempLocalThumbFile);
-        const videoFile = bucket.file(file);
-        const signedVideoUrl = await videoFile.getSignedUrl(config);             
-        const videoUrl = signedVideoUrl[0];        
+        let videoFile = bucket.file(file);
+        let signedVideoUrl = await videoFile.getSignedUrl(config);             
+        let videoUrl = signedVideoUrl[0];        
         console.log("videoUrl:: " + videoUrl);        
         await spawn(ffmpegPath, ['-ss', '0', '-i', videoUrl, '-f', 'image2', '-vframes', '1', '-vf', `scale=${THUMB_MAX_WIDTH}:-1`, tempLocalThumbFile]);
         await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath});      
         await fs.unlinkSync(tempLocalThumbFile);   
 
-        var documentId = customMetadata.documentId;
-        var doc_name_title = customMetadata.doc_name_title;
-        var title = customMetadata.title;
-        var desc = customMetadata.desc; 
-        var userId = customMetadata.userId;              
+        let documentId = customMetadata.documentId;
+        let doc_name_title = customMetadata.doc_name_title;
+        let title = customMetadata.title;
+        let desc = customMetadata.desc; 
+        let userId = customMetadata.userId;              
         
         let _time = admin.firestore.FieldValue.serverTimestamp();            
-        const fileThumb = bucket.file(thumbFilePath);
+        let fileThumb = bucket.file(thumbFilePath);
         
         // Get the Signed URLs for the thumbnail and original image.
-        const signedUrl = await fileThumb.getSignedUrl(config);
-        const thumbResult = signedUrl[0];
+        let signedUrl = await fileThumb.getSignedUrl(config);
+        let thumbResult = signedUrl[0];
 
         console.log('thumbResult: ' + thumbResult);
         
@@ -300,7 +303,7 @@
 
     function parseName(fileName) {
         let _file = path.basename(fileName);
-        var _name = _file.replace(/\.[^/.]+$/, "");      
+        let _name = _file.replace(/\.[^/.]+$/, "");      
         return { name : _name };
     } 
 
@@ -315,7 +318,7 @@
 
     console.log("thumbnailImageURL " + thumbnailImageURL);
 
-    if (thumbnailImageURL != undefined) {
+    if (thumbnailImageURL !== undefined) {
 
       var title = newValue.title;
       var message = newValue.notification;
@@ -359,7 +362,7 @@
   
   });  
 
-  exports.sendSMS = functions.https.onRequest((req, res) => {
+  /*exports.sendSMS = functions.https.onRequest((req, res) => {
     
       const phone = req.body.data.phone;
       const payload = req.body.data.payload;
@@ -507,25 +510,25 @@
     return firestore.collection(document_path).get()      
     .then(function(usersSnapshot) {
         
-        /*usersSnapshot.forEach(function(docUserNotification) {
-          var notiData = docUserNotification.data();   
-          let token = notiData.token;          
+        //usersSnapshot.forEach(function(docUserNotification) {
+        //  var notiData = docUserNotification.data();   
+        //  let token = notiData.token;          
 
-          const payload = {
-            "notification": {
-                "title": title,
-                "body": message,
-                "image":urlimage,
-              },
-              "data" : {
-                "notificationId" : notificationId,
-              }
-          };      
+        //  const payload = {
+        //    "notification": {
+        //        "title": title,
+        //        "body": message,
+        //        "image":urlimage,
+        //      },
+        //      "data" : {
+        //        "notificationId" : notificationId,
+        //      }
+        //  };      
                         
-          console.log("payload " + JSON.stringify(payload));          
-          admin.messaging().sendToDevice(token, payload);     
+        //  console.log("payload " + JSON.stringify(payload));          
+        //  admin.messaging().sendToDevice(token, payload);     
 
-        });*/
+        //});
     
         res.status(500).send(e.toString());
 
@@ -585,7 +588,7 @@
       const htmlString = buildHtmlWithPost(post);
       res.status(200).end(htmlString);
     });
-  };
+  };*/
 
 
   
