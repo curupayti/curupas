@@ -17,7 +17,7 @@ $(document).ready(function () {
         var inputPassword = $("#inputPassword").val();          
         
 
-        if ( inputEmail=="" || inputPassword=="") {                                           
+        if (inputEmail=="" || inputPassword=="") {                                           
 
             empty = true;             
             let prob = 0;
@@ -49,7 +49,7 @@ $(document).ready(function () {
                 window.location.href = 'index.html';
              
             
-            }).catch(function(error) {  
+            }).catch( function(error) {  
                 
                 //var errorCode = error.code;
                 var errorMessage = error.message;  
@@ -59,9 +59,7 @@ $(document).ready(function () {
                 form.addClass('was-validated');
 
             });
-
         } 
-
     });
 
     //https://www.codeply.com/go/oPUDdgN6CK/bootstrap-4-validation
