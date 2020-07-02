@@ -29,6 +29,19 @@ $(document).ready(function () {
         });
     });
 
+    $("#search-keyword").change(function (e){
+        const filteredDocuments = [];
+        for(doc in _documents){
+            if(_documents[doc].data().title && _documents[doc].data().title.includes(e.target.value)) {
+                filteredDocuments.push(_documents[doc]);
+            }
+        }
+        $('#post-table tbody').html("");
+        filteredDocuments.forEach(function(doc) {
+            renderPost(doc);
+        } )
+    });
+
     function renderPost(document) {  
         _documents[document.id] = document;      
         let _time = formatDate(Date(document.data().timeStamp));        
