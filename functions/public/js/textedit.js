@@ -18,7 +18,7 @@ $(document).ready(function () {
 
     db.collection('contents').onSnapshot(snapshot => {
         window.mainTotalMain = snapshot.size;
-        window.mainSteps = Math.round(window.mainTotalMain/3);
+        window.mainSteps = Math.round(window.mainTotalMain/3) - 1;
         $('.count-visible-main').text(3);
         $('.count-total-main').text(window.mainTotalMain);    
     });  
@@ -69,6 +69,9 @@ $(document).ready(function () {
         $('.count-visible-main').text(window.mainPartial);        
         if (window.mainSteps == window.mainActiveTable) {
           $('#js-next-main').closest('.page-item').addClass('disabled');
+        }
+        if (window.mainActiveTable != 0) {
+          $('#js-previous-main').closest('.page-item').removeClass('disabled');
         }              
         if (!window._main_row_selected && window.activePanelNum==0) {
           return;
@@ -102,7 +105,7 @@ $(document).ready(function () {
         $('.count-visible-main').text(window.mainPartial);  
       });
       if (window.mainActiveTable == 0) {
-        $('#js-next-main').closest('.page-item').removeClass('disabled');
+        $('#js-previous-main').closest('.page-item').addClass('disabled');        
       }
     });
 
