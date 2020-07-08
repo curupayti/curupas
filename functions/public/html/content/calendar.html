@@ -1,14 +1,49 @@
 <main role="main" id="main">
-    <div class="container">    
-        <div id='wrap'>
-            <div id='calendar-module'></div>
-            <div style='clear:both'></div>
-        </div>
-        <div id="eventContent" title="Event Details" style="display:none;">
-            Start: <span id="startTime"></span><br>
-            End: <span id="endTime"></span><br><br>
-            <p id="eventInfo"></p>
-            <p><strong><a id="eventLink" href="" target="_blank">Read More</a></strong></p>
-        </div>
+  <div class="container">
+    <div id="wrap">
+      <div class="btn-group btn-group-toggle mb-3" data-toggle="buttons">
+        <label class="btn btn-secondary active">
+          <input
+            type="radio"
+            name="options"
+            id="camada"
+            value="camada"
+            autocomplete="off"
+            checked
+          />
+          camada
+        </label>
+        <label class="btn btn-secondary">
+          <input
+            type="radio"
+            name="options"
+            value="curupa"
+            id="curupa"
+            autocomplete="off"
+          />
+          curupas
+        </label>
+        <label class="btn btn-secondary">
+          <input
+            type="radio"
+            name="options"
+            value="partidos"
+            id="partidos"
+            autocomplete="off"
+          />
+          partidos
+        </label>
+      </div>
+      <div id="calendar-module"></div>
+      <div style="clear: both;"></div>
     </div>
+    <div id="eventContent" title="Event Details" style="display: none;">
+      Start: <span id="startTime"></span><br />
+      End: <span id="endTime"></span><br /><br />
+      <p id="eventInfo"></p>
+      <p>
+        <strong><a id="eventLink" href="" target="_blank">Read More</a></strong>
+      </p>
+    </div>
+  </div>
 </main>
