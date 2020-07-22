@@ -134,5 +134,27 @@ $(document).ready(function () {
     return [year, month, day].join("-");
   }
 
+  $("#calendar-form").on("submit", function (e) {
+    e.preventDefault();
+    const name = $("#name").val();
+    const desc = $("#description").val();
+    const type = $("#type").val();
+    const date = $("#date").val();
+    const allday = $("#allday").val();
+
+    db.collection("calendar")
+      .doc(type)
+      .collection(type + "_collection")
+      .add({ name, summary: desc, start: new Date(date), allday })
+      .then((res) => {
+        $("#name").val("");
+        $("#description").val("");
+        // $("#type").val("");
+        $("#date").val("");
+        // $("#allday").val();
+        alert("Event Added");
+      });
+  });
+
   //# sourceURL=calendar.js
 });
