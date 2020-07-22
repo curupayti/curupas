@@ -10,7 +10,7 @@
     "logs": "firebase functions:log"
   },
   "engines": {
-    "node": "8"
+    "node": "10"
   },
   "dependencies": {
     "@crapougnax/firestore-export-import": "^0.3.0",
@@ -30,6 +30,7 @@
     "request-promise": "^4.2.5"
   },
   "devDependencies": {
+    "@firebase/testing": "^0.20.5",
     "eslint": "^5.16.0",
     "eslint-plugin-promise": "^4.0.1",
     "firebase-functions-test": "^0.2.0"

@@ -111,8 +111,10 @@
       
       await mkdirp(tempLocalDir);      
       await file.download({destination: tempLocalFile});
-      await spawn('convert', [tempLocalFile, '-thumbnail', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});      
+      await spawn('convert', [tempLocalFile, '-thumbnail', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});            
       await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath, metadata: metadata});
+      
+      
       fs.unlinkSync(tempLocalFile);
       fs.unlinkSync(tempLocalThumbFile);
       
@@ -132,7 +134,13 @@
         let _id1 = customMetadata.id;
         let _collection = customMetadata.collection; 
         let _time = admin.firestore.FieldValue.serverTimestamp();
-        await firestore.collection(_collection).doc(_id1).update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time});
+        
+        await firestore.collection(_collection).doc(_id1)
+          .update({thumbnailSmallUrl: thumbFileUrl, timeStamp:_time})
+          .catch((error) => {
+            console.log('Error updating:', error);
+            return error;
+          });
     
       //Save User Thumbnail
       } else if (customMetadataType === 2) {  
@@ -149,6 +157,9 @@
             profilePicture : filePath,
             thumbnailPicture : thumbFilePath,          
             last_update:_time
+        }).catch((error) => {
+          console.log('Error updating collection:', error);
+          return error;
         });
 
       // Update content  
@@ -169,6 +180,9 @@
             icon_original : fileUrl,
             icon: thumbFileUrl, 
             last_update: _time 
+          }).catch((error) => {
+            console.log('Error updating collection:', error);
+            return error;
           });                     
       
         // Save Media thumbnail image and video  
@@ -197,7 +211,10 @@
             userId : userId,
             aprroved: false,
             last_update: _time 
-          });    
+          }).catch((error) => {
+            console.log('Error setting collection:', error);
+            return error;
+          });   
       
         // Udate user avatar
         } else if (customMetadataType === 5) {  
@@ -216,6 +233,9 @@
               "profilePicture" : filePath,
               "thumbnailPicture" : thumbFilePath,          
               "last_update" :_time
+          }).catch((error) => {
+            console.log('Error updating collection:', error);
+            return error;
           });
 
           //Borra imagenes viejas. 
@@ -237,6 +257,9 @@
               "imageURL" : fileUrl,
               "thumbnailImageURL": thumbFileUrl,               
               "last_update" :_time
+          }).catch((error) => {
+            console.log('Error updating collection:', error);
+            return error;
           });
         
       }
@@ -296,6 +319,9 @@
             userId : userId,
             aprroved: false,
             last_update: _time 
+          }).catch((error) => {
+            console.log('Error setting collection:', error);
+            return error;
           });
       
       }
@@ -314,25 +340,27 @@
     .onWrite((change, context) => {    
 
     const newValue = change.after.data();       
-    var thumbnailImageURL = newValue.thumbnailImageURL;
+    let thumbnailImageURL = newValue.thumbnailImageURL;
 
     console.log("thumbnailImageURL " + thumbnailImageURL);
 
     if (thumbnailImageURL !== undefined) {
 
-      var title = newValue.title;
-      var message = newValue.notification;
-      var urlimage = newValue.thumbnailImageURL;
-      var notificationId = context.params.notificationsId;
-      var document_path = "notifications/" + notificationId + "/user-token-chat";
+      let title = newValue.title;
+      let message = newValue.notification;
+      let urlimage = newValue.thumbnailImageURL;
+      let notificationId = context.params.notificationsId;
+      let document_path = "notifications/" + notificationId + "/user-token-chat";
       
-      console.log("document_path " + document_path);
-
+      console.log("document_path " + document_path);    
+      
+      
       return firestore.collection(document_path).get()      
       .then(function(usersSnapshot) {
           
           usersSnapshot.forEach(function(docUserNotification) {
-            var notiData = docUserNotification.data();   
+
+            let notiData = docUserNotification.data();   
             let token = notiData.token;          
 
             const payload = {
@@ -347,12 +375,24 @@
             };      
                           
             console.log("payload " + JSON.stringify(payload));          
-            admin.messaging().sendToDevice(token, payload);     
+
+            admin.messaging().sendToDevice(token, payload).then(function(response) {
+              console.log('Successfully sent message:', response);
+              return response;
+            }).catch((error) => {
+              console.log('Error sending message:', error);
+              return error;
+            });
+            
+            return docUserNotification;
 
           });    
+
+          return null;
       
       }).catch(err=>{
         console.log("error:  " + err);
+        return err;
       });  
 
     } else {
@@ -362,7 +402,7 @@
   
   });  
 
-  /*exports.sendSMS = functions.https.onRequest((req, res) => {
+  exports.sendSMS = functions.https.onRequest((req, res) => {
     
       const phone = req.body.data.phone;
       const payload = req.body.data.payload;
@@ -387,43 +427,53 @@
 
           if (!error) {
 
-              var body = JSON.parse(body);
-              console.log("body: " + JSON.stringify(body));              
-              var data = body["data"];
+              let _body = JSON.parse(body);
+              console.log("body: " + JSON.stringify(_body));              
+              
+              let data = _body["data"];
               console.log("data: " + JSON.stringify(data));              
-              var smsid = data["sms_id"];                         
+              
+              let smsid = data["sms_id"];                         
               console.log("smsid: " + smsid);
-              var userRef = firestore.collection("users").doc(userId);
+              
+              let userRef = firestore.collection("users").doc(userId);
+              
               return userRef.update({
                 smsId: smsid
               })
               .then(function() {
                   res.send(body); 
-              })
-              .catch(function(e) {                
-                  console.error("Error updating document: ", e);
-                  res.send(e);
-              });              
+                  return body;
+              }).catch((error) => {
+                console.log('Error updating document:', error);
+                res.send(e);
+                return error;
+              });                         
               
           } else {
 
               var _error = JSON.parse(error);
               res.send(_error);
+              return error;
           }
           
-      });
+      }).catch((error) => {
+        console.log('Error posting SMS:', error);        
+        return error;
+      });  
+
   });  
 
 
   exports.getClassBuckup = functions.https.onRequest((req, res) => {       
 
-        const collection = req.body.collections; //['languages', 'roles'];        
+      let collections = req.body.collections; //['languages', 'roles'];        
     
         let promises = [];       
         
         try {
 
-            collections.map(collection =>
+         collections.map(collection =>
                 promises.push(
                     firestoreService.fixtures(
                         path.resolve(__dirname, `./${collection}.json`),
@@ -434,15 +484,22 @@
                 ),
             );            
             
-            Promise.all(promises).then(process.exit);
+            //Promise.all(promises).then(process.exit);
+            //let _collJson = JSON.stringify(promises);
 
-            let _collJson = JSON.stringify(promises);
+           return Promise.all(promises).then(responses => {
+              responses.map(response => write(response));              
+              return responses;
+            }).then(data => {
+              console.log("Second handler", data);
+              res.status(200).send(data); 
+              return data;
+            });            
 
-            res.send(_collJson); 
-
-        } catch (err) {
-            console.error(err)
-        }       
+        } catch (e) {
+            console.error(e);
+            return e;
+        }   
 
     });
 
@@ -451,144 +508,72 @@
     response.set('Access-Control-Allow-Origin', '*');
     response.set('Access-Control-Allow-Credentials', 'true'); // vital
 
-    if (request.method === 'OPTIONS') {
-        
-        // Send response to OPTIONS requests
-        response.set('Access-Control-Allow-Methods', 'GET');
-        response.set('Access-Control-Allow-Headers', 'Content-Type');
-        response.set('Access-Control-Max-Age', '3600');
-        response.status(204).send('');
-    
-      } else {
-        
-        const data = request.body;
-        const database_ref = data.database_ref;
-        const contentType = data.contentType; 
-        const documentId = data.documentId; 
+    try {
 
-        var firepadRef = firebase.database().ref().child(contentType).child(database_ref);    
-        var headless = new Firepad.Headless(firepadRef);  
+      if (request.method === 'OPTIONS') {
+          
+          // Send response to OPTIONS requests
+          response.set('Access-Control-Allow-Methods', 'GET');
+          response.set('Access-Control-Allow-Headers', 'Content-Type');
+          response.set('Access-Control-Max-Age', '3600');
+          response.status(204).send('');
+      
+        } else {
+          
+          const data = request.body;
+          const database_ref = data.database_ref;
+          const contentType = data.contentType; 
+          const documentId = data.documentId; 
 
-        return cors(request, response, () => {  
-            
-            headless.getHtml(function(_html) {           
+          var firepadRef = firebase.database().ref().child(contentType).child(database_ref);    
+          var headless = new Firepad.Headless(firepadRef);  
 
-              firestore.collection("contents")
-              .doc(contentType)
-              .collection("collection")
-              .doc(documentId)
-              .set({
-                html : _html,
-                published : true
-              },{merge:true})
-              .then(() => {
+          return cors(request, response, () => {  
+              
+              headless.getHtml(function(_html) {           
 
-                console.log('Successfully set');                          
-                let json_resutl_ok = { data: { html: _html, result: true }};
-                response.send(json_resutl_ok); 
-                headless.dispose();
-                
-              }).catch(function(error) {
+                firestore.collection("contents")
+                .doc(contentType)
+                .collection("collection")
+                .doc(documentId)
+                .set({
+                  html : _html,
+                  published : true
+                },{merge:true})
+                .then(() => {
 
-                let json_resutl_false = { data: { result: false }};                
-                response.send(json_resutl_false);               
-                headless.dispose();
+                  console.log('Successfully set');                          
+                  let json_resutl_ok = { data: { html: _html, result: true }};
+                  response.send(json_resutl_ok); 
+                  headless.dispose();
+                  return json_resutl_ok;
+                  
+                }).catch((error) => {
 
+                  let json_resutl_false = { data: { result: false }};                
+                  response.send(json_resutl_false);               
+                  headless.dispose();
+                  return json_resutl_false;
+
+                });              
+
+              }).catch((error) => {                
+                console.log('Error henerating HTML');
+                return error;
               });
 
-            });
+          }).catch((error) => {                
+            console.log('Error setting CORS');
+            return error;
+          });   
+      }   
 
-        });    
-    }   
-
-  });
-
-  app.get('/contenido', async function screenshotHandler(req, res) {
-
-    const url = req.query.url;    
-
-    return firestore.collection(document_path).get()      
-    .then(function(usersSnapshot) {
-        
-        //usersSnapshot.forEach(function(docUserNotification) {
-        //  var notiData = docUserNotification.data();   
-        //  let token = notiData.token;          
-
-        //  const payload = {
-        //    "notification": {
-        //        "title": title,
-        //        "body": message,
-        //        "image":urlimage,
-        //      },
-        //      "data" : {
-        //        "notificationId" : notificationId,
-        //      }
-        //  };      
-                        
-        //  console.log("payload " + JSON.stringify(payload));          
-        //  admin.messaging().sendToDevice(token, payload);     
-
-        //});
-    
-        res.status(500).send(e.toString());
-
-    }).catch(err=>{
-      console.log("error:  " + err);
-    });  
+    } catch (e) {
+      console.error(e);
+      return e;
+    } 
 
   });
 
-    // Handler to take screenshots of a URL.
-  app.get('/screenshot', async function screenshotHandler(req, res) {
-      const url = req.query.url;
-      if (!url) {
-      return res.status(400).send(
-          'Please provide a URL. Example: ?url=https://google.com');
-      }
-      const browser = res.locals.browser;
-      try {
-      const page = await browser.newPage();
-      await page.goto(url, {waitUntil: 'networkidle2'});
-      const buffer = await page.screenshot({fullPage: true});
-      res.type('image/png').send(buffer);
-      } catch (e) {
-      res.status(500).send(e.toString());
-      }
-      await browser.close();
-  });
-  // Handler that prints the version of headless Chrome being used.
-  app.get('/version', async function versionHandler(req, res) {
-      const browser = res.locals.browser;
-      res.status(200).send(await browser.version());
-      await browser.close();
-  });
-  const opts = {memory: '2GB', timeoutSeconds: 60};
-  exports.screenshot = functions.runWith(opts).https.onRequest(app);
-  exports.version = functions.https.onRequest(app);
-
-
-  function buildHtmlWithPost (post) {
-    const string = '<!DOCTYPE html><head>' +
-      '<title>' + post.title + ' | Example Website</title>' +
-      '<meta property="og:title" content="' + post.title + '">' +
-      '<meta property="twitter:title" content="' + post.title + '">' +
-      '<link rel="icon" href="https://example.com/favicon.png">' +
-      '</head><body>' +
-      '<script>window.location="https://example.com/?post=' + post.id + '";</script>' +
-      '</body></html>';
-    return string;
-  }
   
-  exports.buildHtmlWithContent = function(req, res) {
-    const path = req.path.split('/');
-    const postId = path[2];
-    admin.database().ref('/posts').child(postId).once('value').then(snapshot => {
-      const post = snapshot.val();
-      post.id = snapshot.key;
-      const htmlString = buildHtmlWithPost(post);
-      res.status(200).end(htmlString);
-    });
-  };*/
-
-
   
