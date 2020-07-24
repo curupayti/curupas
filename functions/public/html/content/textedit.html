@@ -7,7 +7,9 @@
                 <div class="col-12">
 
                     <div class="container overflow-hidden">
+
                         <div class="multisteps-form">
+
                             <div class="row">
                                 <div class="col-12 col-lg-8 ml-auto mr-auto mb-4">
                                     <div class="multisteps-form__progress">
@@ -17,6 +19,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row">
 
                                 <div id="columna" class="col-12 col-lg-8 m-auto">
@@ -132,7 +135,7 @@
                                                 </div>                                        
                                             
                                             <div class="button-row d-flex mt-4">
-                                                <button class="btn btn-primary js-btn-prev" type="button" title="Prev"><< Anterior</button>
+                                                <button class="btn btn-primary js-btn-prev" type="button" title="Prev">&#60;&#60; Anterior</button>
                                                 <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Next">Siguiente >></button>
                                             </div>
 
@@ -156,7 +159,7 @@
                                                 <li class="list-group-item">                                                
                                                     <div class="row d-flex">
                                                         <div class="button-row mt-4 col-12">
-                                                            <button class="btn btn-primary js-btn-prev" type="button" title="Anterior"> << Anterior</button>   
+                                                            <button class="btn btn-primary js-btn-prev" type="button" title="Anterior"> &#60;&#60; Anterior</button>   
                                                             <div class="float-right">
                                                                 <button id="button-save" class="btn ml-auto btn btn-success">Guardar</button>
                                                                 <button id="view-save" class="btn ml-auto btn btn-secondary">Vista Previa</button>                    
@@ -167,8 +170,7 @@
                                                 </li>
                                             </ul>   
                                         </div>
-                                    </div>                       
-                                    
+                                    </div>                           
                                 </form>
                             </div>
                         </div>
@@ -215,13 +217,13 @@
                 <div id="previewModal" class="modal fade" data-backdrop="static" data-keyboard="false">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form id="add-form">
+                            <form id="preview-add-form">
                                 <div class="modal-header">
                                     <h4 id="preview-title" class="modal-title"></h4>
                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                 </div>
                                 <div class="modal-body">
-                                    <div id="modal-content"></div>                           
+                                    <div id="preview-content"></div>                           
                                 </div>
                                 <div class="modal-footer">
                                     <input type="button" class="btn btn-default" data-dismiss="modal" value="Cerrar">                                
@@ -236,7 +238,7 @@
                 <div id="publishModal" class="modal fade" data-backdrop="static" data-keyboard="false">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form id="add-form">
+                            <form id="publish-add-form">
                                 <div class="modal-header">
                                     <h4 class="modal-title">Publicar</h4>
                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -260,7 +262,7 @@
                                     </div>                    
                                 </div>
                                 <div class="modal-footer">
-                                    <input type="button-close" class="btn btn-default disabled" data-dismiss="modal" value="Cerrar">   
+                                    <input id="button-close" type="button" class="btn btn-default disabled" data-dismiss="modal" value="Cerrar">   
                                     <input id="button-accept" type="button" class="btn btn-success disabled" value="Aceptar">                                
                                     <div class="lds-dual-ring" style="visibility: hidden;"></div>                              
                                 </div>                    
@@ -309,8 +311,6 @@
                     </div>
                     </div>
                 </div>
-                
-
             </div>
         </div>
     </div><!--Container-->

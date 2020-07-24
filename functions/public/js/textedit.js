@@ -1,4 +1,6 @@
-$(document).ready(function () { 
+$(document).ready( function() { 
+
+    "use strict";
 
     let deleteIDs = [];
     
@@ -14,7 +16,9 @@ $(document).ready(function () {
     window._id_document_collection;
     window.database_ref;
 
-    window.editObjects;     
+    window.editObjects;  
+    
+    var _clicked = false;
 
     db.collection('contents').onSnapshot(snapshot => {
         window.mainTotalMain = snapshot.size;
@@ -109,7 +113,7 @@ $(document).ready(function () {
       }
     });
 
-    // REAL TIME LISTENER
+    // REAL TIME LISTENER  
     /*db.collection('contents').onSnapshot(snapshot => {
         let size = snapshot.size;
         $('.count').text(size);
@@ -148,7 +152,7 @@ $(document).ready(function () {
                 data-short="${document.data().short}">                
             <td>
                 <span class="custom-checkbox">
-                    <input type="checkbox" id="${document.id}" name="options[]" value="${document.id}">
+                    <input type="checkbox" id="${document.id}" value="${document.id}">
                     <label for="${document.id}"></label>
                 </span>
             </td>
@@ -204,10 +208,12 @@ $(document).ready(function () {
       $('#messageModal').modal('show');
       $('#message-title').text("Atención");
       $('#message-body').text("No tener permisos para realizar esta operación, consultalo con el administrador del sistema.");     
-    });
+    });   
 
     // VIEW IMAGES
-    $(document).on('click', '.clickable-row-main', function (event) {       
+    $(document).on('click', '.clickable-row-main', function (event) {     
+      
+        event.preventDefault();
 
         let dataid = $(this).data("id");
         let _new = $(this).data("new");
@@ -355,7 +361,7 @@ $(document).ready(function () {
       data-id="${_doc_id_}">
       <td>
           <span class="custom-checkbox">
-              <input type="checkbox" id="${_doc_id_}" name="options[]" value="${_doc_id_}">
+              <input type="checkbox" id="${_doc_id_}" value="${_doc_id_}">
               <label for="${document.id}"></label>
           </span>
       </td>                      
@@ -406,41 +412,53 @@ $(document).ready(function () {
       //if (_count == (_length-1)) {
           //$("#btn-contenidos").click();                               
       //}
-      //_count++;         
+      //_count++;        
+      
 
         // VIEW IMAGES
       $(document).on('click', '.clickable-row-detail', function (event) {    
+
+          event.preventDefault();
+
+          if (_clicked == false) {
+
+            _clicked = true;
         
-          window._detail_row_selected = true; 
+            window._detail_row_selected = true; 
 
-          let docid = $(this).data("id");
-          let database_ref = $(this).data("ref");
-          let _short = $(this).data("short"); 
-          let _name = $(this).data("name");               
+            let docid = $(this).data("id");
+            let database_ref = $(this).data("ref");
+            let _short = $(this).data("short"); 
+            let _name = $(this).data("name");               
 
-          window._id_document_collection = docid;
+            window._id_document_collection = docid;
 
-          var checkboxes = $('#detail-table tbody input[type="checkbox"]');
+            var checkboxes = $('#detail-table tbody input[type="checkbox"]');
 
-          checkboxes.each(function () {
-              this.checked = false;
-          });
+            checkboxes.each(function () {
+                this.checked = false;
+            });
 
-          $(this).find('input[type="checkbox"]').prop("checked", true);                               
-      
+            $(this).find('input[type="checkbox"]').prop("checked", true);                               
+        
 
-          $("#btn-contenidos").text(_name);
+            $("#btn-contenidos").text(_name);
 
-          setTimeout( function() {                          
-              loadEdits(database_ref, _short);   
-          }, 500);                                 
+            window.time = setTimeout( function() {                          
+                loadEdits(database_ref, _short);   
+            }, 500);   
+
+          }                              
 
       });
 
     }
 
      // Edit Detail
-     $(document).on('click', '.js-edit-detail', function () {
+     $(document).on('click', '.js-edit-detail', function (event) {
+
+      event.preventDefault();
+
       let id = $(this).data('id');
       let _name = $(this).data('name');
 
@@ -449,7 +467,9 @@ $(document).ready(function () {
     });
     
     // Delete Detail
-    $(document).on('click', '.js-delete-detail', function () {
+    $(document).on('click', '.js-delete-detail', function (event) {
+
+      event.preventDefault();
       
       let id = $(this).data('id');      
       let name = $(this).data('name');
@@ -467,7 +487,9 @@ $(document).ready(function () {
 
     });
 
-    $("#delete-detail").on("click", function() { 
+    $("#delete-detail").on("click", function(event) { 
+
+      event.preventDefault();
 
       let id = $(this).data('id');      
       let name = $(this).data('name');
@@ -491,7 +513,9 @@ $(document).ready(function () {
 
     });      
 
-    $(document).on('show.bs.modal', '.modal',  function () {
+    $(document).on('show.bs.modal', '.modal',  function (event) {
+
+      event.preventDefault();
 
       var input_type;
 
@@ -806,15 +830,20 @@ $(document).ready(function () {
       });
   
       $('#view-save').click(function() { 
+          //$('#messageModal').modal('show');
           $('#previewModal').modal('show');
-          $('#modal-content').append("<div id='modal-container'>" + window.html + "</div>");
+          $('#preview-content').append("<div id='modal-container'>" + window.html + "</div>");
       });
   
       $('#previewModal').on('hidden.bs.modal', function () {
-        $('#modal-container').remove();
+        $('#preview-content').remove();
       });     
        
       function loadEdits(database_ref, _short) { 
+
+        clearTimeout(window.time);
+
+        _clicked = false;
 
         clearFirepad(); 
   
@@ -911,26 +940,35 @@ $(document).ready(function () {
   
         firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
             { richTextToolbar: true, richTextShortcuts: true, userId: _user.userId});
+  
         userList = FirepadUserList.fromDiv(firepadRef.child('users'),
             document.getElementById('firepad-userlist'), _user.userId);
-  
-          firepad.on('ready', function() {
-            if (firepad.isHistoryEmpty()) {
-              firepad.setText('Welcome to your own private pad!\n\nShare the URL below and collaborate with your friends.');
-            }          
-  
-            ensurePadInList(database_ref);
-            buildPadList();
-          });
+
+        firepad.on('ready', function() {
           
-          firepad.on('newLine', function() {  
-            //$('#button-save').prop('disabled', false);                    
-          });          
+          if (firepad.isHistoryEmpty()) {
+            firepad.setText('Welcome to your own private pad!\n\nShare the URL below and collaborate with your friends.');
+          }          
+
+          ensurePadInList(database_ref);
+          buildPadList();
+        });
+
+        firepad.on('synced', function(isSynced) {
+          // isSynced will be false immediately after the user edits the pad,
+          // and true when their edit has been saved to Firebase.
+          console.log('synced');
+        });
+          
+        firepad.on('newLine', function() {  
+          $('#button-save').prop('disabled', false);                    
+        });          
   
-          codeMirror.focus();
+        codeMirror.focus();
   
-          codeMirror.setOption('dragDrop', true);        
-         
+        codeMirror.setOption('dragDrop', true);
+
+        
   
         function padListEnabled() {
           return (typeof localStorage !== 'undefined' && typeof JSON !== 'undefined' && localStorage.setItem &&
@@ -1012,9 +1050,10 @@ $(document).ready(function () {
   
     function modal(){
        $('.modal').modal('show');
-       setTimeout(function () {
+       var _time = setTimeout(function () {
          console.log('hejF');
          $('.modal').modal('hide');
+         clearTimeout(_time);
        }, 3000);
     }
 

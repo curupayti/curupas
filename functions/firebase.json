@@ -10,9 +10,12 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
+      { 
+        "source": "/**", 
+        "function": "buildHtmlForNoti" 
+      }, {
+        "source": "/screenshot",
+        "function": "screenshot"
       }
     ]
   },

@@ -1,0 +1,473 @@
+file:///home/jose/repos/curupa/functions/public/index.html {"mtime":1595144434151,"size":20110,"etag":"35dki6c2sksm","orphaned":false}
+<!DOCTYPE html>
+
+    <html lang="es">
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Curupas</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="css/vendor/font-awesome.min.css">
+        <link rel="stylesheet" href="css/vendor/bootstrap.min.css">             
+        <link rel="icon" type="image/x-icon" href="https://vigil.com.ar/favicons/curupa.ico"/>                
+        <link type="text/css" rel="stylesheet" href="css/vendor/loading_indicator/jquery.loading-indicator.css" />
+    </head>
+
+    <body>
+
+        <header></header>  
+
+        <div id="content"></div>
+ 
+        <footer></footer>        
+
+        <script src="js/vendor/popper.js"></script>
+        <script src="js/vendor/jquery.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script> 
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@beta/dist/js.cookie.min.js"></script>   
+        <script src="js/vendor/loading_indicator/jquery.loading-indicator.js"></script>                
+        <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase-storage.js"></script>        
+        <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-auth.js"></script>            
+        <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-functions.js"></script>        
+
+    </body>
+
+    <script>    
+        
+        var _user = {};
+        var _role = {};
+
+        var _rolePagesArray = [];
+        var _dropDownMenuObj = {};
+        
+        var promisesRoles = [];
+        var profileArray = [];
+
+        var editObjects = new Object();
+
+        let _id   =  "logout";
+        let _name = "Salir";
+        let _html =  "salir.html";
+        let _js =  "logout.js";
+        let _css  =  "logout.css";
+        profileArray.push({id:_id, html:_html, js:_js, css:_css, desc:_name});
+
+        var homeLoader = $('body').loadingIndicator({ useImage: false,}).data("loadingIndicator");
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg",
+            authDomain: "curupas-app.firebaseapp.com",
+            databaseURL: "https://curupas-app.firebaseio.com",
+            projectId: "curupas-app",
+            storageBucket: "curupas-app.appspot.com",
+            messagingSenderId: "813267916846",
+            appId: "1:813267916846:web:529f9c18a84b6b45aa67bf",
+            measurementId: "G-2RRZXWLMTL"
+        };
+        firebase.initializeApp(firebaseConfig);
+        //firebase.functions().useFunctionsEmulator('http://localhost:5001');
+        //firebase.functions().useFunctionsEmulator('http://localhost:5000') 
+
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        const database = firebase.database();
+        const functions = firebase.functions();
+
+        var getUrlParameter = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        };       
+        //var role = getUrlParameter('role');
+
+        //if (role==undefined) {   
+
+        firebase.auth().onAuthStateChanged(function (user) {
+
+            if (user) {
+
+
+                /*firebase.auth().currentUser.getIdToken(rue).then(function(idToken) {
+                  
+                    let token = idToken;
+
+                    console.log(token);
+
+                }).catch(function(error) {
+                    // Handle error
+                });*/
+
+                /*let idToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjYzZTllYThmNzNkZWExMTRkZWI5YTY0OTcxZDJhMjkzN2QwYzY3YWEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vY3VydXBhcy1hcHAiLCJhdWQiOiJjdXJ1cGFzLWFwcCIsImF1dGhfdGltZSI6MTU3NTk4MTE1MiwidXNlcl9pZCI6IlpBdldRakZhYjJmaXYyN2czSHUwa2NwU0NYUDIiLCJzdWIiOiJaQXZXUWpGYWIyZml2MjdnM0h1MGtjcFNDWFAyIiwiaWF0IjoxNTgxNTM0OTA1LCJleHAiOjE1ODE1Mzg1MDUsImVtYWlsIjoiam9zZW1hbnVlbHZpZ2lsQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJqb3NlbWFudWVsdmlnaWxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.Sb5coyhk8PAotRplIEDN8wd-1qVn6X_cOcEUxUZVs34c3-frpAhLunyqwECNsA5YHYC6y339e0zRhZDid_zp_hHo8KNEwddsM-bg5RJMTe6FiVxSTiwhseUYm4q74W051pRL0LGRidENXjAzh9WpEhJ-HmW8_R9ViAsD4UfSHbzIQbz-ynx3zRUXVmzMqF-FT-UzBm-mYJb8PxSWH01lqsH5-IkCaAJeQNIdkyu-9Xmj31dcQzMLqR1bulAWAfUQSTQwwdL8WOyPCeCy5N82-WAbBeVeNy887EtYwosBO6fS3acYx70kbmQMgK6Eep68qfJg8JN3IO99YFLtrjpQ1A";
+
+                firebase.auth().verifyIdToken(idToken)
+                .then(function(decodedToken) {
+                    let uid = decodedToken.uid;
+                    console.log(uid);
+                    // ...
+                }).catch(function(error) {
+                    // Handle error
+                });*/
+
+                
+                console.log(user.email);
+
+                var previous = db.collection("users").where("email", "==", user.email)
+                .get()
+                .then(function(querySnapshotUser) {
+                    querySnapshotUser.forEach(function(docUser) {                        
+                        var roleReference =  docUser.data().roleRef;
+                        var yearReference =  docUser.data().yearRef;
+
+                        _user.userId = docUser.data().userID;
+                        _user.name = docUser.data().name;
+                        _user.profilePictureURL = docUser.data().profilePictureURL;            
+                        _user.roleReference = roleReference;                        
+                        _user.yearReference = yearReference;                        
+
+                        roleReference.get()
+                        .then(function(docPage) {                     
+
+                            var json = docPage.data();  
+                            
+                            let type = typeof json;
+                            
+                            var count = Object.keys(json).length;
+                            var a = 0;    
+                            
+                            _role.desc = json.role;         
+                            
+                            if (json.edit!=undefined) { 
+                                _role.edit_references = json.edit;    
+                            }   
+                            
+                            Object.keys(json).forEach((id) => {
+
+                                let isNumeric = $.isNumeric(id);
+
+                                if (isNumeric) {
+
+                                    var reference = json[id];                                    
+
+                                    promisesRoles.push(reference.get());                                    
+
+                                } else {
+
+                                    let isArray = Array.isArray(json[id]);
+
+                                    if (isArray) {                                           
+                                  
+                                        var arrayNav = json[id];                                            
+
+                                        for (var i=0; i<arrayNav.length; i++) {
+
+                                            let key = arrayNav[i];
+
+                                            _dropDownMenuObj[key] = id;
+                                        }  
+                                    }
+                                }                                  
+                                
+                                if (a == (count-1)) {
+
+                                    Promise.all(promisesRoles).then(function(responses) {  
+                                        
+                                        let length = responses.length;
+
+                                        for (var i=0; i<length; i++) {                                           
+
+                                            let pageResponse = responses[i];
+
+                                            let page = pageResponse.data();                                                
+                                            
+                                            var _id   =  page.id;
+                                            var _name =  page.name;
+                                            var _html =  page.html;
+                                            var _js =  page.js;
+                                            var _css  =   page.css; 
+
+                                            var _jss = page.jss;
+                                            var _csss = page.csss;
+
+                                            var json = {key: i, id:_id, html:_html, js:_js, css:_css, desc:_name};
+
+                                            if (_jss!=undefined) {                                       
+                                                let jss = JSON.stringify(_jss);
+                                                json.jss = window.btoa(jss);
+                                            }
+
+                                            if (_csss!=undefined) {
+                                                let csss = JSON.stringify(_csss);
+                                                json.csss = window.btoa(csss);
+                                            }
+
+                                            _rolePagesArray.push(json);
+                                            
+                                        }
+
+                                        _role.roles = _rolePagesArray;                                            
+                                        renderNavbar(_rolePagesArray);    
+
+                                    });                                    
+                                }
+                                a++;
+
+                            });
+                            
+                        });                    
+                    });
+                })
+                .catch(function(error) {
+                    console.log("Error getting documents: ", error);
+                });
+
+            } else {
+
+                homeLoader.hide();
+
+                $("<link/>", {
+                    rel: "stylesheet",
+                    type: "text/css",
+                    href: "/css/login.css"
+                }).appendTo("head");
+
+                fetch("../html/content/login.html")
+                .then(response => {
+                    return response.text();
+                })
+                .then(data => {                    
+                    $("#content").html(data);                        
+                    $.getScript("js/login.js");
+                });                         
+            }
+        });
+                
+        //} 
+        
+        function renderNavbar (navBar)  {
+
+           //Uso este random para que me refresque el css 
+           var random = Math.round(Math.random() * 10);
+                      
+            $("<link/>", {
+                rel: "stylesheet",
+                type: "text/css",
+                href: "/css/style.css?v=" + random
+            }).appendTo("head");                    
+            
+            fetch("../html/header.html")
+            .then(response => {
+                return response.text()
+            })
+            .then(data => {
+                
+                $("header").html(data);                   
+
+                var _dropDownItems = [];
+
+                let _lastMenu;
+                
+                for (var j=0;j<navBar.length; j++) {
+                    
+                    var key = navBar[j].key; 
+                    var id = navBar[j].id;
+                    var desc = navBar[j].desc;
+                    var html = navBar[j].html;
+                    var js = navBar[j].js;
+                    var css = navBar[j].css;                    
+                    
+                    var jss = navBar[j].jss;                    
+                    var csss = navBar[j].csss;                    
+
+                    var baseLoad = id + '\', \'' + html + '\', \'' + js + '\', \'' + css;
+
+                    if (jss!=undefined) {
+                        baseLoad = baseLoad + '\', \'' + jss;
+                    }
+                    
+                    if (csss!=undefined) {
+                        baseLoad = baseLoad + '\', \'' + csss;
+                    }
+
+                    if (key in _dropDownMenuObj) {                      
+
+                        let menu = _dropDownMenuObj[key];
+
+                        var profile = false;
+                        if (menu=="Perfil") {profile = true;}                                              
+                        
+                        let item = '<a class="dropdown-item" id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + baseLoad + '\'); return false;">' + desc + '</a>';                 
+                        _dropDownItems.push({"menu":menu, "item":item});
+                       
+                        if(_lastMenu != menu) {
+                          
+                            var dropDown = '<li class="nav-item dropdown ';
+                            if (profile) { dropDown += 'justify-content-end';}
+                            dropDown += '"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                            dropDown += menu;
+                            if (profile) { dropDown += '&nbsp;&nbsp;<img id="avatar" src="' + _user.profilePictureURL + '" width="40" height="40" class="rounded-circle">';}                                                        
+                            dropDown += '</a><div id="' + menu.toLowerCase() + '" class="dropdown-menu" aria-labelledby="navbarDropdown1"></div></li>';                                                                                                                  
+
+                            if (profile) {                                
+                                $("#navbarRight").append(dropDown);
+                            } else {
+                                $("#navbar").append(dropDown);
+                            }                      
+
+                            _lastMenu = menu;
+                        }                        
+
+                    } else  {                                                
+
+                        $("#navbar").append('<li class="nav-item"><a id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + baseLoad + '\'); return false;">' + desc + '</a></li>');           
+                        
+                    }      
+                    
+                }           
+                
+                if (_dropDownItems.length>0) {
+                    for (var i=0; i<_dropDownItems.length;i++) {
+                        let menu = _dropDownItems[i].menu;
+                        let item = _dropDownItems[i].item;
+                        $('#'+menu.toLowerCase()).append(item);           
+                    }
+                }          
+
+                loadPage(navBar[0].id, navBar[0].html, navBar[0].js, navBar[0].css);
+                
+                //Levanta la ultima pagina navegada sino Home
+                /*let cookie = Cookies.get('html');
+                if (cookie === undefined) {
+                    loadPage(navBar[0].html, navBar[0].css);
+                } else {
+                    let html =  Cookies.get('html', html);
+                    let cee = Cookies.set('html', css);
+                    loadPage(html, css)
+                }*/
+
+                homeLoader.hide();
+            });           
+            
+            fetch("../html/footer.html?v=" + random)
+            .then(response => {
+                return response.text()
+            })
+            .then(data => {
+                document.querySelector("footer").innerHTML = data;
+            });           
+
+        }
+
+        function loadPage(id, html, js, css) {
+
+            loadPage(id, html, js, css, undefined, undefined);
+        }
+
+        function loadPage(id, html, js, css, jss) {
+
+            loadPage(id, html, js, css, jss, undefined);
+        }
+
+        function loadPage(id, html, js, css, jss, csss) {            
+
+            homeLoader.show();
+
+            $("#navbar").find("li.active").removeClass("active");
+            $("#navbar").find("li a.active").removeClass("active");
+
+            $("#"+id).addClass('active');
+
+            Cookies.set('id', id);
+            Cookies.set('html', html);
+            Cookies.set('css', css);            
+
+            var random = Math.round(Math.random() * 10);            
+
+            $("<link/>", {
+                rel: "stylesheet",
+                type: "text/css",
+                href: "/css/" + css + "?v=" + random
+            }).appendTo("head");            
+
+            if (csss!=undefined) { 
+                let _csss = window.atob(csss);
+                let _csss_ = JSON.parse(_csss);
+                loadCss(_csss_); 
+            }
+
+            fetch("../html/content/" + html +"?v=" + random)
+            .then(response => {
+                return response.text();
+            })
+            .then(data => {                
+                $("#content").html(data);
+                let html = "js/" + js;  
+                if (jss!=undefined) {                        
+                    let _jss = JSON.parse(window.atob(jss));
+                    loadJss(_jss, function() {                        
+                        $.getScript(html, function() {
+                            homeLoader.hide();                                  
+                        });
+                    });
+                } else {                    
+                    $.getScript(html, function() {
+                        homeLoader.hide();                                  
+                    });
+                }                         
+            });
+        }   
+
+        function loadCss(csss, callback) {
+            let lengthcsss = csss.length;
+            for (let t=0; t<lengthcsss; t++) {
+                var random = Math.round(Math.random() * 10);    
+                $("<link/>", {
+                    rel: "stylesheet",
+                    type: "text/css",
+                    href: csss[t] + "?v=" + random
+                }).appendTo("head");                             
+            }            
+        }
+
+        function loadJss(jss, callback) {    
+            (async () => {
+                for (const path of jss) {
+                    await $.getScript(path);
+                }
+                callback();
+            })()
+            .catch((err) => {
+                Console.log("error: " + err);
+            });                
+        }
+        
+        function downloadImage(_url, callback) {
+            $.ajax({
+                type: 'GET',
+                url: _url,
+                dataType: 'image/jpg',
+                async: true,
+                success: function (data) {
+                    callback(data);
+                    //$("#" + i).attr("src", 'data:image/png;base64,'+data);
+                }
+            });
+        } 
+   
+    </script>
+
+    </html>

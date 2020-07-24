@@ -24,17 +24,6 @@
   const express = require('express');
   const app = express();
 
-  // Runs before every route. Launches headless Chrome.
-  app.all('*', async (req, res, next) => {
-      // Note: --no-sandbox is required in this env.
-      // Could also launch chrome and reuse the instance
-      // using puppeteer.connect()
-      res.locals.browser = await puppeteer.launch({
-        args: ['--no-sandbox']
-      });
-      next(); // pass control to next route.
-  }); 
-  
   var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
   var db_url = "https://curupas-app.firebaseio.com";
   
