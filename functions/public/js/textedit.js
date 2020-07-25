@@ -528,7 +528,7 @@ $(document).ready( function() {
         </div>`;       
         
       } else {      
-
+0
         input_type = `<div id="mediapick" class="form-group">                                  
           <label for="icon">Icono</label>&nbsp;<input type="text" class="use-material-icon-picker" value="android" name="icon">
         </div>`;  
@@ -710,7 +710,14 @@ $(document).ready( function() {
                 thisRef.put(file, metadata);
               }             
   
-              loadEdits(_database_ref, window._short);  
+              loadEdits(_database_ref, window._short); 
+              
+              /**
+               * HERE TINYMCE
+               */
+
+              //loadEditor();
+
               var num = parseInt($("#" + window._short).text());  
               num++;  
               $("#" + window._short).text(num);
@@ -721,6 +728,37 @@ $(document).ready( function() {
           }); 
 
        });
+
+       
+
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
        function saveDetailWithImage() {}  
        function saveDetailWithIcon() {}
@@ -822,15 +860,13 @@ $(document).ready( function() {
   
             if (response.data.result) {
               homeLoader.hide();  
-              //$('#view-save').prop('disabled', false);
               window.html = response.data.html;           
             } 
             
           });     
       });
   
-      $('#view-save').click(function() { 
-          //$('#messageModal').modal('show');
+      $('#view-save').click(function() {           
           $('#previewModal').modal('show');
           $('#preview-content').append("<div id='modal-container'>" + window.html + "</div>");
       });
@@ -839,24 +875,95 @@ $(document).ready( function() {
         $('#preview-content').remove();
       });     
        
-      function loadEdits(database_ref, _short) { 
+      function loadEdits(database_ref, _short) {        
 
         clearTimeout(window.time);
 
         _clicked = false;
 
-        clearFirepad(); 
+        //clearFirepad(); 
   
         window.database_ref = database_ref;     
 
         var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );
         
-        var firepad_div = $( "<div id='firepad'></div>" );
+        //let firepad_div = $( "<div id='firepad'></div>" );
+
+        let firepad_div = $(`<textarea id="basic-example"></textarea>`);        
         
         $( "#firepad-container" ).append( firepad_userlist_div );
         $( "#firepad-container" ).append( firepad_div );    
+
+        loadEditor();
+      }
+
+      /**
+        * TINYMCE
+        */
+
+       function loadEditor() {
+        tinymce.init({
+        selector: 'textarea#basic-example',
+        menubar: false,
+        height: 1000,
+        //toolbar: 'campos medios acciones',                     
+        plugins: [
+          'advlist autolink lists link image charmap print preview anchor',
+          'searchreplace visualblocks code fullscreen',
+          'insertdatetime media table paste code wordcount'
+        ],
+        toolbar: 'undo redo | formatselect | ' +
+        'bold italic backcolor | alignleft aligncenter ' +
+        'alignright alignjustify | bullist numlist outdent indent | ' +
+        'removeformat',
+        content_css: '//www.tiny.cloud/css/codepen.min.css',
+
+        setup: function(editor) {
+
+          editor.on('change', function(ed) {              
+            
+            /*let _content = editor.getContent();
+            let append_notifications = _content.replace(recibir_notificaciones, _html);
+
+            $("<link/>", {
+                rel: "stylesheet",
+                type: "text/css",
+                href: "css/style.css"
+            }).appendTo("head");
+            
+            $('#preview').html(append_notifications);*/
+
+          });
+          
+          /** Campos **/              
+          editor.ui.registry.addMenuButton('campos', {
+            text: 'Campos',
+            fetch: function(callback) {
+              var items = [];
+              for (var fieldName in camposFields) {
+                var menuItem = {
+                  type: 'menuitem',
+                  text: camposFields[fieldName],
+                  value:fieldName,
+                  onSetup: function(buttonApi) {
+                    var $this = this;
+                    this.onAction = function() {
+                      editor.insertContent($this.data.value);
+                    };
+                  },
+                };
+                items.push(menuItem);
+              }
+              callback(items);
+            },
+          });
+
+        }
+
+      });
+    }
     
-        var firepad = null, userList = null, codeMirror = null;
+        /*var firepad = null, userList = null, codeMirror = null;
     
         if (firepad) {
           // Clean up.
@@ -1005,15 +1112,7 @@ $(document).ready( function() {
           }
         }
   
-        function makePadLink(id, name) {
-          return $('<a></a>')
-              .text(name)
-              .on('click', function() {
-                window.location = window.location.toString().replace(/#.*/, '') + '#' + id;
-                $('#my-pads-list').hide();
-                return false;
-          });
-        }
+       
   
         function randomString(length) {
           var text = "";
@@ -1030,7 +1129,7 @@ $(document).ready( function() {
         }
 
         $(".firepad-tb-insert-image").parent().parent().hide(); 
-      }     
+      }    */ 
       
       function readURL(input) {
         if (input.files && input.files[0]) {
