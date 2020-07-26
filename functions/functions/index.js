@@ -257,7 +257,11 @@
 
       //console.log("::customMetadataType:: " + customMetadataType);  
 
-      if (customMetadataType === 1) {         
+      if (customMetadataType === 1) { 
+        
+        /**
+         * Years
+         */
         
         let file = object.name;
         let thumbFileExt       = 'jpg';
@@ -313,7 +317,32 @@
             return error;
           });
       
-      }
+      } else if (customMetadataType === 2) {  
+
+          /**
+           * Content Images Attached to Editor
+           */ 
+
+          let fileUrl = originalResult[0];            
+          let _short = customMetadata.short;          
+          let _id3 = customMetadata.id;    
+          let _time = admin.firestore.FieldValue.serverTimestamp();             
+
+          await firestore.collection('contents')
+          .doc(_short)
+          .collection("collection")
+          .doc(_id3)
+          .set({ 
+            sharedWith: [{ fileUrl }],            
+            last_update: _time,
+            merge: true
+          }).catch((error) => {
+            console.log('Error updating collection:', error);
+            return error;
+          });                     
+      
+        // Save Media thumbnail image and video  
+        }
     }
 
     function parseName(fileName) {

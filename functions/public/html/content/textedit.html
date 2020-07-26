@@ -175,10 +175,38 @@
                             </div>
                         </div>
                     </div>
-                </div>     
+                </div>  
+                
+                <div id="addImageModal" class="modal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                        <form id="add-images-form">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Seleccionar Imagenes</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">                           
+                                <div class="form-group">                                                                                   
+                                    <fieldset class="form-group">
+                                        <a href="javascript:void(0)" onclick="$('#proImage').click()">Agregar Imágen</a>
+                                        <input type="file" id="proImage" name="proImage" style="display: none;" class="form-control" multiple name="files[]">
+                                    </fieldset>
+                                    <div class="preview-images-zone"></div>
+                                </div>				
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary">Agregar</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            </div>
+                        </form>
+                    </div>
+                    </div>
+                </div>
                     
                 <!-- Add Modal HTML -->
-                <div id="detailModal" class="modal fade" data-backdrop="static" data-keyboard="false">
+                <!--<div id="detailModal" class="modal fade" data-backdrop="static" data-keyboard="false">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <form id="add-detail-form">
@@ -193,15 +221,9 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Descripción</label>                            
-                                        <textarea id="new-desc" class="form-control" required></textarea>
-                                        <!--<input type="text" id="desc" class="form-control" required>-->
+                                        <textarea id="new-desc" class="form-control" required></textarea>                                        
                                     </div> 
-                                    <div id="pictureInput"></div>
-                                    <!--<div  class="form-group" style="display: none;">                        
-                                        <label>Thumbnail</label><br>                  
-                                        <input type='file' id="imgInp" name="files[]"/>
-                                        <img id="avatar-preview" class="avatar-preview" src="images/picture.png" alt="your image" />
-                                    </div>-->                                    
+                                    <div id="pictureInput"></div>                                                                  
                                 </div>
                                 <div class="modal-footer">
                                     <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancelar">
@@ -211,10 +233,10 @@
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>-->
                     
                 <!-- Preview Modal HTML -->
-                <div id="previewModal" class="modal fade" data-backdrop="static" data-keyboard="false">
+                <!--<div id="previewModal" class="modal fade" data-backdrop="static" data-keyboard="false">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <form id="preview-add-form">
@@ -232,10 +254,10 @@
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>-->
     
                 <!-- Preview Modal HTML -->
-                <div id="publishModal" class="modal fade" data-backdrop="static" data-keyboard="false">
+                <!--<div id="publishModal" class="modal fade" data-backdrop="static" data-keyboard="false">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <form id="publish-add-form">
@@ -269,12 +291,11 @@
                             </form>
                         </div>
                     </div>
-                </div>  
+                </div>-->
                 
                 <!-- Modal Message -->
-                <div id="messageModal" class="modal fade" role="dialog">
-                    <div class="modal-dialog">                    
-                        <!-- Modal content-->
+                <!--<div id="messageModal" class="modal fade" role="dialog">
+                    <div class="modal-dialog">                                            
                         <div class="modal-content">
                             <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -288,17 +309,15 @@
                             </div>
                         </div>                    
                     </div>
-                </div>  
+                </div>-->  
 
                 <!-- Modal Remove Confirm -->
-                <div id="deleteConfirmModal" class="modal">
+                <!--<div id="deleteConfirmModal" class="modal">
                     <div class="modal-dialog">
-                    <div class="modal-content">
-                        <!-- Modal Header -->
+                    <div class="modal-content">                        
                         <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        </div>
-                        <!-- Modal body -->
+                        </div>                        
                         <div class="modal-body text-center mb-5">
                         <img src="images/right.png" class="img-responsive">
                         <h1>¿Seguro?</h1>
@@ -310,7 +329,8 @@
                         </div>
                     </div>
                     </div>
-                </div>
+                </div>-->
+
             </div>
         </div>
     </div><!--Container-->

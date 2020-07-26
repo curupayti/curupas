@@ -627,12 +627,12 @@ $(document).ready( function() {
   
        function clearFirepad() {
   
-          let hash_userlist = '#firepad-userlist';
+          //let hash_userlist = '#firepad-userlist';
           let hash_firepad = '#firepad';
   
-          if($(hash_userlist).length){
-            $( hash_userlist ).remove();
-          }
+          //if($(hash_userlist).length){
+          //  $( hash_userlist ).remove();
+          //}
   
           if($(hash_firepad).length){
             $( hash_firepad ).remove();
@@ -728,36 +728,6 @@ $(document).ready( function() {
           }); 
 
        });
-
-       
-
-       
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
        function saveDetailWithImage() {}  
@@ -905,18 +875,26 @@ $(document).ready( function() {
         tinymce.init({
         selector: 'textarea#basic-example',
         menubar: false,
-        height: 1000,
+        height: 600,
+        element_format: 'html',
         //toolbar: 'campos medios acciones',                     
         plugins: [
           'advlist autolink lists link image charmap print preview anchor',
           'searchreplace visualblocks code fullscreen',
           'insertdatetime media table paste code wordcount'
         ],
+        /*external_plugins: {              
+          'helloworld': '/plugins/plugin.js',             
+        },*/
         toolbar: 'undo redo | formatselect | ' +
         'bold italic backcolor | alignleft aligncenter ' +
         'alignright alignjustify | bullist numlist outdent indent | ' +
-        'removeformat',
+        'removeformat | imageButton', // | helloworld',
         content_css: '//www.tiny.cloud/css/codepen.min.css',
+        menubar: 'insert help',
+        /*menu: {
+          insert: {title: 'Insert', items: 'helloworld'},
+        },*/
 
         setup: function(editor) {
 
@@ -934,7 +912,17 @@ $(document).ready( function() {
             $('#preview').html(append_notifications);*/
 
           });
-          
+
+          editor.ui.registry.addButton('imageButton', {
+            icon: 'image',
+            text: 'Insertar Imagen',
+            tooltip: 'Insertar Imagen',
+            onAction: function (_) {
+              //editor.insertContent();//toDateHtml(new Date()));
+              $("#addImageModal").show();
+            }
+          });
+                
           /** Campos **/              
           editor.ui.registry.addMenuButton('campos', {
             text: 'Campos',
@@ -958,10 +946,123 @@ $(document).ready( function() {
             },
           });
 
+          
+
         }
 
       });
     }
+
+    document.getElementById('proImage').addEventListener('change', readImage, false);          
+    
+    $(document).on('click', '.image-cancel', function() {
+        let no = $(this).data('no');
+        $(".preview-image.preview-show-"+no).remove();
+    });    
+    
+    var num = 4;
+    function readImage() {
+        if (window.File && window.FileList && window.FileReader) {
+            var files = event.target.files; //FileList object
+            //$( ".preview-images-zone" ).sortable();
+            var output = $(".preview-images-zone");    
+            for (let i = 0; i < files.length; i++) {
+                var file = files[i];
+                if (!file.type.match('image')) continue;                
+                var picReader = new FileReader();                
+                picReader.addEventListener('load', function (event) {
+                    var picFile = event.target;
+                    var html =  '<div class="preview-image preview-show-' + num + '">' +
+                                '<div class="image-cancel" data-no="' + num + '">x</div>' +
+                                '<div class="image-zone"><img id="pro-img-' + num + '" src="' + picFile.result + '"></div>' +
+                                '<div class="tools-edit-image"><a href="javascript:void(0)" data-no="' + num + '" class="btn btn-light btn-edit-image">edit</a></div>' +
+                                '</div>';
+    
+                    output.append(html);
+                    num = num + 1;
+                });
+    
+                picReader.readAsDataURL(file);
+            }
+            $("#pro-image").val('');
+        } else {
+            console.log('Browser not support');
+        }
+    }
+
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();            
+            reader.onload = function (e) {
+                $('#avatar-preview').attr('src', e.target.result);
+            }            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    $("#imgInp").change(function(){
+        readURL(this);
+    });
+
+    // ADD EMPLOYEE
+    $("#add-images-form").submit(function (event) {
+        event.preventDefault();          
+
+        var storageRef = storage.ref("contents/" + _short + "/" + window._id_document_collection + "/images"); 
+     
+        var metadataFiles = {
+            customMetadata: {
+                'thumbnail': 'false',
+                'type' : '2', 
+                'id' : window._id_document_collection,
+                'short' : _short                    
+            }
+        }
+        var prefArray = [];
+        var input = document.getElementById("proImage");
+        var j=0, k=0;
+        var length = input.files.length;
+        for (var i = 0; i < length; ++i) {            
+            var _file = input.files.item(i);                                                  
+            var filePathMuseum = title + "_" + i + "_original.png";        
+            const museumRef = storageRef.child(filePathMuseum);
+            const putRef = museumRef.put(_file, metadataFiles);  
+            prefArray.push(putRef);  
+            putRef.on('state_changed', function(snapshot) {
+                var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log('Upload is ' + progress + '% done');
+                switch (snapshot.state) {
+                  case firebase.storage.TaskState.PAUSED: // or 'paused'
+                    console.log('Upload is paused');
+                    break;
+                  case firebase.storage.TaskState.RUNNING: // or 'running'
+                    console.log('Upload is running');
+                    break;
+                }
+              }, function(error) {
+                // Handle unsuccessful uploads
+              }, function() {                                        
+
+                if (k==(length-1)){
+                    $('#addImageModal').modal('hide');
+                }
+                k++;
+
+                /*var putRefFromArray = prefArray[j];
+                putRefFromArray.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
+                    db.collection("museums").doc(museumId).collection("images").add({downloadURL});
+                    if (k==(length-1)){
+                        $('#addMuseumModal').modal('hide');
+                    }
+                    k++;
+                });
+                j++;*/
+
+            });   
+        }
+       
+    });
+
     
         /*var firepad = null, userList = null, codeMirror = null;
     
@@ -1389,6 +1490,65 @@ $(document).ready( function() {
       $('#js-next-detail').closest('.page-item').removeClass('disabled');
     }
   });
+
+  /**
+   * UPLOAD FILE
+   * https://webdevtrick.com/jquery-drag-and-drop-file-upload/
+   */ 
+
+  // Code By Webdevtrick ( https://webdevtrick.com )
+  function readFile(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        var htmlPreview =
+          '<img width="200" src="' + e.target.result + '" />' +
+          '<p>' + input.files[0].name + '</p>';
+        var wrapperZone = $(input).parent();
+        var previewZone = $(input).parent().parent().find('.preview-zone');
+        var boxZone = $(input).parent().parent().find('.preview-zone').find('.box').find('.box-body');
+
+        wrapperZone.removeClass('dragover');
+        previewZone.removeClass('hidden');
+        boxZone.empty();
+        boxZone.append(htmlPreview);
+      };
+
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function reset(e) {
+    e.wrap('<form>').closest('form').get(0).reset();
+    e.unwrap();
+  }
+
+  $(".dropzone").change(function() {
+    readFile(this);
+  });
+
+  $('.dropzone-wrapper').on('dragover', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).addClass('dragover');
+  });
+
+  $('.dropzone-wrapper').on('dragleave', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).removeClass('dragover');
+  });
+
+  $('.remove-preview').on('click', function() {
+    var boxZone = $(this).parents('.preview-zone').find('.box-body');
+    var previewZone = $(this).parents('.preview-zone');
+    var dropzone = $(this).parents('.form-group').find('.dropzone');
+    boxZone.empty();
+    previewZone.addClass('hidden');
+    reset(dropzone);
+  });
+
       
   //# sourceURL=textedit.js   
   
