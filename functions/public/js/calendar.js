@@ -1,6 +1,7 @@
 $(document).ready(function () {
   let selectedEvent = "";
-
+  let initialLoad = true;
+  var calendar;
   getSelectedCalendar("camada");
   $("input[name=options]").change(function () {
     getSelectedCalendar(this.value);
@@ -20,14 +21,15 @@ $(document).ready(function () {
           let className = doc.data().className;
           let allDay = doc.data().allDay;
           let start = doc.data().start;
+          let end = doc.data().end;
           let summary = doc.data().summary;
           // let date = Date(doc.data().timeStamp);
           //let date = doc.data().timeStamp.toDate();
-
           let event = {
             id,
             title: name,
-            start: formatDate(start.seconds * 1000),
+            start: start ? formatDate(start.seconds * 1000) : null,
+            end: end ? formatDate(end.seconds * 1000) : null,
             allDay: allDay,
             className: className,
             summary,
@@ -37,44 +39,49 @@ $(document).ready(function () {
 
           calendarEvents.push(event);
         });
-
-        // if (count == size - 1) {
-        initializeCalendar(calendarEvents);
-        // }
-        // count++;
-
-        // let size = snapshot.size;
-        // var count = 0;
-        // let changes = snapshot.docChanges();
-
-        // changes.forEach((change) => {
-        //   let doc = change.doc;
-        //   let name = doc.data().name;
-        //   let className = doc.data().className;
-        //   let allDay = doc.data().allDay;
-        //   let start = doc.data().start;
-        //   let date = Date(doc.data().timeStamp);
-        //   //let date = doc.data().timeStamp.toDate();
-
-        //   let event = {
-        //     title: name,
-        //     start: formatDate(start.seconds * 1000),
-        //     allDay: allDay,
-        //     className: className,
-        //   };
-
-        //   calendarEvents.push(event);
-
-        //   if (count == size - 1) {
-        //     initializeCalendar(calendarEvents);
-        //   }
-        //   count++;
-        // });
+        if (initialLoad) {
+          initializeCalendar(calendarEvents);
+          initialLoad = false;
+        } else {
+          calendar.removeAllEvents();
+          calendar.addEventSource(calendarEvents);
+        }
       });
+    // if (count == size - 1) {
+    // }
+    // count++;
+
+    // let size = snapshot.size;
+    // var count = 0;
+    // let changes = snapshot.docChanges();
+
+    // changes.forEach((change) => {
+    //   let doc = change.doc;
+    //   let name = doc.data().name;
+    //   let className = doc.data().className;
+    //   let allDay = doc.data().allDay;
+    //   let start = doc.data().start;
+    //   let date = Date(doc.data().timeStamp);
+    //   //let date = doc.data().timeStamp.toDate();
+
+    //   let event = {
+    //     title: name,
+    //     start: formatDate(start.seconds * 1000),
+    //     allDay: allDay,
+    //     className: className,
+    //   };
+
+    //   calendarEvents.push(event);
+
+    //   if (count == size - 1) {
+    //     initializeCalendar(calendarEvents);
+    //   }
+    //   count++;
+    // });
     function initializeCalendar(events) {
       var calendarEl = document.getElementById("calendar-module");
 
-      var calendar = new FullCalendar.Calendar(calendarEl, {
+      calendar = new FullCalendar.Calendar(calendarEl, {
         plugins: ["interaction", "dayGrid", "timeGrid", "list"],
         header: {
           left: "prev,next today",
@@ -126,7 +133,6 @@ $(document).ready(function () {
         dayNamesShort: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
         events: events,
         eventClick: function (info) {
-          console.log(info.event);
           selectedEvent = info.event.id;
           $("#type").prop("disabled", true);
           $("#name").val(info.event.title);
@@ -180,8 +186,8 @@ $(document).ready(function () {
         .add({
           name,
           summary: desc,
-          start: new Date(start),
-          end: end ? new Date(end) : null,
+          start: new Date(start).setHours(0, 0, 0),
+          end: end ? new Date(end).setHours(0, 0, 0) : null,
           createdAt: new Date(),
         })
         .then((res) => {
@@ -201,8 +207,8 @@ $(document).ready(function () {
           {
             name,
             summary: desc,
-            start: new Date(start),
-            end: end ? new Date(end) : null,
+            start: new Date(start).setHours(0, 0, 0),
+            end: end ? new Date(end).setHours(0, 0, 0) : null,
           },
           { merge: true }
         )
