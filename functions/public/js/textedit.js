@@ -20,33 +20,37 @@ $(document).ready( function() {
     
     var _clicked = false;
 
-    db.collection('contents').onSnapshot(snapshot => {
-        window.mainTotalMain = snapshot.size;
-        window.mainSteps = Math.round(window.mainTotalMain/3) - 1;
-        $('.count-visible-main').text(3);
-        $('.count-total-main').text(window.mainTotalMain);    
-    });  
-    
-    var first = db.collection("contents").limit(3);
-
-    first.get().then(function (documentSnapshots) {         
-         var count = 0;
-         documentSnapshots.docs.forEach(doc => {            
-            if (count==0) {
-              firstVisible = doc;              
-            } else if (count==2) {
-              lastVisible = doc;
-            }            
-            renderMain(doc);
-            count++;
-         });
-         window.mainPartial = documentSnapshots.docs.length;
-    });   
+    loadData();
 
     window.mainActiveTable = 0;
     window.mainTotalMain = 0;
     window.mainSteps = 0;
     window.mainPartial = 0;
+
+    function loadData() {
+      db.collection('contents').onSnapshot(snapshot => {
+          window.mainTotalMain = snapshot.size;
+          window.mainSteps = Math.round(window.mainTotalMain/3) - 1;
+          $('.count-visible-main').text(3);
+          $('.count-total-main').text(window.mainTotalMain);    
+      });  
+      
+      var first = db.collection("contents").limit(3);
+
+      first.get().then(function (documentSnapshots) {         
+          var count = 0;
+          documentSnapshots.docs.forEach(doc => {            
+              if (count==0) {
+                firstVisible = doc;              
+              } else if (count==2) {
+                lastVisible = doc;
+              }            
+              renderMain(doc);
+              count++;
+          });
+          window.mainPartial = documentSnapshots.docs.length;
+      }); 
+    }
     
     $('#js-next-main').on('click', function () {              
       window.mainActiveTable++;     
@@ -191,6 +195,12 @@ $(document).ready( function() {
             $("#btn-categorias").click();
         });            
     }
+
+
+    function openDetailModal(){
+      $("#detailModal").show()
+    }
+
 
     // Edit Main
     $(document).on('click', '.js-edit-main', function () {
@@ -945,13 +955,11 @@ $(document).ready( function() {
               callback(items);
             },
           });
-
-          
-
         }
-
       });
     }
+
+
 
     document.getElementById('proImage').addEventListener('change', readImage, false);          
     
@@ -1002,31 +1010,41 @@ $(document).ready( function() {
     
     $("#imgInp").change(function(){
         readURL(this);
-    });
-
-    // ADD EMPLOYEE
+    }); 
+ 
+    // ADD IMAGE    
     $("#add-images-form").submit(function (event) {
-        event.preventDefault();          
+      event.preventDefault();              
 
-        var storageRef = storage.ref("contents/" + _short + "/" + window._id_document_collection + "/images"); 
-     
+        let _imagePath = "contents/" + window._short + "/" + window._id_document_collection + "/images";
+
+        var storageRef = storage.ref(_imagePath); 
+    
         var metadataFiles = {
             customMetadata: {
                 'thumbnail': 'false',
                 'type' : '2', 
                 'id' : window._id_document_collection,
-                'short' : _short                    
+                'short' : window._short                   
             }
-        }
-        var prefArray = [];
+        };
+
         var input = document.getElementById("proImage");
+        var prefArray = [];
+        
         var j=0, k=0;
         var length = input.files.length;
-        for (var i = 0; i < length; ++i) {            
-            var _file = input.files.item(i);                                                  
-            var filePathMuseum = title + "_" + i + "_original.png";        
-            const museumRef = storageRef.child(filePathMuseum);
+
+        for (var i = 0; i < length; ++i) {   
+            
+            var _file = input.files.item(i);     
+          
+            let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
+            var filePath = window._short + "_" +  rnd + ".png";              
+            
+            const museumRef = storageRef.child(filePath);
             const putRef = museumRef.put(_file, metadataFiles);  
+            
             prefArray.push(putRef);  
             putRef.on('state_changed', function(snapshot) {
                 var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -1039,200 +1057,19 @@ $(document).ready( function() {
                     console.log('Upload is running');
                     break;
                 }
-              }, function(error) {
-                // Handle unsuccessful uploads
-              }, function() {                                        
-
+              }, function(error) {                
+                console.error("Error loading image: ", error);
+              }, function() {                                       
                 if (k==(length-1)){
-                    $('#addImageModal').modal('hide');
+                    $('#addImageModal').hide();
                 }
-                k++;
-
-                /*var putRefFromArray = prefArray[j];
-                putRefFromArray.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
-                    db.collection("museums").doc(museumId).collection("images").add({downloadURL});
-                    if (k==(length-1)){
-                        $('#addMuseumModal').modal('hide');
-                    }
-                    k++;
-                });
-                j++;*/
-
+                k++;             
             });   
         }
-       
+      
     });
-
-    
-        /*var firepad = null, userList = null, codeMirror = null;
-    
-        if (firepad) {
-          // Clean up.
-          firepad.dispose();
-          userList.dispose();
-          $('.CodeMirror').remove();
-        }      
       
-        var firepadRef = new Firebase( 'https://curupas-app.firebaseio.com/' + _short ).child(database_ref);
-  
-        codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });          
-        
-        codeMirror.on('drop', function(data, e) {
-          var file;
-          var files;
-          // Check if files were dropped
-          var _URL = window.URL || window.webkitURL;
-          files = e.dataTransfer.files;
-          if (files.length > 0) {
-            e.preventDefault();
-            e.stopPropagation();
-            _file = files[0];
-            //alert('File: ' + file.name);
-            var img = new Image();    
-            img = new Image();
-            var objectUrl = _URL.createObjectURL(_file);
-            img.onload = function () {
-  
-                var _width = this.width;
-                var _height = this.height;
-                
-                var metadataFiles = {
-                  customMetadata: {
-                      'thumbnail': 'false',
-                      'type' : '0'
-                  }
-                }              
-  
-                var storageRef = storage.ref("contents/" + _short + "/" + window._id_document_collection + "/images");       
-  
-                let rnd = Math.floor((Math.random()) * 0x10000).toString(7);
-                                                                
-                var filePathPost = _short + "_" +  rnd + ".png";        
-                const postRef = storageRef.child(filePathPost);
-                const putRef = postRef.put(_file, metadataFiles);  
-                //prefArray.push(putRef);  
-                putRef.on('state_changed', function(snapshot) {
-                    var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    console.log('Upload is ' + progress + '% done');
-                    switch (snapshot.state) {
-                      case firebase.storage.TaskState.PAUSED: // or 'paused'
-                        console.log('Upload is paused');
-                        break;
-                      case firebase.storage.TaskState.RUNNING: // or 'running'
-                        console.log('Upload is running');
-                        break;
-                    }
-                  }, function(error) {
-                    // Handle unsuccessful uploads
-                  }, function() {                                                          
-                    putRef.snapshot.ref.getDownloadURL().then(function(downloadURL) {                      
-                        firepad.insertEntity('img', {
-                          'src' : downloadURL,
-                          'width' : _width,
-                          'height' : _height
-                        });
-                         
-                    });                  
-                });             
-                
-            };          
-            img.src = objectUrl;
-            return false;
-          }        
-  
-        });
-  
-        //LISTENER DRAG
-        //https://gist.github.com/mikelehen/fa5ceab5ad6f241b6544
-        //https://groups.google.com/forum/#!topic/firepad-io/d9HRHfd9NcE         
-  
-        firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
-            { richTextToolbar: true, richTextShortcuts: true, userId: _user.userId});
-  
-        userList = FirepadUserList.fromDiv(firepadRef.child('users'),
-            document.getElementById('firepad-userlist'), _user.userId);
-
-        firepad.on('ready', function() {
-          
-          if (firepad.isHistoryEmpty()) {
-            firepad.setText('Welcome to your own private pad!\n\nShare the URL below and collaborate with your friends.');
-          }          
-
-          ensurePadInList(database_ref);
-          buildPadList();
-        });
-
-        firepad.on('synced', function(isSynced) {
-          // isSynced will be false immediately after the user edits the pad,
-          // and true when their edit has been saved to Firebase.
-          console.log('synced');
-        });
-          
-        firepad.on('newLine', function() {  
-          $('#button-save').prop('disabled', false);                    
-        });          
-  
-        codeMirror.focus();
-  
-        codeMirror.setOption('dragDrop', true);
-
-        
-  
-        function padListEnabled() {
-          return (typeof localStorage !== 'undefined' && typeof JSON !== 'undefined' && localStorage.setItem &&
-              localStorage.getItem && JSON.parse && JSON.stringify);
-        }
-  
-        function ensurePadInList(id) {
-          if (!padListEnabled()) { return; }
-          var list = JSON.parse(localStorage.getItem('demo-pad-list') || "{ }");
-          if (!(id in list)) {
-            var now = new Date();
-            var year = now.getFullYear(), month = now.getMonth() + 1, day = now.getDate();
-            var hours = now.getHours(), minutes = now.getMinutes();
-            if (hours < 10) { hours = '0' + hours; }
-            if (minutes < 10) { minutes = '0' + minutes; }
-  
-            list[id] = [year, month, day].join('/') + ' ' + hours + ':' + minutes;
-  
-            localStorage.setItem('demo-pad-list', JSON.stringify(list));
-            buildPadList();
-          }
-        }
-  
-        function buildPadList() {
-          if (!padListEnabled()) { return; }
-          $('#my-pads-list').empty();
-  
-          var list = JSON.parse(localStorage.getItem('demo-pad-list') || '{ }');
-          for(var id in list) {
-            $('#my-pads-list').append(
-                $('<div></div>').addClass('my-pads-item').append(
-                    makePadLink(id, list[id])
-            ));
-          }
-        }
-  
-       
-  
-        function randomString(length) {
-          var text = "";
-          var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  
-          for(var i=0; i < length; i++)
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-  
-          return text;
-        }
-      
-        function displayPads() {
-          $('#my-pads-list').toggle();
-        }
-
-        $(".firepad-tb-insert-image").parent().parent().hide(); 
-      }    */ 
-      
-      function readURL(input) {
+    function readURL(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();            
             reader.onload = function (e) {
@@ -1245,7 +1082,65 @@ $(document).ready( function() {
     $("#imgInp").change(function(){
         readURL(this);
     });
+
+    /**
+     * Add Category Modal
+     */
+    $('#button-add-cetegory').on('click', function(event) {
+        event.preventDefault(); 
+        $("#addCategoryModal").show();     
+    });
+
+    $("#btn-category-close").add("#btn-category-close-x").on('click', function (event) {
+      event.preventDefault();   
+
+      $("#addCategoryModal").hide();
+    });
+
+    $("#btn-category-save").on('click', function (event) {
+      event.preventDefault();  
+
+      let _name = $("#category-name").val();
+      let _desc = $("#category-description").val();
+      let _new = $("#category-new").val();
+
+      let _short = _name.toLowerCase();
+      
+      let docRef = db.collection("contents").doc(_short);
+
+      var now = firebase.firestore.FieldValue.serverTimestamp();
+      
+      return docRef.set({
+        name: _name,
+        short: _short,
+        desc: _desc,
+        new: _new,
+        amount:0,
+        last_update: now,      
+        time_created: now 
+      }).then(docRefSet => {      
+          
+        //FaLTA BORRAR LISTA
+        $("#addCategoryModal").hide();
+        loadData();
+        
+      }).catch((error) => {     
+        console.error("Error adding document: ", error);           
+      });   
   
+    });
+
+   
+
+     $("#button-add-detail").submit(function (event) {
+      event.preventDefault();
+      
+      $("#addDetailModal").modal('hide');
+  
+    });
+
+    
+
     /*Spinner*/
   
     function modal(){

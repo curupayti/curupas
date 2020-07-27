@@ -5,7 +5,8 @@
             <div class="row">
 
                 <div class="col-12">
-
+                    
+                    <!-- CRUD -->
                     <div class="container overflow-hidden">
 
                         <div class="multisteps-form">
@@ -25,76 +26,73 @@
                                 <div id="columna" class="col-12 col-lg-8 m-auto">
 
                                     <form class="multisteps-form__form">
-                                    <div class="multisteps-form__panel shadow p-4 rounded bg-white js-active" data-animation="scaleIn">
 
-                                        <div class="multisteps-form__content">
+                                        <div class="multisteps-form__panel shadow p-4 rounded bg-white js-active" data-animation="scaleIn">
+
+                                            <div class="multisteps-form__content">
+
                                                 <div class="table-wrapper">                                                    
 
-                                                        <div class="table-title">
-                                                            <div class="row">
-                                                                <!--<div class="col-sm-6">
-                                                                    <h2>Categor
-                                                                        ias editor de contenido</h2>
-                                                                </div>-->
-                                                                <!--<div class="col-sm-12">-->
-                                                                    <a href="#mainModal" class="btn btn-success" data-toggle="modal"><i
-                                                                            class="material-icons">&#xE147;</i> <span>Agregar Categoria</span></a>                                    
-                                                                <!--</div>-->
-                                                            </div>
-                                                        </div>
-                                                        <div class="table-responsive">
-                                                            <table id="main-table" class="table table-striped table-hover">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>
-                                                                            <!--<span class="custom-checkbox">
-                                                                                <input type="checkbox" id="selectAllMain">
-                                                                                <label for="selectAllMain"></label>
-                                                                            </span>-->
-                                                                        </th>
-                                                                        <th>Cantidad</th>                                                              
-                                                                        <th>Nombre</th>  
-                                                                        <th>Descripción</th>                                                                                                                 
-                                                                        <th>Actualizado</th>   
-                                                                        <th>Editar</th>                                                                
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                </tbody>
-                                                            </table>
-                                                        </div> 
-
-                                                        <div class="clearfix">
-                                                            <div class="hint-text">Mostrando <b class="count-visible-main">0</b> de <b class="count-total-main">0</b> posts</div>
-                                                            <ul class="pagination">
-                                                                <li class="page-item disabled"><a href="#" id="js-previous-main" class="page-link">Anterior</a></li>
-                                                                <li class="page-item"><a href="#" id="js-next-main" class="page-link">Siguiente</a></li>
-                                                            </ul>
-                                                        </div>
-
-                                                    </div> 
-
-                                            <div class="button-row d-flex mt-4">
-                                                <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Siguiente">Siguiente >></button>
-                                            </div>                                        
-
-                                        </div>
-                                    </div>
-                        
-                                    <div class="multisteps-form__panel shadow p-4 rounded bg-white" data-animation="scaleIn">
-                                                                                                                    
-                                        <div class="multisteps-form__content">
-                                        
-                                            <div id="detail-grid" class="table-wrapper">
                                                     <div class="table-title">
                                                         <div class="row">
-                                                            <!--<div class="col-sm-6">
-                                                                <h2>Posts</h2>
-                                                            </div>-->
-                                                            <!--<div class="col-sm-6">-->
-                                                                <a href="#detailModal" class="btn btn-success" data-toggle="modal"><i
-                                                                        class="material-icons">&#xE147;</i> <span id="add-content">Agregar</span></a>                                    
-                                                            <!--</div>-->
+                                                            <button id="button-add-cetegory" class="btn btn-success"><i
+                                                                    class="material-icons">&#xE147;</i> <span>Agregar Categoria</span></button>                                                                                                                                               
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="table-responsive">
+                                                        <table id="main-table" class="table table-striped table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>
+                                                                        <!--<span class="custom-checkbox">
+                                                                            <input type="checkbox" id="selectAllMain">
+                                                                            <label for="selectAllMain"></label>
+                                                                        </span>-->
+                                                                    </th>
+                                                                    <th>Cantidad</th>                                                              
+                                                                    <th>Nombre</th>  
+                                                                    <th>Descripción</th>                                                                                                                 
+                                                                    <th>Actualizado</th>   
+                                                                    <th>Editar</th>                                                                
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            </tbody>
+                                                        </table>
+                                                    </div> 
+
+                                                    <div class="clearfix">
+                                                        <div class="hint-text">Mostrando <b class="count-visible-main">0</b> de <b class="count-total-main">0</b> posts</div>
+                                                        <ul class="pagination">
+                                                            <li class="page-item disabled"><a href="#" id="js-previous-main" class="page-link">Anterior</a></li>
+                                                            <li class="page-item"><a href="#" id="js-next-main" class="page-link">Siguiente</a></li>
+                                                        </ul>
+                                                    </div>
+
+                                                </div> 
+
+                                                <div class="button-row d-flex mt-4">
+                                                    <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Siguiente">Siguiente >></button>
+                                                </div>                                        
+
+                                            </div>
+
+                                            
+
+                                        </div>
+                        
+                                        <div class="multisteps-form__panel shadow p-4 rounded bg-white" data-animation="scaleIn">
+                                                                                                                    
+                                            <div class="multisteps-form__content">
+                                        
+                                                <div id="detail-grid" class="table-wrapper">
+
+                                                    <div class="table-title">
+                                                    
+                                                        <div class="row">                                                         
+                                                            <button id="button-add-detail" class="btn btn-success"><i
+                                                                class="material-icons">&#xE147;</i> <span>Agregar</span></button>                                                                                                                                               
                                                         </div>
                                                         <!--<div class="row">
                                                             <div class="col-sm-12">
@@ -104,7 +102,9 @@
                                                                 </div>
                                                             </div>
                                                         </div>-->
+
                                                     </div>
+
                                                     <div class="table-responsive">
                                                         <table id="detail-table" class="table table-striped table-hover">
                                                             <thead>
@@ -125,6 +125,7 @@
                                                             </tbody>
                                                         </table>
                                                     </div>
+                                                    
                                                     <div class="clearfix">
                                                         <div class="hint-text">Mostrando <b class="count-visible-detail">0</b> de <b class="count-total-detail">0</b> posts</div>
                                                         <ul class="pagination">
@@ -132,206 +133,254 @@
                                                             <li class="page-item"><a href="#" id="js-next-detail" class="page-link">Siguiente</a></li>
                                                         </ul>
                                                     </div>
+
                                                 </div>                                        
                                             
-                                            <div class="button-row d-flex mt-4">
-                                                <button class="btn btn-primary js-btn-prev" type="button" title="Prev">&#60;&#60; Anterior</button>
-                                                <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Next">Siguiente >></button>
-                                            </div>
+                                                <div class="button-row d-flex mt-4">
+                                                    <button class="btn btn-primary js-btn-prev" type="button" title="Prev">&#60;&#60; Anterior</button>
+                                                    <button class="btn btn-primary ml-auto js-btn-next" type="button" title="Next">Siguiente >></button>
+                                                </div>
 
-                                        </div>
-
-                                    </div>
+                                        </div>                                   
                         
-                                    <div class="multisteps-form__panel shadow p-4 rounded bg-white" data-animation="scaleIn">
-                                        
-                                        <div id="firepadform" class="multisteps-form__content">
+                                        <div class="multisteps-form__panel shadow p-4 rounded bg-white" data-animation="scaleIn">
+                                            
+                                            <div id="firepadform" class="multisteps-form__content">
 
-
-                                            <ul class="list-group">
+                                                <ul class="list-group">
                                                 
-                                                <li id="firepaditem" class="list-group-item">
-                                                    <div class="row">
-                                                        <div id="firepad-container"></div>                                                                                                                                                                     
-                                                    </div>
-                                                </li>  
-                                                
-                                                <li class="list-group-item">                                                
-                                                    <div class="row d-flex">
-                                                        <div class="button-row mt-4 col-12">
-                                                            <button class="btn btn-primary js-btn-prev" type="button" title="Anterior"> &#60;&#60; Anterior</button>   
-                                                            <div class="float-right">
-                                                                <button id="button-save" class="btn ml-auto btn btn-success">Guardar</button>
-                                                                <button id="view-save" class="btn ml-auto btn btn-secondary">Vista Previa</button>                    
-                                                                <button id="button-publish" class="btn ml-auto btn btn-danger">Publicar</button>                              
-                                                            </div>                                       
+                                                    <li id="firepaditem" class="list-group-item">
+                                                        <div class="row">
+                                                            <div id="firepad-container"></div>                                                                                                                                                                     
                                                         </div>
-                                                    </div>
-                                                </li>
-                                            </ul>   
+                                                    </li>  
+                                                    
+                                                    <li class="list-group-item">                                                
+                                                        <div class="row d-flex">
+                                                            <div class="button-row mt-4 col-12">
+                                                                <button class="btn btn-primary js-btn-prev" type="button" title="Anterior"> &#60;&#60; Anterior</button>   
+                                                                <div class="float-right">
+                                                                    <button id="button-save" class="btn ml-auto btn btn-success">Guardar</button>
+                                                                    <button id="view-save" class="btn ml-auto btn btn-secondary">Vista Previa</button>                    
+                                                                    <button id="button-publish" class="btn ml-auto btn btn-danger">Publicar</button>                              
+                                                                </div>                                       
+                                                            </div>
+                                                        </div>
+                                                    </li>
+
+                                                </ul>                                                   
+                                            </div>
+                                        </div> 
+                                    </form>
+                                </div>
+                               
+                            </div>
+
+                        </div>
+                    </div> <!-- END OF CRUD -->
+
+                    <!-- Add Modal Category --> 
+                    <div id="addCategoryModal" class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">                                
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Agregar Categoria</h5>
+                                    <button id="btn-category-close-x" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">                           
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label>Nombre</label>
+                                            <input type="text" id="category-name" class="form-control" required>
                                         </div>
-                                    </div>                           
+                                        <div class="form-group">
+                                            <label>Descripción</label>                            
+                                            <textarea id="category-description" class="form-control" required></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Nuevo</label>                            
+                                            <input id="category-new" class="form-control" required>
+                                        </div>	
+                                    </div>		
+                                </div>
+                                <div class="modal-footer">                                    
+                                    <button type="button" id="btn-category-save" class="btn btn-success">Guardar</button>
+                                    <button type="button" id="btn-category-close" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                                </div>                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                
+                    <!-- Add Modal HTML -->
+                    <div id="addDetailModal" class="modal fade" data-backdrop="static" data-keyboard="false">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form id="add-detail-form">
+                                    <div class="modal-header">
+                                        <h4 id="new-title" class="modal-title"></h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label>Nombre</label>
+                                            <input type="text" id="new-name" class="form-control" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Descripción</label>                            
+                                            <textarea id="new-desc" class="form-control" required></textarea>
+                                            <!--<input type="text" id="desc" class="form-control" required>-->
+                                        </div> 
+                                        <div id="pictureInput"></div>
+                                        <!--<div  class="form-group" style="display: none;">                        
+                                            <label>Thumbnail</label><br>                  
+                                            <input type='file' id="imgInp" name="files[]"/>
+                                            <img id="avatar-preview" class="avatar-preview" src="images/picture.png" alt="your image" />
+                                        </div>-->                                    
+                                    </div>
+                                    <div class="modal-footer">
+                                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancelar">
+                                        <input type="submit" class="btn btn-success" value="Agregar">    
+                                        <div class="lds-dual-ring" style="visibility: hidden;"></div>                              
+                                    </div>                    
                                 </form>
                             </div>
                         </div>
-                    </div>
-                </div>  
-                
-                <div id="addImageModal" class="modal" tabindex="-1" role="dialog">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                        <form id="add-images-form">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Seleccionar Imagenes</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">                           
-                                <div class="form-group">                                                                                   
-                                    <fieldset class="form-group">
-                                        <a href="javascript:void(0)" onclick="$('#proImage').click()">Agregar Imágen</a>
-                                        <input type="file" id="proImage" name="proImage" style="display: none;" class="form-control" multiple name="files[]">
-                                    </fieldset>
-                                    <div class="preview-images-zone"></div>
-                                </div>				
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-primary">Agregar</button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                            </div>
-                        </form>
-                    </div>
-                    </div>
-                </div>
+                    </div>   
                     
-                <!-- Add Modal HTML -->
-                <!--<div id="detailModal" class="modal fade" data-backdrop="static" data-keyboard="false">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="add-detail-form">
+                    <!-- Edit Modal HTML -->  
+                    <div id="addImageModal" class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                            <form id="add-images-form">
                                 <div class="modal-header">
-                                    <h4 id="new-title" class="modal-title"></h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h5 class="modal-title">Seleccionar Imagenes</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                 </div>
-                                <div class="modal-body">
-                                    <div class="form-group">
-                                        <label>Nombre</label>
-                                        <input type="text" id="new-name" class="form-control" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Descripción</label>                            
-                                        <textarea id="new-desc" class="form-control" required></textarea>                                        
-                                    </div> 
-                                    <div id="pictureInput"></div>                                                                  
+                                <div class="modal-body">                           
+                                    <div class="form-group">                                                                                   
+                                        <fieldset class="form-group">
+                                            <a href="javascript:void(0)" onclick="$('#proImage').click()">Agregar Imágen</a>
+                                            <input type="file" id="proImage" name="proImage" style="display: none;" class="form-control" multiple name="files[]">
+                                        </fieldset>
+                                        <div class="preview-images-zone"></div>
+                                    </div>				
                                 </div>
                                 <div class="modal-footer">
-                                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancelar">
                                     <input type="submit" class="btn btn-success" value="Agregar">    
-                                    <div class="lds-dual-ring" style="visibility: hidden;"></div>                              
-                                </div>                    
+                                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancelar">                                
+                                </div>
                             </form>
                         </div>
+                        </div>
                     </div>
-                </div>-->
                     
-                <!-- Preview Modal HTML -->
-                <!--<div id="previewModal" class="modal fade" data-backdrop="static" data-keyboard="false">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="preview-add-form">
-                                <div class="modal-header">
-                                    <h4 id="preview-title" class="modal-title"></h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                </div>
-                                <div class="modal-body">
-                                    <div id="preview-content"></div>                           
-                                </div>
-                                <div class="modal-footer">
-                                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cerrar">                                
-                                    <div class="lds-dual-ring" style="visibility: hidden;"></div>                              
-                                </div>                    
-                            </form>
-                        </div>
-                    </div>
-                </div>-->
-    
-                <!-- Preview Modal HTML -->
-                <!--<div id="publishModal" class="modal fade" data-backdrop="static" data-keyboard="false">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="publish-add-form">
-                                <div class="modal-header">
-                                    <h4 class="modal-title">Publicar</h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="alert alert-success" role="alert">
-                                        <h4 class="alert-heading">Falta un solo paso, la aprovación</h4><br>
-                                        <p>Antes de que el documento sea publicado va a ser revisado y aprobado por un referente o administrador de contenidos.</p><p> En caso debas hacer alguna correción serás notificado.</p><p> El proposito es para mejorar la calidad de los contenidos y establecer buenas prácticas para su uso.</p>                                    
-                                        <hr>
-                                        <div class="input-group mb-3">
-                                            <div class="input-group-prepend">
-                                            <div class="input-group-text">
-                                                <input id="acceptCheckbox" type="checkbox" aria-label="Checkbox for following text input">
-                                            </div>    
-                                            &nbsp;&nbsp;                                  
-                                            Acepto la publicación de este contenido. 
-                                            </div>                                        
-                                        </div>
-                                        <hr>
-                                        <p class="mb-0">Muchas gracias por tu gran aporte!</p>
+                    <!-- Preview Modal HTML -->
+                    <!--<div id="previewModal" class="modal fade" data-backdrop="static" data-keyboard="false">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form id="preview-add-form">
+                                    <div class="modal-header">
+                                        <h4 id="preview-title" class="modal-title"></h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="preview-content"></div>                           
+                                    </div>
+                                    <div class="modal-footer">
+                                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cerrar">                                
+                                        <div class="lds-dual-ring" style="visibility: hidden;"></div>                              
                                     </div>                    
+                                </form>
+                            </div>
+                        </div>
+                    </div>-->
+
+                    <!-- Preview Modal HTML -->
+                    <!--<div id="publishModal" class="modal fade" data-backdrop="static" data-keyboard="false">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form id="publish-add-form">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Publicar</h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="alert alert-success" role="alert">
+                                            <h4 class="alert-heading">Falta un solo paso, la aprovación</h4><br>
+                                            <p>Antes de que el documento sea publicado va a ser revisado y aprobado por un referente o administrador de contenidos.</p><p> En caso debas hacer alguna correción serás notificado.</p><p> El proposito es para mejorar la calidad de los contenidos y establecer buenas prácticas para su uso.</p>                                    
+                                            <hr>
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                <div class="input-group-text">
+                                                    <input id="acceptCheckbox" type="checkbox" aria-label="Checkbox for following text input">
+                                                </div>    
+                                                &nbsp;&nbsp;                                  
+                                                Acepto la publicación de este contenido. 
+                                                </div>                                        
+                                            </div>
+                                            <hr>
+                                            <p class="mb-0">Muchas gracias por tu gran aporte!</p>
+                                        </div>                    
+                                    </div>
+                                    <div class="modal-footer">
+                                        <input id="button-close" type="button" class="btn btn-default disabled" data-dismiss="modal" value="Cerrar">   
+                                        <input id="button-accept" type="button" class="btn btn-success disabled" value="Aceptar">                                
+                                        <div class="lds-dual-ring" style="visibility: hidden;"></div>                              
+                                    </div>                    
+                                </form>
+                            </div>
+                        </div>
+                    </div>-->
+                    
+                    <!-- Modal Message -->
+                    <!--<div id="messageModal" class="modal fade" role="dialog">
+                        <div class="modal-dialog">                                            
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 id="message-title" class="modal-title">Modal Header</h4>
+                                </div>
+                                <div class="modal-body">
+                                <p id="message-body"></p>
                                 </div>
                                 <div class="modal-footer">
-                                    <input id="button-close" type="button" class="btn btn-default disabled" data-dismiss="modal" value="Cerrar">   
-                                    <input id="button-accept" type="button" class="btn btn-success disabled" value="Aceptar">                                
-                                    <div class="lds-dual-ring" style="visibility: hidden;"></div>                              
-                                </div>                    
-                            </form>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>                    
                         </div>
-                    </div>
-                </div>-->
-                
-                <!-- Modal Message -->
-                <!--<div id="messageModal" class="modal fade" role="dialog">
-                    <div class="modal-dialog">                                            
-                        <div class="modal-content">
+                    </div>-->  
+
+                    <!-- Modal Remove Confirm -->
+                    <!--<div id="deleteConfirmModal" class="modal">
+                        <div class="modal-dialog">
+                        <div class="modal-content">                        
                             <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h4 id="message-title" class="modal-title">Modal Header</h4>
+                            </div>                        
+                            <div class="modal-body text-center mb-5">
+                            <img src="images/right.png" class="img-responsive">
+                            <h1>¿Seguro?</h1>
+                            <p>Estas por borrar <strong id="delete-element"></strong> para siempres. ¿Estas seguro?</p>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary btn-lg mr-2 rounded-lg" data-dismiss="modal">Cancel</button>
+                                <button id="delete-detail"  type="button" class="btn btn-danger btn-lg rounded-lg">Delete</button>
                             </div>
-                            <div class="modal-body">
-                            <p id="message-body"></p>
                             </div>
-                            <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                            </div>
-                        </div>                    
-                    </div>
-                </div>-->  
-
-                <!-- Modal Remove Confirm -->
-                <!--<div id="deleteConfirmModal" class="modal">
-                    <div class="modal-dialog">
-                    <div class="modal-content">                        
-                        <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        </div>                        
-                        <div class="modal-body text-center mb-5">
-                        <img src="images/right.png" class="img-responsive">
-                        <h1>¿Seguro?</h1>
-                        <p>Estas por borrar <strong id="delete-element"></strong> para siempres. ¿Estas seguro?</p>
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-secondary btn-lg mr-2 rounded-lg" data-dismiss="modal">Cancel</button>
-                            <button id="delete-detail"  type="button" class="btn btn-danger btn-lg rounded-lg">Delete</button>
                         </div>
                         </div>
-                    </div>
-                    </div>
-                </div>-->
+                    </div>-->
 
-            </div>
-        </div>
+                    
+
+                </div><!-- END OF col-12 -->
+            </div><!-- END OF row -->
+
+             
+
     </div><!--Container-->
 </main>

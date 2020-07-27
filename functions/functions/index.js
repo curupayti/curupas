@@ -255,7 +255,8 @@
       
     } else { // not isThiumbnail
 
-      //console.log("::customMetadataType:: " + customMetadataType);  
+      //console.log("::customMetadataType:: " + customMetadataType);       
+
 
       if (customMetadataType === 1) { 
         
@@ -323,7 +324,13 @@
            * Content Images Attached to Editor
            */ 
 
-          let fileUrl = originalResult[0];            
+          const file = bucket.file(filePath);          
+          const fileDir = path.dirname(filePath);
+          const fileName = path.basename(filePath);
+          const thumbFilePath = path.normalize(path.join(fileDir, `${THUMB_PREFIX}${fileName}`));          
+          let signedImageUrl = await file.getSignedUrl(config);             
+          var imageUrl = signedImageUrl[0];
+          
           let _short = customMetadata.short;          
           let _id3 = customMetadata.id;    
           let _time = admin.firestore.FieldValue.serverTimestamp();             
@@ -332,18 +339,19 @@
           .doc(_short)
           .collection("collection")
           .doc(_id3)
-          .set({ 
-            sharedWith: [{ fileUrl }],            
-            last_update: _time,
-            merge: true
+          .set({             
+            images: admin.firestore.FieldValue.arrayUnion(imageUrl),          
+            last_update: _time},
+            {merge:true
           }).catch((error) => {
             console.log('Error updating collection:', error);
             return error;
           });                     
       
         // Save Media thumbnail image and video  
-        }
+      }
     }
+    
 
     function parseName(fileName) {
         let _file = path.basename(fileName);
