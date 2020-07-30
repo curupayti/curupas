@@ -1,6 +1,6 @@
-$(document).ready( function() { 
+  $(document).ready( function() { 
 
-    "use strict";
+    "use strict";     
 
     let deleteIDs = [];
     
@@ -14,7 +14,6 @@ $(document).ready( function() {
     window._is_detail_drawer = false;
     window._short;
     window._id_document_collection;
-    window.database_ref;
 
     window.editObjects;  
     
@@ -115,34 +114,12 @@ $(document).ready( function() {
       if (window.mainActiveTable == 0) {
         $('#js-previous-main').closest('.page-item').addClass('disabled');        
       }
-    });
-
-    // REAL TIME LISTENER  
-    /*db.collection('contents').onSnapshot(snapshot => {
-        let size = snapshot.size;
-        $('.count').text(size);
-        if (size == 0) {
-            $('#selectAll').attr('disabled', true);USA.no
-        } else {
-            $('#selectAll').attr('disabled', false);
-        }
-        let changes = snapshot.docChanges();
-        changes.forEach(change => {
-            if (change.type == 'added') {
-                renderMain(change.doc);
-            } else if (change.type == 'modified') {
-                $('tr[data-id=' + change.doc.id + ']').remove();
-                renderMain(change.doc);
-            } else if (change.type == 'removed') {
-                $('tr[data-id=' + change.doc.id + ']').remove();
-            }
-        });
-    });*/
+    });     
 
     function renderMain(document) { 
 
         window.editObjects[document.data().short] = document;      
-        //let _time = formatDate(Date(document.data().timeStamp));  
+        
         let _last_update = formatDate(Date(document.data().last_update));        
 
         document.ref.collection("images").get().then(function(imagesSnapshot) {
@@ -196,7 +173,6 @@ $(document).ready( function() {
         });            
     }
 
-
     function openDetailModal(){
       $("#detailModal").show()
     }
@@ -238,7 +214,8 @@ $(document).ready( function() {
 
         window._id_document_collection = dataid;           
 
-        window._detail_name = _name;           
+        window._detail_name = _name;        
+        window._detail_new = _new;    
 
         var checkboxes = $('#main-table tbody input[type="checkbox"]');
 
@@ -260,6 +237,7 @@ $(document).ready( function() {
         
         $("#firepad-container").css("left", 0);
         $("#firepad-container").css("height", 570);
+        $("#firepad-container").css("width", "100%");
 
         $("#firepadform").css("height", 650);
         $("#firepaditem").css("height", 570);               
@@ -273,13 +251,14 @@ $(document).ready( function() {
     window._detail_row_selected = false;
 
     window._short;
-    window._id_document_collection;
-    window.database_ref;
+    window._id_document_collection;      
 
     window.detailDocuments;
 
     window.limitedDetailArray = [];
-  
+
+    window.active_detail;
+
     window.loadEditsList = function(_new, _short) { 
 
       window._short = _short;    
@@ -329,8 +308,8 @@ $(document).ready( function() {
         
         loadDetails(0);
 
-     });       
-     
+    });       
+    
     }
 
     function loadDetails(id) {
@@ -349,23 +328,21 @@ $(document).ready( function() {
               
       window._id_document_collection = editData.id;  
       
-      var _doc_id_ = docEdit.id;
-      var _database_ref_ = editData.database_ref;
+      var _doc_id_ = docEdit.id;        
       
       window.editDocuments[_doc_id_] = docEdit;          
-       
+      
       let _date = editData.last_update;
 
       let last_update = getDateFrom(_date.toDate());
 
-       if (editData.html != undefined){
-         window.html = editData.html;
-       }
+      if (editData.html != undefined){
+        window.html = editData.html;
+      }
 
-       let _icon = editData.icon;             
+      let _icon = editData.icon;             
       
-      let item = `<tr class="clickable-row-detail" 
-      data-ref="${_database_ref_}" 
+      let item = `<tr class="clickable-row-detail"         
       data-short="${_short}" 
       data-name="${editData.name}"             
       data-id="${_doc_id_}">
@@ -389,8 +366,7 @@ $(document).ready( function() {
           </a>
           <a href="#" id="${_doc_id_}" class="delete js-delete-detail" 
           data-name="${editData.name}"             
-          data-id="${_doc_id_}"  
-          data-ref="${_database_ref_}" 
+          data-id="${_doc_id_}"              
           data-short="${_short}"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
           </a>
       </td>                        
@@ -417,13 +393,7 @@ $(document).ready( function() {
               $("#selectAll").prop("checked", false);
           }
       });
-
-      //HABILITAR CUANDO ANDE 
-      //if (_count == (_length-1)) {
-          //$("#btn-contenidos").click();                               
-      //}
-      //_count++;        
-      
+    
 
         // VIEW IMAGES
       $(document).on('click', '.clickable-row-detail', function (event) {    
@@ -436,12 +406,12 @@ $(document).ready( function() {
         
             window._detail_row_selected = true; 
 
-            let docid = $(this).data("id");
-            let database_ref = $(this).data("ref");
+            let docid = $(this).data("id");              
             let _short = $(this).data("short"); 
-            let _name = $(this).data("name");               
+            let _name = $(this).data("name");                            
 
-            window._id_document_collection = docid;
+
+            window._id_document_collection = docid;          
 
             var checkboxes = $('#detail-table tbody input[type="checkbox"]');
 
@@ -454,9 +424,11 @@ $(document).ready( function() {
 
             $("#btn-contenidos").text(_name);
 
+            $(".multisteps-form__panel").css("opacity","1");
+
             window.time = setTimeout( function() {                          
-                loadEdits(database_ref, _short);   
-            }, 500);   
+                loadEdits(_short);                    
+            }, 1000);
 
           }                              
 
@@ -464,14 +436,16 @@ $(document).ready( function() {
 
     }
 
-     // Edit Detail
-     $(document).on('click', '.js-edit-detail', function (event) {
+    
+
+    // Edit Detail
+    $(document).on('click', '.js-edit-detail', function (event) {
 
       event.preventDefault();
 
       let id = $(this).data('id');
       let _name = $(this).data('name');
-
+    
       $('#edit-employee-form').attr('id', id);          
       
     });
@@ -518,14 +492,11 @@ $(document).ready( function() {
 
       }).catch(function(error) {
         console.error("Error removing document: ", error);
-      });  
-      
+      });        
 
-    });      
+    });  
 
-    $(document).on('show.bs.modal', '.modal',  function (event) {
-
-      event.preventDefault();
+    $(document).on('show.bs.modal', '.modal',  function (event) {       
 
       var input_type;
 
@@ -538,11 +509,10 @@ $(document).ready( function() {
         </div>`;       
         
       } else {      
-0
+
         input_type = `<div id="mediapick" class="form-group">                                  
           <label for="icon">Icono</label>&nbsp;<input type="text" class="use-material-icon-picker" value="android" name="icon">
         </div>`;  
-
       }
 
       $("#pictureInput").append(input_type);
@@ -553,7 +523,8 @@ $(document).ready( function() {
 
     });
 
-     function loadIconPickerCode() {
+
+    function loadIconPickerCode() {
 
         var material_icons = ['3d_rotation', 'ac_unit', 'access_alarm', 'access_alarms', 'access_time', 'accessibility', 'accessible', 'account_balance', 'account_balance_wallet', 'account_box', 'account_circle', 'adb', 'add', 'add_a_photo', 'add_alarm', 'add_alert', 'add_box', 'add_circle', 'add_circle_outline', 'add_location', 'add_shopping_cart', 'add_to_photos', 'add_to_queue', 'adjust', 'airline_seat_flat', 'airline_seat_flat_angled', 'airline_seat_individual_suite', 'airline_seat_legroom_extra', 'airline_seat_legroom_normal', 'airline_seat_legroom_reduced', 'airline_seat_recline_extra', 'airline_seat_recline_normal', 'airplanemode_active', 'airplanemode_inactive', 'airplay', 'airport_shuttle', 'alarm', 'alarm_add', 'alarm_off', 'alarm_on', 'album', 'all_inclusive', 'all_out', 'android', 'announcement', 'apps', 'archive', 'arrow_back', 'arrow_downward', 'arrow_drop_down', 'arrow_drop_down_circle', 'arrow_drop_up', 'arrow_forward', 'arrow_upward', 'art_track', 'aspect_ratio', 'assessment', 'assignment', 'assignment_ind', 'assignment_late', 'assignment_return', 'assignment_returned', 'assignment_turned_in', 'assistant', 'assistant_photo', 'attach_file', 'attach_money', 'attachment', 'audiotrack', 'autorenew', 'av_timer', 'backspace', 'backup', 'battery_alert', 'battery_charging_full', 'battery_full', 'battery_std', 'battery_unknown', 'beach_access', 'beenhere', 'block', 'bluetooth', 'bluetooth_audio', 'bluetooth_connected', 'bluetooth_disabled', 'bluetooth_searching', 'blur_circular', 'blur_linear', 'blur_off', 'blur_on', 'book', 'bookmark', 'bookmark_border', 'border_all', 'border_bottom', 'border_clear', 'border_color', 'border_horizontal', 'border_inner', 'border_left', 'border_outer', 'border_right', 'border_style', 'border_top', 'border_vertical', 'branding_watermark', 'brightness_1', 'brightness_2', 'brightness_3', 'brightness_4', 'brightness_5', 'brightness_6', 'brightness_7', 'brightness_auto', 'brightness_high', 'brightness_low', 'brightness_medium', 'broken_image', 'brush', 'bubble_chart', 'bug_report', 'build', 'burst_mode', 'business', 'business_center', 'cached', 'cake', 'call', 'call_end', 'call_made', 'call_merge', 'call_missed', 'call_missed_outgoing', 'call_received', 'call_split', 'call_to_action', 'camera', 'camera_alt', 'camera_enhance', 'camera_front', 'camera_rear', 'camera_roll', 'cancel', 'card_giftcard', 'card_membership', 'card_travel', 'casino', 'cast', 'cast_connected', 'center_focus_strong', 'center_focus_weak', 'change_history', 'chat', 'chat_bubble', 'chat_bubble_outline', 'check', 'check_box', 'check_box_outline_blank', 'check_circle', 'chevron_left', 'chevron_right', 'child_care', 'child_friendly', 'chrome_reader_mode', 'class', 'clear', 'clear_all', 'close', 'closed_caption', 'cloud', 'cloud_circle', 'cloud_done', 'cloud_download', 'cloud_off', 'cloud_queue', 'cloud_upload', 'code', 'collections', 'collections_bookmark', 'color_lens', 'colorize', 'comment', 'compare', 'compare_arrows', 'computer', 'confirmation_number', 'contact_mail', 'contact_phone', 'contacts', 'content_copy', 'content_cut', 'content_paste', 'control_point', 'control_point_duplicate', 'copyright', 'create', 'create_new_folder', 'credit_card', 'crop', 'crop_16_9', 'crop_3_2', 'crop_5_4', 'crop_7_5', 'crop_din', 'crop_free', 'crop_landscape', 'crop_original', 'crop_portrait', 'crop_rotate', 'crop_square', 'dashboard', 'data_usage', 'date_range', 'dehaze', 'delete', 'delete_forever', 'delete_sweep', 'description', 'desktop_mac', 'desktop_windows', 'details', 'developer_board', 'developer_mode', 'device_hub', 'devices', 'devices_other', 'dialer_sip', 'dialpad', 'directions', 'directions_bike', 'directions_boat', 'directions_bus', 'directions_car', 'directions_railway', 'directions_run', 'directions_subway', 'directions_transit', 'directions_walk', 'disc_full', 'dns', 'do_not_disturb', 'do_not_disturb_alt', 'do_not_disturb_off', 'do_not_disturb_on', 'dock', 'domain', 'done', 'done_all', 'donut_large', 'donut_small', 'drafts', 'drag_handle', 'drive_eta', 'dvr', 'edit', 'edit_location', 'eject', 'email', 'enhanced_encryption', 'equalizer', 'error', 'error_outline', 'euro_symbol', 'ev_station', 'event', 'event_available', 'event_busy', 'event_note', 'event_seat', 'exit_to_app', 'expand_less', 'expand_more', 'explicit', 'explore', 'exposure', 'exposure_neg_1', 'exposure_neg_2', 'exposure_plus_1', 'exposure_plus_2', 'exposure_zero', 'extension', 'face', 'fast_forward', 'fast_rewind', 'favorite', 'favorite_border', 'featured_play_list', 'featured_video', 'feedback', 'fiber_dvr', 'fiber_manual_record', 'fiber_new', 'fiber_pin', 'fiber_smart_record', 'file_download', 'file_upload', 'filter', 'filter_1', 'filter_2', 'filter_3', 'filter_4', 'filter_5', 'filter_6', 'filter_7', 'filter_8', 'filter_9', 'filter_9_plus', 'filter_b_and_w', 'filter_center_focus', 'filter_drama', 'filter_frames', 'filter_hdr', 'filter_list', 'filter_none', 'filter_tilt_shift', 'filter_vintage', 'find_in_page', 'find_replace', 'fingerprint', 'first_page', 'fitness_center', 'flag', 'flare', 'flash_auto', 'flash_off', 'flash_on', 'flight', 'flight_land', 'flight_takeoff', 'flip', 'flip_to_back', 'flip_to_front', 'folder', 'folder_open', 'folder_shared', 'folder_special', 'font_download', 'format_align_center', 'format_align_justify', 'format_align_left', 'format_align_right', 'format_bold', 'format_clear', 'format_color_fill', 'format_color_reset', 'format_color_text', 'format_indent_decrease', 'format_indent_increase', 'format_italic', 'format_line_spacing', 'format_list_bulleted', 'format_list_numbered', 'format_paint', 'format_quote', 'format_shapes', 'format_size', 'format_strikethrough', 'format_textdirection_l_to_r', 'format_textdirection_r_to_l', 'format_underlined', 'forum', 'forward', 'forward_10', 'forward_30', 'forward_5', 'free_breakfast', 'fullscreen', 'fullscreen_exit', 'functions', 'g_translate', 'gamepad', 'games', 'gavel', 'gesture', 'get_app', 'gif', 'golf_course', 'gps_fixed', 'gps_not_fixed', 'gps_off', 'grade', 'gradient', 'grain', 'graphic_eq', 'grid_off', 'grid_on', 'group', 'group_add', 'group_work', 'hd', 'hdr_off', 'hdr_on', 'hdr_strong', 'hdr_weak', 'headset', 'headset_mic', 'healing', 'hearing', 'help', 'help_outline', 'high_quality', 'highlight', 'highlight_off', 'history', 'home', 'hot_tub', 'hotel', 'hourglass_empty', 'hourglass_full', 'http', 'https', 'image', 'image_aspect_ratio', 'import_contacts', 'import_export', 'important_devices', 'inbox', 'indeterminate_check_box', 'info', 'info_outline', 'input', 'insert_chart', 'insert_comment', 'insert_drive_file', 'insert_emoticon', 'insert_invitation', 'insert_link', 'insert_photo', 'invert_colors', 'invert_colors_off', 'iso', 'keyboard', 'keyboard_arrow_down', 'keyboard_arrow_left', 'keyboard_arrow_right', 'keyboard_arrow_up', 'keyboard_backspace', 'keyboard_capslock', 'keyboard_hide', 'keyboard_return', 'keyboard_tab', 'keyboard_voice', 'kitchen', 'label', 'label_outline', 'landscape', 'language', 'laptop', 'laptop_chromebook', 'laptop_mac', 'laptop_windows', 'last_page', 'launch', 'layers', 'layers_clear', 'leak_add', 'leak_remove', 'lens', 'library_add', 'library_books', 'library_music', 'lightbulb_outline', 'line_style', 'line_weight', 'linear_scale', 'link', 'linked_camera', 'list', 'live_help', 'live_tv', 'local_activity', 'local_airport', 'local_atm', 'local_bar', 'local_cafe', 'local_car_wash', 'local_convenience_store', 'local_dining', 'local_drink', 'local_florist', 'local_gas_station', 'local_grocery_store', 'local_hospital', 'local_hotel', 'local_laundry_service', 'local_library', 'local_mall', 'local_movies', 'local_offer', 'local_parking', 'local_pharmacy', 'local_phone', 'local_pizza', 'local_play', 'local_post_office', 'local_printshop', 'local_see', 'local_shipping', 'local_taxi', 'location_city', 'location_disabled', 'location_off', 'location_on', 'location_searching', 'lock', 'lock_open', 'lock_outline', 'looks', 'looks_3', 'looks_4', 'looks_5', 'looks_6', 'looks_one', 'looks_two', 'loop', 'loupe', 'low_priority', 'loyalty', 'mail', 'mail_outline', 'map', 'markunread', 'markunread_mailbox', 'memory', 'menu', 'merge_type', 'message', 'mic', 'mic_none', 'mic_off', 'mms', 'mode_comment', 'mode_edit', 'monetization_on', 'money_off', 'monochrome_photos', 'mood', 'mood_bad', 'more', 'more_horiz', 'more_vert', 'motorcycle', 'mouse', 'move_to_inbox', 'movie', 'movie_creation', 'movie_filter', 'multiline_chart', 'music_note', 'music_video', 'my_location', 'nature', 'nature_people', 'navigate_before', 'navigate_next', 'navigation', 'near_me', 'network_cell', 'network_check', 'network_locked', 'network_wifi', 'new_releases', 'next_week', 'nfc', 'no_encryption', 'no_sim', 'not_interested', 'note', 'note_add', 'notifications', 'notifications_active', 'notifications_none', 'notifications_off', 'notifications_paused', 'offline_pin', 'ondemand_video', 'opacity', 'open_in_browser', 'open_in_new', 'open_with', 'pages', 'pageview', 'palette', 'pan_tool', 'panorama', 'panorama_fish_eye', 'panorama_horizontal', 'panorama_vertical', 'panorama_wide_angle', 'party_mode', 'pause', 'pause_circle_filled', 'pause_circle_outline', 'payment', 'people', 'people_outline', 'perm_camera_mic', 'perm_contact_calendar', 'perm_data_setting', 'perm_device_information', 'perm_identity', 'perm_media', 'perm_phone_msg', 'perm_scan_wifi', 'person', 'person_add', 'person_outline', 'person_pin', 'person_pin_circle', 'personal_video', 'pets', 'phone', 'phone_android', 'phone_bluetooth_speaker', 'phone_forwarded', 'phone_in_talk', 'phone_iphone', 'phone_locked', 'phone_missed', 'phone_paused', 'phonelink', 'phonelink_erase', 'phonelink_lock', 'phonelink_off', 'phonelink_ring', 'phonelink_setup', 'photo', 'photo_album', 'photo_camera', 'photo_filter', 'photo_library', 'photo_size_select_actual', 'photo_size_select_large', 'photo_size_select_small', 'picture_as_pdf', 'picture_in_picture', 'picture_in_picture_alt', 'pie_chart', 'pie_chart_outlined', 'pin_drop', 'place', 'play_arrow', 'play_circle_filled', 'play_circle_outline', 'play_for_work', 'playlist_add', 'playlist_add_check', 'playlist_play', 'plus_one', 'poll', 'polymer', 'pool', 'portable_wifi_off', 'portrait', 'power', 'power_input', 'power_settings_new', 'pregnant_woman', 'present_to_all', 'print', 'priority_high', 'public', 'publish', 'query_builder', 'question_answer', 'queue', 'queue_music', 'queue_play_next', 'radio', 'radio_button_checked', 'radio_button_unchecked', 'rate_review', 'receipt', 'recent_actors', 'record_voice_over', 'redeem', 'redo', 'refresh', 'remove', 'remove_circle', 'remove_circle_outline', 'remove_from_queue', 'remove_red_eye', 'remove_shopping_cart', 'reorder', 'repeat', 'repeat_one', 'replay', 'replay_10', 'replay_30', 'replay_5', 'reply', 'reply_all', 'report', 'report_problem', 'restaurant', 'restaurant_menu', 'restore', 'restore_page', 'ring_volume', 'room', 'room_service', 'rotate_90_degrees_ccw', 'rotate_left', 'rotate_right', 'rounded_corner', 'router', 'rowing', 'rss_feed', 'rv_hookup', 'satellite', 'save', 'scanner', 'schedule', 'school', 'screen_lock_landscape', 'screen_lock_portrait', 'screen_lock_rotation', 'screen_rotation', 'screen_share', 'sd_card', 'sd_storage', 'search', 'security', 'select_all', 'send', 'sentiment_dissatisfied', 'sentiment_neutral', 'sentiment_satisfied', 'sentiment_very_dissatisfied', 'sentiment_very_satisfied', 'settings', 'settings_applications', 'settings_backup_restore', 'settings_bluetooth', 'settings_brightness', 'settings_cell', 'settings_ethernet', 'settings_input_antenna', 'settings_input_component', 'settings_input_composite', 'settings_input_hdmi', 'settings_input_svideo', 'settings_overscan', 'settings_phone', 'settings_power', 'settings_remote', 'settings_system_daydream', 'settings_voice', 'share', 'shop', 'shop_two', 'shopping_basket', 'shopping_cart', 'short_text', 'show_chart', 'shuffle', 'signal_cellular_4_bar', 'signal_cellular_connected_no_internet_4_bar', 'signal_cellular_no_sim', 'signal_cellular_null', 'signal_cellular_off', 'signal_wifi_4_bar', 'signal_wifi_4_bar_lock', 'signal_wifi_off', 'sim_card', 'sim_card_alert', 'skip_next', 'skip_previous', 'slideshow', 'slow_motion_video', 'smartphone', 'smoke_free', 'smoking_rooms', 'sms', 'sms_failed', 'snooze', 'sort', 'sort_by_alpha', 'spa', 'space_bar', 'speaker', 'speaker_group', 'speaker_notes', 'speaker_notes_off', 'speaker_phone', 'spellcheck', 'star', 'star_border', 'star_half', 'stars', 'stay_current_landscape', 'stay_current_portrait', 'stay_primary_landscape', 'stay_primary_portrait', 'stop', 'stop_screen_share', 'storage', 'store', 'store_mall_directory', 'straighten', 'streetview', 'strikethrough_s', 'style', 'subdirectory_arrow_left', 'subdirectory_arrow_right', 'subject', 'subscriptions', 'subtitles', 'subway', 'supervisor_account', 'surround_sound', 'swap_calls', 'swap_horiz', 'swap_vert', 'swap_vertical_circle', 'switch_camera', 'switch_video', 'sync', 'sync_disabled', 'sync_problem', 'system_update', 'system_update_alt', 'tab', 'tab_unselected', 'tablet', 'tablet_android', 'tablet_mac', 'tag_faces', 'tap_and_play', 'terrain', 'text_fields', 'text_format', 'textsms', 'texture', 'theaters', 'thumb_down', 'thumb_up', 'thumbs_up_down', 'time_to_leave', 'timelapse', 'timeline', 'timer', 'timer_10', 'timer_3', 'timer_off', 'title', 'toc', 'today', 'toll', 'tonality', 'touch_app', 'toys', 'track_changes', 'traffic', 'train', 'tram', 'transfer_within_a_station', 'transform', 'translate', 'trending_down', 'trending_flat', 'trending_up', 'tune', 'turned_in', 'turned_in_not', 'tv', 'unarchive', 'undo', 'unfold_less', 'unfold_more', 'update', 'usb', 'verified_user', 'vertical_align_bottom', 'vertical_align_center', 'vertical_align_top', 'vibration', 'video_call', 'video_label', 'video_library', 'videocam', 'videocam_off', 'videogame_asset', 'view_agenda', 'view_array', 'view_carousel', 'view_column', 'view_comfy', 'view_compact', 'view_day', 'view_headline', 'view_list', 'view_module', 'view_quilt', 'view_stream', 'view_week', 'vignette', 'visibility', 'visibility_off', 'voice_chat', 'voicemail', 'volume_down', 'volume_mute', 'volume_off', 'volume_up', 'vpn_key', 'vpn_lock', 'wallpaper', 'warning', 'watch', 'watch_later', 'wb_auto', 'wb_cloudy', 'wb_incandescent', 'wb_iridescent', 'wb_sunny', 'wc', 'web', 'web_asset', 'weekend', 'whatshot', 'widgets', 'wifi', 'wifi_lock', 'wifi_tethering', 'work', 'wrap_text', 'youtube_searched_for', 'zoom_in', 'zoom_out', 'zoom_out_map'];
 
@@ -600,7 +571,7 @@ $(document).ready( function() {
             $picker.fadeOut(200);
           }
         });
-     }
+    }
 
 
     function getDateFrom(_date) {      
@@ -608,20 +579,20 @@ $(document).ready( function() {
         var year = _date.getFullYear();
         var month = _date.getMonth()+1;
         var day = _date.getDate();
-  
+
         if (day < 10) {
           day = '0' + day;
         }
         if (month < 10) {
           month = '0' + month;
         }
-  
-        var formattedDate = day + '-' + month + '-' + year;
-  
-        return formattedDate;
-       }
 
-       function formatDate(date) {
+        var formattedDate = day + '-' + month + '-' + year;
+
+        return formattedDate;
+      }
+
+      function formatDate(date) {
             var d = new Date(date),
                 month = '' + (d.getMonth() + 1),
                 day = '' + d.getDate(),
@@ -634,116 +605,25 @@ $(document).ready( function() {
         
             return [day, month, year].join('-');
         }
-  
-       function clearFirepad() {
-  
+
+      function clearFirepad() {
+
           //let hash_userlist = '#firepad-userlist';
           let hash_firepad = '#firepad';
-  
+
           //if($(hash_userlist).length){
           //  $( hash_userlist ).remove();
           //}
-  
+
           if($(hash_firepad).length){
             $( hash_firepad ).remove();
           } 
-       }     
-  
-       $("#add-detail-form").submit(function (event) {
-  
-          event.preventDefault();          
-          
-          var new_name = $('#new-name').val();
-          var new_desc = $('#new-desc').val();          
-  
-          var document_path = "contents/" + window._short + "/collection";
-  
-          var _database_ref = makeid(28);        
-  
-          var _time =  new Date();
-  
-          var _desc = new_desc.slice(0, 20) + "...";
-  
-          var timestamp =  new Date();
-  
-          var thedate = getDateFrom(timestamp);            
-  
-          let row = { "meta": {  
-            "database_ref": _database_ref, 
-            "id" : window._short,
-            "Nombre": new_name, 
-            "Desc": new_desc, 
-            "Actualizado": thedate } };   
-  
-          window.jsonDataDetail.push(row); 
+      }    
+      
+      function saveDetailWithImage() {}  
+      function saveDetailWithIcon() {}
 
-          var newData = {            
-            group_ref : _user.yearReference,
-            name : new_name,
-            description : new_desc,
-            database_ref : _database_ref,
-            last_update : _time          
-          };
-
-          if (window._is_detail_drawer) {   
-            
-            let codepoint = $("#codepoint").text();             
-            newData['codepoints'] = codepoint;
-            let code = getIconCode(codepoint);
-            newData['icon'] = code;
-
-          } 
-
-          db.collection(document_path).add(newData).then(function(doc){   
-
-              if (!window._is_detail_drawer) {   
-            
-                let _id = doc.id;
-              
-                var storage_path = "contents/" + window._short + "/" + _id;
-    
-                var storageRef = storage.ref(storage_path);        
-                var file = document.getElementById("imgInp").files[0];                 
-                let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
-                var filePath = window._short + "_" +  rnd + ".png";            
-                
-                var thisRef = storageRef.child(filePath);                         
-    
-                var metadata = {
-                    customMetadata: {
-                        'thumbnail': 'true',
-                        'type' : '3',
-                        'short' : window._short,
-                        'id' : _id                   
-                    }
-                }    
-                thisRef.put(file, metadata);
-              }             
-  
-              loadEdits(_database_ref, window._short); 
-              
-              /**
-               * HERE TINYMCE
-               */
-
-              //loadEditor();
-
-              var num = parseInt($("#" + window._short).text());  
-              num++;  
-              $("#" + window._short).text(num);
-              $('#detailModal').modal('hide');  
-  
-          }).catch(function(error) {
-            console.error("Error adding document: ", error);
-          }); 
-
-       });
-
-
-       function saveDetailWithImage() {}  
-       function saveDetailWithIcon() {}
-
-       function makeid(length) {
+      function makeid(length) {
           var result           = '';
           var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
           var charactersLength = characters.length;
@@ -751,13 +631,13 @@ $(document).ready( function() {
               result += characters.charAt(Math.floor(Math.random() * charactersLength));
           }
           return result;
-       }   
-  
+      }   
+
       $('#button-publish').click(function(event) { 
         event.preventDefault();
         $('#publishModal').modal('show');        
       });
-  
+
       $('#detailModal').on('hidden.bs.modal', function () {
         $("#mediapick").remove();
       });    
@@ -779,7 +659,7 @@ $(document).ready( function() {
         let obj = icons.filter(item => item.name === name);
         return "0x" +  obj[0].code;
       }
-  
+
       $('#acceptCheckbox').change(function() {
         if ($(this).prop('checked')) {
           $('#button-accept').prop('disabled', false);       
@@ -787,9 +667,9 @@ $(document).ready( function() {
           $('#button-accept').prop('disabled', true);
         }
       });
-  
+
       $('#button-accept').click(function(event) { 
-  
+
         event.preventDefault();  
         //var _document = window.editDocuments[window._id_document_collection];
         var _time =  new Date(); 
@@ -804,17 +684,17 @@ $(document).ready( function() {
             "last_update" : _time        
           })
           .then(function(documentUpdated) {
-  
+
             $('#publishModal').modal('hide');
-  
+
           })
           .catch(function(error) {
             console.error("Error adding document: ", error);
           }); 
-  
+
       });
-  
-       $('#button-save').click(function(event) {     
+
+      $('#button-save').click(function(event) {     
 
         event.preventDefault();  
         
@@ -826,18 +706,17 @@ $(document).ready( function() {
               "Content-Type": "application/json"
             },
             "data": JSON.stringify({
-              "database_ref":window.database_ref,
               "contentType":window._short,
               "documentId":window._id_document_collection
             }),
           };
-  
+
           homeLoader.show();  
           
           $.ajax(settings).done(function (response) {
-  
+
             console.log(response);
-  
+
             if (response.data.result) {
               homeLoader.hide();  
               window.html = response.data.html;           
@@ -845,121 +724,103 @@ $(document).ready( function() {
             
           });     
       });
-  
+
       $('#view-save').click(function() {           
           $('#previewModal').modal('show');
           $('#preview-content').append("<div id='modal-container'>" + window.html + "</div>");
       });
-  
+
       $('#previewModal').on('hidden.bs.modal', function () {
         $('#preview-content').remove();
       });     
-       
-      function loadEdits(database_ref, _short) {        
+      
+      function loadEdits(_short) {        
 
         clearTimeout(window.time);
 
         _clicked = false;
 
         //clearFirepad(); 
-  
-        window.database_ref = database_ref;     
 
-        var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );
-        
-        //let firepad_div = $( "<div id='firepad'></div>" );
+        var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );        
+        let firepad_div = $(`<textarea id="basic-example"></textarea>`);                
 
-        let firepad_div = $(`<textarea id="basic-example"></textarea>`);        
-        
         $( "#firepad-container" ).append( firepad_userlist_div );
-        $( "#firepad-container" ).append( firepad_div );    
+        $( "#firepad-container").append( firepad_div );          
 
-        loadEditor();
-      }
+        window.time = setTimeout( function() {               
+          
+            // TINYMCE          
 
-      /**
-        * TINYMCE
-        */
-
-       function loadEditor() {
         tinymce.init({
-        selector: 'textarea#basic-example',
-        menubar: false,
-        height: 600,
-        element_format: 'html',
-        //toolbar: 'campos medios acciones',                     
-        plugins: [
-          'advlist autolink lists link image charmap print preview anchor',
-          'searchreplace visualblocks code fullscreen',
-          'insertdatetime media table paste code wordcount'
-        ],
-        /*external_plugins: {              
-          'helloworld': '/plugins/plugin.js',             
-        },*/
-        toolbar: 'undo redo | formatselect | ' +
-        'bold italic backcolor | alignleft aligncenter ' +
-        'alignright alignjustify | bullist numlist outdent indent | ' +
-        'removeformat | imageButton', // | helloworld',
-        content_css: '//www.tiny.cloud/css/codepen.min.css',
-        menubar: 'insert help',
-        /*menu: {
-          insert: {title: 'Insert', items: 'helloworld'},
-        },*/
+          selector: 'textarea#basic-example',
+          menubar: false,
+          height: 600,
+          element_format: 'html',            
+          plugins: [
+            'advlist autolink lists link image charmap print preview anchor',
+            'searchreplace visualblocks code fullscreen',
+            'insertdatetime media table paste code wordcount'
+          ],            
+          toolbar: 'undo redo | formatselect | ' +
+          'bold italic backcolor | alignleft aligncenter ' +
+          'alignright alignjustify | bullist numlist outdent indent | ' +
+          'removeformat | imageButton', // | helloworld',            
+          menubar: 'insert help',
+          /*menu: {
+            insert: {title: 'Insert', items: 'helloworld'},
+          },*/
 
-        setup: function(editor) {
+          setup: function(editor) {
 
-          editor.on('change', function(ed) {              
-            
-            /*let _content = editor.getContent();
-            let append_notifications = _content.replace(recibir_notificaciones, _html);
+            clearTimeout(window.time);            
 
-            $("<link/>", {
-                rel: "stylesheet",
-                type: "text/css",
-                href: "css/style.css"
-            }).appendTo("head");
-            
-            $('#preview').html(append_notifications);*/
+            editor.on('change', function(ed) {     
+          
 
-          });
+            });
 
-          editor.ui.registry.addButton('imageButton', {
-            icon: 'image',
-            text: 'Insertar Imagen',
-            tooltip: 'Insertar Imagen',
-            onAction: function (_) {
-              //editor.insertContent();//toDateHtml(new Date()));
-              $("#addImageModal").show();
-            }
-          });
-                
-          /** Campos **/              
-          editor.ui.registry.addMenuButton('campos', {
-            text: 'Campos',
-            fetch: function(callback) {
-              var items = [];
-              for (var fieldName in camposFields) {
-                var menuItem = {
-                  type: 'menuitem',
-                  text: camposFields[fieldName],
-                  value:fieldName,
-                  onSetup: function(buttonApi) {
-                    var $this = this;
-                    this.onAction = function() {
-                      editor.insertContent($this.data.value);
-                    };
-                  },
-                };
-                items.push(menuItem);
+            editor.ui.registry.addButton('imageButton', {
+              icon: 'image',
+              text: 'Insertar Imagen',
+              tooltip: 'Insertar Imagen',
+              onAction: function (_) {
+                //editor.insertContent();//toDateHtml(new Date()));
+                $("#addImageModal").show();
               }
-              callback(items);
-            },
-          });
-        }
-      });
+            });
+                  
+            /** Campos **/              
+            editor.ui.registry.addMenuButton('campos', {
+              text: 'Campos',
+              fetch: function(callback) {
+                var items = [];
+                for (var fieldName in camposFields) {
+                  var menuItem = {
+                    type: 'menuitem',
+                    text: camposFields[fieldName],
+                    value:fieldName,
+                    onSetup: function(buttonApi) {
+                      var $this = this;
+                      this.onAction = function() {
+                        editor.insertContent($this.data.value);
+                      };
+                    },
+                  };
+                  items.push(menuItem);
+                }
+                callback(items);
+              },
+            });
+          }
+        });
+
+        
+          
+    }, 2000);
+      
+        
     }
-
-
 
     document.getElementById('proImage').addEventListener('change', readImage, false);          
     
@@ -1010,8 +871,10 @@ $(document).ready( function() {
     
     $("#imgInp").change(function(){
         readURL(this);
-    }); 
- 
+    });
+    
+    
+
     // ADD IMAGE    
     $("#add-images-form").submit(function (event) {
       event.preventDefault();              
@@ -1083,31 +946,28 @@ $(document).ready( function() {
         readURL(this);
     });
 
-    /**
-     * Add Category Modal
-     */
-    $('#button-add-cetegory').on('click', function(event) {
-        event.preventDefault(); 
-        $("#addCategoryModal").show();     
-    });
+    
+    //Add Main Modal      
 
-    $("#btn-category-close").add("#btn-category-close-x").on('click', function (event) {
+    //$('#button-main-add').on('click', function(event) {
+        //event.preventDefault(); 
+        //$("#addCategoryModal").show();     
+    //});
+
+    $("#btn-main-close").add("#btn-main-close-x").on('click', function (event) {
       event.preventDefault();   
-
       $("#addCategoryModal").hide();
     });
 
-    $("#btn-category-save").on('click', function (event) {
+    $("#btn-main-save").on('click', function (event) {
       event.preventDefault();  
 
       let _name = $("#category-name").val();
       let _desc = $("#category-description").val();
       let _new = $("#category-new").val();
 
-      let _short = _name.toLowerCase();
-      
+      let _short = _name.toLowerCase();      
       let docRef = db.collection("contents").doc(_short);
-
       var now = firebase.firestore.FieldValue.serverTimestamp();
       
       return docRef.set({
@@ -1118,174 +978,305 @@ $(document).ready( function() {
         amount:0,
         last_update: now,      
         time_created: now 
-      }).then(docRefSet => {      
-          
-        //FaLTA BORRAR LISTA
+      }).then(docRefSet => {            
+        
+        $('#main-table').empty();
         $("#addCategoryModal").hide();
         loadData();
         
       }).catch((error) => {     
         console.error("Error adding document: ", error);           
       });   
-  
-    });
 
-   
-
-     $("#button-add-detail").submit(function (event) {
-      event.preventDefault();
-      
-      $("#addDetailModal").modal('hide');
-  
-    });
+    });  
 
     
 
-    /*Spinner*/
-  
-    function modal(){
-       $('.modal').modal('show');
-       var _time = setTimeout(function () {
-         console.log('hejF');
-         $('.modal').modal('hide');
-         clearTimeout(_time);
-       }, 3000);
-    }
+    //Add Detail Modal
 
+    /*$('#button-detail-add').on('click', function(event) {
+        event.preventDefault(); 
+        $("#addDetailModal").show();     
+    });*/
+
+    $("#btn-detail-close").add("#btn-detail-close-x").on('click', function (event) {
+      event.preventDefault();   
+      $("#addDetailModal").hide();
+    });
+
+    $("#btn-detail-save").on('click', function (event) {
+      event.preventDefault();  
+
+      var new_name = $('#new-name').val();
+      var new_desc = $('#new-desc').val();          
+
+      var document_path = "contents/" + window._short + "/collection";            
+
+      var _time =  new Date();
+
+      //var _desc = new_desc.slice(0, 20) + "...";
+
+      var timestamp =  new Date();
+
+      var thedate = getDateFrom(timestamp);            
+
+      let row = { "meta": {            
+        "id" : window._short,
+        "Nombre": new_name, 
+        "Desc": new_desc, 
+        "Actualizado": thedate } };   
+
+      window.jsonDataDetail.push(row); 
+
+      var newData = {            
+        group_ref : _user.yearReference,
+        name : new_name,
+        description : new_desc,          
+        last_update : _time          
+      };
+
+      if (window._is_detail_drawer) {   
+        
+        let codepoint = $("#codepoint").text();             
+        newData['codepoints'] = codepoint;
+        let code = getIconCode(codepoint);
+        newData['icon'] = code;
+
+      } 
+
+      db.collection(document_path).add(newData).then(function(doc){   
+
+          if (!window._is_detail_drawer) {   
+        
+            let _id = doc.id;
+          
+            var storage_path = "contents/" + window._short + "/" + _id;
+
+            var storageRef = storage.ref(storage_path);        
+            var file = window.document.getElementById("imgInp").files[0];                 
+            let rnd = Math.floor((Math.random()) * 0x10000).toString(7);               
+            
+            var filePath = window._short + "_" +  new_name.split(' ').join('_').toLowerCase() + "_" + rnd + ".png";            
+            
+            var thisRef = storageRef.child(filePath);                         
+
+            var metadata = {
+                customMetadata: {
+                    'thumbnail': 'true',
+                    'type' : '3',
+                    'short' : window._short,
+                    'id' : _id                   
+                }
+            }    
+            thisRef.put(file, metadata);
+          }    
+
+          let _document = window.editObjects[_short];
+
+          let data_amount =  _document.data().amount;           
+          
+          let _amount = parseInt(data_amount);
+            _amount++;                     
+
+            window.editObjects[_short].ref.set({ 
+              amount:_amount }
+            ,{merge:true}
+          ).then(function() {
+
+            
+            $("#addDetailModal").hide(); 
+            reloadDetails(_short);            
+
+          })
+          .catch((error) => {
+            console.log('Error setting amount:', error);                
+          });  
+        
+      }).catch(function(error) {
+        console.error("Error getting collection: ", error);
+      }); 
+
+    });
+
+    function reloadDetails(short) {
+
+      //$('#detail-table tbody').html('');      
+
+      db.collection("contents").doc(short)
+        .get().then(function (snap) {  
+
+        var _new = snap.data().new;
+
+          var document_path = "contents/" + short + "/collection";                     
+
+          db.collection(document_path).get().then(function (documentSnapshots) {         
+            
+            var count = 0;
+            var length = documentSnapshots.docs.length; 
+
+            documentSnapshots.docs.forEach(function(document) {          
+              
+              if (count==(length-1)) {                 
+                window.editObjects[short] = document;               
+                let _doc = document.data();                                             
+                loadEditsList(_new, short);                       
+                        
+              }                          
+              count++;
+            
+            });
+
+            window.mainPartial = documentSnapshots.docs.length;
+        });
+      }); 
+    }
+    
+    // Spinner
+    
+
+    function modal(){
+      $('.modal').modal('show');
+      var _time = setTimeout(function () {
+        console.log('hejF');
+        $('.modal').modal('hide');
+        clearTimeout(_time);
+      }, 3000);
+    }
+    
     // Bootstrap Stepper 
 
-    //https://webdevtrick.com/bootstrap-multi-step-form-animations/
-    
-    const DOMstrings = {
-      stepsBtnClass: 'multisteps-form__progress-btn',
-      stepsBtns: document.querySelectorAll(`.multisteps-form__progress-btn`),
-      stepsBar: document.querySelector('.multisteps-form__progress'),
-      stepsForm: document.querySelector('.multisteps-form__form'),
-      stepsFormTextareas: document.querySelectorAll('.multisteps-form__textarea'),
-      stepFormPanelClass: 'multisteps-form__panel',
-      stepFormPanels: document.querySelectorAll('.multisteps-form__panel'),
-      stepPrevBtnClass: 'js-btn-prev',
-      stepNextBtnClass: 'js-btn-next' };
+  //https://webdevtrick.com/bootstrap-multi-step-form-animations/
+
+  const DOMstrings = {
+    stepsBtnClass: 'multisteps-form__progress-btn',
+    stepsBtns: document.querySelectorAll(`.multisteps-form__progress-btn`),
+    stepsBar: document.querySelector('.multisteps-form__progress'),
+    stepsForm: document.querySelector('.multisteps-form__form'),
+    stepsFormTextareas: document.querySelectorAll('.multisteps-form__textarea'),
+    stepFormPanelClass: 'multisteps-form__panel',
+    stepFormPanels: document.querySelectorAll('.multisteps-form__panel'),
+    stepPrevBtnClass: 'js-btn-prev',
+    stepNextBtnClass: 'js-btn-next' };
 
   window.activePanelNum = 0;
-  
-  
+
+
   const removeClasses = (elemSet, className) => {    
-    elemSet.forEach(elem => {    
-      elem.classList.remove(className);    
-    });    
-  };
-  
-  const findParent = (elem, parentClass) => {    
-    let currentNode = elem;    
-    while (!currentNode.classList.contains(parentClass)) {
-      currentNode = currentNode.parentNode;
-    }    
-    return currentNode;    
-  };
-  
-  const getActiveStep = elem => {
-      return Array.from(DOMstrings.stepsBtns).indexOf(elem);
-  };
-  
-  const setActiveStep = activeStepNum => {    
-    removeClasses(DOMstrings.stepsBtns, 'js-active');    
-    DOMstrings.stepsBtns.forEach((elem, index) => {    
-      if (index <= activeStepNum) {
-          elem.classList.add('js-active');
-      }    
-    });
-  };
-  
-  const getActivePanel = () => {    
-    let activePanel;    
-    DOMstrings.stepFormPanels.forEach(elem => {    
-      if (elem.classList.contains('js-active')) {      
-          activePanel = elem;      
-      }    
-    });    
-    return activePanel;    
-  };
-  
-  const setActivePanel = activePanelNum => {    
-    removeClasses(DOMstrings.stepFormPanels, 'js-active');    
-    DOMstrings.stepFormPanels.forEach((elem, index) => {
-      if (index === activePanelNum) {      
-          elem.classList.add('js-active');      
-          setFormHeight(elem);      
-      }
-    });    
-  };
-  
-  const formHeight = activePanel => {    
-    var activePanelHeight = activePanel.offsetHeight;        
-    if (window.activePanelNum==2) {
-        $("#columna").removeClass("col-lg-8");                        
-        //$('#firepadform').height(1500);            
-    } else {
-        $("#columna").addClass("col-lg-8");
-    }    
-    DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;            
-  };
-  
-  const setFormHeight = () => {
-    const activePanel = getActivePanel();    
-    formHeight(activePanel);
-  };
-  
-  DOMstrings.stepsBar.addEventListener('click', e => {    
-    const eventTarget = e.target;    
-    if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
-      return;
-    }   
-    const activeStep = getActiveStep(eventTarget);    
-    setActiveStep(activeStep);    
-    setActivePanel(activeStep);
-  });
-  
-  DOMstrings.stepsForm.addEventListener('click', e => {   
-    const eventTarget = e.target;        
-    if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)))  {        
-      if (!window._main_row_selected && window.activePanelNum==0) {
-          return;
-      }    
-      if (!window._detail_row_selected && window.activePanelNum==1) {
-        return;
-      }          
-      if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`))) {
-        return;
-      }
-    }      
-    const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);    
-    window.activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);    
-    if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
-        window.activePanelNum--;    
-    } else {    
-      window.activePanelNum++;       
-    }    
-   
-    let button_name_detail;
-    if (window.activePanelNum==0) {
-      button_name_detail = "contenido";      
-      $('#btn-contenidos').text('Contenidos'); 
-    } else if (window.activePanelNum==1) {      
-      button_name_detail = window._detail_name;
-    }    
-    $('#add-content').text('Agregar ' + button_name_detail); 
-    
-    setActiveStep(window.activePanelNum);
-    setActivePanel(window.activePanelNum);    
+  elemSet.forEach(elem => {    
+    elem.classList.remove(className);    
   });    
-  
+  };
+
+  const findParent = (elem, parentClass) => {    
+  let currentNode = elem;    
+  while (!currentNode.classList.contains(parentClass)) {
+    currentNode = currentNode.parentNode;
+  }    
+  return currentNode;    
+  };
+
+  const getActiveStep = elem => {
+    return Array.from(DOMstrings.stepsBtns).indexOf(elem);
+  };
+
+  const setActiveStep = activeStepNum => {    
+  removeClasses(DOMstrings.stepsBtns, 'js-active');    
+  DOMstrings.stepsBtns.forEach((elem, index) => {    
+    if (index <= activeStepNum) {
+        elem.classList.add('js-active');
+    }    
+  });
+  };
+
+  const getActivePanel = () => {    
+  let activePanel;    
+  DOMstrings.stepFormPanels.forEach(elem => {    
+    if (elem.classList.contains('js-active')) {      
+        activePanel = elem;      
+    }    
+  });    
+  return activePanel;    
+  };
+
+  const setActivePanel = activePanelNum => {    
+  removeClasses(DOMstrings.stepFormPanels, 'js-active');    
+  DOMstrings.stepFormPanels.forEach((elem, index) => {
+    if (index === activePanelNum) {      
+        elem.classList.add('js-active');      
+        setFormHeight(elem);      
+    }
+  });    
+  };
+
+  const formHeight = activePanel => {    
+  var activePanelHeight = activePanel.offsetHeight;        
+  if (window.activePanelNum==2) {
+      $("#columna").removeClass("col-lg-8");                        
+      //$('#firepadform').height(1500);            
+  } else {
+      $("#columna").addClass("col-lg-8");
+  }    
+  DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;            
+  };
+
+  const setFormHeight = () => {
+  const activePanel = getActivePanel();    
+  formHeight(activePanel);
+  };
+
+  DOMstrings.stepsBar.addEventListener('click', e => {    
+  const eventTarget = e.target;    
+  if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
+    return;
+  }   
+  const activeStep = getActiveStep(eventTarget);    
+  setActiveStep(activeStep);    
+  setActivePanel(activeStep);
+  });
+
+  DOMstrings.stepsForm.addEventListener('click', e => {   
+  const eventTarget = e.target;        
+  if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)))  {        
+    if (!window._main_row_selected && window.activePanelNum==0) {
+        return;
+    }    
+    if (!window._detail_row_selected && window.activePanelNum==1) {
+      return;
+    }          
+    if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`))) {
+      return;
+    }
+  }      
+  const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);    
+  window.activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);    
+  if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
+      window.activePanelNum--;    
+  } else {    
+    window.activePanelNum++;       
+  }    
+
+  let button_name_detail;
+  if (window.activePanelNum==0) {
+    button_name_detail = "contenido";      
+    $('#btn-contenidos').text('Contenidos'); 
+  } else if (window.activePanelNum==1) {      
+    button_name_detail = window._detail_name;
+  }    
+  $('#add-content').text('Agregar ' + button_name_detail); 
+
+  setActiveStep(window.activePanelNum);
+  setActivePanel(window.activePanelNum);    
+  });    
+
   //window.addEventListener('load', setFormHeight, false);    
   //window.addEventListener('resize', setFormHeight, false);    
-  
+
   const setAnimationType = newType => {
-    DOMstrings.stepFormPanels.forEach(elem => {
-      elem.dataset.animation = newType;
-    });
+  DOMstrings.stepFormPanels.forEach(elem => {
+    elem.dataset.animation = newType;
+  });
   };  
-  
+
 
   // PAGINATION
   window.detailActiveTable = 0;
@@ -1318,33 +1309,6 @@ $(document).ready( function() {
       return;
     }   
 
-    /*var next = db.collection("contents")
-        .startAfter(lastVisible)
-        .limit(3);
-      next.get().then(function (documentSnapshots) {           
-      var count = 0; 
-      var length = documentSnapshots.docs.length;
-      documentSnapshots.docs.forEach(doc => {   
-        if (count==0) {
-          firstVisible = doc;              
-        } else if (count==2) {
-          lastVisible = doc;
-        }
-        renderDetail(doc);   
-        count++;           
-      });           
-      window.detailPartial = (window.detailPartial + length);
-      $('.count-visible-detail').text(window.detailPartial);        
-      if (window.detailSteps == window.detailActiveTable) {
-        $('#js-next-detail').closest('.page-item').addClass('disabled');
-      }              
-      if (!window._main_row_selected && window.activePanelNum==0) {
-        return;
-      }    
-      if (!window._detail_row_selected && window.activePanelNum==1) {
-        return;
-      }   
-    });*/   
   });
 
   // PAGINATION
@@ -1354,27 +1318,7 @@ $(document).ready( function() {
 
     $('#detail-table tbody').html('');
 
-    loadDetails(window.detailActiveTable);
-
-    /*var previous;
-    if (window.detailActiveTable == 0) {
-      previous = db.collection("contents").limit(3);
-      $('#js-next-detail').closest('.page-item').addClass('enabled');
-    } else  {
-      var previous = db.collection("contents")          
-        //.orderBy(firebase.firestore.FieldPath.documentId(), "desc")
-        .startAt(firstVisible)
-        .limit(3);
-    }     
-    previous.get().then(function (documentSnapshots) {
-      documentSnapshots.docs.forEach(doc => {              
-        renderDetail(doc);
-      });
-      if (window.detailActiveTable == 0) {
-        window.detailPartial = documentSnapshots.docs.length;            
-      } 
-      $('.count-visible-detail').text(window.detailPartial);  
-    });*/
+    loadDetails(window.detailActiveTable); 
 
     if (window.detailActiveTable == 0) {
       window.detailPartial = documentSnapshots.docs.length;            
@@ -1386,10 +1330,9 @@ $(document).ready( function() {
     }
   });
 
-  /**
-   * UPLOAD FILE
-   * https://webdevtrick.com/jquery-drag-and-drop-file-upload/
-   */ 
+
+  // UPLOAD FILE
+  // https://webdevtrick.com/jquery-drag-and-drop-file-upload/      
 
   // Code By Webdevtrick ( https://webdevtrick.com )
   function readFile(input) {
@@ -1443,11 +1386,10 @@ $(document).ready( function() {
     previewZone.addClass('hidden');
     reset(dropzone);
   });
-
       
   //# sourceURL=textedit.js   
-  
-});
+
+  });
 
 
 
