@@ -335,15 +335,17 @@
           let _id3 = customMetadata.id;    
           let _time = admin.firestore.FieldValue.serverTimestamp();             
 
+          var _imgeURL = admin.firestore.FieldValue.arrayUnion(imageUrl);
+
           await firestore.collection('contents')
           .doc(_short)
           .collection("collection")
           .doc(_id3)
           .set({             
-            images: admin.firestore.FieldValue.arrayUnion(imageUrl),          
+            images: _imgeURL,          
             last_update: _time},
-            {merge:true
-          }).catch((error) => {
+            {merge:true}
+          ).catch((error) => {
             console.log('Error updating collection:', error);
             return error;
           });                     

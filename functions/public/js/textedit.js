@@ -16,6 +16,8 @@
     window._id_document_collection;
 
     window.editObjects;  
+
+    window.array_images_selected;
     
     var _clicked = false;
 
@@ -197,8 +199,7 @@
     });   
 
     // VIEW IMAGES
-    $(document).on('click', '.clickable-row-main', function (event) {     
-      
+    $(document).on('click', '.clickable-row-main', function (event) {           
         event.preventDefault();
 
         let dataid = $(this).data("id");
@@ -246,54 +247,38 @@
 
     window.jsonDataDetail = [];
     window.editDocuments = [];
-
     window._main_row_selected = false;
     window._detail_row_selected = false;
-
     window._short;
-    window._id_document_collection;      
-
+    window._id_document_collection;
     window.detailDocuments;
-
     window.limitedDetailArray = [];
-
     window.active_detail;
 
     window.loadEditsList = function(_new, _short) { 
 
-      window._short = _short;    
-      
+      window._short = _short;          
       window.detailDocuments = window.editObjects[_short];   
 
       window.detailDocuments.ref.collection("collection").get()
-      .then(function(querySnapshotDetail) {
+      .then(function(querySnapshotDetail) {       
         
-        let length =  querySnapshotDetail.size;
-
         let countLimit = 3;
         let limit = 0;
-        let counter = 0;
-        
+        let counter = 0;        
         var tempArray = new Array;
 
         querySnapshotDetail.forEach(function(docEdit) {       
 
-          if (limit==countLimit) {          
-
+          if (limit==countLimit) {
             window.limitedDetailArray[counter] = tempArray;
-
             tempArray = [];
-
             limit = 0;
             counter++;
-
-          } else {            
-
-            tempArray[limit] = docEdit;
-            
+          } else {    
+            tempArray[limit] = docEdit;            
             limit++;
           }
-
         });
 
         if (limit!=3) {
@@ -307,41 +292,31 @@
         $('.count-total-detail').text(window.detailTotal);         
         
         loadDetails(0);
-
     });       
     
     }
 
     function loadDetails(id) {
-
       window.limitedDetailArray[id].forEach(function(docEdit) {
-
         renderDetail(docEdit);
-
       }); 
     } 
 
 
     function renderDetail(docEdit) { 
             
-      var editData = docEdit.data();
-              
-      window._id_document_collection = editData.id;  
-      
-      var _doc_id_ = docEdit.id;        
-      
-      window.editDocuments[_doc_id_] = docEdit;          
-      
+      var editData = docEdit.data();              
+      window._id_document_collection = editData.id;        
+      var _doc_id_ = docEdit.id;              
+      window.editDocuments[_doc_id_] = docEdit;                
       let _date = editData.last_update;
-
       let last_update = getDateFrom(_date.toDate());
 
       if (editData.html != undefined){
         window.html = editData.html;
       }
 
-      let _icon = editData.icon;             
-      
+      let _icon = editData.icon;                   
       let item = `<tr class="clickable-row-detail"         
       data-short="${_short}" 
       data-name="${editData.name}"             
@@ -393,7 +368,6 @@
               $("#selectAll").prop("checked", false);
           }
       });
-    
 
         // VIEW IMAGES
       $(document).on('click', '.clickable-row-detail', function (event) {    
@@ -401,58 +375,44 @@
           event.preventDefault();
 
           if (_clicked == false) {
-
-            _clicked = true;
-        
+            
+            _clicked = true;        
             window._detail_row_selected = true; 
 
             let docid = $(this).data("id");              
             let _short = $(this).data("short"); 
-            let _name = $(this).data("name");                            
-
+            let _name = $(this).data("name"); 
 
             window._id_document_collection = docid;          
-
+            
             var checkboxes = $('#detail-table tbody input[type="checkbox"]');
-
             checkboxes.each(function () {
                 this.checked = false;
             });
 
-            $(this).find('input[type="checkbox"]').prop("checked", true);                               
-        
-
+            $(this).find('input[type="checkbox"]').prop("checked", true);  
             $("#btn-contenidos").text(_name);
-
             $(".multisteps-form__panel").css("opacity","1");
 
             window.time = setTimeout( function() {                          
                 loadEdits(_short);                    
-            }, 1000);
+            }, 200);
 
           }                              
-
       });
-
     }
-
-    
 
     // Edit Detail
     $(document).on('click', '.js-edit-detail', function (event) {
-
       event.preventDefault();
 
       let id = $(this).data('id');
-      let _name = $(this).data('name');
-    
-      $('#edit-employee-form').attr('id', id);          
-      
+      let _name = $(this).data('name');    
+      $('#edit-employee-form').attr('id', id);         
     });
     
     // Delete Detail
     $(document).on('click', '.js-delete-detail', function (event) {
-
       event.preventDefault();
       
       let id = $(this).data('id');      
@@ -460,19 +420,15 @@
       let ref = $(this).data('ref');
       let short = $(this).data('short');    
 
-      $('#deleteConfirmModal').modal('show');           
-
+      $('#deleteConfirmModal').modal('show');
       $('#delete-element').text(name);   
-
       $('#delete-detail').data('id', id);   
       $('#delete-detail').data('name', name);   
       $('#delete-detail').data('ref', ref);  
       $('#delete-detail').data('short', short);   
-
     });
 
     $("#delete-detail").on("click", function(event) { 
-
       event.preventDefault();
 
       let id = $(this).data('id');      
@@ -481,46 +437,35 @@
       let short = $(this).data('short');
 
       let doc = window.editDocuments[id];
-
       doc.ref.delete().then(function() {  
 
         let docRef = database.ref("/" + short + "/" +  ref);
         docRef.remove();        
-
-        $('#deleteConfirmModal').modal('hide');     
-        
+        $('#deleteConfirmModal').modal('hide');            
 
       }).catch(function(error) {
         console.error("Error removing document: ", error);
       });        
-
     });  
 
     $(document).on('show.bs.modal', '.modal',  function (event) {       
 
       var input_type;
-
       if (!window._is_detail_drawer) {
-
         input_type = `<div id="mediapick" class="form-group">                        
           <label>Thumbnail</label><br>                  
           <input type='file' id="imgInp" name="files[]"/>
           <img id="avatar-preview" class="avatar-preview" src="images/picture.png" alt="your image" />
-        </div>`;       
-        
+        </div>`;               
       } else {      
-
         input_type = `<div id="mediapick" class="form-group">                                  
           <label for="icon">Icono</label>&nbsp;<input type="text" class="use-material-icon-picker" value="android" name="icon">
         </div>`;  
       }
-
       $("#pictureInput").append(input_type);
-
       if (window._is_detail_drawer) {
         loadIconPickerCode();
       }
-
     });
 
 
@@ -586,53 +531,25 @@
         if (month < 10) {
           month = '0' + month;
         }
-
         var formattedDate = day + '-' + month + '-' + year;
-
         return formattedDate;
       }
 
       function formatDate(date) {
-            var d = new Date(date),
-                month = '' + (d.getMonth() + 1),
-                day = '' + d.getDate(),
-                year = d.getFullYear();
-        
-            if (month.length < 2) 
-                month = '0' + month;
-            if (day.length < 2) 
-                day = '0' + day;
-        
-            return [day, month, year].join('-');
-        }
-
-      function clearFirepad() {
-
-          //let hash_userlist = '#firepad-userlist';
-          let hash_firepad = '#firepad';
-
-          //if($(hash_userlist).length){
-          //  $( hash_userlist ).remove();
-          //}
-
-          if($(hash_firepad).length){
-            $( hash_firepad ).remove();
-          } 
-      }    
+          var d = new Date(date),
+              month = '' + (d.getMonth() + 1),
+              day = '' + d.getDate(),
+              year = d.getFullYear();
       
-      function saveDetailWithImage() {}  
-      function saveDetailWithIcon() {}
-
-      function makeid(length) {
-          var result           = '';
-          var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-          var charactersLength = characters.length;
-          for ( var i = 0; i < length; i++ ) {
-              result += characters.charAt(Math.floor(Math.random() * charactersLength));
-          }
-          return result;
-      }   
-
+          if (month.length < 2) 
+              month = '0' + month;
+          if (day.length < 2) 
+              day = '0' + day;
+      
+          return [day, month, year].join('-');
+      }     
+      
+      // Publish
       $('#button-publish').click(function(event) { 
         event.preventDefault();
         $('#publishModal').modal('show');        
@@ -645,14 +562,12 @@
       var icons = [];
 
       $('#detailModal').on('show.bs.modal', function () {
-
         if (window._is_detail_drawer) {
           fetch('./json/icons.json').then(res => res.json()).then(data => {            
             console.log(data);
             icons = data;
           }).catch(err => console.error(err));
-        }     
-
+        }    
       });
 
       function getIconCode(name) {
@@ -669,11 +584,9 @@
       });
 
       $('#button-accept').click(function(event) { 
-
         event.preventDefault();  
-        //var _document = window.editDocuments[window._id_document_collection];
-        var _time =  new Date(); 
-      
+        
+        var _time =  new Date();       
         db.collection('contents')
           .doc(window._short)
           .collection("collection")
@@ -682,20 +595,14 @@
             "approved" : false,
             "published" : false,
             "last_update" : _time        
-          })
-          .then(function(documentUpdated) {
-
-            $('#publishModal').modal('hide');
-
-          })
-          .catch(function(error) {
-            console.error("Error adding document: ", error);
-          }); 
-
+        }).then(function(documentUpdated) {
+          $('#publishModal').modal('hide');
+        }).catch(function(error) {
+          console.error("Error adding document: ", error);
+        });
       });
 
       $('#button-save').click(function(event) {     
-
         event.preventDefault();  
         
         var settings = {
@@ -710,24 +617,19 @@
               "documentId":window._id_document_collection
             }),
           };
-
-          homeLoader.show();  
-          
+          homeLoader.show();            
           $.ajax(settings).done(function (response) {
-
             console.log(response);
-
             if (response.data.result) {
               homeLoader.hide();  
               window.html = response.data.html;           
-            } 
-            
+            }             
           });     
       });
 
       $('#view-save').click(function() {           
-          $('#previewModal').modal('show');
-          $('#preview-content').append("<div id='modal-container'>" + window.html + "</div>");
+        $('#previewModal').modal('show');
+        $('#preview-content').append("<div id='modal-container'>" + window.html + "</div>");
       });
 
       $('#previewModal').on('hidden.bs.modal', function () {
@@ -737,10 +639,7 @@
       function loadEdits(_short) {        
 
         clearTimeout(window.time);
-
         _clicked = false;
-
-        //clearFirepad(); 
 
         var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );        
         let firepad_div = $(`<textarea id="basic-example"></textarea>`);                
@@ -750,80 +649,145 @@
 
         window.time = setTimeout( function() {               
           
-            // TINYMCE          
+          // TINYMCE       
+          tinymce.init({
+            selector: 'textarea#basic-example',
+            menubar: false,
+            height: 600,
+            element_format: 'html',            
+            plugins: [
+              'advlist autolink lists link image charmap print preview anchor',
+              'searchreplace visualblocks code fullscreen',
+              'insertdatetime media table paste code wordcount'
+            ],            
+            toolbar: 'undo redo | formatselect | ' +
+            'bold italic backcolor | alignleft aligncenter ' +
+            'alignright alignjustify | bullist numlist outdent indent | ' +
+            'removeformat | imageUpload imageInsert ', // | helloworld',            
+            //menubar: 'insert help',
+            /*menu: {
+              insert: {title: 'Insert', items: 'helloworld'},
+            },*/
+            setup: function(editor) {
+              clearTimeout(window.time);            
+              
+              editor.on('change', function(ed) {               
 
-        tinymce.init({
-          selector: 'textarea#basic-example',
-          menubar: false,
-          height: 600,
-          element_format: 'html',            
-          plugins: [
-            'advlist autolink lists link image charmap print preview anchor',
-            'searchreplace visualblocks code fullscreen',
-            'insertdatetime media table paste code wordcount'
-          ],            
-          toolbar: 'undo redo | formatselect | ' +
-          'bold italic backcolor | alignleft aligncenter ' +
-          'alignright alignjustify | bullist numlist outdent indent | ' +
-          'removeformat | imageButton', // | helloworld',            
-          menubar: 'insert help',
-          /*menu: {
-            insert: {title: 'Insert', items: 'helloworld'},
-          },*/
+              });              
 
-          setup: function(editor) {
-
-            clearTimeout(window.time);            
-
-            editor.on('change', function(ed) {     
-          
-
-            });
-
-            editor.ui.registry.addButton('imageButton', {
-              icon: 'image',
-              text: 'Insertar Imagen',
-              tooltip: 'Insertar Imagen',
-              onAction: function (_) {
-                //editor.insertContent();//toDateHtml(new Date()));
-                $("#addImageModal").show();
-              }
-            });
-                  
-            /** Campos **/              
-            editor.ui.registry.addMenuButton('campos', {
-              text: 'Campos',
-              fetch: function(callback) {
-                var items = [];
-                for (var fieldName in camposFields) {
-                  var menuItem = {
-                    type: 'menuitem',
-                    text: camposFields[fieldName],
-                    value:fieldName,
-                    onSetup: function(buttonApi) {
-                      var $this = this;
-                      this.onAction = function() {
-                        editor.insertContent($this.data.value);
-                      };
-                    },
-                  };
-                  items.push(menuItem);
+              editor.ui.registry.addButton('imageUpload', {
+                icon: 'upload',
+                text: 'Subir',
+                tooltip: 'Subir Imagen',
+                onAction: function (_) {
+                  //editor.insertContent();//toDateHtml(new Date()));
+                  $("#uploadImageModal").modal("show");
                 }
-                callback(items);
-              },
-            });
+              });
+            
+              editor.ui.registry.addButton('imageInsert', {
+                icon: 'image',
+                text: 'Insertar',
+                tooltip: 'Insertar Imagen',
+                onAction: function (_) {
+                  //editor.insertContent();//toDateHtml(new Date()));
+                  $("#insertImageModal").modal("show");
+
+                  $(".modal .modal-dialog").css("max-width", "800px");
+
+                  $("#insert-picker").empty();
+
+                  db.collection('contents')
+                  .doc(window._short)
+                  .collection("collection")
+                  .doc(window._id_document_collection)                
+                  .get().then(function (snap) { 
+
+                      var _images = snap.data().images;
+
+                      var lenght = _images.length;
+                      
+                      if ( lenght > 0 ) {
+
+                        for (var i=0; i < lenght; i++) {
+                          
+                          let picheck = `<div class="col-xs-4 col-sm-3 col-md-2 nopad text-center">
+                              <label class="image-checkbox">
+                                  <img class="img-responsive" src="${_images[i]}">
+                                  <input name="image[]" value="" type="checkbox">                                  
+                              </label>
+                          </div>`;
+                          $("#insert-picker").append(picheck);
+
+                          window.array_images_selected = new Array();
+
+                          if (i==(length-1)) {
+
+                            window.time = setTimeout( function() {                          
+
+                              //https://stackoverflow.com/questions/48379838/bootstrap-image-with-checkbox
+                              
+                              $(".image-checkbox").each(function () {
+                                if ($(this).find('input[type="checkbox"]').first().attr("checked")) {
+                                    $(this).addClass('image-checkbox-checked');
+                                } else {
+                                    $(this).removeClass('image-checkbox-checked');
+                                }
+                              });
+                          
+                              // sync the state to the input
+                              $(".image-checkbox").on("click", function (e) {
+                                  $(this).toggleClass('image-checkbox-checked');   
+                                  let src = $(this).find('img').attr("src");  
+                                  if ($(this).hasClass( "image-checkbox-checked" )) {
+                                      window.array_images_selected.push(src);
+                                  } else {
+                                     window.array_images_selected = window.array_images_selected.filter(e => e !== src);
+                                  }                            
+                                  e.preventDefault();
+                              });
+
+                              clearTimeout(window.time);
+
+                            }, 1000); 
+                          }
+                        }
+                      }
+                  });
+                }
+              });
+                    
+              /** Campos **/              
+              editor.ui.registry.addMenuButton('campos', {
+                text: 'Campos',
+                fetch: function(callback) {
+                  var items = [];
+                  for (var fieldName in camposFields) {
+                    var menuItem = {
+                      type: 'menuitem',
+                      text: camposFields[fieldName],
+                      value:fieldName,
+                      onSetup: function(buttonApi) {
+                        var $this = this;
+                        this.onAction = function() {
+                          editor.insertContent($this.data.value);
+                        };
+                      },
+                    };
+                    items.push(menuItem);
+                  }
+                  callback(items);
+                },
+              });
           }
         });
-
-        
           
-    }, 2000);
-      
-        
+      }, 500);            
     }
 
-    document.getElementById('proImage').addEventListener('change', readImage, false);          
     
+
+    document.getElementById('proImage').addEventListener('change', readImage, false);              
     $(document).on('click', '.image-cancel', function() {
         let no = $(this).data('no');
         $(".preview-image.preview-show-"+no).remove();
@@ -871,89 +835,9 @@
     
     $("#imgInp").change(function(){
         readURL(this);
-    });
-    
-    
+    });   
 
-    // ADD IMAGE    
-    $("#add-images-form").submit(function (event) {
-      event.preventDefault();              
-
-        let _imagePath = "contents/" + window._short + "/" + window._id_document_collection + "/images";
-
-        var storageRef = storage.ref(_imagePath); 
-    
-        var metadataFiles = {
-            customMetadata: {
-                'thumbnail': 'false',
-                'type' : '2', 
-                'id' : window._id_document_collection,
-                'short' : window._short                   
-            }
-        };
-
-        var input = document.getElementById("proImage");
-        var prefArray = [];
-        
-        var j=0, k=0;
-        var length = input.files.length;
-
-        for (var i = 0; i < length; ++i) {   
-            
-            var _file = input.files.item(i);     
-          
-            let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
-            var filePath = window._short + "_" +  rnd + ".png";              
-            
-            const museumRef = storageRef.child(filePath);
-            const putRef = museumRef.put(_file, metadataFiles);  
-            
-            prefArray.push(putRef);  
-            putRef.on('state_changed', function(snapshot) {
-                var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress + '% done');
-                switch (snapshot.state) {
-                  case firebase.storage.TaskState.PAUSED: // or 'paused'
-                    console.log('Upload is paused');
-                    break;
-                  case firebase.storage.TaskState.RUNNING: // or 'running'
-                    console.log('Upload is running');
-                    break;
-                }
-              }, function(error) {                
-                console.error("Error loading image: ", error);
-              }, function() {                                       
-                if (k==(length-1)){
-                    $('#addImageModal').hide();
-                }
-                k++;             
-            });   
-        }
-      
-    });
-      
-    function readURL(input) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();            
-            reader.onload = function (e) {
-                $('#avatar-preview').attr('src', e.target.result);
-            }            
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-    
-    $("#imgInp").change(function(){
-        readURL(this);
-    });
-
-    
     //Add Main Modal      
-
-    //$('#button-main-add').on('click', function(event) {
-        //event.preventDefault(); 
-        //$("#addCategoryModal").show();     
-    //});
-
     $("#btn-main-close").add("#btn-main-close-x").on('click', function (event) {
       event.preventDefault();   
       $("#addCategoryModal").hide();
@@ -987,18 +871,9 @@
       }).catch((error) => {     
         console.error("Error adding document: ", error);           
       });   
-
     });  
 
-    
-
-    //Add Detail Modal
-
-    /*$('#button-detail-add').on('click', function(event) {
-        event.preventDefault(); 
-        $("#addDetailModal").show();     
-    });*/
-
+    //Add Detail Modal    
     $("#btn-detail-close").add("#btn-detail-close-x").on('click', function (event) {
       event.preventDefault();   
       $("#addDetailModal").hide();
@@ -1008,17 +883,11 @@
       event.preventDefault();  
 
       var new_name = $('#new-name').val();
-      var new_desc = $('#new-desc').val();          
-
+      var new_desc = $('#new-desc').val();
       var document_path = "contents/" + window._short + "/collection";            
-
       var _time =  new Date();
-
-      //var _desc = new_desc.slice(0, 20) + "...";
-
       var timestamp =  new Date();
-
-      var thedate = getDateFrom(timestamp);            
+      var thedate = getDateFrom(timestamp);      
 
       let row = { "meta": {            
         "id" : window._short,
@@ -1026,7 +895,7 @@
         "Desc": new_desc, 
         "Actualizado": thedate } };   
 
-      window.jsonDataDetail.push(row); 
+      window.jsonDataDetail.push(row);
 
       var newData = {            
         group_ref : _user.yearReference,
@@ -1035,29 +904,23 @@
         last_update : _time          
       };
 
-      if (window._is_detail_drawer) {   
-        
+      if (window._is_detail_drawer) {           
         let codepoint = $("#codepoint").text();             
         newData['codepoints'] = codepoint;
         let code = getIconCode(codepoint);
         newData['icon'] = code;
-
       } 
 
       db.collection(document_path).add(newData).then(function(doc){   
 
-          if (!window._is_detail_drawer) {   
+          if (!window._is_detail_drawer) {  
         
-            let _id = doc.id;
-          
+            let _id = doc.id;          
             var storage_path = "contents/" + window._short + "/" + _id;
-
             var storageRef = storage.ref(storage_path);        
             var file = window.document.getElementById("imgInp").files[0];                 
-            let rnd = Math.floor((Math.random()) * 0x10000).toString(7);               
-            
-            var filePath = window._short + "_" +  new_name.split(' ').join('_').toLowerCase() + "_" + rnd + ".png";            
-            
+            let rnd = Math.floor((Math.random()) * 0x10000).toString(7);           
+            var filePath = window._short + "_" +  new_name.split(' ').join('_').toLowerCase() + "_" + rnd + ".png";                        
             var thisRef = storageRef.child(filePath);                         
 
             var metadata = {
@@ -1067,28 +930,27 @@
                     'short' : window._short,
                     'id' : _id                   
                 }
-            }    
+            };
             thisRef.put(file, metadata);
           }    
 
           let _document = window.editObjects[_short];
-
-          let data_amount =  _document.data().amount;           
-          
+          let data_amount =  _document.data().amount;                     
           let _amount = parseInt(data_amount);
-            _amount++;                     
+          _amount++;                     
 
-            window.editObjects[_short].ref.set({ 
+          window.editObjects[_short].ref.set({             
               amount:_amount }
             ,{merge:true}
           ).then(function() {
 
-            
-            $("#addDetailModal").hide(); 
-            reloadDetails(_short);            
+            $('#addDetailModal').modal('hide');
+            //REFRESH PAGE COMPULSORY
+            location.reload(true);               
+            //THIS SHOULD BE RELOADED
+            //reloadDetails(_short);    
 
-          })
-          .catch((error) => {
+          }).catch((error) => {
             console.log('Error setting amount:', error);                
           });  
         
@@ -1098,53 +960,96 @@
 
     });
 
-    function reloadDetails(short) {
-
-      //$('#detail-table tbody').html('');      
+    function reloadDetails(short) {     
 
       db.collection("contents").doc(short)
         .get().then(function (snap) {  
-
-        var _new = snap.data().new;
-
+          
+          var _new = snap.data().new;
           var document_path = "contents/" + short + "/collection";                     
-
-          db.collection(document_path).get().then(function (documentSnapshots) {         
-            
+          db.collection(document_path).get().then(function (documentSnapshots) {                     
             var count = 0;
-            var length = documentSnapshots.docs.length; 
-
+            var length = documentSnapshots.docs.length;
             documentSnapshots.docs.forEach(function(document) {          
               
               if (count==(length-1)) {                 
                 window.editObjects[short] = document;               
-                let _doc = document.data();                                             
-                loadEditsList(_new, short);                       
-                        
+                //let _doc = document.data();                                             
+                loadEditsList(_new, short);                          
               }                          
-              count++;
-            
+              count++;            
             });
-
             window.mainPartial = documentSnapshots.docs.length;
         });
       }); 
     }
-    
-    // Spinner
-    
 
-    function modal(){
-      $('.modal').modal('show');
-      var _time = setTimeout(function () {
-        console.log('hejF');
-        $('.modal').modal('hide');
-        clearTimeout(_time);
-      }, 3000);
-    }
-    
-    // Bootstrap Stepper 
+    // Add Imaget 
+    $("#btn-upload-close").add("#btn-upload-close-x").on('click', function (event) {
+      event.preventDefault();         
+      $('#uploadImageModal').modal('hide');
+    });
+          
+    $('#btn-upload-save').on('click', function(event) {  
+      event.preventDefault();              
 
+      let _imagePath = "contents/" + window._short + "/" + window._id_document_collection + "/images";
+      var storageRef = storage.ref(_imagePath);     
+      var metadataFiles = {
+          customMetadata: {
+              'thumbnail': 'false',
+              'type' : '2', 
+              'id' : window._id_document_collection,
+              'short' : window._short                   
+          }
+      };
+      var input = document.getElementById("proImage");
+      var prefArray = [];        
+      var j=0, k=0;
+      var length = input.files.length;
+
+      for (var i = 0; i < length; ++i) {               
+          var _file = input.files.item(i);          
+          let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
+          var filePath = window._short + "_" +  rnd + ".png";                          
+          const museumRef = storageRef.child(filePath);
+          const putRef = museumRef.put(_file, metadataFiles);              
+          prefArray.push(putRef);  
+          putRef.on('state_changed', function(snapshot) {
+              var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              console.log('Upload is ' + progress + '% done');
+              switch (snapshot.state) {
+                case firebase.storage.TaskState.PAUSED: // or 'paused'
+                  console.log('Upload is paused');
+                  break;
+                case firebase.storage.TaskState.RUNNING: // or 'running'
+                  console.log('Upload is running');
+                  break;
+              }
+            }, function(error) {                
+              console.error("Error loading image: ", error);
+            }, function() {                                       
+              if (k==(length-1)){
+                  $('#uploadImageModal').modal('hide'); 
+              }
+              k++;             
+          });   
+      }      
+  });
+      
+
+    
+  // Spinner
+  function modal(){
+    $('.modal').modal('show');
+    var _time = setTimeout(function () {
+      console.log('hejF');
+      $('.modal').modal('hide');
+      clearTimeout(_time);
+    }, 3000);
+  }
+    
+  // Bootstrap Stepper 
   //https://webdevtrick.com/bootstrap-multi-step-form-animations/
 
   const DOMstrings = {
@@ -1160,19 +1065,18 @@
 
   window.activePanelNum = 0;
 
-
   const removeClasses = (elemSet, className) => {    
-  elemSet.forEach(elem => {    
-    elem.classList.remove(className);    
-  });    
+    elemSet.forEach(elem => {    
+      elem.classList.remove(className);    
+    });    
   };
 
   const findParent = (elem, parentClass) => {    
-  let currentNode = elem;    
-  while (!currentNode.classList.contains(parentClass)) {
-    currentNode = currentNode.parentNode;
-  }    
-  return currentNode;    
+    let currentNode = elem;    
+    while (!currentNode.classList.contains(parentClass)) {
+      currentNode = currentNode.parentNode;
+    }    
+    return currentNode;    
   };
 
   const getActiveStep = elem => {
@@ -1180,103 +1084,99 @@
   };
 
   const setActiveStep = activeStepNum => {    
-  removeClasses(DOMstrings.stepsBtns, 'js-active');    
-  DOMstrings.stepsBtns.forEach((elem, index) => {    
-    if (index <= activeStepNum) {
-        elem.classList.add('js-active');
-    }    
-  });
+    removeClasses(DOMstrings.stepsBtns, 'js-active');    
+    DOMstrings.stepsBtns.forEach((elem, index) => {    
+      if (index <= activeStepNum) {
+          elem.classList.add('js-active');
+      }    
+    });
   };
 
   const getActivePanel = () => {    
-  let activePanel;    
-  DOMstrings.stepFormPanels.forEach(elem => {    
-    if (elem.classList.contains('js-active')) {      
-        activePanel = elem;      
-    }    
-  });    
-  return activePanel;    
+    let activePanel;    
+    DOMstrings.stepFormPanels.forEach(elem => {    
+      if (elem.classList.contains('js-active')) {      
+          activePanel = elem;      
+      }    
+    });    
+    return activePanel;    
   };
 
   const setActivePanel = activePanelNum => {    
-  removeClasses(DOMstrings.stepFormPanels, 'js-active');    
-  DOMstrings.stepFormPanels.forEach((elem, index) => {
-    if (index === activePanelNum) {      
-        elem.classList.add('js-active');      
-        setFormHeight(elem);      
-    }
-  });    
+    removeClasses(DOMstrings.stepFormPanels, 'js-active');    
+    DOMstrings.stepFormPanels.forEach((elem, index) => {
+      if (index === activePanelNum) {      
+          elem.classList.add('js-active');      
+          setFormHeight(elem);      
+      }
+    });    
   };
 
   const formHeight = activePanel => {    
-  var activePanelHeight = activePanel.offsetHeight;        
-  if (window.activePanelNum==2) {
-      $("#columna").removeClass("col-lg-8");                        
-      //$('#firepadform').height(1500);            
-  } else {
-      $("#columna").addClass("col-lg-8");
-  }    
-  DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;            
+    var activePanelHeight = activePanel.offsetHeight;        
+    if (window.activePanelNum==2) {
+        $("#columna").removeClass("col-lg-8");                        
+        //$('#firepadform').height(1500);            
+    } else {
+        $("#columna").addClass("col-lg-8");
+    }    
+    DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;            
   };
 
   const setFormHeight = () => {
-  const activePanel = getActivePanel();    
-  formHeight(activePanel);
+    const activePanel = getActivePanel();    
+    formHeight(activePanel);
   };
 
   DOMstrings.stepsBar.addEventListener('click', e => {    
-  const eventTarget = e.target;    
-  if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
-    return;
-  }   
-  const activeStep = getActiveStep(eventTarget);    
-  setActiveStep(activeStep);    
-  setActivePanel(activeStep);
+    const eventTarget = e.target;    
+    if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
+      return;
+    }   
+    const activeStep = getActiveStep(eventTarget);    
+    setActiveStep(activeStep);    
+    setActivePanel(activeStep);
   });
 
   DOMstrings.stepsForm.addEventListener('click', e => {   
-  const eventTarget = e.target;        
-  if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)))  {        
-    if (!window._main_row_selected && window.activePanelNum==0) {
+    const eventTarget = e.target;        
+    if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)))  {        
+      if (!window._main_row_selected && window.activePanelNum==0) {
+          return;
+      }    
+      if (!window._detail_row_selected && window.activePanelNum==1) {
         return;
+      }          
+      if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`))) {
+        return;
+      }
+    }      
+    const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);    
+    window.activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);    
+    if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
+        window.activePanelNum--;    
+    } else {    
+      window.activePanelNum++;       
     }    
-    if (!window._detail_row_selected && window.activePanelNum==1) {
-      return;
-    }          
-    if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`))) {
-      return;
-    }
-  }      
-  const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);    
-  window.activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);    
-  if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
-      window.activePanelNum--;    
-  } else {    
-    window.activePanelNum++;       
-  }    
 
-  let button_name_detail;
-  if (window.activePanelNum==0) {
-    button_name_detail = "contenido";      
-    $('#btn-contenidos').text('Contenidos'); 
-  } else if (window.activePanelNum==1) {      
-    button_name_detail = window._detail_name;
-  }    
-  $('#add-content').text('Agregar ' + button_name_detail); 
+    let button_name_detail;
+    if (window.activePanelNum==0) {
+      button_name_detail = "contenido";      
+      $('#btn-contenidos').text('Contenidos'); 
+    } else if (window.activePanelNum==1) {      
+      button_name_detail = window._detail_name;
+    }    
+    $('#button-add-detail-text').text('Agregar ' + button_name_detail); 
 
-  setActiveStep(window.activePanelNum);
-  setActivePanel(window.activePanelNum);    
-  });    
-
-  //window.addEventListener('load', setFormHeight, false);    
-  //window.addEventListener('resize', setFormHeight, false);    
+    setActiveStep(window.activePanelNum);
+    setActivePanel(window.activePanelNum);    
+  });        
 
   const setAnimationType = newType => {
-  DOMstrings.stepFormPanels.forEach(elem => {
-    elem.dataset.animation = newType;
-  });
+    DOMstrings.stepFormPanels.forEach(elem => {
+      elem.dataset.animation = newType;
+    });
   };  
-
 
   // PAGINATION
   window.detailActiveTable = 0;
@@ -1284,20 +1184,14 @@
   window.detailSteps = 0;
   window.detailPartial = 0;
 
-  $('#js-next-detail').on('click', function () {              
-    
-    window.detailActiveTable++;     
-    
+  $('#js-next-detail').on('click', function () {                  
+    window.detailActiveTable++;         
     if ($(this).closest('.page-item').hasClass('disabled')) {
         return false;
     }      
-
-    $('#detail-table tbody').html('');   
-
+    $('#detail-table tbody').html('');
     loadDetails(window.detailActiveTable);
-
     window.detailPartial = (window.detailPartial + length);
-
     $('.count-visible-detail').text(window.detailPartial);        
     if (window.detailSteps == window.detailActiveTable) {
       $('#js-next-detail').closest('.page-item').addClass('disabled');
@@ -1308,28 +1202,22 @@
     if (!window._detail_row_selected && window.activePanelNum==1) {
       return;
     }   
-
   });
 
   // PAGINATION
   $("#js-previous-detail").on('click', function () {
 
     window.detailActiveTable--;
-
     $('#detail-table tbody').html('');
-
     loadDetails(window.detailActiveTable); 
-
     if (window.detailActiveTable == 0) {
       window.detailPartial = documentSnapshots.docs.length;            
     } 
     $('.count-visible-detail').text(window.detailPartial);  
-
     if (window.detailActiveTable == 0) {
       $('#js-next-detail').closest('.page-item').removeClass('disabled');
     }
   });
-
 
   // UPLOAD FILE
   // https://webdevtrick.com/jquery-drag-and-drop-file-upload/      
@@ -1389,7 +1277,7 @@
       
   //# sourceURL=textedit.js   
 
-  });
+});
 
 
 
