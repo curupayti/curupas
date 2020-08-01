@@ -1041,22 +1041,21 @@
       let _desc = $("#category-description").val();
       let _new = $("#category-new").val();
 
-      let _short = _name.toLowerCase();      
-      let docRef = db.collection("contents").doc(_short);
-      var now = firebase.firestore.FieldValue.serverTimestamp();
+      let _short = _name.toLowerCase();            
+      var _time =  new Date();      
       
-      return docRef.set({
+      db.collection("contents").doc(_short).set({
         name: _name,
         short: _short,
         desc: _desc,
         new: _new,
         amount:0,
-        last_update: now,      
-        time_created: now 
+        last_update: _time,      
+        time_created: _time 
       }).then(docRefSet => {            
         
-        $('#main-table').empty();
-        $("#addCategoryModal").hide();
+        $("#addCategoryModal").modal('hide');
+        $('#main-table').empty();        
         loadData();
         
       }).catch((error) => {     
