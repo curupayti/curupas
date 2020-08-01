@@ -813,8 +813,7 @@
     
                     output.append(html);
                     num = num + 1;
-                });
-    
+                });    
                 picReader.readAsDataURL(file);
             }
             $("#pro-image").val('');
@@ -903,7 +902,7 @@
             var blob = b64toBlob(stripped, 'image/png');
             uploadImageToStorage(blob);            
           });
-          
+
         }
 
       });  
@@ -980,6 +979,33 @@
           k++; 
         }); 
       }           
+    });
+
+    //Insert Images
+    $("#btn-insert-close").add("#btn-insert-close-x").on('click', function (event) {
+      event.preventDefault();         
+      $('#insertImageModal').modal('hide');
+    });
+          
+    $('#btn-insert-save').on('click', function(event) {  
+      event.preventDefault(); 
+
+      //TODO 
+      // Check if image is selected and count otherwise show error modal. 
+      // https://gist.github.com/billmei/2e9d11ff732b1ea6916f
+      // Bare in mind z-index
+      // http://jsfiddle.net/CxdUQ/
+
+      let length = window.array_images_selected.length;
+
+      for (var i=0;i<length;i++) {
+          let image = window.array_images_selected[i];
+          let content = '<img src=\"' + image + '\"/>';          
+          tinymce.activeEditor.insertContent(content);          
+      }
+
+      $('#insertImageModal').modal('hide');
+
     });
 
     //Add Main Modal      
