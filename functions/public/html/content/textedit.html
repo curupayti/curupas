@@ -159,7 +159,7 @@
                                                                 <button class="btn btn-primary js-btn-prev" type="button" title="Anterior"> &#60;&#60; Anterior</button>   
                                                                 <div class="float-right">
                                                                     <button id="button-save" class="btn ml-auto btn btn-success">Guardar</button>
-                                                                    <button id="view-save" class="btn ml-auto btn btn-secondary">Vista Previa</button>                    
+                                                                    <button id="button-preview" class="btn ml-auto btn btn-secondary">Vista Previa</button>                    
                                                                     <button id="button-publish" class="btn ml-auto btn btn-danger">Publicar</button>                              
                                                                 </div>                                       
                                                             </div>
@@ -173,6 +173,19 @@
                             </div>
                         </div>
                     </div> <!-- END OF CRUD -->
+
+                    <!-- Add Alert -->  
+                    <div id="alertModal" class="modal fade">
+                        <div class="modal-dialog">
+                            <div class="modal-content">                                
+                                <div class="modal-body">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <p id="alert-content"></p>
+                                </div>                                
+                                <div data-dismiss="modal" class="modal-footer"><button type="button" class="btn btn-primary">OK</button></div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Add Modal Category -->                
                     <div id="addCategoryModal" class="modal fade" data-backdrop="static" data-keyboard="false">

@@ -228,7 +228,7 @@
         
         $("#detail-table").find("tr:gt(0)").remove();               
         
-        loadEditsList(_new, _short);   
+        loadEditorList(_new, _short);   
         
         $("#detail-grid").show();
 
@@ -255,7 +255,7 @@
     window.limitedDetailArray = [];
     window.active_detail;
 
-    window.loadEditsList = function(_new, _short) { 
+    window.loadEditorList = function(_new, _short) { 
 
       window._short = _short;          
       window.detailDocuments = window.editObjects[_short];   
@@ -395,7 +395,7 @@
             $(".multisteps-form__panel").css("opacity","1");
 
             window.time = setTimeout( function() {                          
-                loadEdits(_short);                    
+                loadEditor(_short);                    
             }, 200);
 
           }                              
@@ -467,7 +467,6 @@
         loadIconPickerCode();
       }
     });
-
 
     function loadIconPickerCode() {
 
@@ -600,12 +599,35 @@
         }).catch(function(error) {
           console.error("Error adding document: ", error);
         });
+
       });
 
       $('#button-save').click(function(event) {     
-        event.preventDefault();  
+        event.preventDefault(); 
+
+        let html = tinymce.activeEditor.getContent();
+
+        var _time =  new Date();       
+        db.collection('contents')
+          .doc(window._short)
+          .collection("collection")
+          .doc(window._id_document_collection)
+          .update({        
+            "html" : html,            
+            "last_update" : _time        
+        }).then(function(documentUpdated) {         
+
+          $('#alert-content').text('Documento guardado');          
+          $('#alertModal').modal('show');
+
+        }).catch(function(error) {
+          console.error("Error adding document: ", error);
+        });
+         
         
-        var settings = {
+        //Old method post with coors
+
+        /*var settings = {
             "url": "https://us-central1-curupas-app.cloudfunctions.net/publish",
             "method": "POST",
             "timeout": 0,
@@ -624,19 +646,18 @@
               homeLoader.hide();  
               window.html = response.data.html;           
             }             
-          });     
+          }); */
+
       });
 
-      $('#view-save').click(function() {           
+      $('#button-preview').click(function() {           
         $('#previewModal').modal('show');
         $('#preview-content').append("<div id='modal-container'>" + window.html + "</div>");
-      });
-
-      $('#previewModal').on('hidden.bs.modal', function () {
-        $('#preview-content').remove();
       });         
       
-      function loadEdits(_short) {        
+      // Load Editor
+      
+      function loadEditor(_short) {        
 
         clearTimeout(window.time);
         _clicked = false;
@@ -645,144 +666,142 @@
         let firepad_div = $(`<textarea id="basic-example"></textarea>`);                
 
         $( "#firepad-container" ).append( firepad_userlist_div );
-        $( "#firepad-container").append( firepad_div );          
-
-        window.time = setTimeout( function() {               
+        $( "#firepad-container").append( firepad_div );                 
           
-          // TINYMCE       
-          tinymce.init({
-            selector: 'textarea#basic-example',
-            menubar: false,
-            height: 600,
-            element_format: 'html',            
-            plugins: [
-              'advlist autolink lists link image charmap print preview anchor',
-              'searchreplace visualblocks code fullscreen',
-              'insertdatetime media table paste code wordcount'
-            ],            
-            toolbar: 'undo redo | formatselect | ' +
-            'bold italic backcolor | alignleft aligncenter ' +
-            'alignright alignjustify | bullist numlist outdent indent | ' +
-            'removeformat | imageUpload imageInsert ', // | helloworld',            
-            //menubar: 'insert help',
-            /*menu: {
-              insert: {title: 'Insert', items: 'helloworld'},
-            },*/
-            setup: function(editor) {
-              clearTimeout(window.time);            
-              
-              editor.on('change', function(ed) {               
-
-              });              
-
-              editor.ui.registry.addButton('imageUpload', {
-                icon: 'upload',
-                text: 'Subir imagenes',
-                tooltip: 'Subir Imagen',
-                onAction: function (_) {
-                  //editor.insertContent();//toDateHtml(new Date()));
-                  $("#uploadImageModal").modal("show");
-                }
-              });
+        // TINYMCE       
+        tinymce.init({
+          selector: 'textarea#basic-example',
+          menubar: false,
+          height: 600,
+          element_format: 'html',            
+          plugins: [
+            'advlist autolink lists link image charmap print preview anchor',
+            'searchreplace visualblocks code fullscreen',
+            'insertdatetime media table paste code wordcount'
+          ],            
+          toolbar: 'undo redo | formatselect | ' +
+          'bold italic backcolor | alignleft aligncenter ' +
+          'alignright alignjustify | bullist numlist outdent indent | ' +
+          'removeformat | imageUpload imageInsert ', // | helloworld',            
+          //menubar: 'insert help',
+          /*menu: {
+            insert: {title: 'Insert', items: 'helloworld'},
+          },*/
+          setup: function(editor) {
+            clearTimeout(window.time);  
             
-              editor.ui.registry.addButton('imageInsert', {
-                icon: 'image',
-                text: 'Insertar',
-                tooltip: 'Insertar Imagen',
-                onAction: function (_) {
-                  //editor.insertContent();//toDateHtml(new Date()));
-                  $("#insertImageModal").modal("show");
+            //Load html
+            editor.on('init', function (e) {
+              editor.setContent(window.html);
+            });
+            
+            editor.on('change', function(e) {               
 
-                  $(".modal .modal-dialog").css("max-width", "800px");
+            });              
 
-                  $("#insert-picker").empty();
+            editor.ui.registry.addButton('imageUpload', {
+              icon: 'upload',
+              text: 'Subir imagenes',
+              tooltip: 'Subir Imagen',
+              onAction: function (_) {
+                //editor.insertContent();//toDateHtml(new Date()));
+                $("#uploadImageModal").modal("show");
+              }
+            });
+          
+            editor.ui.registry.addButton('imageInsert', {
+              icon: 'image',
+              text: 'Insertar',
+              tooltip: 'Insertar Imagen',
+              onAction: function (_) {
+                //editor.insertContent();//toDateHtml(new Date()));
+                $("#insertImageModal").modal("show");
 
-                  db.collection('contents')
-                  .doc(window._short)
-                  .collection("collection")
-                  .doc(window._id_document_collection)                
-                  .get().then(function (snap) { 
+                $(".modal .modal-dialog").css("max-width", "800px");
 
-                      var _images = snap.data().images;
+                $("#insert-picker").empty();
 
-                      var lenght = _images.length;
-                      
-                      if ( lenght > 0 ) {
+                db.collection('contents')
+                .doc(window._short)
+                .collection("collection")
+                .doc(window._id_document_collection)                
+                .get().then(function (snap) { 
 
-                        for (var i=0; i < lenght; i++) {
-                          
-                          let picheck = `<div class="col-xs-4 col-sm-3 col-md-2 nopad text-center">
-                              <label class="image-checkbox">
-                                  <img class="img-responsive" src="${_images[i]}">
-                                  <input name="image[]" value="" type="checkbox">                                  
-                              </label>
-                          </div>`;
-                          $("#insert-picker").append(picheck);
+                    var _images = snap.data().images;
+                    var lenght = _images.length;                    
+                    if ( lenght > 0 ) {
 
-                          window.array_images_selected = new Array();
+                      for (var i=0; i < lenght; i++) {                        
+                        let picheck = `<div class="col-xs-4 col-sm-3 col-md-2 nopad text-center">
+                            <label class="image-checkbox">
+                                <img class="img-responsive" src="${_images[i]}">
+                                <input name="image[]" value="" type="checkbox">                                  
+                            </label>
+                        </div>`;
+                        $("#insert-picker").append(picheck);
+                        window.array_images_selected = new Array();
 
-                          if (i==(length-1)) {
+                        if (i==(length-1)) {
 
-                            window.time = setTimeout( function() {                          
+                          window.time = setTimeout( function() {                          
 
-                              //https://stackoverflow.com/questions/48379838/bootstrap-image-with-checkbox
-                              
-                              $(".image-checkbox").each(function () {
-                                if ($(this).find('input[type="checkbox"]').first().attr("checked")) {
-                                    $(this).addClass('image-checkbox-checked');
+                            //https://stackoverflow.com/questions/48379838/bootstrap-image-with-checkbox
+                            
+                            $(".image-checkbox").each(function () {
+                              if ($(this).find('input[type="checkbox"]').first().attr("checked")) {
+                                  $(this).addClass('image-checkbox-checked');
+                              } else {
+                                  $(this).removeClass('image-checkbox-checked');
+                              }
+                            });
+                        
+                            // sync the state to the input
+                            $(".image-checkbox").on("click", function (e) {
+                                $(this).toggleClass('image-checkbox-checked');   
+                                let src = $(this).find('img').attr("src");  
+                                if ($(this).hasClass( "image-checkbox-checked" )) {
+                                    window.array_images_selected.push(src);
                                 } else {
-                                    $(this).removeClass('image-checkbox-checked');
-                                }
-                              });
-                          
-                              // sync the state to the input
-                              $(".image-checkbox").on("click", function (e) {
-                                  $(this).toggleClass('image-checkbox-checked');   
-                                  let src = $(this).find('img').attr("src");  
-                                  if ($(this).hasClass( "image-checkbox-checked" )) {
-                                      window.array_images_selected.push(src);
-                                  } else {
-                                     window.array_images_selected = window.array_images_selected.filter(e => e !== src);
-                                  }                            
-                                  e.preventDefault();
-                              });
+                                    window.array_images_selected = window.array_images_selected.filter(e => e !== src);
+                                }                            
+                                e.preventDefault();
+                            });
 
-                              clearTimeout(window.time);
+                            clearTimeout(window.time);
 
-                            }, 1000); 
-                          }
+                          }, 1000); 
                         }
                       }
-                  });
+                    }
+                });
+              }
+            });
+                  
+            /** Campos **/              
+            editor.ui.registry.addMenuButton('campos', {
+              text: 'Campos',
+              fetch: function(callback) {
+                var items = [];
+                for (var fieldName in camposFields) {
+                  var menuItem = {
+                    type: 'menuitem',
+                    text: camposFields[fieldName],
+                    value:fieldName,
+                    onSetup: function(buttonApi) {
+                      var $this = this;
+                      this.onAction = function() {
+                        editor.insertContent($this.data.value);
+                      };
+                    },
+                  };
+                  items.push(menuItem);
                 }
-              });
-                    
-              /** Campos **/              
-              editor.ui.registry.addMenuButton('campos', {
-                text: 'Campos',
-                fetch: function(callback) {
-                  var items = [];
-                  for (var fieldName in camposFields) {
-                    var menuItem = {
-                      type: 'menuitem',
-                      text: camposFields[fieldName],
-                      value:fieldName,
-                      onSetup: function(buttonApi) {
-                        var $this = this;
-                        this.onAction = function() {
-                          editor.insertContent($this.data.value);
-                        };
-                      },
-                    };
-                    items.push(menuItem);
-                  }
-                  callback(items);
-                },
-              });
+                callback(items);
+              },
+            });           
+
           }
-        });
-          
-      }, 500);            
+        });          
     } 
        
 
@@ -1146,7 +1165,7 @@
               if (count==(length-1)) {                 
                 window.editObjects[short] = document;               
                 //let _doc = document.data();                                             
-                loadEditsList(_new, short);                          
+                loadEditorList(_new, short);                          
               }                          
               count++;            
             });
