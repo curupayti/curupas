@@ -679,20 +679,21 @@
             'searchreplace visualblocks code fullscreen',
             'insertdatetime media table paste code wordcount'
           ],            
-          toolbar: 'undo redo | formatselect | ' +
-          'bold italic backcolor | alignleft aligncenter ' +
-          'alignright alignjustify | bullist numlist outdent indent | ' +
+          toolbar: 'undo redo | fontsizeselect | ' +          
+          'bold italic forecolor backcolor | alignleft aligncenter ' +
+          'alignright alignjustify | ' +
           'removeformat | imageUpload imageInsert ', // | helloworld',            
           //menubar: 'insert help',
           /*menu: {
             insert: {title: 'Insert', items: 'helloworld'},
           },*/
+          fontsize_formats: "8pt 10pt 12pt 14pt 18pt 24pt 36pt",
           setup: function(editor) {
             clearTimeout(window.time);  
             
             //Load html
-            editor.on('init', function (e) {
-              editor.setContent(window.html);
+            editor.on('init', function (e) {              
+              editor.setContent(window.html);              
             });
             
             editor.on('change', function(e) {               
