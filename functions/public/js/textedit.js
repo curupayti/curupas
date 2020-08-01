@@ -873,14 +873,12 @@
               'short' : window._short                   
           }
       };
+
       var input = document.getElementById("proImage");
       var prefArray = [];        
-      var k=0;
-      var length_files = input.files.length;   
-      var count_input = 0;   
-      
-      var previewList = $(".preview-image");      
-
+      var k=0;      
+      var count_input = 0;         
+      var previewList = $(".preview-image");
       let length = previewList.length;
       
       previewList.each(function( index ) {    
@@ -893,34 +891,67 @@
         
           var file_uploaded = input.files.item(count_input);            
           uploadImageToStorage(file_uploaded);
-
           count_input++;
 
         } else if (data_type==2)  {
 
           //from internet
-          
-          let _imgeURL = $(this).find("img").attr('src');
 
-          jQuery.ajax({
-              url:_imgeURL,
-              cache:false,
-              xhr:function(){// Seems like the only way to get access to the xhr object
-                  var xhr = new XMLHttpRequest();
-                  xhr.responseType= 'blob'
-                  return xhr;
-              },
-              success: function(data){
-                uploadImageToStorage(data);
-              },
-              error:function(){
-                console.log('Error downloading image from url ' + _imgeURL);
-              }
-          });        
+          let _imgeURL = $(this).find("img").attr('src');
+          convertToDataURLviaCanvas(_imgeURL, function(dataUrl) {            
+            var stripped = dataUrl.slice(22);
+            var blob = b64toBlob(stripped, 'image/png');
+            uploadImageToStorage(blob);            
+          });
+          
         }
 
-      });
+      });  
+      
+      function b64toBlob(b64Data, contentType, sliceSize) {
+        var byteCharacters = atob(b64Data);
+        var byteArrays = [];
+      
+        contentType = contentType || '';
+        sliceSize = sliceSize || 512;
+      
+        for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+          var slice = byteCharacters.slice(offset, offset + sliceSize);
+          var byteNumbers = new Array(slice.length);
+          var byteArray;
+      
+          for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+          }
+      
+          byteArray = new Uint8Array(byteNumbers);
+          byteArrays.push(byteArray);
+        }
+      
+        var blob = new Blob(byteArrays, {type: contentType});
+        return blob;
+      }
+      
+      function convertToDataURLviaCanvas(url, callback) {
+        var img = new Image();
+      
+        img.crossOrigin = 'Anonymous';
+        img.onload = function(){
+          var canvas = document.createElement('canvas');
+          var ctx = canvas.getContext('2d');
+          var dataURL;
+      
+          canvas.height = this.height;
+          canvas.width = this.width;
+          ctx.drawImage(this, 0, 0);
+          dataURL = canvas.toDataURL();
+          callback(dataURL);
+          canvas = null; 
+        };
+        img.src = url;
+      }
 
+     
       function uploadImageToStorage(_file) {
 
         let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
@@ -928,7 +959,6 @@
         const museumRef = storageRef.child(filePath);
         const putRef = museumRef.put(_file, metadataFiles);              
         prefArray.push(putRef);  
-
         putRef.on('state_changed', function(snapshot) {
           var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           console.log('Upload is ' + progress + '% done');
@@ -949,9 +979,7 @@
           }
           k++; 
         }); 
-
-      }      
-      
+      }           
     });
 
     //Add Main Modal      
