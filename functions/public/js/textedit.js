@@ -634,7 +634,7 @@
 
       $('#previewModal').on('hidden.bs.modal', function () {
         $('#preview-content').remove();
-      });     
+      });         
       
       function loadEdits(_short) {        
 
@@ -677,7 +677,7 @@
 
               editor.ui.registry.addButton('imageUpload', {
                 icon: 'upload',
-                text: 'Subir',
+                text: 'Subir imagenes',
                 tooltip: 'Subir Imagen',
                 onAction: function (_) {
                   //editor.insertContent();//toDateHtml(new Date()));
@@ -783,21 +783,21 @@
         });
           
       }, 500);            
-    }
+    } 
+       
 
-    
+    document.getElementById('proImage').addEventListener('change', addImageToPreviewFromFile, false);      
 
-    document.getElementById('proImage').addEventListener('change', readImage, false);              
     $(document).on('click', '.image-cancel', function() {
         let no = $(this).data('no');
         $(".preview-image.preview-show-"+no).remove();
     });    
     
     var num = 4;
-    function readImage() {
+
+    function addImageToPreviewFromFile() {
         if (window.File && window.FileList && window.FileReader) {
-            var files = event.target.files; //FileList object
-            //$( ".preview-images-zone" ).sortable();
+            var files = event.target.files;             
             var output = $(".preview-images-zone");    
             for (let i = 0; i < files.length; i++) {
                 var file = files[i];
@@ -805,7 +805,7 @@
                 var picReader = new FileReader();                
                 picReader.addEventListener('load', function (event) {
                     var picFile = event.target;
-                    var html =  '<div class="preview-image preview-show-' + num + '">' +
+                    var html =  '<div data-type="1" class="preview-image preview-show-' + num + '">' +
                                 '<div class="image-cancel" data-no="' + num + '">x</div>' +
                                 '<div class="image-zone"><img id="pro-img-' + num + '" src="' + picFile.result + '"></div>' +
                                 '<div class="tools-edit-image"><a href="javascript:void(0)" data-no="' + num + '" class="btn btn-light btn-edit-image">edit</a></div>' +
@@ -823,6 +823,23 @@
         }
     }
 
+    $('#upload-image-from-url').click(function() {      
+      let url = $("#image-url").val();
+      $("#image-url").val("");
+      addImageToPreviewFromUrl(url);
+    }); 
+
+    function addImageToPreviewFromUrl(url) {      
+        var output = $(".preview-images-zone");    
+        var html =  '<div data-type="2" class="preview-image preview-show-' + num + '">' +
+                    '<div class="image-cancel" data-no="' + num + '">x</div>' +
+                    '<div class="image-zone"><img id="pro-img-' + num + '" src="' + url + '"></div>' +
+                    '<div class="tools-edit-image"><a href="javascript:void(0)" data-no="' + num + '" class="btn btn-light btn-edit-image">edit</a></div>' +
+                    '</div>';
+        output.append(html);
+        num = num + 1;
+    }
+
     function readURL(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();            
@@ -835,7 +852,107 @@
     
     $("#imgInp").change(function(){
         readURL(this);
-    });   
+    });  
+    
+    // Add Images 
+    $("#btn-upload-close").add("#btn-upload-close-x").on('click', function (event) {
+      event.preventDefault();         
+      $('#uploadImageModal').modal('hide');
+    });
+          
+    $('#btn-upload-save').on('click', function(event) {  
+      event.preventDefault();              
+
+      let _imagePath = "contents/" + window._short + "/" + window._id_document_collection + "/images";
+      var storageRef = storage.ref(_imagePath);     
+      var metadataFiles = {
+          customMetadata: {
+              'thumbnail': 'false',
+              'type' : '2', 
+              'id' : window._id_document_collection,
+              'short' : window._short                   
+          }
+      };
+      var input = document.getElementById("proImage");
+      var prefArray = [];        
+      var k=0;
+      var length_files = input.files.length;   
+      var count_input = 0;   
+      
+      var previewList = $(".preview-image");      
+
+      let length = previewList.length;
+      
+      previewList.each(function( index ) {    
+        
+        let data_type = $(this).attr("data-type");
+
+        if (data_type==1) {
+
+          //from file
+        
+          var file_uploaded = input.files.item(count_input);            
+          uploadImageToStorage(file_uploaded);
+
+          count_input++;
+
+        } else if (data_type==2)  {
+
+          //from internet
+          
+          let _imgeURL = $(this).find("img").attr('src');
+
+          jQuery.ajax({
+              url:_imgeURL,
+              cache:false,
+              xhr:function(){// Seems like the only way to get access to the xhr object
+                  var xhr = new XMLHttpRequest();
+                  xhr.responseType= 'blob'
+                  return xhr;
+              },
+              success: function(data){
+                uploadImageToStorage(data);
+              },
+              error:function(){
+                console.log('Error downloading image from url ' + _imgeURL);
+              }
+          });        
+        }
+
+      });
+
+      function uploadImageToStorage(_file) {
+
+        let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
+        var filePath = window._short + "_" +  rnd + ".png";                          
+        const museumRef = storageRef.child(filePath);
+        const putRef = museumRef.put(_file, metadataFiles);              
+        prefArray.push(putRef);  
+
+        putRef.on('state_changed', function(snapshot) {
+          var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log('Upload is ' + progress + '% done');
+          switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED: // or 'paused'
+              console.log('Upload is paused');
+              break;
+            case firebase.storage.TaskState.RUNNING: // or 'running'
+              console.log('Upload is running');
+              break;
+          }
+        }, function(error) {                
+          console.error("Error loading image: ", error);
+        }, function() {                                       
+          console.error("Image uploaded succesfully");                
+          if (k==(length-1)){
+              $('#uploadImageModal').modal('hide'); 
+          }
+          k++; 
+        }); 
+
+      }      
+      
+    });
 
     //Add Main Modal      
     $("#btn-main-close").add("#btn-main-close-x").on('click', function (event) {
@@ -941,7 +1058,7 @@
 
           window.editObjects[_short].ref.set({             
               amount:_amount }
-            ,{merge:true}
+            ,{ merge:true }
           ).then(function() {
 
             $('#addDetailModal').modal('hide');
@@ -984,60 +1101,7 @@
       }); 
     }
 
-    // Add Imaget 
-    $("#btn-upload-close").add("#btn-upload-close-x").on('click', function (event) {
-      event.preventDefault();         
-      $('#uploadImageModal').modal('hide');
-    });
-          
-    $('#btn-upload-save').on('click', function(event) {  
-      event.preventDefault();              
-
-      let _imagePath = "contents/" + window._short + "/" + window._id_document_collection + "/images";
-      var storageRef = storage.ref(_imagePath);     
-      var metadataFiles = {
-          customMetadata: {
-              'thumbnail': 'false',
-              'type' : '2', 
-              'id' : window._id_document_collection,
-              'short' : window._short                   
-          }
-      };
-      var input = document.getElementById("proImage");
-      var prefArray = [];        
-      var j=0, k=0;
-      var length = input.files.length;
-
-      for (var i = 0; i < length; ++i) {               
-          var _file = input.files.item(i);          
-          let rnd = Math.floor((Math.random()) * 0x10000).toString(7);                                                              
-          var filePath = window._short + "_" +  rnd + ".png";                          
-          const museumRef = storageRef.child(filePath);
-          const putRef = museumRef.put(_file, metadataFiles);              
-          prefArray.push(putRef);  
-          putRef.on('state_changed', function(snapshot) {
-              var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log('Upload is ' + progress + '% done');
-              switch (snapshot.state) {
-                case firebase.storage.TaskState.PAUSED: // or 'paused'
-                  console.log('Upload is paused');
-                  break;
-                case firebase.storage.TaskState.RUNNING: // or 'running'
-                  console.log('Upload is running');
-                  break;
-              }
-            }, function(error) {                
-              console.error("Error loading image: ", error);
-            }, function() {                                       
-              if (k==(length-1)){
-                  $('#uploadImageModal').modal('hide'); 
-              }
-              k++;             
-          });   
-      }      
-  });
-      
-
+    
     
   // Spinner
   function modal(){
