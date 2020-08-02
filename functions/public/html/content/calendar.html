@@ -1,14 +1,172 @@
 <main role="main" id="main">
-    <div class="container">    
-        <div id='wrap'>
-            <div id='calendar-module'></div>
-            <div style='clear:both'></div>
-        </div>
-        <div id="eventContent" title="Event Details" style="display:none;">
-            Start: <span id="startTime"></span><br>
-            End: <span id="endTime"></span><br><br>
-            <p id="eventInfo"></p>
-            <p><strong><a id="eventLink" href="" target="_blank">Read More</a></strong></p>
-        </div>
+  <div class="container">
+    <div id="wrap">
+      <div class="btn-group btn-group-toggle mb-3" id="type-toggle" data-toggle="buttons">
+        <label class="btn btn-secondary active">
+          <input
+            type="radio"
+            name="options"
+            id="camada"
+            value="camada"
+            autocomplete="off"
+            checked
+          />
+          camada
+        </label>
+        <label class="btn btn-secondary">
+          <input
+            type="radio"
+            name="options"
+            value="curupa"
+            id="curupa"
+            autocomplete="off"
+          />
+          curupas
+        </label>
+        <label class="btn btn-secondary">
+          <input
+            type="radio"
+            name="options"
+            value="partidos"
+            id="partidos"
+            autocomplete="off"
+          />
+          partidos
+        </label>
+      </div>
+      <button type="button" class="btn btn-primary mb-3" onclick="closeModal()">
+        Nuevo Evento
+      </button>
+      <div id="calendar-module"></div>
+      <div style="clear: both;"></div>
     </div>
+    <div id="eventContent" title="Event Details" style="display: none;">
+      Start: <span id="startTime"></span><br />
+      End: <span id="endTime"></span><br /><br />
+      <p id="eventInfo"></p>
+      <p>
+        <strong><a id="eventLink" href="" target="_blank">Read More</a></strong>
+      </p>
+    </div>
+    <div class="container my-5">
+      <div
+        class="modal fade"
+        id="exampleModalLong"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <form id="calendar-form">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Event</h5>
+                <button
+                  type="button"
+                  class="close"
+                  onclick="closeModal()"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="name">title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    aria-describedby="title"
+                    placeholder="Enter title"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="desc">desc</label>
+                  <textarea
+                    class="form-control"
+                    id="description"
+                    placeholder="Description"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="type">type</label>
+                  <select class="form-control" id="type" required>
+                    <option selected value="camada">Camada</option>
+                    <option value="curupa">Curupas</option>
+                    <option value="partidos">Partidos</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="date">Event Start Date</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="start"
+                    aria-describedby="date"
+                    placeholder="Start date"
+                    required
+                  />
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="start_time"
+                    value=""
+                    aria-describedby="time"
+                    placeholder="Start time"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="date">Event End Date</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="end"
+                    aria-describedby="date"
+                    placeholder="Enter date"
+                  />
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="end_time"
+                    aria-describedby="time"
+                    placeholder="End time"
+                  />
+                </div>
+                <!-- <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value=""
+                    id="allday"
+                    required
+                  />
+                  <label class="form-check-label" for="invalidCheck">
+                    Allday
+                  </label> -->
+                <!-- <button type="submit" class="btn btn-primary">Submit</button> -->
+                <!-- </div> -->
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="closeModal()"
+                  >
+                    Close
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    Save changes
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>

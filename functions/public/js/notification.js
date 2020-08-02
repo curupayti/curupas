@@ -4,6 +4,8 @@ $(document).ready(function () {
     let firstVisible;
 
     window.roles = [];
+    var years = [];
+    var allUsers = [];
 
     window.checked_users = [];
 
@@ -28,6 +30,21 @@ $(document).ready(function () {
         console.log("Error getting documents: ", error);
     }); 
     
+    db.collection("years").get()
+    .then(function(querySnapshot) {
+        querySnapshot.forEach(function(doc) {                    
+            console.log(doc.id, " => ", doc.data());
+            let number = parseInt(doc.data().year);
+            years.push(number)
+            // $("#group").append($('<option>').text(doc.data().year).attr('value', number));
+        });
+    })
+    .catch(function(error) {
+        console.log("Error getting groups: ", error);
+    }); 
+    
+
+
     db.collection("groups").get()
     .then(function(querySnapshot) {
         querySnapshot.forEach(function(doc) {                    
@@ -46,7 +63,6 @@ $(document).ready(function () {
 
         var selectedDestiny = this.value;
         var selectedText = this.text;
-        console.log(selectedDestiny);               
         if (selectedDestiny == 0){
             topic = "users";
         } else {
@@ -140,14 +156,14 @@ $(document).ready(function () {
 
     $("#addNotificationModal").on('show.bs.modal', function () {
 
-        $(this).find('.modal-content').css({
-            width:'800px',                               
-        });
+        // $(this).find('.modal-content').css({
+        //     width:'800px',                               
+        // });
 
-        $(this).css({            
-            transform: 'translateX(-20%)',
-            'overflow-y': 'hidden'
-        });
+        // $(this).css({            
+        //     transform: 'translateX(-20%)',
+        //     'overflow-y': 'hidden'
+        // });
 
         clearData();
         
@@ -160,7 +176,16 @@ $(document).ready(function () {
             var addoption = $('<option></option>').val(id).text(content);                       
             $('#destiny').append(addoption);            
         } 
-        
+
+        var yearsLength = years.length;
+        for (var i=0; i<yearsLength;i++){
+            let data = years[i];
+            var addoption = $('<option></option>').val(data).text(data);
+            console.log(years, addoption);
+            
+            $('#grouptest').append(addoption);
+        } 
+
         //Limpiar combo al entrar y verificar cual id es el que esta en foco. 
         //$('#destiny').val(0);
         loadAllUsers();
@@ -172,13 +197,36 @@ $(document).ready(function () {
         
         clearData();        
         
-        if (value==0) {
-            loadAllUsers();
-        } else {
+        // if (value==0) {
+            // loadAllUsers();
+        // } else {
             loadSelectorByRole(value);        
-        }       
+        // }       
 
     });
+
+    $('#grouptest').on('change', function(e){               
+        let destiny = $('#destiny').val();
+        let roleObject = destiny ? window.roles[destiny] : {};
+        let rolRef = roleObject.roleRef;
+        clearData();
+        $("#search-user").val('');
+        
+        let group = e.target.value;
+        var count = 0;
+        var filteredUsers = allUsers.filter((doc) => {
+          return (
+            ((destiny ? doc.data().roleRef.path === rolRef.path : true) &&
+              (group ? doc.data().year == group : true)) ||
+            checked_users.indexOf(doc.id) > -1
+          );
+        });
+        filteredUsers.forEach(function(doc) {                           
+            populateUserTable(doc, count);
+            count++;           
+        });
+        
+    })
 
     function clearData() {
 
@@ -197,27 +245,31 @@ $(document).ready(function () {
     }
 
     function loadSelectorByRole(id) {
-
         let roleObject = window.roles[id];
         let rolRef = roleObject.roleRef;
-
         let name = roleObject.name;
 
         $('#titulo-selected').text(name);
-
+        $("#search-user").val('');
+        let group = $('#grouptest').val();
+        console.log(window.roles, id, rolRef);
+        
         var count = 0;
-        var usersRef = db.collection("users").where("roleRef", "==", rolRef)
-        .get()
-        .then(function(querySnapshot) {
-            querySnapshot.forEach(function(doc) {                           
-                populateUserTable(doc, count);
-                count++;           
-            });
-        })
-        .catch(function(error) {
-            console.log("Error getting documents: ", error);
+        var filteredUsers = allUsers.filter((doc) => {
+          return (
+            ((rolRef ? doc.data().roleRef.path === rolRef.path : true) &&
+              (group ? doc.data().year == group : true)) ||
+            checked_users.indexOf(doc.id) > -1
+          );
+        });
+
+        filteredUsers.forEach(function(doc) {                           
+            populateUserTable(doc, count);
+            count++;           
         });
     }
+
+
 
     function loadAllUsers() {
 
@@ -230,9 +282,8 @@ $(document).ready(function () {
         var usersRef = db.collection("users").get()
         .then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
-                //console.log(doc.id, " => ", doc.data());
-
                 if (doc.id != "init") {
+                    allUsers.push(doc);
                     populateUserTable(doc, count);
                     count++;
                 }
@@ -244,27 +295,67 @@ $(document).ready(function () {
         });
     }
 
+    $("#search-user").change((e) => {
+        let destiny = $('#destiny').val();
+
+        let roleObject = destiny ? window.roles[destiny] : {};
+        let rolRef = roleObject.roleRef;
+        let group = $('#grouptest').val();
+
+        var count = 0;
+        clearData();        
+        
+        var filteredUsers = allUsers.filter(
+          (doc) =>
+            ((destiny ? doc.data().roleRef.path === rolRef.path : true) &&
+              (group ? doc.data().year == group : true) &&
+              doc
+                .data()
+                .name.toLowerCase()
+                .includes(e.target.value.toLowerCase())) ||
+            checked_users.indexOf(doc.id) > -1
+        );
+        filteredUsers.forEach(function(doc) {                           
+            populateUserTable(doc, count);
+            count++;           
+        });
+
+    })
+
     function populateUserTable(doc, id) {                
 
         let data = doc.data();
 
-        window.checked_users[id] = data;
+        // window.checked_users[id] = data;
 
         let name = data.name;
-        let year = data.year;        
-
+        let year = data.year;
+        let docId = doc.id;
         let row = `<tr>
             <th class="active">
-                <input type="checkbox" class="select-all checkbox" name="select-all" />
+                <input type="checkbox" ${
+                  checked_users.indexOf(docId) > -1 ? "checked" : ""
+                } onchange="selectUser('${docId}')" class="userCheckbox select-all checkbox" name="select-all" />
             </th>
             <th>${name}</th>            
             <th>${year}</th>
-            <th class="id" style="display:none">${id}</th>            
+            <th class="id" style="display:none">${doc.id}</th>            
         </tr>`;
 
         $('#usersTable').append(row);
     }
 
+    window.selectUser = function (id) {
+      if (checked_users.indexOf(id) > -1) {
+        checked_users = checked_users.filter((v) => v !== id);
+      } else {
+        checked_users.push(id);
+      }
+    };
+
+    $(".userCheckbox").change(function () { 
+        alert("Event is bound");
+    });
 
     //button select all or cancel
     $("#select-all").click(function () {
@@ -281,11 +372,12 @@ $(document).ready(function () {
 
         var userdata = []; 
 
-        $('#usersTable input:checked').each(function(){
-            var id,toArea,checkBox;
-            id = $(this).closest('tr').find('.id').html();
-            let _userData = window.checked_users[id];
-            let data = {token:_userData.token, userID:_userData.userID};             
+        checked_users.forEach(function(v){
+            const user = allUsers.find((doc)=>doc.id == v);
+            // var id,toArea,checkBox;
+            // id = $(this).closest('tr').find('.id').html();
+            // let _userData = window.checked_users[id];
+            let data = {token:user.data().token, userID:user.data().userID};             
             userdata.push(data);
         });
 
