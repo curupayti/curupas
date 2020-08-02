@@ -1,3 +1,8 @@
+function closeModal() {
+  $("#type").prop("disabled", false);
+  $("#type").val($("#type-toggle input:radio:checked").val());
+  $("#exampleModalLong").modal("toggle");
+}
 $(document).ready(function () {
   let selectedEvent = "";
   let initialLoad = true;
@@ -28,7 +33,7 @@ $(document).ready(function () {
           let event = {
             id,
             title: name,
-            start: start ? formatDate(start.seconds * 1000) : null,
+            start: start ? new Date(start.seconds * 1000) : null,
             end: end ? formatDate(end.seconds * 1000) : null,
             allDay: allDay,
             className: className,
@@ -141,17 +146,24 @@ $(document).ready(function () {
           if (info.event.start) {
             var day = ("0" + info.event.start.getDate()).slice(-2);
             var month = ("0" + (info.event.start.getMonth() + 1)).slice(-2);
+            var hrs = info.event.start.getHours();
+            var min = info.event.start.getMinutes();
 
             var today =
               info.event.start.getFullYear() + "-" + month + "-" + day;
             $("#start").val(today);
+
+            $("#start_time").val(hrs < 10 ? `0${hrs}:${min}` : `${hrs}:${min}`);
           }
           if (info.event.end) {
             var day = ("0" + info.event.end.getDate()).slice(-2);
             var month = ("0" + (info.event.end.getMonth() + 1)).slice(-2);
+            var hrs = info.event.end.getHours();
+            var min = info.event.end.getMinutes();
 
             var today = info.event.end.getFullYear() + "-" + month + "-" + day;
             $("#end").val(today);
+            $("#end_time").val(hrs < 10 ? `0${hrs}:${min}` : `${hrs}:${min}`);
           }
           $("#exampleModalLong").modal();
         },
@@ -178,7 +190,18 @@ $(document).ready(function () {
     const desc = $("#description").val();
     const type = $("#type").val();
     const start = $("#start").val();
+    const start_time = $("#start_time").val();
     const end = $("#end").val();
+    const end_time = $("#end_time").val();
+    console.log(start_time);
+
+    const shrs = start_time.split(":")[0];
+    const smin = start_time.split(":")[1];
+    if (end && end_time) {
+      const ehrs = end_time.split(":")[0];
+      const emin = end_time.split(":")[1];
+      end.setHours(ehrs, emin, 0);
+    }
     if (!selectedEvent) {
       db.collection("calendar")
         .doc(type)
@@ -186,8 +209,8 @@ $(document).ready(function () {
         .add({
           name,
           summary: desc,
-          start: new Date(start).setHours(0, 0, 0),
-          end: end ? new Date(end).setHours(0, 0, 0) : null,
+          start: new Date(new Date(start).setHours(shrs, smin, 0)),
+          end: end ? new Date(end) : null,
           createdAt: new Date(),
         })
         .then((res) => {
@@ -207,8 +230,8 @@ $(document).ready(function () {
           {
             name,
             summary: desc,
-            start: new Date(start).setHours(0, 0, 0),
-            end: end ? new Date(end).setHours(0, 0, 0) : null,
+            start: new Date(new Date(start).setHours(shrs, smin, 0)),
+            end: end ? new Date(end) : null,
           },
           { merge: true }
         )
