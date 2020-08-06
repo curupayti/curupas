@@ -12,10 +12,7 @@
     "rewrites": [
       { 
         "source": "/**", 
-        "function": "buildHtmlForNoti" 
-      }, {
-        "source": "/screenshot",
-        "function": "screenshot"
+        "function": "buildHtml" 
       }
     ]
   },
