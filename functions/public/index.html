@@ -139,7 +139,7 @@
                         _user.yearReference = yearReference;                        
 
                         roleReference.get()
-                        .then(function(docPage) {                     
+                        .then(async function (docPage) {                     
 
                             var json = docPage.data();  
                             
@@ -148,7 +148,11 @@
                             var count = Object.keys(json).length;
                             var a = 0;    
                             
-                            _role.desc = json.role;         
+                            _role.desc = json.role;     
+                            if(json.homesRef) {
+                                const data = await json.homesRef.get();
+                                _role.homepageData = data.data();
+                            }
                             
                             if (json.edit!=undefined) { 
                                 _role.edit_references = json.edit;    
