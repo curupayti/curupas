@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="200" height="200" src="images/escudo.png" alt="Escudo image"/>
+</p>             
+               
 # Curupas
 
 Mobile project with Flutter and Firebase, this guide was created for Ubuntu Linux but can be useful for Windows and Mac.
@@ -105,6 +109,10 @@ Emulators should be downloaded
 sudo firebase emulators:start
 
 ```
+
+<p align="center">
+  <img width="500" height="284" src="images/emulators.png" alt="Escudo image"/>
+</p>  
 
 If the port is busy, start with this command or change the port number above
 
