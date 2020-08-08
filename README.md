@@ -74,13 +74,39 @@ npm i -D @firebase/testing
 firebase setup:emulators:firestore
 ```
 
+Edit firebase.json and add the emulators
+
+```sh
+"emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "database": {
+      "port": 9000
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "pubsub": {
+      "port": 8085
+    },
+    "ui": {
+      "enabled": true
+    }
+  },
+```
+
 Emulators should be downloaded
 
 ```sh
 sudo firebase emulators:start
 
 ```
-If the port is busy, start with
+
+If the port is busy, start with this command or change the port number above
 
 ```sh
 sudo firebase serve
