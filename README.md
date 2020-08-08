@@ -43,6 +43,7 @@ git checkout --track origin/<BRANCH-NAME>
 ```
 
 Init commands
+-------------
 
 ```sh
 firebase init
@@ -61,6 +62,19 @@ sudo code --user-data-dir="~/.vscode-root"
 ```
 
 Start emulators
+---------------
+
+Install tools
+
+```sh
+npm install -g firebase-tools
+
+npm i -D @firebase/testing
+
+firebase setup:emulators:firestore
+```
+
+Emulators should be downloaded
 
 ```sh
 sudo firebase emulators:start
@@ -82,6 +96,15 @@ Local port test
 
 curl -X POST -H "Content-Type: application/json"  -d '{"data":{"name":"YOUR_NAME"}}'  http://localhost:5000/curupa-d830b/us-central1/helloWorld
 
+
+Bug
+---
+
+The fancy_bottom_navigation flutter component https://pub.dev/packages/fancy_bottom_navigation is limited to 4 tabs. In order to extend it to 5 wich the project uses please comment this line 28 of fancy_button_navigation.dat file.
+
+```sh
+  assert(tabs.length > 1 && tabs.length < 7);
+```
 
 ## Flutter start project form scratch
 
