@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="200" height="200" src="images/escudo.png" alt="Escudo image"/>
+  <img src="images/curupas.png" alt="Escudo image"/>
 </p>             
                
 # Curupas
