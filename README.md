@@ -117,6 +117,12 @@ sudo firebase emulators:start
 If the port is busy, start with this command or change the port number above
 
 ```sh
+"firestore": {
+   port": 5003
+},
+```
+
+```sh
 sudo firebase serve
 ```
 
