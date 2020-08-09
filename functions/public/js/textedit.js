@@ -29,14 +29,15 @@
     window.mainPartial = 0;
 
     function loadData() {
+      const mostrar = parseInt($('#mostrar-select').val());
       db.collection('contents').onSnapshot(snapshot => {
           window.mainTotalMain = snapshot.size;
-          window.mainSteps = Math.round(window.mainTotalMain/3) - 1;
-          $('.count-visible-main').text(3);
+          window.mainSteps = Math.round(window.mainTotalMain/mostrar) - 1;
+          $('.count-visible-main').text(mostrar);
           $('.count-total-main').text(window.mainTotalMain);    
       });  
       
-      var first = db.collection("contents").limit(3);
+      var first = db.collection("contents").limit(mostrar);
 
       first.get().then(function (documentSnapshots) {         
           var count = 0;
@@ -91,18 +92,32 @@
       });   
     });
     
+    $("#mostrar-select").on("change", (e) => {
+      const initial = db.collection("contents").limit(parseInt(e.target.value));
+      window.mainActiveTable = 0;
+      $('#main-table tbody').html('');
+      initial.get().then(function (documentSnapshots) {
+        documentSnapshots.docs.forEach((doc) => {
+          renderMain(doc);
+        });
+        $("#js-previous-main").closest(".page-item").addClass("disabled");
+        $("#js-next-main").closest(".page-item").addClass("enabled");
+      });
+    });
+
     $("#js-previous-main").on('click', function () {
       window.mainActiveTable--;
       $('#main-table tbody').html('');
       var previous;
+      const mostrar = parseInt($('#mostrar-select').val());
       if (window.mainActiveTable == 0) {
-        previous = db.collection("contents").limit(3);
+        previous = db.collection("contents").limit(mostrar);
         $('#js-next-main').closest('.page-item').addClass('enabled');
       } else  {
         var previous = db.collection("contents")          
           //.orderBy(firebase.firestore.FieldPath.documentId(), "desc")
           .startAt(firstVisible)
-          .limit(3);
+          .limit(mostrar);
       }     
       previous.get().then(function (documentSnapshots) {
         documentSnapshots.docs.forEach(doc => {              
