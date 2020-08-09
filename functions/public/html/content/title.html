@@ -1,43 +1,61 @@
 <main role="main" class="flex-shrink-0" id="main">
-    <div class="container">            
-        <div class="row">
-            <span class="col-4 border rounded bg-light ">
-              <form id="titleForm" class="form-title p-5">
-                <h2>Titulo App</h2>
-                <br>
-                <input type="text" id="title" class="form-control" required>      
-                <br>
-                <br>      
-                <h2>Frase bienvenida</h2>
-                <br>
-                <textarea name="description" id="description" required></textarea>      
-                <br>
-                <br>      
-                <div class="text-right">
-                    <button id="updateButton" class="btn btn-large btn-primary" data-toggle="modal" data-target="#editTitleModal">Actualizar</button>
-                </div>
-            </form>
-          </span> 
-          <div class="col-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4"></div>
+      <span class="col-lg-4 col-12 border rounded bg-light">
+        <form id="titleForm" class="form-title p-5">
+          <h2>Titulo App</h2>
+          <br />
+          <input type="text" id="app-title" class="form-control" required />
+          <br />
+          <br />
+          <h2>Frase bienvenida</h2>
+          <br />
+          <textarea
+            name="app-description"
+            id="app-description"
+            required
+          ></textarea>
+          <br />
+          <br />
+          <h2>Versión</h2>
+          <br />
+          <input name="app-version" id="app-version" required />
+          <br />
+          <br />
+          <div class="text-right">
+            <button
+              id="updateButton"
+              class="btn btn-large btn-primary"
+              data-toggle="modal"
+              data-target="#editTitleModal"
+            >
+              Actualizar
+            </button>
+          </div>
+        </form>
+      </span>
+      <div class="col-lg-4"></div>
+      <!-- <div class="col-4">
               <span class="border rounded">
               <div class="pt-2 pl-5" >
                 <h2 style="color:gray;">Home</h2>
                   <p style="color:gray;">El <b>título</b> y la <b>frase</b>, podes modificar ámbos.<br>Para agregar posts de imagenes ir a Posts. </p>
-                  <p><a class="btn btn-secondary" href="post.html" role="button">Ir a Posts &raquo;</a></p>
-                  <!--<p style="color:gray;">Para agregar imágenes al museo ir a Museo. </p>
+                  <p><a class="btn btn-secondary" href="post.html" role="button">Ir a Posts &raquo;</a></p> -->
+      <!--<p style="color:gray;">Para agregar imágenes al museo ir a Museo. </p>
                   <p><a class="btn btn-secondary" href="post.html" role="button">Ir a Museo &raquo;</a></p>-->
-                  <p style="color:gray;">Para crear eventos en el calendario ir a Calendario. </p>
+      <!-- <p style="color:gray;">Para crear eventos en el calendario ir a Calendario. </p>
                   <p><a class="btn btn-secondary" href="post.html" role="button">Ir a Calendario &raquo;</a></p>
                 </div>
               </span>
-          </div>            
-          <div class="col-4" align="center">
+          </div>             -->
+      <!-- <div class="col-4" align="center">
               <img id="escudo" src="images/escudo.png" />
               <p style="color:lightgray;">Sistema de administración de la aplicación de camadas. Desarrollado para la gestión de contenido.</p>
           </div>          
-        </div>          
-        
-        <div id="editTitleModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        </div>           -->
+
+      <div id="editTitleModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <form id="delete-post-form">
@@ -55,6 +73,8 @@
               </form>
             </div>
           </div>
-        </div>
-      </div><!--Container-->
-    </main>
+       
+    </div>
+  </div>
+  <!--Container-->
+</main>
