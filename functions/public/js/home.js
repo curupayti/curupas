@@ -16,8 +16,6 @@ $(document).ready(function () {
         var css = _role.roles[i].css;      
 
         let item = '<a id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + id + '\', \'' + html + '\', \'' + js + '\', \'' + css + '\'); return false;">' + desc + '</a>';                 
-        console.log(item, _role, _role.roles[i]);
-        
         modules += item;
 
     }
@@ -25,7 +23,6 @@ $(document).ready(function () {
     $('#welcome').html("Bienvenido " +name);
     $('#role').html(role_desc);
     $('#modules').html(modules);
-    console.log(_role);
     
     if(_role.homepageData) {
         $("#homepage-data").html(_role.homepageData.html);
