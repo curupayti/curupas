@@ -4,8 +4,9 @@ $(document).ready(function () {
     .onSnapshot(function(doc) {          
         exist = true;
         console.log("Document data:", doc.data());
-        $("#title").val(doc.data().title);
-        $("#description").text(doc.data().description);          
+        $("#app-title").val(doc.data().title);
+        $("#app-description").text(doc.data().description);          
+        $("#app-version").val(doc.data().version);          
     });
 
     $("#updateButton").on("click", function(e) {
@@ -16,9 +17,10 @@ $(document).ready(function () {
         e.preventDefault();        
         var now = firebase.firestore.FieldValue.serverTimestamp();
         var title = {
-            title: $('#title').val(), 
-            description: $("#description").val(),            
-            updatedAt: now
+            title: $('#app-title').val(), 
+            description: $("#app-description").val(),            
+            updatedAt: now,
+            version: $('#app-version').val()
             //updatedBy : user.name
         };
         db.collection("titles").doc("home").set(title).then(()=>{        
