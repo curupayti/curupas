@@ -295,11 +295,11 @@
                     var baseLoad = id + '\', \'' + html + '\', \'' + js + '\', \'' + css;
 
                     if (jss!=undefined) {
-                        baseLoad = baseLoad + '\', \'' + jss;
-                    }
-                    
-                    if (csss!=undefined) {
-                        baseLoad = baseLoad + '\', \'' + csss;
+                        baseLoad = baseLoad + '\', \'' + jss + '\',' + undefined;
+                    } else if (csss!=undefined) {
+                        baseLoad = baseLoad + '\',' + undefined + ',\'' + csss;                       
+                    } else if ((csss!=undefined) && (jss!=undefined)) {
+                        baseLoad = baseLoad + '\',' + jss + ',\'' + csss;                       
                     }
 
                     if (key in _dropDownMenuObj) {                      
@@ -374,11 +374,6 @@
         function loadPage(id, html, js, css) {
 
             loadPage(id, html, js, css, undefined, undefined);
-        }
-
-        function loadPage(id, html, js, css, jss) {
-
-            loadPage(id, html, js, css, jss, undefined);
         }
 
         function loadPage(id, html, js, css, jss, csss) {            
