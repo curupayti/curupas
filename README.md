@@ -55,9 +55,30 @@ firebase init
 
 Mark all options, OVERRIDE RULES! Allways bring them from the server.
 
-```sh
-ENTER, N, ENTER, N, ENTER, N, Javascript, ENTER, N, N, N, ENTER, public, ENTER, N, N, ENTER
-```
+| Module  | Initialization | Response | 
+| ---     |  ------  |---------:|
+| Project | Which Firebase CLI features do you want to set up for this folder? Press Space to select features, then Enter to confirm your choices.  | Select all   |
+| Database | What file should be used for Database Rules?  | ENTER (database.rules.json) |
+| Database | File database.rules.json already exists. Do you want to overwrite it with the Database Rules for  from the Firebase Console?  | ENTER (N)  |
+| Firestore |  What file should be used for Firestore Rules?  | ENTER (firestore.rules) |
+| Firestore | File firestore.rules already exists. Do you want to overwrite it with the Firestore Rules from the Firebase Console?  | ENTER (N) |
+| Firestore |  What file should be used for Firestore indexes?  | ENTER (firestore.indexes.json) |
+| Firestore | File firestore.indexes.json already exists. Do you want to overwrite it with the Firestore Indexes from the Firebase Console?  | ENTER (N) |
+| Functions | What language would you like to use to write Cloud Functions? | Javascript |
+| Functions | Do you want to use ESLint to catch probable bugs and enforce style?  | Y |
+| Functions | File functions/package.json already exists. Overwrite?  | ENTER (N) |
+| Functions | File functions/index.js already exists. Overwrite?  | ENTER (N) |
+| Functions | File functions/.gitignore already exists. Overwrite?  | ENTER (N) |
+| Functions | Do you want to install dependencies with npm now?  | ENTER (Y) |
+| Hosting |  What do you want to use as your public directory?  | ENTER (public) |
+| Hosting |  Configure as a single-page app (rewrite all urls to /index.html)?  | ENTER (N) |
+| Hosting |  File public/404.html already exists. Overwrite?  | ENTER (N) |
+| Hosting |  File public/index.html already exists. Overwrite?  | ENTER (N) |
+| Storage | What file should be used for Storage Rules?  | ENTER (storage.rules) |
+| Emulators | Which Firebase emulators do you want to set up? Press Space to select emulators, then Enter to confirm your choices.  | Select All |
+| Emulators | Which port do you want to use for the hosting emulator? | ENTER (5000) |
+| Emulators | Would you like to download the emulators now? | Y |
+
 
 To run Visual Studio Code with root access command
 
