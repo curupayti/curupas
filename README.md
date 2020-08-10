@@ -12,7 +12,7 @@ https://firebase.google.com/docs/cli
 
 Install Node
 
-https://nodejs.org/
+https://nodejs.org/ 
 
 Install Cli for Windows stand alone or run npm command
 
@@ -53,7 +53,7 @@ Init commands
 firebase init
 ```
 
-Mark all options, OVERRIDE RULES! Allways bring them from the server.
+Follow the wizard and aswer accordingly.
 
 | Module  | Initialization | Response | 
 | ---     |  ------  |---------:|
