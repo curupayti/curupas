@@ -79,7 +79,6 @@ Follow the wizard and aswer accordingly.
 | Emulators | Which port do you want to use for the hosting emulator? | ENTER (5000) |
 | Emulators | Would you like to download the emulators now? | Y |
 
-
 To run Visual Studio Code with root access command
 
 ```sh
