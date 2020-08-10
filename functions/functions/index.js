@@ -4,6 +4,7 @@
   var admin = require('firebase-admin');
   const firebase = require('firebase');
   const backupService = require('@crapougnax/firestore-export-import');
+  var firestoreService = require('firestore-export-import');      
 
   const Firepad  = require('firepad');
   const jsdom = require("jsdom");
@@ -33,6 +34,11 @@
   });
   
   const firestore = admin.firestore(); 
+
+  firestoreService.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: db_url,        
+  });
 
   const firebaseConfig = {
     apiKey: "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg",
@@ -492,44 +498,54 @@
 
   });  
 
+  exports.getCollections = functions.https.onRequest((request, response) => {  
 
-  exports.getClassBuckup = functions.https.onRequest((req, res) => {       
-
-      let collections = req.body.collections; //['languages', 'roles'];        
+    let _collection = request.body.collection; 
     
-        let promises = [];       
-        
-        try {
 
-         collections.map(collection =>
-                promises.push(
-                    firestoreService.fixtures(
-                        path.resolve(__dirname, `./${collection}.json`),
-                        [],
-                        [],
-                        bs,
-                    ),
-                ),
-            );            
+    console.log(_collection);
+    
+    response.set('Access-Control-Allow-Origin', '*');
+    response.set('Access-Control-Allow-Credentials', 'true'); // vital
+
+    try {
+
+      if (request.method === 'OPTIONS') {
+          
+          // Send response to OPTIONS requests
+          response.set('Access-Control-Allow-Methods', 'GET');
+          response.set('Access-Control-Allow-Headers', 'Content-Type');
+          response.set('Access-Control-Max-Age', '3600');
+          response.status(204).send('');
+      
+        } else {          
+
+          try {
+
+            firestoreService
+            .backup(_collection)
+            .then(data => {  
+              response.status(200).send(data);        
+              return data;           
+            }).catch((error) => {                
+              console.log('Error getting sertvice backup');
+              return error;
+            });  
             
-            //Promise.all(promises).then(process.exit);
-            //let _collJson = JSON.stringify(promises);
+          } catch (e) {
+              console.error(e);
+              return e;
+          } 
 
-           return Promise.all(promises).then(responses => {
-              responses.map(response => write(response));              
-              return responses;
-            }).then(data => {
-              console.log("Second handler", data);
-              res.status(200).send(data); 
-              return data;
-            });            
+        }
 
-        } catch (e) {
-            console.error(e);
-            return e;
-        }   
+    } catch (e) {
+      console.error(e);
+      return e;
+    }      
+   
 
-    });
+  }); 
 
   exports.publish = functions.https.onRequest((request, response) => {
     
@@ -604,4 +620,97 @@
   });
 
   
+  /**
+   * BUILD HTML
+   */
+
+ /* exports.buildHtml = functions.https.onRequest((req, res) => {
+
+      console.log("req.path:", req.path); 
+      const pathParams = req.path.split('/');
+
+      switch (pathParams[1]) {
+        case "newsletter":
+          let _newsletterId = pathParams[2];   
+          getNewsletterHtmlById(_newsletterId, res);
+          break;
+        case "historia":
+          break;
+        case "pumas":
+          break;
+        case "valores":
+          break;
+        case "calendario":
+          break;      
+        case "post":
+          break;
+        case "camada":
+          break;
+        detault:
+          break;
+      }   
+      
+      function getNewsletterHtmlById(id, res) {        
+              
+        if (!id) {
+          //return res.status(400).send('No se encontro el Id');
+        }             
+
+        return firestore.collection("cobranzas").doc(id)
+                        .get()
+                        .then( (document) => {        
+            
+          if (document.exists) {
+
+            let docId = document.id;
+            let name = document.data().name;
+            //let mensaje = document.data().message;
+            //let contact = document.data().contact;
+            let preview_image = document.data().preview_image;          
+            let title = "Mensaje para " + name;
+            const htmlString = buildHTMLForPage(docId, title, name, preview_image);
+
+            console.log("_________________________");
+            console.log(htmlString);
+            
+            //return res.status(200).send(htmlString);
+          
+          } else {
+            //return res.status(403).send("Document do not exit");
+          }        
+
+        }).catch((error) => {    
+            console.log("Error getting document:", error);
+            return res.status(404).send(error);
+        });
+
+      }
+
+      function buildHTMLForPage (docId, title, nombre, image) {
+      
+        //let _style = buildStyle();
+        //let _body = buildBody(nombre, mensaje, contacto);        
+        
+        var _html = '<!DOCTYPE html><head>' +          
+        '<meta property="og:title" content="' + nombre + '">' +                    
+        '<meta property="og:image" content="' + image + '"/>' +
+        '<title>' + title + '</title>';        
+        
+        //'<link rel="icon" href="https://noti.ms/favicon.png">' +
+        //'<style>' + _style  + '</style>' +
+        //'</head><body>' + _body + '</body></html>';
+
+        let _javascript = `<!DOCTYPE html><head><meta property="og:title" content="Jose Vigil"><meta property="og:image" content="https://storage.googleapis.com/notims.appspot.com/cobranzas/sipef/43YjVa_5205172.png?GoogleAccessId=notims%40appspot.gserviceaccount.com&Expires=16730323200&Signature=jbrD3iGC%2FbVaHDcfyUS2ipgfmpc2Czdi6ePG8HdcFmcMZ%2F3WaIpHUN%2BSWXU9tMOJfOm6aSJDfJPrQpXb5B9gzTzzrITXYRRElbLF1bJGtIzGbh48G9018DepMHWgEFzY6hTrGjFGuK9GPFBBu0FruHHYJgxRcEhnBGosJshOUCsddvVR%2Bh8eVvLJlMgMMaAV%2F2Aam0Z9MnUIFUDACX19NFqCEReiy1gFiWTLM15iyvoegQNgCwzX67dAKQfyfI3MeCQDvEDYKiP6Nbpgz%2F0oZOxl7XbvUQxToUc41R2sw%2FtFf8w3qh3uXUa%2FNijO5h7iiWunw98Y0FU%2Bjb5rw%2FRN6Q%3D%3D"/><title>Mensaje para Jose Vigil</title><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-firestore.js"></script><script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-functions.js"></script><script>$(document).ready(function(){console.log("ENTRAAAAAA");const e={apiKey:"AIzaSyAM4WQDHpHh1oRT_v-6ikquE4V809hA3kY",authDomain:"notims.firebaseapp.com",databaseURL:"https://notims.firebaseio.com",projectId:"notims",storageBucket:"notims.appspot.com",messagingSenderId:"79471870593",appId:"1:79471870593:web:ef29a72e1b1866b2bb4380",measurementId:"G-8T5N81L78J"};return firebase.initializeApp(e),firebase.firestore().collection("cobranzas").doc(` + docId + `).get().then(e=>{if(console.log("____1____"),e.exists){var o=0;if(console.log("____2____"),e.data().previewed){o=parseInt(e.data().previewed)+1}else o++;e.ref.update({previewed:o}).then(e=>(console.log("____3____"),e.id)).catch(e=>{console.log("Error saving preview "+e)})}return e.id}).then(e=>(console.log("____4____"),e.id)).catch(e=>(console.log("Error getting document:",e),res.status(404).send(e)))});</script></head>`;
+        var _script;                
+        _script =  `<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>`;
+        _script += `<script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-app.js"></script>`;
+        _script += `<script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-firestore.js"></script>`;        
+        _script += `<script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-functions.js"></script>`;  
+        _script += `<script>${_javascript}</script>`;
+        _html = _html + _script + '</head>';
+        
+        return _html;
+    } */
+
   
+
