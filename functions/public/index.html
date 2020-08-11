@@ -298,14 +298,14 @@
 
                     var baseLoad = id + '\', \'' + html + '\', \'' + js + '\', \'' + css;
 
-                    if (jss!=undefined) {
+                    if ((csss!=undefined) && (jss!=undefined)) {
+                        baseLoad = baseLoad + '\',\'' + jss + '\',\'' + csss;                       
+                    } else if (jss!=undefined) {
                         baseLoad = baseLoad + '\', \'' + jss + '\',' + undefined;
                     } else if (csss!=undefined) {
                         baseLoad = baseLoad + '\',' + undefined + ',\'' + csss;                       
-                    } else if ((csss!=undefined) && (jss!=undefined)) {
-                        baseLoad = baseLoad + '\',' + jss + ',\'' + csss;                       
-                    }
-
+                    } 
+                    
                     if (key in _dropDownMenuObj) {                      
 
                         let menu = _dropDownMenuObj[key];
@@ -449,7 +449,7 @@
                 callback();
             })()
             .catch((err) => {
-                Console.log("error: " + err);
+                console.log("error: " + err);
             });                
         }
         
