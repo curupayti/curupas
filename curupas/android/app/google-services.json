@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "813267916846",
+    "firebase_url": "https://curupas-app.firebaseio.com",
+    "project_id": "curupas-app",
+    "storage_bucket": "curupas-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813267916846:android:f92d771e0e6e6930aa67bf",
+        "android_client_info": {
+          "package_name": "com.curupayti.curupas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "813267916846-muk6nt6snpv8f9jq6du5qc193kpq9rig.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.curupayti.curupas",
+            "certificate_hash": "8295ea54b448945b3eb3c5474a11df5560f31b2e"
+          }
+        },
+        {
+          "client_id": "813267916846-a98om8f0l9uui77o8jnfu80b3tc0msde.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQGGQ2IF1FVyWU8ia0jx8iCu6nVZRM-6c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "813267916846-a98om8f0l9uui77o8jnfu80b3tc0msde.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
