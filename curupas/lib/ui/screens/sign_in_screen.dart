@@ -1,4 +1,5 @@
-  import 'package:flutter/cupertino.dart';
+  import 'package:curupas/utils/common_class.dart';
+import 'package:flutter/cupertino.dart';
   import "package:flutter/material.dart";
   import 'package:flutter_facebook_login/flutter_facebook_login.dart';
   import 'package:curupas/business/auth.dart';
@@ -104,12 +105,14 @@
     }
 
     void _createLoginButton(bool enabled, Color textColor) {
+
       _loginButton = CustomFlatButton(
         title: "Ingresa",
         fontSize: 22,
         fontWeight: FontWeight.w700,
         textColor: textColor, //Colors.white,
         onPressed: () {
+          CommonClass.hideKeyBoard(context);
           _emailLogin(
               email: _email.text, password: _password.text, context: context);
         },
@@ -233,7 +236,6 @@
         _email.clear();
         _password.clear();
         _blackVisible = !_blackVisible;
-        FocusScope.of(context).requestFocus(emailFocusNodeSignUp);
       });
     }
 

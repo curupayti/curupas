@@ -80,7 +80,6 @@
       fontSize: 25.0,
     );
 
-
     @override
     void initState() {
       super.initState();
@@ -191,7 +190,6 @@
         if (_event.contains("main")) {
           setState(() {
             updeteWidget();
-            _loading = false;
           });
         }
       });
@@ -579,6 +577,7 @@
         pages = [one, two, three, four, five];
         currentPage = one;
         currentIconButton = _home;
+        _loading = false;
       });
     }
 

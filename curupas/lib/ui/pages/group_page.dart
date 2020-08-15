@@ -1,353 +1,313 @@
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curupas/models/HTML.dart';
+import 'package:curupas/models/add_media.dart';
+import 'package:curupas/ui/widgets/anecdote/anecdote_widget.dart';
+import 'package:curupas/ui/widgets/anectodes.dart';
+import 'package:curupas/ui/widgets/staggered.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/gestures.dart';
+import "package:flutter/material.dart";
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:curupas/globals.dart' as _globals;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:ui' as ui;
 
-    import 'dart:io';
-    import 'package:cloud_firestore/cloud_firestore.dart';
-    import 'package:curupas/models/HTML.dart';
-    import 'package:curupas/models/add_media.dart';
-    import 'package:curupas/ui/widgets/anecdote/anecdote_widget.dart';
-    import 'package:curupas/ui/widgets/anectodes.dart';
-  import 'package:curupas/ui/widgets/staggered.dart';
-    import 'package:file_picker/file_picker.dart';
-    import 'package:flutter/gestures.dart';
-    import "package:flutter/material.dart";
-    import 'package:flutter/cupertino.dart';
-    import 'package:flutter_screenutil/flutter_screenutil.dart';
-    import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-    import 'package:curupas/globals.dart' as _globals;
-    import 'package:flutter_spinkit/flutter_spinkit.dart';
-    import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-    import 'package:shared_preferences/shared_preferences.dart';
-    import 'dart:ui' as ui;
+class GroupPage extends StatefulWidget {
+  GroupPage({Key key}) : super(key: key);
 
-    class GroupPage extends StatefulWidget {
+  @override
+  _GroupPageState createState() => _GroupPageState();
+}
 
-      GroupPage({Key key}) : super(key: key);
-      @override
-      _GroupPageState createState() => _GroupPageState();
-    }
+class _GroupPageState extends State<GroupPage> {
+  var currentUserEmail;
+  DocumentReference userRef;
+  SharedPreferences prefs;
+  String _videoPath;
+  double _progressValue;
+  List<Color> _colors = [Colors.greenAccent, Colors.yellow];
+  List<double> _stops = [0.0, 0.7];
 
-    class _GroupPageState extends State<GroupPage> {
+  //File vars
+  String _imagePath;
 
-      var currentUserEmail;
-      DocumentReference userRef;
-      SharedPreferences prefs;
-      String _videoPath;
-      double _progressValue;
-      List<Color> _colors = [Colors.greenAccent, Colors.yellow];
-      List<double> _stops = [0.0, 0.7];
-      //File vars
-      String _imagePath;
+  bool _loading = true;
+  int _counting = 0;
 
-      bool _loading = true;
-      int _counting = 0;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GroupStream(_loading),
+      floatingActionButton: buildSpeedDial(context),
+    );
+  }
 
-      @override
-      Widget build(BuildContext context) {
-        return Scaffold(
-          body: GroupStream(_loading),
-          floatingActionButton: buildSpeedDial(context),
-        );
+  @override
+  void initState() {
+    super.initState();
+
+    _globals.getGroupVideoMedia();
+    _globals.getAnecdotes();
+
+    _globals.eventBus.on().listen((event) {
+      String _event = event.toString();
+      if (_event.contains("group")) {
+        _counting = _counting + 1;
+        if (_counting == 2) {
+          _globals.setDataFromGlobal();
+          _counting = 0;
+          setState(() {
+            _loading = false;
+          });
+        }
+        print("Counting : ${_counting}");
       }
+    });
+  }
 
-      @override
-      void initState() {
-        super.initState();
+  SpeedDial buildSpeedDial(BuildContext context) {
+    return SpeedDial(
+      marginRight: 25,
+      marginBottom: 50,
+      animatedIcon: AnimatedIcons.menu_close,
+      //animatedIconTheme: IconThemeData(size: 22.0),
+      child: Icon(Icons.add),
+      visible: true,
+      closeManually: false,
+      curve: Curves.bounceIn,
+      overlayColor: Colors.black,
+      overlayOpacity: 0.5,
+      onOpen: () => print('OPENING DIAL'),
+      onClose: () => print('DIAL CLOSED'),
+      tooltip: 'Menu',
+      heroTag: 'speed-dial-hero-tag',
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
+      elevation: 8.0,
+      shape: CircleBorder(),
+      children: [
+        SpeedDialChild(
+          child: Icon(Icons.photo, color: Colors.white),
+          backgroundColor: Color.fromRGBO(0, 29, 126, 1),
+          label: 'Subir imagen',
+          labelStyle: TextStyle(fontSize: 18.0),
+          onTap: () {
+            _globals.filePickerGlobal
+                .getImagePath(FileType.image)
+                .then((result) {
+              File _file = new File(result);
+              if (_file != null) {
+                _imagePath = result;
+                Image _newImage = new Image.file(_file);
 
-        _globals.getGroupVideoMedia();
-        _globals.getAnecdotes();
+                AddMedia addMedia = new AddMedia(
+                    title: "Imagen seleccionada",
+                    selectedImage: _newImage,
+                    path: _imagePath,
+                    type: "images",
+                    typeId: 2);
 
-        _globals.eventBus.on().listen((event) {
-          String _event = event.toString();
-          if (_event.contains("group")) {
-            _counting = _counting + 1;
-            if (_counting == 2) {
-              _globals.setDataFromGlobal();
-              _counting = 0;
-              setState(() {
-                _loading = false;
-              });
-            }
-            print("Counting : ${_counting}");
-          }
-        });
-      }
-
-      SpeedDial buildSpeedDial(BuildContext context) {
-        return SpeedDial(
-          marginRight: 25,
-          marginBottom: 50,
-          animatedIcon: AnimatedIcons.menu_close,
-          //animatedIconTheme: IconThemeData(size: 22.0),
-          child: Icon(Icons.add),
-          visible: true,
-          closeManually: false,
-          curve: Curves.bounceIn,
-          overlayColor: Colors.black,
-          overlayOpacity: 0.5,
-          onOpen: () => print('OPENING DIAL'),
-          onClose: () => print('DIAL CLOSED'),
-          tooltip: 'Menu',
-          heroTag: 'speed-dial-hero-tag',
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          elevation: 8.0,
-          shape: CircleBorder(),
-          children: [
-            SpeedDialChild(
-              child: Icon(Icons.photo, color: Colors.white),
-              backgroundColor: Color.fromRGBO(0, 29, 126, 1),
-              label: 'Subir imagen',
-              labelStyle: TextStyle(fontSize: 18.0),
-              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  '/addmedia',
+                  arguments: addMedia,
+                );
+              }
+              ;
+            });
+          },
+        ),
+        SpeedDialChild(
+          child: Icon(Icons.video_label, color: Colors.white),
+          backgroundColor: Color.fromRGBO(0, 29, 126, 1),
+          label: 'Subir Video',
+          labelStyle: TextStyle(fontSize: 18.0),
+          onTap: () {
+            _globals.filePickerGlobal
+                .getImagePath(FileType.video)
+                .then((result) {
+              File _file = new File(result);
+              if (_file != null) {
+                _videoPath = result;
                 _globals.filePickerGlobal
-                    .getImagePath(FileType.image)
-                    .then((result) {
-                  File _file = new File(result);
-                  if (_file != null) {
-                    _imagePath = result;
-                    Image _newImage = new Image.file(_file);
-
+                    .getThumbnailFromVideo(_videoPath)
+                    .then((Image image) async {
+                  setState(() {
                     AddMedia addMedia = new AddMedia(
-                        title:"Imagen seleccionada",
-                        selectedImage :_newImage,
-                        path: _imagePath,
-                        type:"images",
-                        typeId: 2);
-
+                        title: "Video seleccionado",
+                        selectedImage: image,
+                        path: result,
+                        type: "videos",
+                        typeId: 1);
                     Navigator.pushNamed(
                       context,
                       '/addmedia',
                       arguments: addMedia,
                     );
-                  };
+                  });
                 });
-              },
-            ),
-            SpeedDialChild(
-              child: Icon(Icons.video_label, color: Colors.white),
-              backgroundColor: Color.fromRGBO(0, 29, 126, 1),
-              label: 'Subir Video',
-              labelStyle: TextStyle(fontSize: 18.0),
-              onTap: () {
-                _globals.filePickerGlobal
-                    .getImagePath(FileType.video)
-                    .then((result) {
-                  File _file = new File(result);
-                  if (_file != null) {
-                    _videoPath = result;
-                    _globals.filePickerGlobal
-                        .getThumbnailFromVideo(_videoPath)
-                        .then((Image image) async {
-                      setState(() {
-                        AddMedia addMedia = new AddMedia(
-                            title:"Video seleccionado",
-                            selectedImage :image,
-                            path: result,
-                            type:"videos",
-                            typeId: 1);
-                        Navigator.pushNamed(
-                          context,
-                          '/addmedia',
-                          arguments: addMedia,
-                        );
-                      });
-                    });
-                  }
-                });
-              },
-            ),
-            SpeedDialChild(
-              child: Icon(Icons.calendar_today),
-              backgroundColor: Colors.white,
-              label: 'Proponer juntada',
-              labelStyle: TextStyle(fontSize: 18.0),
-              onTap: () {
-                //
-              },
-            ),
-          ],
-        );
-      }
-    }
-
-    class GroupStream extends StatefulWidget {
-
-      final bool loading;
-
-      GroupStream(this.loading);
-
-
-      @override
-      _GroupStreamState createState() => new _GroupStreamState();
-    }
-
-    class _GroupStreamState extends State<GroupStream> {
-      @override
-      Widget build(BuildContext context) {
-        double height = MediaQuery.of(context).size.height;
-        double _height = height - (80 /* navbar */ + ScreenUtil.statusBarHeight);
-        return Scaffold(
-          body: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                Container(height: _height, child: GroupBackground(widget.loading))
-              ],
-            ),
-          ),
-        );
-      }
-    }
-
-    class GroupBackground extends StatelessWidget {
-
-      final bool loading;
-
-      GroupBackground(this.loading);
-
-      @override
-      Widget build(BuildContext context) {
-        double bottomPadding =
-            ScreenUtil.statusBarHeight + ScreenUtil().setHeight(30.0);
-        return Scaffold(
-          body: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(bottom: bottomPadding),
-                child:
-                Image.asset(_globals.appData.group_background, fit: BoxFit.cover),
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: bottomPadding),
-                child: BackdropFilter(
-                  filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              color: Colors.black.withOpacity(0.5),
-                              child: _buildContent(context, loading),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              CustomPaint(
-                //painter: CurvePainter(0, null, 10),
-              ),
-              CustomPaint(
-                //painter: CurvePainter(null, bottomPadding, 5),
-              ),
-            ],
-          ),
-          //floatingActionButton: buildSpeedDial(),
-        );
-      }
-    }
-
-    Widget _buildContent(BuildContext context, bool loading) {
-
-      if (loading) {
-
-        return SpinKitFadingCircle(
-          itemBuilder: (BuildContext context, int index) {
-            return DecoratedBox(
-              decoration: BoxDecoration(
-                color: index.isEven ? Colors.red : Colors.green,
-              ),
-            );
+              }
+            });
           },
-        );
+        ),
+        SpeedDialChild(
+          child: Icon(Icons.calendar_today),
+          backgroundColor: Colors.white,
+          label: 'Proponer juntada',
+          labelStyle: TextStyle(fontSize: 18.0),
+          onTap: () {
+            //
+          },
+        ),
+      ],
+    );
+  }
+}
 
-      } else {
+class GroupStream extends StatefulWidget {
+  final bool loading;
 
-        double height = MediaQuery.of(context).size.height;
-        double _height = height - 200;
+  GroupStream(this.loading);
 
-        return Row(
-          children: <Widget>[
-            Expanded(
-              child:
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+  @override
+  _GroupStreamState createState() => new _GroupStreamState();
+}
+
+class _GroupStreamState extends State<GroupStream> {
+  @override
+  Widget build(BuildContext context) {
+//    double height = MediaQuery.of(context).size.height;
+//    double _height = height - (80 /* navbar */ + ScreenUtil.statusBarHeight);
+    return Scaffold(
+      body: Container(child: GroupBackground(widget.loading)),
+    );
+  }
+}
+
+class GroupBackground extends StatelessWidget {
+  final bool loading;
+
+  GroupBackground(this.loading);
+
+  @override
+  Widget build(BuildContext context) {
+    double bottomPadding =
+        ScreenUtil.statusBarHeight + ScreenUtil().setHeight(30.0);
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            child: Container(
+              child: Image.asset(
+                _globals.appData.group_background,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Column(
                   children: <Widget>[
                     UpperSection(loading),
-                    MuseumSection(loading),
-                    StaggeredWidget(_height),
+                    _buildContent(context, loading),
                   ],
                 ),
               ),
-            ],
-          );
-      }
-    }
-
-    class UpperSection extends StatelessWidget {
-
-      final bool loading;
-
-      UpperSection(this.loading);
-
-      @override
-      Widget build(BuildContext context) {
-        return new Stack(fit: StackFit.loose, children: <Widget>[
-          new Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Image.asset("assets/images/camadas.png",
-                      height: 45.0, width: 214.0, fit: BoxFit.cover),
-              ),
-            ],
+            ),
           ),
-        ]);
-      }
-    }
+        ],
+      ),
+      //floatingActionButton: buildSpeedDial(),
+    );
+  }
+}
 
-    // double height = MediaQuery.of(context).size.height;
-    //      double gridHeight = height - 200;
-
-
-    class MuseumSection extends StatelessWidget {
-
-      final bool loading;
-
-      MuseumSection(this.loading);
-
-      @override
-      Widget build(BuildContext context) {
-        List<HTML> anecdotes = _globals.anecdoteContent.contents;
-
-        double width = MediaQuery.of(context).size.width;
-
-        Size _size = new Size(width, 150);
-
-        return new Stack(fit: StackFit.loose, children: <Widget>[
-          new Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-            Padding(
-                padding: const EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
-                child: SizedBox.fromSize(
-                  size: _size,
-                  child: new AnecdotesWidget(anecdotes: anecdotes),
-                ),
-              ),
-            ],
+Widget _buildContent(BuildContext context, bool loading) {
+  if (loading) {
+    return SpinKitFadingCircle(
+      itemBuilder: (BuildContext context, int index) {
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: index.isEven ? Colors.red : Colors.green,
           ),
-        ]);
-      }
-    }
+        );
+      },
+    );
+  } else {
+    double height = MediaQuery.of(context).size.height;
+    double _height = height - 150;
 
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            MuseumSection(loading),
+            StaggeredWidget(_height)
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-    /*class StaggeredSection
+class UpperSection extends StatelessWidget {
+  final bool loading;
+
+  UpperSection(this.loading);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: Center(
+        child: Container(
+          child: Image.asset("assets/images/camadas.png",
+              height: 45.0, width: 214.0, fit: BoxFit.cover),
+        ),
+      ),
+    );
+  }
+}
+
+// double height = MediaQuery.of(context).size.height;
+//      double gridHeight = height - 200;
+
+class MuseumSection extends StatelessWidget {
+  final bool loading;
+
+  MuseumSection(this.loading);
+
+  @override
+  Widget build(BuildContext context) {
+    List<HTML> anecdotes = _globals.anecdoteContent.contents;
+
+    double width = MediaQuery.of(context).size.width;
+
+    Size _size = new Size(width, 150);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
+      child: SizedBox.fromSize(
+        size: _size,
+        child: new AnecdotesWidget(anecdotes: anecdotes),
+      ),
+    );
+  }
+}
+
+/*class StaggeredSection
         extends StatelessWidget {
 
       //final _GroupPageState parent;

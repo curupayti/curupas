@@ -10,7 +10,7 @@ class CreditCard {
   final String cardHolder;
   final DateTime expiration_date;
 
-  CreditCard({
+    CreditCard({
     this.documentID,
     this.cardNumber,
     this.card,

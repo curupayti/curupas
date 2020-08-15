@@ -535,7 +535,6 @@
                   onPressed: () {
                     setState(() {
                       _email.clear();
-                      FocusScope.of(context).requestFocus(_emailFocus);
                       _blackVisible = !_blackVisible;
                       _loadingInProgress = false;
                     });

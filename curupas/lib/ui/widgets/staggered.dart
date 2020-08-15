@@ -1,45 +1,39 @@
-
 import 'package:flutter/material.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class StaggeredWidget extends StatelessWidget {
-
   final double gridheight;
 
   StaggeredWidget(this.gridheight);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-        height: gridheight,
-      child:
-      Scaffold(
-      backgroundColor: Color.fromRGBO(255, 0, 0, 0),
-      appBar:
-      PreferredSize(
-        preferredSize: Size.fromHeight(30.0), // here the desired height
-        child:AppBar(
-          centerTitle: true,
-          backgroundColor: Color.fromRGBO(255, 0, 0, 0),
-          title: Text('Fotos y videos',
-            style: TextStyle(color: Colors.white,
-                fontSize: 20.0),),
+    return Container(
+      height: gridheight,
+      child: Scaffold(
+        backgroundColor: Color.fromRGBO(255, 0, 0, 0),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(30.0), // here the desired height
+          child: AppBar(
+            centerTitle: true,
+            backgroundColor: Color.fromRGBO(255, 0, 0, 0),
+            title: Text(
+              'Fotos y videos',
+              style: TextStyle(color: Colors.white, fontSize: 20.0),
+            ),
+          ),
         ),
-      ),
-      body: Stack(
-        children: <Widget>[
-          _getStagged(),
-        ],
-      ),
+        body: _getStagged(),
       ),
     );
   }
 
   Widget _getStagged() {
     return StaggeredGridView.countBuilder(
+      physics: NeverScrollableScrollPhysics(),
       padding:
-      const EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0, bottom: 8.0),
+          const EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0, bottom: 8.0),
       crossAxisCount: 4,
       itemCount: _globals.group.medias.length,
       itemBuilder: (context, j) {
@@ -54,8 +48,7 @@ class StaggeredWidget extends StatelessWidget {
           child: new Column(
             children: <Widget>[
               new Center(
-                child:
-                Stack(
+                child: Stack(
                   children: <Widget>[
                     new Image.network(imgPath),
                     Visibility(
@@ -90,8 +83,7 @@ class StaggeredWidget extends StatelessWidget {
           ),
         );
       },
-      staggeredTileBuilder: (j) =>
-      new StaggeredTile.fit(2),
+      staggeredTileBuilder: (j) => new StaggeredTile.fit(2),
       mainAxisSpacing: 10.0,
       crossAxisSpacing: 10.0,
     );
