@@ -11,6 +11,7 @@ import 'dart:ui' as ui;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:curupas/ui/screens/post/post_card.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:curupas/ui/widgets/valores/valores_widget.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -42,7 +43,7 @@ class _HomePageState extends State<HomePage> {
       String _event = event.toString();
       if (_event.contains("home")) {
         _counting = _counting + 1;
-        if (_counting == 5) {
+        if (_counting == 6) {
           _globals.setDataFromGlobal();
           _counting = 0;
         }
@@ -57,9 +58,10 @@ class _HomePageState extends State<HomePage> {
     });
     _globals.getDescription();
     _globals.getPosts();
-    _globals.getMuseums();
-    _globals.getPumas();
     _globals.getNewsletters();
+    _globals.getPumas();
+    _globals.getValores();
+    _globals.getMuseums();
     Timer(Duration(seconds: 5), () {
       setState(() {
         _loading = false;
@@ -232,8 +234,10 @@ class HomeBackground extends StatelessWidget {
                   _buildHeader(),
                   _buildPostScroller(),
                   _buildNewsletterTimeline(),
-                  _buildMuseumTimeline(),
                   _buildPumasTimeline(),
+                  _buildValoresTimeline(),
+                  _buildMuseumTimeline(),
+
                 ],
               )
             : Container(),
@@ -259,6 +263,17 @@ class HomeBackground extends StatelessWidget {
       ],
     );
   }
+
+  Widget _buildValoresTimeline() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: SizedBox.fromSize(
+        size: Size.fromHeight(170.0),
+        child: new ValoresWidget(pumas: _globals.appData.valores),
+      ),
+    );
+  }
+
 
   Widget _buildHeaderText() {
     return new Column(

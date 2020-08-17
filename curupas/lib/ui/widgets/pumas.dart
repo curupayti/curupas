@@ -1,62 +1,56 @@
 
-  import 'package:circular_profile_avatar/circular_profile_avatar.dart';
-  import 'package:curupas/models/pumas.dart';
-  import 'package:flutter/material.dart';
+import 'package:curupas/models/HTML.dart';
+import 'package:curupas/ui/widgets/pumas/pumas_card.dart';
+import 'package:flutter/material.dart';
 
-  class PumasWidget extends StatelessWidget {
+class PumasWidget extends StatelessWidget {
 
-    final List<Pumas> pumas;
+  final List<HTML> pumas;
 
-    PumasWidget({Key key, this.pumas}) : super(key: key);
+  PumasWidget({Key key, this.pumas}) : super(key: key);
 
-    @override
-    Widget build(BuildContext context) {
-      return Scaffold(
-        backgroundColor: Color.fromRGBO(255, 0, 0, 0),
-        appBar:
-        PreferredSize(
-            preferredSize: Size.fromHeight(30.0), // here the desired height
-            child:AppBar(
-              centerTitle: true,
-              backgroundColor: Color.fromRGBO(255, 0, 0, 0),
-              title: Text('Pumas',
-                style: TextStyle(color: Colors.white,
-                  fontSize: 20.0),),
-            ),
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      backgroundColor: Color.fromRGBO(255, 0, 0, 0),
+      appBar:
+      PreferredSize(
+        preferredSize: Size.fromHeight(30.0), // here the desired height
+        child:AppBar(
+          centerTitle: true,
+          backgroundColor: Color.fromRGBO(255, 0, 0, 0),
+          title: Text('Pumas',
+            style: TextStyle(color: Colors.white,
+                fontSize: 20.0),),
         ),
-        body: Container(
-          height:100,
-          width: MediaQuery.of(context).size.width,
-          child: Center(
-            child: ListView(
-              padding: EdgeInsets.all(2.0),
-              scrollDirection: Axis.horizontal,
-              children: pumas.map((museum) =>
-                  CircularProfileAvatar (
-                    museum.thumbnailSmallUrl,
-                    radius: 50,
-                    //backgroundColor: Colors.transparent,
-                    borderWidth: 2,
-                    initialsText: Text(
-                      museum.title,
-                      style: TextStyle(
-                          fontSize: 30,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold
-                      ),
-                    ),
-                    borderColor: Colors.red,
-                    elevation: 5.0,
-                    //foregroundColor: Colors.white.withOpacity(0.9),
-                    cacheImage: true,
-                    onTap: () {
-                      print('adil');
-                    },
-                    showInitialTextAbovePicture: true,
-                  ),).toList(),
-              ),
-            ),
+      ),
+      body: Container(
+        height:200,
+        width: MediaQuery.of(context).size.width,
+        child: Center(
+          child: buildPumasScroller(),
+        ),
+      ),
+    );
+  }
+
+  Widget buildPumasScroller() {
+    return
+      //Padding(
+      //padding: const EdgeInsets.only(top: 16.0),
+      //child:
+      SizedBox.fromSize(
+        size: Size.fromHeight(250.0),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          itemCount: pumas.length,
+          itemBuilder: (BuildContext context, int index) {
+            var puma = pumas[index];
+            return PumasCard(puma);
+          },
         ),
       );
-    }
   }
+}

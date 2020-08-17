@@ -5,7 +5,6 @@
   import 'package:curupas/models/group_media.dart';
   import 'package:curupas/models/museum.dart';
   import 'package:curupas/models/notification.dart';
-import 'package:curupas/models/pumas.dart';
   import 'package:firebase_analytics/firebase_analytics.dart';
   import 'package:firebase_auth/firebase_auth.dart';
   import 'package:cloud_firestore/cloud_firestore.dart';
