@@ -1,3 +1,4 @@
+import 'package:curupas/ui/pages/group_photos_video_details.dart';
 import 'package:flutter/material.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -44,42 +45,54 @@ class StaggeredWidget extends StatelessWidget {
         if (_globals.group.medias[j].type == 1) {
           isVideo = true;
         }
-        return new Card(
-          child: new Column(
-            children: <Widget>[
-              new Center(
-                child: Stack(
-                  children: <Widget>[
-                    new Image.network(imgPath),
-                    Visibility(
-                      visible: isVideo,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.play_circle_outline,
-                          size: 60.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GroupMediaDetails(
+                  media: _globals.group.medias[j],
                 ),
               ),
-              new Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: new Column(
-                  children: <Widget>[
-                    new Text(
-                      title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    new Text(
-                      description,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
+            );
+          },
+          child: new Card(
+            child: new Column(
+              children: <Widget>[
+                new Center(
+                  child: Stack(
+                    children: <Widget>[
+                      new Image.network(imgPath),
+                      Visibility(
+                        visible: isVideo,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.play_circle_outline,
+                            size: 60.0,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              )
-            ],
+                new Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: new Column(
+                    children: <Widget>[
+                      new Text(
+                        title,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      new Text(
+                        description,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         );
       },

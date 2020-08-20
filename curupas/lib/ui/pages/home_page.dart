@@ -323,7 +323,9 @@ class HomeBackground extends StatelessWidget {
   }
 
   Widget _buildPostScroller() {
-    return _globals.appData != null && _globals.appData.posts.length > 0
+    return _globals.appData != null &&
+            _globals.appData.posts != null &&
+            _globals.appData.posts.length > 0
         ? Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: SizedBox.fromSize(

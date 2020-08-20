@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import "package:flutter/material.dart";
 import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/streaming.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:youtube_api/youtube_api.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class StreamingPage extends StatefulWidget {
   StreamingPage({Key key}) : super(key: key);
@@ -58,14 +62,20 @@ class HomeStream extends StatefulWidget {
 }
 
 class _HomeStreamState extends State<HomeStream> {
+
+  final Completer<WebViewController> _controller =
+  Completer<WebViewController>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[HomeScreeTopPart(widget.loading), HomeScreenBottomPart(widget.loading)],
-        ),
-      ),
+      body: WebView(
+        initialUrl: "https://www.youtube.com/channel/UCeLNPJoPAio9rT2GAdXDVmw/featured",
+        javascriptMode: JavascriptMode.unrestricted,
+        onWebViewCreated: (WebViewController webViewController) {
+          _controller.complete(webViewController);
+        },
+      )
     );
   }
 }
@@ -276,12 +286,41 @@ class HomeScreeTopPart extends StatelessWidget {
   }
 }
 
-class HomeScreenBottomPart extends StatelessWidget {
+class HomeScreenBottomPart extends StatefulWidget {
 
 
   final bool loading;
 
   HomeScreenBottomPart(this.loading);
+
+  @override
+  _HomeScreenBottomPartState createState() => _HomeScreenBottomPartState();
+}
+
+class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
+
+  static String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";// ** ENTER YOUTUBE API KEY HERE **
+
+  YoutubeAPI ytApi = new YoutubeAPI(key, type: "playlist");
+  List<YT_API> ytResult = [];
+
+  callAPI() async {
+    print('UI callled');
+    String query = "Entrenamientos Infantiles";
+    ytResult = await ytApi.search(query);
+    print("length ======= ${ytResult.length}");
+    print("ytResult channelurl ========= ${ytResult[0].channelurl}");
+    print("ytResult channelTitle ========= ${ytResult[0]}");
+
+    print("ytResult channelurl ========= ${ytResult[1].channelurl}");
+    print("ytResult channelTitle ========= ${ytResult[1].channelTitle}");
+
+    print("ytResult channelurl ========= ${ytResult[2].channelurl}");
+    print("ytResult channelTitle ========= ${ytResult[2].channelTitle}");
+
+    print("ytResult channelurl ========= ${ytResult[3].channelurl}");
+    print("ytResult channelTitle ========= ${ytResult[3].channelTitle}");
+  }
 
   List<Widget> movies() {
     List<Widget> movieList = new List();
@@ -341,9 +380,16 @@ class HomeScreenBottomPart extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    //callAPI();
+    super.initState();
+
+  }
+
+  @override
   Widget build(BuildContext context) {
 
-    if (loading) {
+    if (widget.loading) {
 
       return Container();
 
@@ -383,7 +429,6 @@ class HomeScreenBottomPart extends StatelessWidget {
       );
     }
   }
-
 }
 
 class Mclipper extends CustomClipper<Path> {

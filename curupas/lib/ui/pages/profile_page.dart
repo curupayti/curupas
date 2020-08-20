@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:curupas/models/credit_card.dart';
+import 'package:curupas/ui/pages/notification_details.dart';
 import 'package:curupas/ui/widgets/credit_card.dart';
 import 'package:curupas/ui/widgets/flat_button.dart';
 import 'package:file_picker/file_picker.dart';
@@ -214,7 +215,14 @@ class ProfilePageScreen extends StatelessWidget {
                 ),
               ],
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NotificationDetails(notification: _globals.notifications[index],),
+                ),
+              );
+            },
           ),
         ),
       ),

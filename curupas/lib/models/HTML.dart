@@ -38,11 +38,11 @@ class HTML {
 
   factory HTML.fromJson(Map<String, Object> doc) {
 
-    Timestamp timestamp = doc["last_update"] as Timestamp;
-    var format = new DateFormat('d MMM, hh:mm a');
-    DateTime date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
-
-    int id = date.month;
+//    Timestamp timestamp = doc["last_update"] as Timestamp;
+//    var format = new DateFormat('d MMM, hh:mm a');
+//    DateTime date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+//
+//    int id = date.month;
 
     HTML content_html = new HTML(
       html: doc['html'],
@@ -51,8 +51,8 @@ class HTML {
       database_ref: doc['database_ref'],
       group_ref: doc['group_ref'],
       icon: doc['icon'],
-      last_update: date,
-      id: id
+//      last_update: date,
+//      id: id
     );
     return content_html;
   }

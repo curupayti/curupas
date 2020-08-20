@@ -73,7 +73,7 @@ Future<User> getUserData(String userId) async {
       await userDocumentReference.get().then((userSnapshot) async {
         if (userSnapshot.exists) {
           DocumentReference yearDocumentReference =
-              userSnapshot.data["yearRef"];
+          userSnapshot.data["yearRef"];
           if (yearDocumentReference != null) {
             await yearDocumentReference.get().then((yearSnapshot) async {
               if (yearSnapshot.exists) {
@@ -175,13 +175,13 @@ void setDataFromGlobal() {
 }
 
 void setData(
-  String desc,
-  List<Post> posts,
-  List<Museum> museums,
-  List<HTML> newsletters,
-  List<Pumas> pumas,
-  //List<HTML> anecdotes
-) {
+    String desc,
+    List<Post> posts,
+    List<Museum> museums,
+    List<HTML> newsletters,
+    List<Pumas> pumas,
+    //List<HTML> anecdotes
+    ) {
   appData.biography = desc;
   appData.posts = posts;
   appData.museums = museums;
@@ -203,9 +203,9 @@ void queryDevice() async {
 
 void showErrorAlert(
     {BuildContext context,
-    String title,
-    String content,
-    VoidCallback onPressed}) {
+      String title,
+      String content,
+      VoidCallback onPressed}) {
   showDialog(
     barrierDismissible: true,
     context: context,
@@ -260,15 +260,13 @@ class FilePickerGlobal {
   Future<bool> uploadFile(
       String _imagePath, String filePath, StorageMetadata metadata,
       {File file}) async {
-
-    if (_imagePath == "" || _imagePath == null || _imagePath.isEmpty){
+    if (_imagePath == "" || _imagePath == null || _imagePath.isEmpty) {
       String fileFolderExtension = filePath + 'profile.jpeg';
 
       StorageReference storageRef =
       FirebaseStorage.instance.ref().child(fileFolderExtension);
 
-      StorageUploadTask uploadTask =
-      storageRef.putFile(file, metadata);
+      StorageUploadTask uploadTask = storageRef.putFile(file, metadata);
 
       await uploadTask.onComplete.then((completed) {
         //String url = (await downloadUrl.ref.getDownloadURL());
@@ -297,7 +295,7 @@ class FilePickerGlobal {
 
   Future<String> getStorageFileUrl(String childReference) async {
     StorageReference storageRef =
-        FirebaseStorage.instance.ref().child(childReference);
+    FirebaseStorage.instance.ref().child(childReference);
     String url = await storageRef.getDownloadURL();
 
     return url;
@@ -449,16 +447,16 @@ void getNewsletters() {
 }
 
 //CALENDAR
-Future<QuerySnapshot> getCalendar(DateTime dateTime) async {
+Future<QuerySnapshot> getCalendar(String name) async {
   QuerySnapshot querySnapshot;
-  await Auth.getCalendarData(dateTime).then((snapshot) {
+  await Auth.getCalendarData(name).then((snapshot) {
     querySnapshot = snapshot;
   });
   return querySnapshot;
 }
 
-Future<QuerySnapshot> getCalendarEvents(DateTime dateTime) {
-  Auth.getCalendarEvents(dateTime).then((snapshot) {
+Future<QuerySnapshot> getCalendarEvents(DateTime dateTime, String name) {
+  Auth.getCalendarEvents(dateTime, name).then((snapshot) {
     //_userEventSnapshot = snapshot;
     eventBus.fire("calendar-event");
     return snapshot;

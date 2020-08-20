@@ -14,6 +14,7 @@ import 'package:curupas/models/pumas.dart';
   import 'package:curupas/models/group.dart';
   import 'package:curupas/models/sms.dart';
   import 'package:curupas/models/user.dart';
+import 'package:flutter/cupertino.dart';
   import 'package:flutter/services.dart';
   import 'package:curupas/globals.dart' as _globals;
   import 'package:shared_preferences/shared_preferences.dart';
@@ -358,14 +359,18 @@ import 'package:curupas/models/pumas.dart';
 
     static Future<List<NotificationCloud>> getNotifications() async {
       List<NotificationCloud> notiList = new List();
-      QuerySnapshot collectionSnapshot = await Firestore.instance.collectionGroup('user-token-chat').getDocuments();
+      QuerySnapshot collectionSnapshot = await Firestore.instance.collectionGroup('notifications').getDocuments();
       for (var doc in collectionSnapshot.documents)  {
-        DocumentReference notiRef = doc.reference.parent().reference().parent();
-        await notiRef.get().then((notiSnapshot) async {
-          NotificationCloud  noti = NotificationCloud.fromDocument(notiSnapshot);
-          notiList.add(noti);
-        });
+        //print(doc.data);
+        //DocumentReference notiRef = doc.reference.parent().reference().parent();
+//        await notiRef.get().then((notiSnapshot) async {
+//          NotificationCloud  noti = NotificationCloud.fromDocument(notiSnapshot);
+//          notiList.add(noti);
+//        });
+        NotificationCloud  noti = NotificationCloud.fromDocument(doc);
+        notiList.add(noti);
       }
+      print(notiList);
       return notiList;
     }
 
@@ -530,21 +535,22 @@ import 'package:curupas/models/pumas.dart';
       return pumas;
     }*/
 
-    static Future<QuerySnapshot> getCalendarData(DateTime _dateTime) async {
+    static Future<QuerySnapshot> getCalendarData(String name) async {
       QuerySnapshot userEvents = await Firestore.instance
-          .collection('calendar')
-          .where(
-          'start', isGreaterThanOrEqualTo: new DateTime(_dateTime.year, _dateTime.month))
+          .collection('calendar/$name/${name}_collection')
           .getDocuments();
       return userEvents;
     }
+    //.where(
+    //          'start', isGreaterThanOrEqualTo: new DateTime(_dateTime.year, _dateTime.month))
 
-    static Future<QuerySnapshot> getCalendarEvents(DateTime _eventDate) async {
+    static Future<QuerySnapshot> getCalendarEvents(DateTime _eventDate, String name) async {
         QuerySnapshot events = await Firestore.instance
-            .collection('calendar')
-            .where('time', isGreaterThan: new DateTime(_eventDate.year, _eventDate.month, _eventDate.day-1, 23, 59, 59))
-            .where('time', isLessThan: new DateTime(_eventDate.year, _eventDate.month, _eventDate.day+1))
+            .collection('calendar/$name/${name}_collection')
+            .where('start', isGreaterThan: new DateTime(_eventDate.year, _eventDate.month, _eventDate.day-1, 23, 59, 59))
+            .where('start', isLessThan: new DateTime(_eventDate.year, _eventDate.month, _eventDate.day+1))
             .getDocuments();
+        debugPrint("${events.documents.length}");
         return events;
     }
 
