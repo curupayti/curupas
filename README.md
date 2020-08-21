@@ -123,8 +123,10 @@ Edit firebase.json and add the emulators
       "port": 8085
     },
     "ui": {
-      "enabled": true
-    }
+      "enabled": true,
+      "host": "localhost",
+      "port": 4002
+    }    
   },
 ```
 
