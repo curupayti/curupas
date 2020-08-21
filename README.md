@@ -90,8 +90,8 @@ In case skipped installing repos run install into functions and functions/functi
 npm install
 ```
 
-Start emulators
----------------
+Emulators
+---------
 
 Install tools
 
@@ -129,6 +129,8 @@ Edit firebase.json and add the emulators
 ```
 
 Emulators should be downloaded
+
+**Start emulators**
 
 ```sh
 sudo firebase emulators:start
