@@ -85,6 +85,11 @@ To run Visual Studio Code with root access command
 sudo code --user-data-dir="~/.vscode-root"
 ```
 
+In case skipped installing repos run install into functions and functions/functions
+```sh
+npm install
+```
+
 Start emulators
 ---------------
 
