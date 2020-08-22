@@ -172,10 +172,9 @@ Import firestore
 Inside functions -> import folder there is an import.js file. place the downloaded file into files filder and import the json like so. The emulate parameter indicates thet is imported to the localhost, modify the por accordingly.
 
 ```sh
-node import.js emulate console.json
+node import.js emulate contents.json
 ```
-
-
+TODO: Fix formats
 
 Bug solve
 ---------
