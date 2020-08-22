@@ -161,13 +161,24 @@ Deploy (only Jose)
 sudo firebase deploy
 ```
 
-Local port test 
+Export firestore
+----------------
 
-curl -X POST -H "Content-Type: application/json"  -d '{"data":{"name":"YOUR_NAME"}}'  http://localhost:5000/curupa-d830b/us-central1/helloWorld
+Within  the admin panel admin menu -> backup, download the json file accordingly. 
+
+Import firestore
+----------------
+
+Inside functions -> import folder there is an import.js file. place the downloaded file into files filder and import the json like so. The emulate parameter indicates thet is imported to the localhost, modify the por accordingly.
+
+```sh
+node import.js emulate console.json
+```
 
 
-Bug
----
+
+Bug solve
+---------
 
 The fancy_bottom_navigation flutter component https://pub.dev/packages/fancy_bottom_navigation is limited to 4 tabs. In order to extend it to 5 wich the project uses please comment this line 28 of fancy_button_navigation.dat file.
 
