@@ -25,10 +25,10 @@ $(document).ready(function () {
     window.downloadCalss = function (id) {   
         
         $("#icon-" + id).removeClass("fa-download");
-        $("#icon-" + id).addClass("fa-spinner");
+        $("#icon-" + id).addClass("fa-spinner fa-spin");
 
         var settings = {
-        "url": "https://us-central1-curupas-app.cloudfunctions.net/getCollections",
+        "url": "https://us-central1-curupas-app.cloudfunctions.net/backup",
         "method": "POST",
         "timeout": 0,
         "headers": {

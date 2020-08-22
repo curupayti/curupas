@@ -2,9 +2,8 @@
  
   const functions = require('firebase-functions');
   var admin = require('firebase-admin');
-  const firebase = require('firebase');
-  const backupService = require('@crapougnax/firestore-export-import');
-  var firestoreService = require('firestore-export-import');      
+  const firebase = require('firebase');  
+  var firestoreService = require('firestore-export-import');  
 
   const Firepad  = require('firepad');
   const jsdom = require("jsdom");
@@ -15,11 +14,6 @@
   const mkdirp = require('mkdirp-promise');
   const request = require('request');
 
-  const spawn = require('child-process-promise').spawn;
-  const path = require('path');
-  const os = require('os');
-  const fs = require('fs');
-
   const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; 
 
   const express = require('express');
@@ -28,37 +22,39 @@
   var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
   var db_url = "https://curupas-app.firebaseio.com";
   
-  var bs = admin.initializeApp({
+  admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: db_url
   });
-  
-  const firestore = admin.firestore(); 
 
   firestoreService.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: db_url,        
   });
+  
+  const firestore = admin.firestore(); 
 
   const firebaseConfig = {
-    apiKey: "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg",
+    apiKey: "AIzaSyCdPIxQCyCbUMCYfcDErZLPMZtPOs1-mbQ",
     authDomain: "curupas-app.firebaseapp.com",
     databaseURL: "https://curupas-app.firebaseio.com",
     projectId: "curupas-app",
     storageBucket: "curupas-app.appspot.com",
     messagingSenderId: "813267916846",
-    appId: "1:813267916846:web:529f9c18a84b6b45aa67bf",
-    measurementId: "G-2RRZXWLMTL"
+    appId: "1:813267916846:web:f1780b6ac9f8079baa67bf",
+    measurementId: "G-NK6KP62FLM"
   };
+
   firebase.initializeApp(firebaseConfig);
 
   // Max height and width of the thumbnail in pixels.
   const THUMB_MAX_HEIGHT = 200;
   const THUMB_MAX_WIDTH = 200;
   // Thumbnail prefix added to file names.
-  const THUMB_PREFIX = 'thumb_';
+  const THUMB_PREFIX = 'thumb_'; 
 
-  exports.generateThumbnailFromMetadata = functions.storage.object().onFinalize(async (object) => {  
+
+  exports.thumbnail = functions.storage.object().onFinalize(async (object) => {  
     
     const filePath = object.name;
     const customMetadata = object.metadata;
@@ -261,14 +257,9 @@
       
     } else { // not isThiumbnail
 
-      //console.log("::customMetadataType:: " + customMetadataType);       
+      //console.log("::customMetadataType:: " + customMetadataType);  
 
-
-      if (customMetadataType === 1) { 
-        
-        /**
-         * Years
-         */
+      if (customMetadataType === 1) {         
         
         let file = object.name;
         let thumbFileExt       = 'jpg';
@@ -324,42 +315,8 @@
             return error;
           });
       
-      } else if (customMetadataType === 2) {  
-
-          /**
-           * Content Images Attached to Editor
-           */ 
-
-          const file = bucket.file(filePath);          
-          const fileDir = path.dirname(filePath);
-          const fileName = path.basename(filePath);
-          const thumbFilePath = path.normalize(path.join(fileDir, `${THUMB_PREFIX}${fileName}`));          
-          let signedImageUrl = await file.getSignedUrl(config);             
-          var imageUrl = signedImageUrl[0];
-          
-          let _short = customMetadata.short;          
-          let _id3 = customMetadata.id;    
-          let _time = admin.firestore.FieldValue.serverTimestamp();             
-
-          var _imgeURL = admin.firestore.FieldValue.arrayUnion(imageUrl);
-
-          await firestore.collection('contents')
-          .doc(_short)
-          .collection("collection")
-          .doc(_id3)
-          .set({             
-            images: _imgeURL,          
-            last_update: _time},
-            {merge:true}
-          ).catch((error) => {
-            console.log('Error updating collection:', error);
-            return error;
-          });                     
-      
-        // Save Media thumbnail image and video  
       }
     }
-    
 
     function parseName(fileName) {
         let _file = path.basename(fileName);
@@ -369,7 +326,9 @@
 
   });
 
-  exports.sendNotification = functions.firestore
+
+
+  exports.notification = functions.firestore
     .document('notifications/{notificationsId}')
     .onWrite((change, context) => {    
 
@@ -436,7 +395,7 @@
   
   });  
 
-  exports.sendSMS = functions.https.onRequest((req, res) => {
+  exports.sms = functions.https.onRequest((req, res) => {
     
       const phone = req.body.data.phone;
       const payload = req.body.data.payload;
@@ -496,9 +455,11 @@
         return error;
       });  
 
-  });  
+  }); 
 
-  exports.getCollections = functions.https.onRequest((request, response) => {  
+
+  
+  exports.backup = functions.https.onRequest((request, response) => {  
 
     let _collection = request.body.collection; 
     
@@ -545,7 +506,7 @@
     }      
    
 
-  }); 
+  });     
 
   exports.publish = functions.https.onRequest((request, response) => {
     
@@ -619,47 +580,44 @@
 
   });
 
-  
-  /**
-   * BUILD HTML
-   */
-
- /* exports.buildHtml = functions.https.onRequest((req, res) => {
+  exports.build = functions.https.onRequest((req, res) => {     
 
       console.log("req.path:", req.path); 
       const pathParams = req.path.split('/');
 
       switch (pathParams[1]) {
-        case "newsletter":
-          let _newsletterId = pathParams[2];   
-          getNewsletterHtmlById(_newsletterId, res);
+        case "newsletter": {
+          let newId = pathParams[2];   
+          getNewsletterHtmlById(newId, res);
           break;
-        case "historia":
+        } 
+        /*case "historia":
           break;
         case "pumas":
           break;
         case "valores":
           break;
-        case "calendario":
-          break;      
+        case "calendario": 
+          break;       
         case "post":
           break;
         case "camada":
-          break;
-        detault:
-          break;
+          break;*/       
       }   
       
-      function getNewsletterHtmlById(id, res) {        
+      function getNewsletterHtmlById(newsletterId, res) {        
               
-        if (!id) {
-          //return res.status(400).send('No se encontro el Id');
+        if (!newsletterId) {
+          return res.status(400).send('No se encontro el Id');
         }             
 
-        return firestore.collection("cobranzas").doc(id)
-                        .get()
-                        .then( (document) => {        
-            
+        ///contents/newsletter/collection/68WFqTnqqHyMWeH9iGsn
+
+        return firestore.collection("contents")
+          .doc("newsletter").collection("collection")
+          .doc(newsletterId).get().then( (document) => {        
+
+              
           if (document.exists) {
 
             let docId = document.id;
@@ -673,10 +631,10 @@
             console.log("_________________________");
             console.log(htmlString);
             
-            //return res.status(200).send(htmlString);
+            return res.status(200).send(htmlString);
           
           } else {
-            //return res.status(403).send("Document do not exit");
+            return res.status(403).send("Document do not exit");
           }        
 
         }).catch((error) => {    
@@ -710,7 +668,7 @@
         _html = _html + _script + '</head>';
         
         return _html;
-    } */
+      } 
 
-  
+    });
 
