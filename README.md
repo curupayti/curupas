@@ -174,6 +174,10 @@ Inside functions -> import folder there is an import.js file. place the download
 ```sh
 node import.js emulate contents.json
 ```
+<p align="center">
+  <img src="images/emulator.png" alt="Data imported"/>
+</p>  
+
 TODO: Fix formats
 
 Bug solve
