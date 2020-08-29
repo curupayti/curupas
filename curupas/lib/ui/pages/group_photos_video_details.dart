@@ -133,6 +133,7 @@ class _GroupMediaDetailsState extends State<GroupMediaDetails> {
           setState(() {
             _chewieController = ChewieController(
               videoPlayerController: _controller,
+              aspectRatio: _controller.value.aspectRatio,
               looping: false,
               allowFullScreen: true,
               allowMuting: true,

@@ -7,9 +7,9 @@
 	<key>REVERSED_CLIENT_ID</key>
 	<string>com.googleusercontent.apps.813267916846-slqq0hnltbjdlba5golhtf927nup7cvs</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>813267916846-p9b04msu31o6ch4a865c9632u2ngr1gs.apps.googleusercontent.com</string>
+	<string>813267916846-gt4fsracj8r5lt9lbpju5ud1a0gpo9ab.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyCV99EbtbC8LshDDajAdy0CPEzx7AR97ck</string>
+	<string>AIzaSyAbd5of_E_vsvSFgOa_okGCfe7-T2Jhi5M</string>
 	<key>GCM_SENDER_ID</key>
 	<string>813267916846</string>
 	<key>PLIST_VERSION</key>
@@ -31,7 +31,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:813267916846:ios:7967fc279fae87dcaa67bf</string>
+	<string>1:813267916846:ios:e13602882e535b21aa67bf</string>
 	<key>DATABASE_URL</key>
 	<string>https://curupas-app.firebaseio.com</string>
 </dict>

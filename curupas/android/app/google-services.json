@@ -8,18 +8,34 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:813267916846:android:f92d771e0e6e6930aa67bf",
+        "mobilesdk_app_id": "1:813267916846:android:a696c549cc735f1eaa67bf",
         "android_client_info": {
           "package_name": "com.curupayti.curupas"
         }
       },
       "oauth_client": [
         {
-          "client_id": "813267916846-muk6nt6snpv8f9jq6du5qc193kpq9rig.apps.googleusercontent.com",
+          "client_id": "813267916846-gt4fsracj8r5lt9lbpju5ud1a0gpo9ab.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.curupayti.curupas",
-            "certificate_hash": "8295ea54b448945b3eb3c5474a11df5560f31b2e"
+            "certificate_hash": "b32e7f3c8881f746ffa5a7767a52fea48aa38fa3"
+          }
+        },
+        {
+          "client_id": "813267916846-j3kfnhaauie5qurrv9sm9c102l1gjqhk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.curupayti.curupas",
+            "certificate_hash": "b6abda9ed24885b4d0a33cdddad4b8f0ddfe9702"
+          }
+        },
+        {
+          "client_id": "813267916846-d8qffo3kn2gl1j3kma0hs82ifg87ghm3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.curupayti.curupas",
+            "certificate_hash": "cf7c2599ea7aa044b6eda95523b8f3c4b9ebad64"
           }
         },
         {
@@ -29,15 +45,22 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAQGGQ2IF1FVyWU8ia0jx8iCu6nVZRM-6c"
+          "current_key": "AIzaSyDjSrWxXE7XZ2yKBl1bNJVWrbZuAgc1wz8"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "813267916846-a98om8f0l9uui77o8jnfu80b3tc0msde.apps.googleusercontent.com",
+              "client_id": "813267916846-ohh2dmalgh5rvm0dsj4kp5qfo6onhmg6.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "813267916846-slqq0hnltbjdlba5golhtf927nup7cvs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.curupayti.curupas"
+              }
             }
           ]
         }

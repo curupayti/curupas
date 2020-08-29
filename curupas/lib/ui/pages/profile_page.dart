@@ -60,7 +60,9 @@ class _ProfilePageState extends State<ProfilePage> {
     _birthdayController.text = _globals.user.birthday;
 
     _avatarImage = new DecorationImage(
-      image: new NetworkImage(_globals.user.thumbnailPictureURL),
+      image: new NetworkImage(_globals.user.thumbnailPictureURL != null
+          ? _globals.user.thumbnailPictureURL
+          : ""),
       fit: BoxFit.cover,
     );
 
@@ -134,10 +136,10 @@ class ProfilePageScreen extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                         gradient: LinearGradient(
-                      colors: [Colors.green, Colors.blue],
-                      //begin: Alignment.topCenter,
-                      //end:Alignment.bottomCenter
-                    )),
+                          colors: [Colors.green, Colors.blue],
+                          //begin: Alignment.topCenter,
+                          //end:Alignment.bottomCenter
+                        )),
                     child: TabBarView(
                       children: [
                         Container(
@@ -180,7 +182,7 @@ class ProfilePageScreen extends StatelessWidget {
           child: new ListTile(
             leading: CircleAvatar(
               backgroundImage:
-                  NetworkImage(_globals.notifications[index].thumbnailImageURL),
+              NetworkImage(_globals.notifications[index].thumbnailImageURL),
             ),
             title: new Text(
               _globals.notifications[index].title,
@@ -219,7 +221,9 @@ class ProfilePageScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => NotificationDetails(notification: _globals.notifications[index],),
+                  builder: (context) => NotificationDetails(
+                    notification: _globals.notifications[index],
+                  ),
                 ),
               );
             },
@@ -298,7 +302,7 @@ class UpperSection extends StatelessWidget {
                       height: 120.0,
                       decoration: new BoxDecoration(
                         shape: BoxShape.circle,
-                        image: parent._avatarImage,
+                        image: parent != null && parent._avatarImage != null ? parent._avatarImage : "",
                       ),
                     ),
                   ],
@@ -328,7 +332,7 @@ class UpperSection extends StatelessWidget {
                 height: 16.0,
               ),
               Text(
-                _globals.user.name,
+                _globals.user.name != null ? _globals.user.name: "",
                 style: TextStyle(
                   fontSize: 30.0,
                 ),
