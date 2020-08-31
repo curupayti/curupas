@@ -71,7 +71,7 @@ Follow the wizard and aswer accordingly.
 | Emulators | Which port do you want to use for the hosting emulator? | ENTER (5000) |
 | Emulators | Would you like to download the emulators now? | Y |
 
-To run Visual Studio Code with root access command
+To run Visual Studio Code with root access command. Notice when it runs disable git not to ask any more about it otherwise you can reach the point of having to compare each time there is a modification. Remove git activity from VS.
 
 ```sh
 sudo code --user-data-dir="~/.vscode-root"
