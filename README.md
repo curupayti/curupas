@@ -61,7 +61,7 @@ Follow the wizard and aswer accordingly.
 | Functions | File functions/package.json already exists. Overwrite?  | ENTER (N) |
 | Functions | File functions/index.js already exists. Overwrite?  | ENTER (N) |
 | Functions | File functions/.gitignore already exists. Overwrite?  | ENTER (N) |
-| Functions | Do you want to install dependencies with npm now?  | ENTER (Y) |
+| Functions | Do you want to install dependencies with npm now?  | Y |
 | Hosting |  What do you want to use as your public directory?  | ENTER (public) |
 | Hosting |  Configure as a single-page app (rewrite all urls to /index.html)?  | ENTER (N) |
 | Hosting |  File public/404.html already exists. Overwrite?  | ENTER (N) |
