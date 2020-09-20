@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:curupas/business/auth.dart';
 import 'package:curupas/models/credit_card.dart';
 import 'package:curupas/ui/pages/notification_details.dart';
 import 'package:curupas/ui/widgets/credit_card.dart';
 import 'package:curupas/ui/widgets/flat_button.dart';
+import 'package:curupas/utils/toast_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,7 +15,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage({Key key}) : super(key: key);
@@ -27,13 +31,13 @@ var color2 = Color(0xFF6559d4);
 var profileImage = NetworkImage(
     'https://static1.squarespace.com/static/55f45174e4b0fb5d95b07f39/t/5aec4511aa4a991e53e6c044/1525433627644/Alexandra+Agoston+archives.jpg?format=1000w');
 
-bool _status = true;
+bool _status = false;
 
-final TextEditingController _fullnameController = new TextEditingController();
-final TextEditingController _groupController = new TextEditingController();
-final TextEditingController _emailController = new TextEditingController();
-final TextEditingController _phoneController = new TextEditingController();
-final TextEditingController _birthdayController = new TextEditingController();
+TextEditingController _fullnameController = new TextEditingController();
+TextEditingController _groupController = new TextEditingController();
+TextEditingController _emailController = new TextEditingController();
+TextEditingController _phoneController = new TextEditingController();
+TextEditingController _birthdayController = new TextEditingController();
 
 class _ProfilePageState extends State<ProfilePage> {
   DecorationImage _avatarImage;
@@ -302,7 +306,9 @@ class UpperSection extends StatelessWidget {
                       height: 120.0,
                       decoration: new BoxDecoration(
                         shape: BoxShape.circle,
-                        image: parent != null && parent._avatarImage != null ? parent._avatarImage : "",
+                        image: parent != null && parent._avatarImage != null
+                            ? parent._avatarImage
+                            : "",
                       ),
                     ),
                   ],
@@ -332,7 +338,7 @@ class UpperSection extends StatelessWidget {
                 height: 16.0,
               ),
               Text(
-                _globals.user.name != null ? _globals.user.name: "",
+                _globals.user.name != null ? _globals.user.name : "",
                 style: TextStyle(
                   fontSize: 30.0,
                 ),
@@ -517,10 +523,19 @@ void updateAvatar(BuildContext context, _ProfilePageState parent, File _file) {
   });
 }
 
-class ProfileDataWidget extends StatelessWidget {
+class ProfileDataWidget extends StatefulWidget {
   const ProfileDataWidget({
     Key key,
   }) : super(key: key);
+
+  @override
+  _ProfileDataWidgetState createState() => _ProfileDataWidgetState();
+}
+
+class _ProfileDataWidgetState extends State<ProfileDataWidget> {
+
+  DateTime todayDate = DateTime.now();
+  DateTime selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -563,6 +578,7 @@ class ProfileDataWidget extends StatelessWidget {
                         enabled: !_status,
                         autofocus: !_status,
                         controller: _fullnameController,
+
                       ),
                     ),
                   ],
@@ -598,6 +614,7 @@ class ProfileDataWidget extends StatelessWidget {
                         enabled: !_status,
                         autofocus: !_status,
                         controller: _groupController,
+                        keyboardType: TextInputType.number,
                       ),
                     ),
                   ],
@@ -685,25 +702,110 @@ class ProfileDataWidget extends StatelessWidget {
                     ),
                   ],
                 )),
-            Padding(
-                padding: EdgeInsets.only(left: 25.0, right: 110.0, top: 2.0),
-                child: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    new Flexible(
-                      child: new TextField(
-                        decoration: const InputDecoration(
-                            hintText: "Ingresa tu fecha de nacimiento"),
-                        enabled: !_status,
-                        controller: _birthdayController,
+            GestureDetector(
+              onTap: (){
+                _selectDate(context);
+              },
+              child: AbsorbPointer(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 2.0),
+                  child: new Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Flexible(
+                        child: new TextField(
+                          decoration: const InputDecoration(
+                              hintText: "Ingresa tu fecha de nacimiento"),
+                          enabled: !_status,
+                          controller: _birthdayController,
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            GestureDetector(
+              onTap: (){
+                _updateUserProfile();
+              },
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(15),
+                margin: EdgeInsets.all(15),
+                color: Color.fromRGBO(223, 0, 9, 1),
+                height: 50,
+                child: Center(
+                  child: Text(
+                    "Update",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 18,
                     ),
-                  ],
-                )),
+                  ),
+                ),
+              ),
+            )
           ],
         ),
       ),
     );
+  }
+
+  Future<Null> _selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: todayDate,
+      firstDate: todayDate,
+      lastDate: todayDate,
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Color.fromRGBO(223, 0, 9, 1),
+            accentColor: Color.fromRGBO(223, 0, 9, 1),
+            colorScheme: ColorScheme.light(
+              primary: Color.fromRGBO(223, 0, 9, 1),
+            ),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child,
+        );
+      },
+    );
+    if (picked != null && picked != selectedDate)
+      setState(() {
+        _birthdayController = TextEditingController(
+            text: DateFormat("dd MMM, yyyy").format(picked));
+        selectedDate = picked;
+      });
+  }
+
+  _updateUserProfile() async {
+    prefs = await SharedPreferences.getInstance();
+    String userId = prefs.getString('userId');
+
+    Map<String, dynamic> data = <String, dynamic>{
+      'name': _fullnameController.text.trim(),
+      'year': _groupController.text.trim(),
+      'email': _emailController.text.trim(),
+      'phone': _phoneController.text.trim(),
+      'birthday': _birthdayController.text.trim(),
+    };
+    Auth.updateUser(userId, data).then((user) async {
+      if (user != null) {
+        _fullnameController.text = _globals.user.name;
+        _groupController.text = _globals.group.year;
+        _emailController.text = _globals.user.email;
+        _phoneController.text = _globals.user.phone;
+        _birthdayController.text = _globals.user.birthday;
+        AlertToast.showToastMsg("Profile updated successfully");
+      }
+    });
+
   }
 }
 
@@ -775,7 +877,9 @@ class CreditCardWidget extends StatelessWidget {
                 height: 16.0,
               ),
               Text(
-                _globals.user.name,
+                _globals.user != null && _globals.user.name != null
+                    ? _globals.user.name
+                    : "",
                 style: TextStyle(
                   fontSize: 30.0,
                 ),
