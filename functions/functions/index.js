@@ -10,14 +10,13 @@
   const { JSDOM } = jsdom;
   
   const cors = require('cors')({ origin: true });
+  var path = require('path');       
 
   const mkdirp = require('mkdirp-promise');
   const request = require('request');
 
   const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; 
-
-  const express = require('express');
-  const app = express();
+  
 
   var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
   var db_url = "https://curupas-app.firebaseio.com";
@@ -44,8 +43,102 @@
     appId: "1:813267916846:web:f1780b6ac9f8079baa67bf",
     measurementId: "G-NK6KP62FLM"
   };
-
   firebase.initializeApp(firebaseConfig);
+
+    const express = require('express');
+    var engines = require('consolidate');
+
+    var OPTION_SHARE  = 'share';            
+
+    const app = express();
+    app.engine('html', engines.hogan); 
+    app.set('html', path.join(__dirname, 'html'));       
+    app.use(cors);   
+      
+    app.get('*', (req, res) => {
+        
+      console.log("<<<<<<<<<<<<<<<<<<<<======================");
+
+      console.log("req.path:", req.path); 
+      
+      var pathParam = req.path.split('/')[1];
+
+      console.log("pathParam:" + pathParam);       
+      
+      const pathParams = req.path.split('/');
+      var module = pathParams[2];
+      var url = req.url;
+      var urlParams;
+      
+      if (url.indexOf('?') !== -1) {
+        let params = url.split("?");
+        urlParams = getJsonFromUrl(params[1]);        
+      }     
+
+      var static_url;     
+
+      if ( pathParam === OPTION_SHARE ) {      
+
+        if (urlParams) {
+          return res.render(static_url, urlParams); 
+        } else {
+          return res.render(static_url); 
+        }
+
+      } else {         
+        
+        const userAgent = req.headers['user-agent'].toLowerCase();
+
+        let views = path.join(__dirname, 'html');      
+        let indexHTML = fs.readFileSync(views + '/share/share.html').toString();     
+
+        let appPath = "apps/" + pathParam;
+
+        console.log("appPath: " + appPath);
+
+        firestore.doc(appPath)
+        .get().then(document => {
+                        
+            var ogPlaceholder = '<meta name="functions-insert-dynamic-og">';          
+            var DesignAppIdPlaceholder = "<functions-path-design-app-id>";       
+
+              let meta_title = document.data().meta_title;
+              let meta_desc = document.data().meta_desc;
+              let meta_image = document.data().meta_image;
+              let path_design = document.data().path_design;
+
+              let html_meta = getOpenGraph(meta_image, meta_desc, meta_title);
+
+              console.log(html_meta);
+              
+              indexHTML = indexHTML.replace(ogPlaceholder, html_meta);
+              indexHTML = indexHTML.replace(DesignAppIdPlaceholder, path_design);         
+
+              res.status(200).send(indexHTML);    
+              
+              return indexHTML;
+
+        }).catch((error) => {
+          console.log("error: " + error);
+          return error;
+
+        });
+
+      }
+
+      function getJsonFromUrl(url) {
+        if (!url) url = location.search;
+        var query = url.substr(1);
+        var result = {};
+        query.split("&").forEach(function(part) {
+          var item = part.split("=");
+          result[item[0]] = decodeURIComponent(item[1]);
+        });
+        return result;
+      }
+     
+  });
+
 
   // Max height and width of the thumbnail in pixels.
   const THUMB_MAX_HEIGHT = 200;
@@ -456,13 +549,10 @@
       });  
 
   }); 
-
-
   
   exports.backup = functions.https.onRequest((request, response) => {  
 
-    let _collection = request.body.collection; 
-    
+    let _collection = request.body.collection;   
 
     console.log(_collection);
     
@@ -672,3 +762,17 @@
 
     });
 
+
+    //var authClient = require("./key/client_secret_813267916846-on33ikhqtg73ki6upcs6d3la2sjiof77.apps.googleusercontent.com.json");
+    //const CREDENTIALS = readJson(`${__dirname}/key/client_secret_813267916846-on33ikhqtg73ki6upcs6d3la2sjiof77.apps.googleusercontent.com.json`);
+
+    /*const {google} = require('googleapis');    
+    const {authenticate} = require('@google-cloud/local-auth');
+    const urlParse = require('url-parse');
+    const queryParse = require('query-string'); 
+    const bodyParser = require('body-parser');
+    const axios = requier('axios'); 
+
+    exports.auth = functions.https.onRequest((req, res) => {
+    
+    });*/

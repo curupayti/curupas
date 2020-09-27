@@ -15,7 +15,11 @@
   "dependencies": {
     "@crapougnax/firestore-export-import": "^0.3.0",
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "@google-cloud/local-auth": "^1.0.0",
+    "axios": "^0.20.0",
+    "body-parser": "^1.19.0",
     "child-process-promise": "^2.2.1",
+    "consolidate": "^0.16.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "express": "^4.17.1",
@@ -24,13 +28,17 @@
     "firebase-tools": "^8.4.3",
     "firepad": "^1.5.10",
     "firestore-export-import": "^0.6.0",
+    "googleapis": "^59.0.0",
     "jsdom": "^16.2.2",
     "mkdirp-promise": "^5.0.1",
+    "path": "^0.12.7",
+    "query-string": "^6.13.1",
     "request": "^2.88.2",
-    "request-promise": "^4.2.5"
+    "request-promise": "^4.2.5",
+    "url-parse": "^1.4.7"
   },
   "devDependencies": {
-    "@firebase/testing": "^0.20.5",
+    "@firebase/testing": "^0.20.11",
     "eslint": "^5.16.0",
     "eslint-plugin-promise": "^4.0.1",
     "firebase-functions-test": "^0.2.0"
