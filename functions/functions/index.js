@@ -11,11 +11,15 @@
   
   const cors = require('cors')({ origin: true });
   var path = require('path');       
+  var fs = require('fs'); 
 
   const mkdirp = require('mkdirp-promise');
   const request = require('request');
 
   const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; 
+
+  const express = require('express');
+  var engines = require('consolidate');
   
 
   var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
@@ -45,99 +49,110 @@
   };
   firebase.initializeApp(firebaseConfig);
 
-    const express = require('express');
-    var engines = require('consolidate');
+  var OPTION_SHARE  = 'share';            
 
-    var OPTION_SHARE  = 'share';            
-
-    const app = express();
-    app.engine('html', engines.hogan); 
-    app.set('html', path.join(__dirname, 'html'));       
-    app.use(cors);   
+  const app = express();
+  app.engine('html', engines.hogan); 
+  app.set('views', path.join(__dirname, 'views'));    
+  app.use(cors);   
+    
+  app.get('*', (req, res) => {
       
-    app.get('*', (req, res) => {
-        
-      console.log("<<<<<<<<<<<<<<<<<<<<======================");
+    console.log("<<<<<<<<<<<<<<<<<<<<======================");
 
-      console.log("req.path:", req.path); 
+    console.log("req.path:", req.path); 
+    
+    var pathParam = req.path.split('/')[1];
+
+    console.log("pathParam:" + pathParam);           
+     
+    var url = req.url;
+    var urlParams;
+    
+    if (url.indexOf('?') !== -1) {
+      let params = url.split("?");
+      urlParams = getJsonFromUrl(params[1]);        
+    }     
+
+    var static_url;     
+
+    if ( pathParam === OPTION_SHARE ) {    
+
+      var document = req.path.split('/')[1];
       
-      var pathParam = req.path.split('/')[1];
+      const userAgent = req.headers['user-agent'].toLowerCase();
 
-      console.log("pathParam:" + pathParam);       
-      
-      const pathParams = req.path.split('/');
-      var module = pathParams[2];
-      var url = req.url;
-      var urlParams;
-      
-      if (url.indexOf('?') !== -1) {
-        let params = url.split("?");
-        urlParams = getJsonFromUrl(params[1]);        
-      }     
+      let views = path.join(__dirname, 'views');      
+      let indexHTML = fs.readFileSync(views + '/share.html').toString();     
 
-      var static_url;     
+      let appPath = "share/" + document;
+      console.log("document: " + document);
 
-      if ( pathParam === OPTION_SHARE ) {      
-
-        if (urlParams) {
-          return res.render(static_url, urlParams); 
-        } else {
-          return res.render(static_url); 
-        }
-
-      } else {         
-        
-        const userAgent = req.headers['user-agent'].toLowerCase();
-
-        let views = path.join(__dirname, 'html');      
-        let indexHTML = fs.readFileSync(views + '/share/share.html').toString();     
-
-        let appPath = "apps/" + pathParam;
-
-        console.log("appPath: " + appPath);
-
-        firestore.doc(appPath)
-        .get().then(document => {
-                        
+      firestore.doc(appPath)
+      .get().then(document => {
+                      
             var ogPlaceholder = '<meta name="functions-insert-dynamic-og">';          
             var DesignAppIdPlaceholder = "<functions-path-design-app-id>";       
 
-              let meta_title = document.data().meta_title;
-              let meta_desc = document.data().meta_desc;
-              let meta_image = document.data().meta_image;
-              let path_design = document.data().path_design;
+            var document_path = document.data().document_path;
 
-              let html_meta = getOpenGraph(meta_image, meta_desc, meta_title);
+            firestore.doc(document_path)
+            .get().then(document => {
 
-              console.log(html_meta);
-              
-              indexHTML = indexHTML.replace(ogPlaceholder, html_meta);
-              indexHTML = indexHTML.replace(DesignAppIdPlaceholder, path_design);         
+                let description = document.data().description;
+                let icon_original = document.data().icon_original;
+                let name = document.data().name;
 
-              res.status(200).send(indexHTML);    
-              
-              return indexHTML;
+                let html_meta = getOpenGraph(icon_original, description, name);
 
-        }).catch((error) => {
-          console.log("error: " + error);
-          return error;
+                console.log(html_meta);               
+                
+                indexHTML = indexHTML.replace(ogPlaceholder, html_meta);
+                indexHTML = indexHTML.replace(DesignAppIdPlaceholder, document_path);         
 
-        });
+                res.status(200).send(indexHTML);    
+                
+                return indexHTML;
 
+              }).catch((error) => {
+                console.log("error: " + error);
+                return error;
+        
+              }); 
+
+      }).catch((error) => {
+        console.log("error: " + error);
+        return error;
+
+      });     
+
+    } else {         
+
+
+      if (urlParams) {
+        return res.render(static_url, urlParams); 
+      } else {
+        return res.render(static_url); 
       }
+      
+      
 
-      function getJsonFromUrl(url) {
-        if (!url) url = location.search;
-        var query = url.substr(1);
-        var result = {};
-        query.split("&").forEach(function(part) {
-          var item = part.split("=");
-          result[item[0]] = decodeURIComponent(item[1]);
-        });
-        return result;
-      }
-     
+    }
+
+    function getJsonFromUrl(url) {
+      if (!url) url = location.search;
+      var query = url.substr(1);
+      var result = {};
+      query.split("&").forEach(function(part) {
+        var item = part.split("=");
+        result[item[0]] = decodeURIComponent(item[1]);
+      });
+      return result;
+    }
+    
   });
+
+  exports.app = functions.https.onRequest(app);
 
 
   // Max height and width of the thumbnail in pixels.
@@ -197,8 +212,7 @@
       await file.download({destination: tempLocalFile});
       await spawn('convert', [tempLocalFile, '-thumbnail', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});            
       await bucket.upload(tempLocalThumbFile, {destination: thumbFilePath, metadata: metadata});
-      
-      
+            
       fs.unlinkSync(tempLocalFile);
       fs.unlinkSync(tempLocalThumbFile);
       

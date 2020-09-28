@@ -28,6 +28,7 @@
     "firebase-tools": "^8.4.3",
     "firepad": "^1.5.10",
     "firestore-export-import": "^0.6.0",
+    "fs": "0.0.1-security",
     "googleapis": "^59.0.0",
     "jsdom": "^16.2.2",
     "mkdirp-promise": "^5.0.1",
