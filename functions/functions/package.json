@@ -15,7 +15,6 @@
   "dependencies": {
     "@crapougnax/firestore-export-import": "^0.3.0",
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
-    "@google-cloud/local-auth": "^1.0.0",
     "axios": "^0.20.0",
     "body-parser": "^1.19.0",
     "child-process-promise": "^2.2.1",
@@ -29,11 +28,13 @@
     "firepad": "^1.5.10",
     "firestore-export-import": "^0.6.0",
     "fs": "0.0.1-security",
+    "google-auth-library": "^6.1.0",
     "googleapis": "^59.0.0",
     "jsdom": "^16.2.2",
     "mkdirp-promise": "^5.0.1",
     "path": "^0.12.7",
     "query-string": "^6.13.1",
+    "readline": "^1.3.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "url-parse": "^1.4.7"

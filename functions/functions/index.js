@@ -20,8 +20,12 @@
 
   const express = require('express');
   var engines = require('consolidate');
-  
 
+  var readline = require('readline');
+  var {google} = require('googleapis');
+  var OAuth2 = google.auth.OAuth2;
+  var serviceAccountYoutube = require("./key/service_account_curupas-app-4c24d3150d21.json");
+    
   var serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
   var db_url = "https://curupas-app.firebaseio.com";
   
@@ -47,14 +51,239 @@
     appId: "1:813267916846:web:f1780b6ac9f8079baa67bf",
     measurementId: "G-NK6KP62FLM"
   };
-  firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);  
+
+  exports.streamingFeed = functions.firestore
+  .document('streaming/control')
+  .onUpdate( async (change, context) => { 
+
+    //https://stackoverflow.com/questions/63444245/typeerror-cannot-read-property-redirect-uris-of-undefined-youtube-data-api-au
+    //https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=UCeLNPJoPAio9rT2GAdXDVmw&key=AIzaSyCC9bDy5SitFtyT0A0SIryxOQuXmfxR3bk
+
+    /*
+    curl \
+    'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=UUwB4tpXCMWi-bw5HpMlY6Bg&key=[YOUR_API_KEY]' \
+    --header 'Authorization: Bearer [YOUR_ACCESS_TOKEN]' \
+    --header 'Accept: application/json' \
+    --compressed  
+    */
+
+    const newValue = change.after.data();       
+    let fetch_code_trigger  = newValue.fetch_code_trigger;     
+    let fetch_token_trigger = newValue.fetch_token_trigger;          
+
+    console.log("fetch_code_trigger: " + fetch_code_trigger);
+    console.log("fetch_token_trigger: " + fetch_token_trigger);
+
+    var client_secret = path.join(__dirname, '/key/client_secret.json');
+
+    if ( fetch_token_trigger ) {   
+      
+      fs.readFile(client_secret, async function processClientSecrets(err, content) {
+        
+        if (err) {
+          console.log('Error loading client secret file: ' + err);
+          return;
+        }
+
+        let credentials = JSON.parse(content);
+      
+        let clientSecret = credentials.web.client_secret;
+        let clientId = credentials.web.client_id;
+        let redirectUrl = credentials.web.redirect_uris[0];
+        var oauth2Client = new OAuth2(clientId, clientSecret, redirectUrl);
+
+        let code = newValue.code; 
+
+        console.log("code: " + code);
+        
+        try {
+
+            const _tokens = await oauth2Client.getToken(code);
+
+            //var tokens = JSON.stringify(_tokens);
+            //console.log("tokens: " + JSON.stringify(tokens));
+
+            var _time =  new Date();
+
+            firestore.collection('streaming').doc("control").set({ 
+              tokens: _tokens.tokens,
+              fetch_token_trigger: false,
+              last_update: _time 
+            },{ merge: true }).catch((error) => {
+              console.log('Error setting collection:', error);
+              return error;
+            });
+
+        } catch (error) {
+
+          console.log("errror: " + JSON.stringify(error));
+
+        }
+
+      });
+
+    }
+    
+    if ( fetch_code_trigger ) {  
+
+      let youtube_api_token = newValue.youtube_api_token;      
+
+       // If modifying these scopes, delete your previously saved credentials
+        // at ~/.credentials/youtube-nodejs-quickstart.json
+        var SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
+        var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
+            process.env.USERPROFILE) + '/.credentials/';
+        var TOKEN_PATH = TOKEN_DIR + 'youtube-nodejs-quickstart.json';
+
+        // Load client secrets from a local file.
+        fs.readFile(client_secret, function processClientSecrets(err, content) {
+          if (err) {
+            console.log('Error loading client secret file: ' + err);
+            return;
+          }
+          // Authorize a client with the loaded credentials, then call the YouTube API.
+          authorize(JSON.parse(content));//, getChannel);
+        });
+
+        /**
+         * Create an OAuth2 client with the given credentials, and then execute the
+         * given callback function.
+         *
+         * @param {Object} credentials The authorization client credentials.
+         * @param {function} callback The callback to call with the authorized client.
+         */
+        function authorize(credentials, callback) {
+          
+          let clientSecret = credentials.web.client_secret;
+          let clientId = credentials.web.client_id;
+          let redirectUrl = credentials.web.redirect_uris[0];
+          var oauth2Client = new OAuth2(clientId, clientSecret, redirectUrl);
+
+          // Check if we have previously stored a token.
+          fs.readFile(TOKEN_PATH, function(err, token) {
+            if (err) {
+              getNewToken(oauth2Client, callback);
+            } else {
+              oauth2Client.credentials = JSON.parse(token);
+              callback(oauth2Client);
+            }
+          });
+        }
+
+        /**
+        * Get and store new token after prompting for user authorization, and then
+        * execute the given callback with the authorized OAuth2 client.
+        *
+        * @param {google.auth.OAuth2} oauth2Client The OAuth2 client to get token for.
+        * @param {getEventsCallback} callback The callback to call with the authorized
+        *     client.
+        */
+        function getNewToken(oauth2Client, callback) {
+
+          var authUrl = oauth2Client.generateAuthUrl({
+            access_type: 'offline',
+            prompt: 'consent',
+            scope: 'https://www.googleapis.com/auth/analytics.readonly'
+          });
+
+          console.log('Saving url: ', authUrl);
+
+          var _time =  new Date();
+
+          //var base64 = Buffer.from(authUrl).toString('base64')
+
+          firestore.collection('streaming').doc("control").set({ 
+            url_code: authUrl, 
+            fetch_code_trigger: false,                               
+            last_update: _time 
+          },{ merge: true }).catch((error) => {
+            console.log('Error setting collection:', error);
+            return error;
+          });
+
+          /*var rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+          });
+          rl.question('Enter the code from that page here: ', function(code) {
+            rl.close();
+            oauth2Client.getToken(code, function(err, token) {
+              if (err) {
+                console.log('Error while trying to retrieve access token', err);
+                return;
+              }
+              oauth2Client.credentials = token;
+              storeToken(token);
+              callback(oauth2Client);
+            });
+          });*/
+        }
+
+        /**
+        * Store token to disk be used in later program executions.
+        *
+        * @param {Object} token The token to store to disk.
+        */
+        function storeToken(token) {
+          try {
+            fs.mkdirSync(TOKEN_DIR);
+          } catch (err) {
+            if (err.code != 'EEXIST') {
+              throw err;
+            }
+          }
+          fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+            if (err) throw err;
+            console.log('Token stored to ' + TOKEN_PATH);
+          });
+        }
+
+        /**
+        * Lists the names and IDs of up to 10 files.
+        *
+        * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+        */
+        function getChannel(auth) {
+          var service = google.youtube('v3');
+          service.channels.list({
+            auth: auth,
+            part: 'snippet,contentDetails,statistics',
+            forUsername: 'GoogleDevelopers'
+          }, function(err, response) {
+            if (err) {
+              console.log('The API returned an error: ' + err);
+              return;
+            }
+            var channels = response.data.items;
+            if (channels.length == 0) {
+              console.log('No channel found.');
+            } else {
+              console.log('This channel\'s ID is %s. Its title is \'%s\', and ' +
+                          'it has %s views.',
+                          channels[0].id,
+                          channels[0].snippet.title,
+                          channels[0].statistics.viewCount);
+            }
+          });
+        } 
+               
+
+    }
+
+    
+
+    return newValue;
+
+  }); 
 
   var OPTION_SHARE  = 'share';            
+  var OPTION_OAUTH2CALLBACK  = 'oauth2callback';            
 
   const app = express();
   app.engine('html', engines.hogan); 
   app.set('views', path.join(__dirname, 'views'));    
-  app.use(cors);   
+  app.use(cors);     
     
   app.get('*', (req, res) => {
       
@@ -64,7 +293,12 @@
     
     var pathParam = req.path.split('/')[1];
 
-    console.log("pathParam:" + pathParam);           
+    console.log("pathParam:" + pathParam);   
+    
+    if ( pathParam === 'favicon.ico' ) {
+      res.status(204).end();
+      return;
+    }
      
     var url = req.url;
     var urlParams;
@@ -74,9 +308,27 @@
       urlParams = getJsonFromUrl(params[1]);        
     }     
 
-    var static_url;     
+    var static_url;   
+    
+    if ( pathParam === OPTION_OAUTH2CALLBACK ) {       
+      
+      console.log(OPTION_OAUTH2CALLBACK + " : " + JSON.stringify(urlParams));
 
-    if ( pathParam === OPTION_SHARE ) {    
+      var _time =  new Date();
+
+      firestore.collection('streaming').doc("control").set({ 
+        code: urlParams.ode,
+        scope: urlParams.scope,    
+        fetch_code_trigger: false,        
+        last_update: _time 
+      },{ merge: true }).catch((error) => {
+        console.log('Error setting collection:', error);
+        return error;
+      });
+
+      res.status(200).send(true);        
+
+    } else if ( pathParam === OPTION_SHARE ) {    
 
       var document = req.path.split('/')[1];
       
@@ -128,14 +380,13 @@
 
     } else {         
 
+        //urlParams
 
       if (urlParams) {
         return res.render(static_url, urlParams); 
       } else {
         return res.render(static_url); 
       }
-      
-      
 
     }
 
