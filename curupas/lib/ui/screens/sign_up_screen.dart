@@ -7,6 +7,7 @@
   import 'package:flutter/cupertino.dart';
   import "package:flutter/material.dart";
   import 'package:flutter/rendering.dart';
+  import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
   import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:curupas/business/auth.dart';
   import 'package:curupas/business/validator.dart';
@@ -83,6 +84,11 @@
       super.initState();
 
       _getLocaton();
+
+      // Subscribe
+      KeyboardVisibility.onChange.listen((bool visible) {
+        print('Keyboard visibility update. Is visible: ${visible}');
+      });
 
       location.onLocationChanged().listen((LocationData currentLocation) {
         print(currentLocation.latitude);
@@ -594,7 +600,8 @@
                   });
                   showDialog(
                     context: context,
-                    builder: (BuildContext context) => new SMSDialog(userId: uID),
+                    builder: (BuildContext context) =>
+                      new SMSDialog(userId: uID),
                   );
                 }
               }

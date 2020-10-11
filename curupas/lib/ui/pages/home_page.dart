@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:curupas/ui/widgets/museum.dart';
 import 'package:curupas/ui/widgets/newsletter/newsletter_widget.dart';
-import 'package:curupas/ui/widgets/pumas.dart';
+import 'package:curupas/ui/widgets/pumas/pumas_widget.dart';
+import 'package:curupas/ui/widgets/valores/valores_widget.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -42,7 +43,7 @@ class _HomePageState extends State<HomePage> {
       String _event = event.toString();
       if (_event.contains("home")) {
         _counting = _counting + 1;
-        if (_counting == 5) {
+        if (_counting == 6) {
           _globals.setDataFromGlobal();
           _counting = 0;
         }
@@ -59,6 +60,7 @@ class _HomePageState extends State<HomePage> {
     _globals.getPosts();
     _globals.getMuseums();
     _globals.getPumas();
+    _globals.getValores();
     _globals.getNewsletters();
     Timer(Duration(seconds: 5), () {
       setState(() {
@@ -232,6 +234,7 @@ class HomeBackground extends StatelessWidget {
                   _buildHeader(),
                   _buildPostScroller(),
                   _buildNewsletterTimeline(),
+                  _buildValoresTimeline(),
                   _buildMuseumTimeline(),
                   _buildPumasTimeline(),
                 ],
@@ -374,12 +377,27 @@ class HomeBackground extends StatelessWidget {
   Widget _buildPumasTimeline() {
     return _globals.appData.pumas != null && _globals.appData.pumas.length > 0
         ? Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: SizedBox.fromSize(
-              size: Size.fromHeight(170.0),
-              child: new PumasWidget(pumas: _globals.appData.pumas),
-            ),
-          )
+      padding: const EdgeInsets.only(top: 16.0),
+      child: SizedBox.fromSize(
+        size: Size.fromHeight(170.0),
+        child: new PumasWidget(pumas: _globals.appData.pumas),
+      ),
+    )
         : new Container();
   }
+
+  Widget _buildValoresTimeline() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: SizedBox.fromSize(
+        size: Size.fromHeight(170.0),
+        child: new ValoresWidget(pumas: _globals.appData.valores),
+      ),
+    );
+  }
+
 }
+
+
+
+

@@ -196,7 +196,7 @@ packages:
       name: device_info
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.2+7"
+    version: "0.4.2+8"
   device_info_platform_interface:
     dependency: transitive
     description:
@@ -418,7 +418,7 @@ packages:
       name: flutter_keyboard_visibility
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "3.2.2"
   flutter_launcher_icons:
     dependency: "direct main"
     description:

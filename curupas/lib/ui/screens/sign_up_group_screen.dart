@@ -105,16 +105,16 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
       focusNode: phoneNumberFocusNodeGroup,
     );
 
-    getGroupsList().then((val) => setState(() {
-          _loadingInProgress = false;
-          _groupMenuItems = val;
-          print(_groupMenuItems.length);
-          _currentItem = _groupMenuItems[0].value;
-        }));
-
-    onBackPress = () {
-      Navigator.of(context).pop();
-    };
+    getGroupsList().then((val) =>
+      setState(() {
+        _loadingInProgress = false;
+        _groupMenuItems = val;
+        print(_groupMenuItems.length);
+        _currentItem = _groupMenuItems[0].value;
+      }));
+      onBackPress = () {
+        Navigator.of(context).pop();
+      };
   }
 
   void _enableButton() {

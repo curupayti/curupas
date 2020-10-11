@@ -48,10 +48,6 @@ class _SMSDialogState extends State<SMSDialog> {
   void initState() {
     super.initState();
 
-    Auth.getUserDataForSMS(widget.userId).then((smsUser) {
-      sms = smsUser;
-    });
-
     /*Auth.getUserDataForSMS("Pf64W2FdPmOONv5dIefw9lmFmVY2").then((smsUser) {
         sms = smsUser;
       });*/
@@ -59,25 +55,35 @@ class _SMSDialogState extends State<SMSDialog> {
     //KeyboardVisibilityNotification().addNewListener(
     //  onChange: (bool visible) {
 
-    KeyboardVisibility.onChange.listen(
-      (bool visible) {
-        setState(() {
-          if (visible) {
-            _resendVisibility = false;
-          } else {
-            Duration d = new Duration();
-            sleep(new Duration(seconds: 2));
-            if (!validated) {
-              _messageToShow = _messageInit;
+    Auth.getUserDataForSMS(widget.userId).then((smsUser) {
+      sms = smsUser;
+    });
+
+    try {
+
+      KeyboardVisibility.onChange.listen(
+        (bool visible) {
+          setState(() {
+            if (visible) {
+              _resendVisibility = false;
+            } else {
+              Duration d = new Duration();
+              sleep(new Duration(seconds: 2));
+              if (!validated) {
+                _messageToShow = _messageInit;
+              }
+              _messageStyle = TextStyle(
+                  color: Colors.green, fontSize: ScreenUtil().setSp(50.0));
+              initMessage();
+              _smsGroup.clear();
             }
-            _messageStyle = TextStyle(
-                color: Colors.green, fontSize: ScreenUtil().setSp(50.0));
-            initMessage();
-            _smsGroup.clear();
-          }
-        });
-      },
-    );
+          });
+        },
+      );
+
+    } on Exception catch (error) {
+      print(error.toString());
+    }
 
     _messageToShow = _messageInit;
 

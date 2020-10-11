@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:curupas/models/HTML.dart';
+import 'package:curupas/models/user.dart';
 import 'package:curupas/ui/pages/calendar_page.dart';
 import 'package:curupas/ui/pages/group_page.dart';
 import 'package:curupas/ui/pages/home_page.dart';
@@ -8,10 +9,12 @@ import 'package:curupas/ui/pages/profile_page.dart';
 import 'package:curupas/ui/pages/streaming_page.dart';
 import 'package:curupas/ui/screens/friend_screen.dart';
 import 'package:curupas/ui/widgets/alert_sms_dialog.dart';
+import 'package:device_info/device_info.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:curupas/business/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,51 +75,132 @@ class _MainScreenState extends State<MainScreen> {
 
   TapGestureRecognizer _flutterTapRecognizer;
 
+  static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+  Map<String, dynamic> _deviceData = <String, dynamic>{};
+  var isPhysicalDevice = false;
+
   TextStyle linkStyle = const TextStyle(
     color: Colors.blue,
     decoration: TextDecoration.underline,
     fontSize: 25.0,
   );
 
+  Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
+    return <String, dynamic>{
+      'version.securityPatch': build.version.securityPatch,
+      'version.sdkInt': build.version.sdkInt,
+      'version.release': build.version.release,
+      'version.previewSdkInt': build.version.previewSdkInt,
+      'version.incremental': build.version.incremental,
+      'version.codename': build.version.codename,
+      'version.baseOS': build.version.baseOS,
+      'board': build.board,
+      'bootloader': build.bootloader,
+      'brand': build.brand,
+      'device': build.device,
+      'display': build.display,
+      'fingerprint': build.fingerprint,
+      'hardware': build.hardware,
+      'host': build.host,
+      'id': build.id,
+      'manufacturer': build.manufacturer,
+      'model': build.model,
+      'product': build.product,
+      'supported32BitAbis': build.supported32BitAbis,
+      'supported64BitAbis': build.supported64BitAbis,
+      'supportedAbis': build.supportedAbis,
+      'tags': build.tags,
+      'type': build.type,
+      'isPhysicalDevice': build.isPhysicalDevice,
+      'androidId': build.androidId,
+      'systemFeatures': build.systemFeatures,
+    };
+  }
+
+  Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
+    return <String, dynamic>{
+      'name': data.name,
+      'systemName': data.systemName,
+      'systemVersion': data.systemVersion,
+      'model': data.model,
+      'localizedModel': data.localizedModel,
+      'identifierForVendor': data.identifierForVendor,
+      'isPhysicalDevice': data.isPhysicalDevice,
+      'utsname.sysname:': data.utsname.sysname,
+      'utsname.nodename:': data.utsname.nodename,
+      'utsname.release:': data.utsname.release,
+      'utsname.version:': data.utsname.version,
+      'utsname.machine:': data.utsname.machine,
+    };
+  }
+
+  Future<Map<String, dynamic>> initPlatformState() async {
+
+    Map<String, dynamic> deviceData;
+
+    try {
+      if (Platform.isAndroid) {
+        deviceData = _readAndroidBuildData(await deviceInfoPlugin.androidInfo);
+      } else if (Platform.isIOS) {
+        deviceData = _readIosDeviceInfo(await deviceInfoPlugin.iosInfo);
+      }
+    } on PlatformException {
+      deviceData = <String, dynamic>{
+        'Error:': 'Failed to get platform version.'
+      };
+    }
+
+    return deviceData;
+  }
+
   @override
   void initState() {
     super.initState();
 
-    //_globals.queryDevice();
+    initPlatformState().then((device) {
 
-    isRegistered().then((result) {
-      if (result) {
-        _globals.setFilePickerGlobal();
-        String userId = prefs.getString('userId');
-        _globals.getUserData(userId).then((user) {
-          _firebaseMessaging.getToken().then((token) {
-            if (_globals.user.token != token) {
-              Map<String, dynamic> data = <String, dynamic>{'token': token};
-              Auth.updateUser(_globals.user.userID, data).then((user) async {
+      if (device["isPhysicalDevice"]) {
+        isPhysicalDevice = device["isPhysicalDevice"];
+      }
+
+      isRegistered().then((result) async {
+        if (result) {
+          _globals.setFilePickerGlobal();
+          String userId = prefs.getString('userId');
+          await _globals.getUserData(userId).then((user) async {
+
+            await _firebaseMessaging.getToken().then((token) async {
+              Map<String, dynamic> data = new Map<String, dynamic>();
+              if (isPhysicalDevice) {
+                data['token'] = token;
+              }
+              data['device'] = device;
+              await Auth.updateUser(userId, data).then((User user) async {
                 _globals.user.token = token;
               });
+            });
+
+            _globals.user = user;
+            _globals.initData();
+            _globals.getDrawers();
+
+            if (!user.smsChecked) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) =>
+                new SMSDialog(userId: user.userID),
+              );
+            } else if (!user.accepted) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) =>
+                    _buildNotAcceptedDialog(context),
+              );
             }
           });
+        }
+     });
 
-          _globals.user = user;
-          _globals.initData();
-          _globals.getDrawers();
-
-          if (!user.smsChecked) {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) =>
-              new SMSDialog(userId: user.userID),
-            );
-          } else if (!user.accepted) {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) =>
-                  _buildNotAcceptedDialog(context),
-            );
-          }
-        });
-      }
     });
 
     _home = IconButton(

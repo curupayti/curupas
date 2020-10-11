@@ -1,11 +1,12 @@
 
   import 'package:circular_profile_avatar/circular_profile_avatar.dart';
+import 'package:curupas/models/HTML.dart';
   import 'package:curupas/models/pumas.dart';
   import 'package:flutter/material.dart';
 
   class PumasWidget extends StatelessWidget {
 
-    final List<Pumas> pumas;
+    final List<HTML> pumas;
 
     PumasWidget({Key key, this.pumas}) : super(key: key);
 
@@ -29,20 +30,21 @@
           width: MediaQuery.of(context).size.width,
           child: Center(
             child: ListView(
-              padding: EdgeInsets.all(2.0),
+              padding: EdgeInsets.only(left: 15.0, top:2.0, right:0, bottom: 2.0),
               scrollDirection: Axis.horizontal,
-              children: pumas.map((museum) =>
+              children: pumas.map((pumas) =>
                   CircularProfileAvatar (
-                    museum.thumbnailSmallUrl,
+                    pumas.icon,
                     radius: 50,
                     //backgroundColor: Colors.transparent,
                     borderWidth: 2,
                     initialsText: Text(
-                      museum.title,
+                      pumas.name,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 30,
+                          fontSize: 20,
                           color: Colors.white,
-                          fontWeight: FontWeight.bold
+                          fontWeight: FontWeight.bold,
                       ),
                     ),
                     borderColor: Colors.red,

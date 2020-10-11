@@ -42,7 +42,7 @@ class MuseumWidget extends StatelessWidget {
         width: MediaQuery.of(context).size.width,
         child: Center(
           child: ListView(
-            padding: EdgeInsets.all(2.0),
+            padding: EdgeInsets.only(left: 15.0, top:2.0, right:0, bottom: 2.0),
             scrollDirection: Axis.horizontal,
             children: museums.map((museum) =>
                 CircularProfileAvatar (
@@ -72,4 +72,5 @@ class MuseumWidget extends StatelessWidget {
       ),
     );
   }
+
 }

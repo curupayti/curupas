@@ -15,10 +15,8 @@ class StreamingPage extends StatefulWidget {
 
 class _StreamingPageState extends State<StreamingPage> {
 
-
   bool _loading = true;
   int _counting = 0;
-
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +60,20 @@ class HomeStream extends StatefulWidget {
 }
 
 class _HomeStreamState extends State<HomeStream> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[HomeScreeTopPart(widget.loading), HomeScreenBottomPart(widget.loading)],
+        ),
+      ),
+    );
+  }
+}
+
+
+/*class _HomeStreamState extends State<HomeStream> {
 
   final Completer<WebViewController> _controller =
   Completer<WebViewController>();
@@ -78,7 +90,7 @@ class _HomeStreamState extends State<HomeStream> {
       )
     );
   }
-}
+}*/
 
 
 class HomeScreeTopPart extends StatelessWidget {
@@ -89,7 +101,6 @@ class HomeScreeTopPart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
 
     if (loading) {
 

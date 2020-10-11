@@ -161,10 +161,13 @@ import 'package:flutter/cupertino.dart';
 
     static Future<User> updateUser(
         String userId, Map<String, dynamic> data) async {
-      Firestore.instance
-          .collection("users")
-          .document("${userId}")
-          .updateData(data);
+      try {
+        Firestore.instance
+            .collection("users")
+            .document("${userId}").setData(data, merge: true);
+      } catch (e) {
+        print(e);
+      }
       return await _globals.getUserData(userId);
     }
 
@@ -275,16 +278,14 @@ import 'package:flutter/cupertino.dart';
     }
 
     static Future<SMS> getUserDataForSMS(String userID) async {
-      DocumentReference document =
-          await Firestore.instance.collection("users").document("${userID}");
-      return await document.get().then((snapshot) async {
-        if (snapshot.exists) {
+      return await Firestore.instance.document("users/${userID}").get().then((doc) {
+        if (doc.exists) {
           SMS sms = new SMS();
-          sms.smsCode = snapshot.data["smsCode"];
-          sms.smsId = snapshot.data["smsId"];
-          sms.smsChecked = snapshot.data["smsChecked"];
-          sms.phone = snapshot.data["phone"];
-          sms.userId = snapshot.documentID;
+          sms.smsCode = doc.data["smsCode"];
+          sms.smsId = doc.data["smsId"];
+          sms.smsChecked = doc.data["smsChecked"];
+          sms.phone = doc.data["phone"];
+          sms.userId = doc.documentID;
           return sms;
         }
       });
@@ -313,10 +314,10 @@ import 'package:flutter/cupertino.dart';
       String carajo_la_puta_madre = type;
       await Firestore.instance.document("contents/${type}").get().then((document) async {
         if (document.exists) {
-         await getContenHtmls(document).then((listContentHtml) {
-           //Map<String, dynamic> map = {"doc":document,"list":listContentHtml};
-           //_drawerContent = HTMLS.fromDocument(document, listContentHtml);
-           _drawerContent = HTMLS.fromDocument(document, listContentHtml);
+          await getContenHtmls(document).then((listContentHtml) {
+            //Map<String, dynamic> map = {"doc":document,"list":listContentHtml};
+            //_drawerContent = HTMLS.fromDocument(document, listContentHtml);
+            _drawerContent = HTMLS.fromDocument(document, listContentHtml);
           });
         }
       });
