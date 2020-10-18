@@ -13,8 +13,8 @@
     "node": "10"
   },
   "dependencies": {
-    "@crapougnax/firestore-export-import": "^0.3.0",
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "@google-cloud/local-auth": "^1.0.0",
     "axios": "^0.20.0",
     "body-parser": "^1.19.0",
     "child-process-promise": "^2.2.1",
@@ -26,7 +26,7 @@
     "firebase-functions": "^3.6.1",
     "firebase-tools": "^8.4.3",
     "firepad": "^1.5.10",
-    "firestore-export-import": "^0.6.0",
+    "firestore-export-import": "^0.6.1",
     "fs": "0.0.1-security",
     "google-auth-library": "^6.1.0",
     "googleapis": "^59.0.0",
