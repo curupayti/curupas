@@ -92,7 +92,7 @@
 
         var _time =  new Date();
 
-        firestore.collection('streaming').doc("control").set({ 
+        firestore.collection("control").doc("streaming").set({ 
           code: urlParams.ode,
           scope: urlParams.scope,            
           fetch_code_trigger: false,        
