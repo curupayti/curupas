@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:curupas/models/HTML.dart';
-import 'package:curupas/models/user.dart';
+import 'package:curupas/models/curupa_user.dart';
 import 'package:curupas/ui/pages/calendar_page.dart';
 import 'package:curupas/ui/pages/group_page.dart';
 import 'package:curupas/ui/pages/home_page.dart';
@@ -175,7 +175,7 @@ class _MainScreenState extends State<MainScreen> {
                 data['token'] = token;
               }
               data['device'] = device;
-              await Auth.updateUser(userId, data).then((User user) async {
+              await Auth.updateUser(userId, data).then((CurupaUser user) async {
                 _globals.user.token = token;
               });
             });

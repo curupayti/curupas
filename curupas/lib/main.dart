@@ -4,7 +4,7 @@
   import 'package:curupas/ui/screens/drawer/content_viewer.dart';
   import 'package:curupas/ui/widgets/add_media_screen.dart';
   import 'package:curupas/ui/widgets/youtube/player_screen.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+  import 'package:firebase_crashlytics/firebase_crashlytics.dart';
   import 'package:flutter/material.dart';
   import 'package:flutter/services.dart';
   import 'package:notifier/notifier_provider.dart';
@@ -21,14 +21,15 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
   import 'models/add_media.dart';
   import 'models/event_calendar.dart';
   import 'models/post.dart';
-  import 'models/streaming.dart';
+import 'models/streaming.dart';
+  //import 'models/streaming.dart';
 
   //Flutter awesome
   //https://github.com/leisim/awesome-flutter-packages
 
   Future main() async {
     WidgetsFlutterBinding.ensureInitialized();
-    Firestore.instance.settings();
+    FirebaseFirestore.instance.settings;
     Crashlytics.instance.enableInDevMode = true;
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SharedPreferences.getInstance().then((prefs) {

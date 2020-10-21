@@ -78,7 +78,7 @@ class EventsViewState extends State<EventsView> {
                                         new Container(
                                           padding: EdgeInsets.all(10.0),
                                           child: new Text(
-                                            'Event: ' + document['name'],
+                                            'Event: ' + document()['name'],
                                             style: Theme
                                                 .of(context)
                                                 .textTheme
@@ -91,7 +91,7 @@ class EventsViewState extends State<EventsView> {
                                               DateFormat("dd MMM yyyy, hh:mm a")
                                                   .format(DateTime
                                                   .fromMicrosecondsSinceEpoch(
-                                                  document['start']
+                                                  document()['start']
                                                       .microsecondsSinceEpoch)),
                                               style: Theme
                                                   .of(context)
@@ -102,11 +102,11 @@ class EventsViewState extends State<EventsView> {
                                         new Container(
                                           padding: EdgeInsets.all(10.0),
                                           child: new Text('Summary: ' +
-                                              document['summary'],
+                                              document()['summary'],
                                               style: Theme
                                                   .of(context)
                                                   .textTheme
-                                                  .headline
+                                                  .headline5
                                           ),
                                         ),
                                       ],
@@ -134,8 +134,8 @@ class EventsViewState extends State<EventsView> {
 
   void _onCardClicked(DocumentSnapshot document) {
     EventCalendar _event = new EventCalendar(
-        document.data['name'], document.data['summary'],
-        document.data['time'], document.documentID);
+        document.data()['name'], document.data()['summary'],
+        document.data()['time'], document.id);
     Navigator.push(context, new MaterialPageRoute(
         builder: (BuildContext context) => new EventCreator(event: _event)));
   }

@@ -2,10 +2,10 @@
   import 'dart:async';
   import 'package:curupas/models/HTML.dart';
   import 'package:curupas/models/HTMLS.dart';
+import 'package:curupas/models/curupa_user.dart';
   import 'package:curupas/models/group_media.dart';
   import 'package:curupas/models/museum.dart';
   import 'package:curupas/models/notification.dart';
-import 'package:curupas/models/pumas.dart';
   import 'package:firebase_analytics/firebase_analytics.dart';
   import 'package:firebase_auth/firebase_auth.dart';
   import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,8 +13,7 @@ import 'package:curupas/models/pumas.dart';
   import 'package:curupas/models/post.dart';
   import 'package:curupas/models/group.dart';
   import 'package:curupas/models/sms.dart';
-  import 'package:curupas/models/user.dart';
-import 'package:flutter/cupertino.dart';
+  import 'package:flutter/cupertino.dart';
   import 'package:flutter/services.dart';
   import 'package:curupas/globals.dart' as _globals;
   import 'package:shared_preferences/shared_preferences.dart';
@@ -41,10 +40,10 @@ import 'package:flutter/cupertino.dart';
 
   class Auth {
     static Future<ResutlLogin> signIn(String email, String password) async {
-      AuthResult authResult;
+      UserCredential userCredential;
       String errorEsp;
       try {
-        authResult = await _auth.signInWithEmailAndPassword(
+        userCredential = await _auth.signInWithEmailAndPassword(
           email: email,
           password: password,
         );
@@ -101,15 +100,13 @@ import 'package:flutter/cupertino.dart';
 
         return new ResutlLogin(true, errorEsp);
       }
-      String uid = authResult.user.uid;
+      String uid = userCredential.user.uid;
       return ResutlLogin(false, uid);
     }
 
     static Future<String> signInWithFacebok(String accessToken) async {
-      final AuthCredential credential = FacebookAuthProvider.getCredential(
-        accessToken: accessToken,
-      );
-      final FirebaseUser user =
+      final AuthCredential credential = FacebookAuthProvider.credential(accessToken);
+      final User user =
           (await _auth.signInWithCredential(credential)).user;
       setUserFrefs(user.uid);
       return user.uid;
@@ -123,7 +120,7 @@ import 'package:flutter/cupertino.dart';
     }
 
     static Future<String> signUp(String email, String password) async {
-      FirebaseUser user;
+      User user;
       try {
         user = (await _auth.createUserWithEmailAndPassword(
                 email: email, password: password))
@@ -143,28 +140,29 @@ import 'package:flutter/cupertino.dart';
       return FirebaseAuth.instance.signOut();
     }
 
-    static Future<FirebaseUser> getCurrentFirebaseUser() async {
-      FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    static Future<User> getCurrentFirebaseUser() async {
+      User user = await _auth.currentUser;
       return user;
     }
 
-    static Future<bool> addUser(User user) async {
+    static Future<bool> addUser(CurupaUser user) async {
       String userId = user.userID;
       bool checkUser = await checkUserExist(userId);
       if (!checkUser) {
-        Firestore.instance.document("users/${userId}").setData(user.toJson());
+        FirebaseFirestore.instance.doc("users/${userId}").set(user.toJson());
         return true;
       } else {
         return false;
       }
     }
 
-    static Future<User> updateUser(
+    static Future<CurupaUser> updateUser(
         String userId, Map<String, dynamic> data) async {
       try {
-        Firestore.instance
+        SetOptions options = new SetOptions(merge: true);
+        FirebaseFirestore.instance
             .collection("users")
-            .document("${userId}").setData(data, merge: true);
+            .doc("${userId}").set(data, options);
       } catch (e) {
         print(e);
       }
@@ -194,13 +192,13 @@ import 'package:flutter/cupertino.dart';
 
     static Future<DocumentReference> addYear(String year) async {
       DocumentReference yearRef =
-          await Firestore.instance.collection('years').add({'year': year});
+          await FirebaseFirestore.instance.collection('years').add({'year': year});
       return yearRef;
     }
 
     static Future<bool> checkYearExist(String year) async {
       QuerySnapshot querySnapshot =
-          await Firestore.instance.collection("years").getDocuments();
+          await FirebaseFirestore.instance.collection("years").getDocuments();
       for (var doc in querySnapshot.documents) {
         String docYear = doc['year'];
         if (year == docYear) {
@@ -211,25 +209,25 @@ import 'package:flutter/cupertino.dart';
     }
 
     static Stream<Group> getGroupByYear(String year) {
-      return Firestore.instance
+      return FirebaseFirestore.instance
           .collection("years")
           .where("year", isEqualTo: year)
           .snapshots()
           .map((QuerySnapshot snapshot) {
-        return snapshot.documents.map((doc) {
+        return snapshot.docs.map((doc) {
           return Group.fromDocument(doc);
         }).first;
       });
     }
 
     static setMediaListener(String documentId) {
-      CollectionReference reference = Firestore.instance.collection("years/${documentId}/media");
+      CollectionReference reference = FirebaseFirestore.instance.collection("years/${documentId}/media");
       reference.snapshots().listen((querySnapshot) {
-        querySnapshot.documentChanges.forEach((change) {
+        querySnapshot.docChanges.forEach((change) {
             DocumentChange doc = change;
             if (change.type == DocumentChangeType.added){
-              print("document: ${change.document.data} added");
-              GroupMedia groupMedia = GroupMedia.fromDocument(change.document);
+              print("document: ${change.doc.data()} added");
+              GroupMedia groupMedia = GroupMedia.fromDocument(change.doc);
               bool contains = containsGroupMedia(groupMedia.documentID);
               print(contains);
               //Esto es inconsistente si dos medias tienen el mismo titulo.
@@ -257,22 +255,22 @@ import 'package:flutter/cupertino.dart';
       QuerySnapshot collectionSnapshot = await document.reference.collection("media").getDocuments();
       List<DocumentSnapshot> templist;
       List<GroupMedia> listGroupMedia = new List();
-      templist = collectionSnapshot.documents;
+      templist = collectionSnapshot.docs;
       listGroupMedia = await templist.map((DocumentSnapshot docSnapshot) {
         return GroupMedia.fromDocument(docSnapshot);
       }).toList();
       return listGroupMedia;
     }
 
-    static Stream<User> getUser(String userID) {
-      return Firestore.instance
+    static Stream<CurupaUser> getUser(String userID) {
+      return FirebaseFirestore.instance
           .collection("users")
           .where("userID", isEqualTo: userID)
           .snapshots()
           .map((QuerySnapshot snapshot) {
-        return snapshot.documents.map((doc) {
+        return snapshot.docs.map((doc) {
           print(doc.toString);
-          return User.fromDocument(doc);
+          return CurupaUser.fromDocument(doc);
         }).first;
       });
     }
@@ -281,11 +279,11 @@ import 'package:flutter/cupertino.dart';
       return await Firestore.instance.document("users/${userID}").get().then((doc) {
         if (doc.exists) {
           SMS sms = new SMS();
-          sms.smsCode = doc.data["smsCode"];
-          sms.smsId = doc.data["smsId"];
-          sms.smsChecked = doc.data["smsChecked"];
-          sms.phone = doc.data["phone"];
-          sms.userId = doc.documentID;
+          sms.smsCode = doc.data()["smsCode"];
+          sms.smsId = doc.data()["smsId"];
+          sms.smsChecked = doc.data()["smsChecked"];
+          sms.phone = doc.data()["phone"];
+          sms.userId = doc.id;
           return sms;
         }
       });
@@ -378,24 +376,24 @@ import 'package:flutter/cupertino.dart';
     static Future<NotificationCloud> getNotificationById(String notificationId) async {
       List<DocumentSnapshot> templist;
       QuerySnapshot collectionSnapshot =
-      await Firestore.instance.collection("notifications/{$notificationId}").getDocuments();
-      templist = collectionSnapshot.documents;
+      await FirebaseFirestore.instance.collection("notifications/{$notificationId}").getDocuments();
+      templist = collectionSnapshot.docs;
       await templist.map((DocumentSnapshot docSnapshot) {
         return NotificationCloud.fromDocument(docSnapshot);
       });
     }
 
 
-    static Future<List<User>> getUserById(String userId) async {
+    static Future<List<CurupaUser>> getUserById(String userId) async {
       List<DocumentSnapshot> templist;
-      List<User> list = new List();
+      List<CurupaUser> list = new List();
       //DocumentReference yearRef = _globals.user.yearRef;
       QuerySnapshot collectionSnapshot =
-          await Firestore.instance.collection("users").getDocuments();
-      templist = collectionSnapshot.documents;
-      list = await templist.map((DocumentSnapshot docSnapshot) {
-        return User.fromDocument(docSnapshot);
-      }).toList();
+          await FirebaseFirestore.instance.collection("users").get();
+      templist = collectionSnapshot.docs;
+      list = (await templist.map((DocumentSnapshot docSnapshot) {
+        return CurupaUser.fromDocument(docSnapshot);
+      }).toList()).cast<CurupaUser>();
       return list;
     }
 
@@ -413,18 +411,18 @@ import 'package:flutter/cupertino.dart';
     }
 
 
-    static Future<List<User>> getFriends() async {
+    static Future<List<CurupaUser>> getFriends() async {
       List<DocumentSnapshot> templist;
-      List<User> list = new List();
+      List<CurupaUser> list = new List();
       DocumentReference yearRef = _globals.user.yearRef;
-      QuerySnapshot collectionSnapshot = await Firestore.instance
+      QuerySnapshot collectionSnapshot = await FirebaseFirestore.instance
           .collection("users")
           .where("yearRef", isEqualTo: yearRef)
-          .getDocuments();
-      templist = collectionSnapshot.documents;
-      list = await templist.map((DocumentSnapshot docSnapshot) {
-        return User.fromDocument(docSnapshot);
-      }).toList();
+          .get();
+      templist = collectionSnapshot.docs;
+      list = (await templist.map((DocumentSnapshot docSnapshot) {
+        return CurupaUser.fromDocument(docSnapshot);
+      }).toList()).cast<CurupaUser>();
       return list;
     }
 
@@ -450,7 +448,7 @@ import 'package:flutter/cupertino.dart';
         try {
           List<String> imageList = new List();
           templist.map((DocumentSnapshot docSnapshot) {
-            Map<String, Object> doc = docSnapshot.data;
+            Map<String, Object> doc = docSnapshot.data as Map<String, Object>;
             String url = doc["downloadURL"];
             imageList.add(url);
           }).toList();
@@ -488,7 +486,7 @@ import 'package:flutter/cupertino.dart';
         try {
           List<String> imageList = new List();
           templist.map((DocumentSnapshot docSnapshot) {
-            Map<String, Object> doc = docSnapshot.data;
+            Map<String, Object> doc = docSnapshot.data as Map<String, Object>;
             String url = doc["downloadURL"];
             imageList.add(url);
           }).toList();

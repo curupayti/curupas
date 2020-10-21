@@ -40,7 +40,7 @@
     }
 
     factory Pumas.fromDocument(DocumentSnapshot doc, List<String> images) {
-      return Pumas.fromJson(doc.data, images);
+      return Pumas.fromJson(doc.data(), images);
     }
 
     void setGroupReference(DocumentReference ref) {}

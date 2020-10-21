@@ -39,7 +39,7 @@ class Post {
   }
 
   factory Post.fromDocument(DocumentSnapshot doc, List<String> images) {
-    return Post.fromJson(doc.data, images);
+    return Post.fromJson(doc.data(), images);
   }
 
   void setGroupReference(DocumentReference ref) {}

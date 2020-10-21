@@ -3,7 +3,7 @@ import 'package:location/location.dart';
 import 'package:curupas/business/auth.dart';
 import 'package:curupas/models/group.dart';
 
-class User {
+class CurupaUser {
   final String userID;
   final String name;
   final String phone;
@@ -25,7 +25,7 @@ class User {
   final bool smsChecked;
   String token;
 
-  User(
+  CurupaUser(
       {this.userID,
       this.name,
       this.phone,
@@ -75,7 +75,7 @@ class User {
     };
   }
 
-  factory User.fromJson(Map<String, Object> doc) {
+  factory CurupaUser.fromJson(Map<String, dynamic> doc) {
     GeoPoint _location = doc['location'];
     Map<String, double> dataMap = {
       'latitude': _location.latitude,
@@ -90,7 +90,7 @@ class User {
       print(error.toString());
     }
     DocumentReference yearReference = doc['yearRef'];
-    User user = new User(
+    CurupaUser user = new CurupaUser(
       userID: doc['userID'],
       phone: doc['phone'],
       name: doc['name'],
@@ -112,8 +112,8 @@ class User {
     return user;
   }
 
-  factory User.fromDocument(DocumentSnapshot doc) {
-    return User.fromJson(doc.data);
+  factory CurupaUser.fromDocument(DocumentSnapshot doc) {
+    return CurupaUser.fromJson(doc.data());
   }
 
   void setyearReference(DocumentReference ref) {

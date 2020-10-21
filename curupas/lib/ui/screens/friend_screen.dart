@@ -2,7 +2,7 @@
   import 'dart:async';
   import 'package:flutter/material.dart';
   import 'package:curupas/business/auth.dart';
-  import 'package:curupas/models/user.dart';
+  import 'package:curupas/models/curupa_user.dart';
   import 'package:flutter_speed_dial/flutter_speed_dial.dart';
   import 'package:curupas/globals.dart' as _globals;
 
@@ -13,7 +13,7 @@
 
   class _FriendsListPageState extends State<FriendsListPage> {
 
-    List<User> _friends = [];
+    List<CurupaUser> _friends = [];
 
     @override
     void initState() {
@@ -45,7 +45,7 @@
       );
     }
 
-    void _navigateToFriendDetails(User friend, Object avatarTag) {
+    void _navigateToFriendDetails(CurupaUser friend, Object avatarTag) {
       /*Navigator.of(context).push(
         new MaterialPageRoute(
           builder: (c) {

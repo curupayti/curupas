@@ -12,7 +12,7 @@
   import 'package:curupas/business/auth.dart';
   import 'package:curupas/business/validator.dart';
   import 'package:flutter/services.dart';
-  import 'package:curupas/models/user.dart';
+  import 'package:curupas/models/curupa_user.dart';
   import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
   import 'package:intl/intl.dart';
   import 'package:curupas/ui/widgets/alert_sms_dialog.dart';
@@ -573,7 +573,7 @@
 
                 DocumentReference roleRef = await Auth.getRoleGroupReference();
 
-                User user = new User(
+                CurupaUser user = new CurupaUser(
                     userID: uID,
                     phone: phone,
                     email: email,

@@ -28,6 +28,6 @@ class Group {
   factory Group.fromDocument(DocumentSnapshot doc) {
     String documentID = doc.documentID;
     DocumentReference yearRef = doc.reference;
-    return Group.fromJson(doc.data, documentID, yearRef);
+    return Group.fromJson(doc.data(), documentID, yearRef);
   }
 }

@@ -39,7 +39,7 @@ class Museum {
   }
 
   factory Museum.fromDocument(DocumentSnapshot doc, List<String> images) {
-    return Museum.fromJson(doc.data, images);
+    return Museum.fromJson(doc.data(), images);
   }
 
   void setGroupReference(DocumentReference ref) {}

@@ -46,6 +46,6 @@ class CreditCard {
 
   factory CreditCard.fromDocument(DocumentSnapshot doc) {
     String documentID = doc.documentID;
-    return CreditCard.fromJson(doc.data, documentID);
+    return CreditCard.fromJson(doc.data(), documentID);
   }
 }

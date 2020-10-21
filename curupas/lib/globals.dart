@@ -10,10 +10,10 @@
     import 'package:curupas/models/description.dart';
     import 'package:curupas/models/post.dart';
     import 'package:curupas/models/group.dart';
-    import 'package:curupas/models/user.dart';
+    import 'package:curupas/models/curupa_user.dart';
     import 'package:curupas/ui/widgets/alert_dialog.dart';
     import 'package:video_thumbnail/video_thumbnail.dart';
-    import 'package:youtube_api/youtube_api.dart';
+    //import 'package:youtube_api/youtube_api.dart';
     import 'business/auth.dart';
     import 'models/HTML.dart';
     import 'models/HTMLS.dart';
@@ -26,7 +26,7 @@
     import 'dart:math' as math;
     import 'package:path_provider/path_provider.dart';
 
-    User user = new User();
+    CurupaUser user = new CurupaUser();
     Group group = new Group();
 
     //Events
@@ -51,11 +51,11 @@
     //Youtube
     String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";
     String channelId = "UCeLNPJoPAio9rT2GAdXDVmw";
-    YoutubeAPI ytApi = new YoutubeAPI(key);
+    //YoutubeAPI ytApi = new YoutubeAPI(key);
 
     List<NotificationCloud> notifications = new List<NotificationCloud>();
 
-    Streammer streammer;
+    //Streammer streammer;
     bool streamingReachable = false;
     FilePickerGlobal filePickerGlobal;
 
@@ -65,23 +65,24 @@
     String register_error_title = "Error en el registro";
     String signin_error_title = "Error de autentificación";
 
-    Future<User> getUserData(String userId) async {
+    Future<CurupaUser> getUserData(String userId) async {
       if (userId != null) {
-        User _user = new User();
+        CurupaUser _user = new CurupaUser();
         await Auth.getUserDocumentReference(userId)
             .then((userDocumentReference) async {
           await userDocumentReference.get().then((userSnapshot) async {
             if (userSnapshot.exists) {
               DocumentReference yearDocumentReference =
-              userSnapshot.data["yearRef"];
+              userSnapshot.data()["yearRef"];
+
               if (yearDocumentReference != null) {
                 await yearDocumentReference.get().then((yearSnapshot) async {
                   if (yearSnapshot.exists) {
                     _user.userRef = userDocumentReference;
                     try {
                       group = await Group.fromDocument(yearSnapshot);
-                      userSnapshot.data["group"] = group;
-                      _user = await User.fromDocument(userSnapshot);
+                      userSnapshot.data()["group"] = group;
+                      _user = await CurupaUser.fromDocument(userSnapshot);
                       return _user;
                     } on Exception catch (exception) {
                       print(exception.toString());
@@ -91,7 +92,7 @@
                   }
                 });
               } else {
-                _user = await User.fromDocument(userSnapshot);
+                _user = await CurupaUser.fromDocument(userSnapshot);
                 return _user;
               }
             }
@@ -101,7 +102,7 @@
       }
     }
 
-    class Streammer {
+    /*class Streammer {
       List<YT_API> ytResult = [];
       List<Streaming> streamings;
       bool _isLiveStreaming = false;
@@ -124,15 +125,15 @@
         _isLiveStreaming = _isLive;
       }
 
-      void setYtResutl(List<YT_API> _ytResult) {
+      /*void setYtResutl(List<YT_API> _ytResult) {
         ytResult = _ytResult;
-      }
+      }*/
 
       void serStreamings(List<Streaming> _streamings) {
         activeStreaming = _streamings[0];
         streamings = _streamings;
       }
-    }
+    }*/
 
     //TODO from backend
     /*class YT_API {
@@ -147,10 +148,10 @@
       filePickerGlobal = new FilePickerGlobal();
     }
 
-    void setYoutubeApi(List<YT_API> _ytResult) {
+    /*void setYoutubeApi(List<YT_API> _ytResult) {
       streammer = new Streammer();
       streammer.setYtResutl(_ytResult);
-    }
+    }*/
 
     void initData() {
       AppData _dataPost = new AppData(
@@ -501,7 +502,7 @@
     }
 
     Future<bool> getStreamingData() async {
-      List<YT_API> ytResult = [];
+      /*List<YT_API> ytResult = [];
       List<Streaming> streamingList = [];
       try {
         ytResult = await ytApi.channel(channelId);
@@ -536,7 +537,7 @@
         }
         streammer.serStreamings(streamingList);
         eventBus.fire("streaming-games-loaded");
-      }
+      }*/
     }
 
     Future<File> writeYoutubeLog(int counter, String content) async {

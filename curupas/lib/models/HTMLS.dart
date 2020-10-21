@@ -43,7 +43,7 @@ class HTMLS {
   }
 
   factory HTMLS.fromDocument(DocumentSnapshot doc, List<HTML> contents) {
-    return HTMLS.fromJson(doc.data, contents);
+    return HTMLS.fromJson(doc.data(), contents);
   }
 
   void setGroupReference(DocumentReference ref) {}

@@ -5,7 +5,7 @@
   import 'dart:async';
   import 'package:firebase_auth/firebase_auth.dart';
   import 'package:intl/intl.dart';
-  import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+  //import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 
   class EventData {
     String title = '';
@@ -96,7 +96,7 @@
                 children: <Widget>[
                   titleWidget,
                   SizedBox(height: 16.0),
-                  new DateTimePickerFormField(
+                  /*new DateTimePickerFormField(
                     initialDate: widget.event != null ? widget.event.time : DateTime.now(),
                     initialValue: widget.event != null ? widget.event.time : DateTime.now(),
                     inputType: InputType.both,
@@ -115,7 +115,7 @@
                     autovalidate: false,
                     validator: this._validateDate,
                     onSaved: (DateTime value) => this._eventData.time = value,
-                  ),
+                  ),*/
                   SizedBox(height: 16.0),
                   notesWidget,
                 ],
@@ -145,14 +145,14 @@
     }
 
     Future _saveNewEvent(BuildContext context) async {
-      FirebaseUser currentUser = await _auth.currentUser();
+      User currentUser = await _auth.currentUser;
       print('current user: $currentUser');
 
       if (currentUser != null && this._formKey.currentState.validate()) {
         _formKey.currentState.save(); // Save our form now.
 
-        Firestore.instance.collection('calendar_events').document(widget.event != null ? widget.event.documentId : null)
-            .setData({'name': _eventData.title, 'summary': _eventData.summary,
+        FirebaseFirestore.instance.collection('calendar_events').doc(widget.event != null ? widget.event.documentId : null)
+            .set({'name': _eventData.title, 'summary': _eventData.summary,
           'start': _eventData.time});
 
         Navigator.maybePop(context);

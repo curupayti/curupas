@@ -4,7 +4,7 @@ import "package:flutter/material.dart";
 import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/streaming.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:youtube_api/youtube_api.dart';
+//import 'package:youtube_api/youtube_api.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class StreamingPage extends StatefulWidget {
@@ -60,20 +60,6 @@ class HomeStream extends StatefulWidget {
 }
 
 class _HomeStreamState extends State<HomeStream> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[HomeScreeTopPart(widget.loading), HomeScreenBottomPart(widget.loading)],
-        ),
-      ),
-    );
-  }
-}
-
-
-/*class _HomeStreamState extends State<HomeStream> {
 
   final Completer<WebViewController> _controller =
   Completer<WebViewController>();
@@ -81,19 +67,26 @@ class _HomeStreamState extends State<HomeStream> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WebView(
-        initialUrl: "https://www.youtube.com/channel/UCeLNPJoPAio9rT2GAdXDVmw/featured",
-        javascriptMode: JavascriptMode.unrestricted,
-        onWebViewCreated: (WebViewController webViewController) {
-          _controller.complete(webViewController);
-        },
-      )
+      body: SingleChildScrollView(
+        child: Scaffold(
+            body: WebView(
+              initialUrl: "https://www.youtube.com/channel/UCeLNPJoPAio9rT2GAdXDVmw/featured",
+              javascriptMode: JavascriptMode.unrestricted,
+              onWebViewCreated: (WebViewController webViewController) {
+                _controller.complete(webViewController);
+              },
+            )
+        ),
+      ),
     );
   }
-}*/
+}
 
 
-class HomeScreeTopPart extends StatelessWidget {
+
+
+
+/*class HomeScreeTopPart extends StatelessWidget {
 
   final bool loading;
 
@@ -295,9 +288,9 @@ class HomeScreeTopPart extends StatelessWidget {
 
     }
   }
-}
+}*/
 
-class HomeScreenBottomPart extends StatefulWidget {
+/*class HomeScreenBottomPart extends StatefulWidget {
 
 
   final bool loading;
@@ -312,8 +305,8 @@ class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
 
   static String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";// ** ENTER YOUTUBE API KEY HERE **
 
-  YoutubeAPI ytApi = new YoutubeAPI(key, type: "playlist");
-  List<YT_API> ytResult = [];
+  //YoutubeAPI ytApi = new YoutubeAPI(key, type: "playlist");
+  //List<YT_API> ytResult = [];
 
   callAPI() async {
     print('UI callled');
@@ -332,6 +325,7 @@ class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
     print("ytResult channelurl ========= ${ytResult[3].channelurl}");
     print("ytResult channelTitle ========= ${ytResult[3].channelTitle}");
   }
+
 
   List<Widget> movies() {
     List<Widget> movieList = new List();
@@ -440,9 +434,9 @@ class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
       );
     }
   }
-}
+}*/
 
-class Mclipper extends CustomClipper<Path> {
+/*class Mclipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     var path = new Path();
@@ -464,4 +458,4 @@ class Mclipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) {
     return true;
   }
-}
+}*/

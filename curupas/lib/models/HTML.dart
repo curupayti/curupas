@@ -36,7 +36,7 @@ class HTML {
     };
   }
 
-  factory HTML.fromJson(Map<String, Object> doc) {
+  factory HTML.fromJson(Map<String, dynamic> doc) {
 
     Timestamp timestamp = doc["last_update"] as Timestamp;
     var format = new DateFormat('d MMM, hh:mm a');
@@ -58,6 +58,6 @@ class HTML {
   }
 
   factory HTML.fromDocument(DocumentSnapshot doc) {
-    return HTML.fromJson(doc.data);
+    return HTML.fromJson(doc.data());
   }
 }

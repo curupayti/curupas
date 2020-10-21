@@ -34,7 +34,7 @@ class Description {
   }
 
   factory Description.fromDocument(DocumentSnapshot doc) {
-    return Description.fromJson(doc.data, doc.documentID);
+    return Description.fromJson(doc.data(), doc.documentID);
   }
 
 }

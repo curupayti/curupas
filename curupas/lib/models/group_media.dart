@@ -63,8 +63,8 @@ class GroupMedia {
   }
 
   factory GroupMedia.fromDocument(DocumentSnapshot doc) {
-    String documentId = doc.documentID;
-    return GroupMedia.fromJson(doc.data, documentId);
+    String documentId = doc.id;
+    return GroupMedia.fromJson(doc.data(), documentId);
   }
 
 }

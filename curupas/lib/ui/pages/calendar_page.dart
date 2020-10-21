@@ -381,8 +381,8 @@ class _CalendarPageState extends State<CalendarPage> {
     String eventName;
     calendarSnapshot.documents.forEach((doc) {
       eventDate = DateTime.fromMicrosecondsSinceEpoch(
-          doc.data['start'].microsecondsSinceEpoch);
-      eventName = doc.data['name'];
+          doc.data()['start'].microsecondsSinceEpoch);
+      eventName = doc.data()['name'];
       if (eventDate != null &&
           eventDate.day == dayNumber - _beginMonthPadding &&
           eventDate.month == _dateTime.month &&

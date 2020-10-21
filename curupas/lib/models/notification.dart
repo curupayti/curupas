@@ -47,7 +47,7 @@ class NotificationCloud {
   }
 
   factory NotificationCloud.fromDocument(DocumentSnapshot doc) {
-    String documentID = doc.documentID;
-    return NotificationCloud.fromJson(doc.data, documentID);
+    String documentID = doc.id;
+    return NotificationCloud.fromJson(doc.data(), documentID);
   }
 }
