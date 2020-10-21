@@ -267,7 +267,7 @@
                       var _time =  new Date();
 
                       var _json = {  
-                        id:id, 
+                        id:videoId, 
                         etag:etag,                        
                         title:title,
                         channelId:channelId,
@@ -276,7 +276,7 @@
                         channelTitle:channelTitle,
                         playlistId:playlistId,
                         description:description,
-                        videoId:videoId,
+                        //videoId:videoId,
                         thumbnails:thumbnails,
                         last_update:_time                            
                       };                        
@@ -284,7 +284,7 @@
                       json_videos.push(JSON.stringify(_json));
 
                       promise_videos.push(
-                        firestore.collection("media").doc(playlistId).collection("videos").add(videoId)
+                        firestore.collection("media").doc(playlistId).collection("videos").add(_json)
                       );                      
 
                       if (count == (lenght-1)) {                                                   
@@ -295,63 +295,7 @@
 
                     });
 
-                  }             
-
-                }).then(async (videosresults) => {
-
-                    let lenght = json_videos.length;
-
-                    console.log(
-                        " ************************************************************ " 
-                    );
-
-                    console.log(
-                        " json_videos: " + JSON.stringify(json_videos)
-                    );
-
-                    console.log(
-                        " ************************************************************ " 
-                    );
-
-                    var ps = [];
-                    var promise_videos_data = [];
-                    var count = 0;
-
-                    for (var i=0; i<lenght; i++) {
-
-                        var json = JSON.parse(json_videos[i]);
-
-                        console.log(
-                            " -------------------------------------------------------- " 
-                        );
-
-                        console.log(
-                            " json: " + JSON.stringify(json)
-                        );
-
-                        let videoId = json["videoId"];
-                        let playlistId = json["playlistId"];   
-
-                        console.log("videoId: " + videoId);
-                        console.log("playlistId: " + playlistId);
-
-
-                        console.log(
-                            " -------------------------------------------------------- " 
-                        );                   
-
-                        promise_videos_data.push(
-                          firestore.collection("media").doc(playlistId).collection("videos").doc(videoId).set(json, {merge:true})
-                        ); 
-
-                        if (count == (lenght-1)) {                                                   
-                            return promise_videos_data;
-                        }
-
-                        count++;
-
-                    }
-
+                  }
 
                 }).then(async (finalresults) => {
 
