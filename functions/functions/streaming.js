@@ -229,69 +229,78 @@
                       "******** results ******* " + JSON.stringify(results)
                   ); 
 
-                  var length = results.length;
+                  var length_playlists = results.length;
                   var count = 0;
 
                   console.log(
-                      " ------ length ------- " + length
+                      " ------ length_playlists ------- " + length_playlists
                   );
 
                   var promise_videos = [];  
 
-                  if (length>0) {                
+                  if (length_playlists>0) {                
 
-                    results.forEach(async (result) => {
+                    results.forEach(async (result) => {                      
                       
-                      var id          = result.id;                      
-                      var etag        = result.etag;
-                      var items       = result.items[0];
+                      var items       = result.items;
 
-                      var snippet     = items.snippet;                      
+                      let lenght = items.length;
 
-                      var title       = snippet.title;
-                      var channelId   = snippet.channelId;                      
-                      var description = snippet.description;                      
-                      var position    = snippet.position;                      
+                      for (var i=0; i<lenght; i++) {
 
-                      console.log("title: " + title);
-                      console.log("channelId: " + channelId);
+                          let item = items[i];
 
-                      var channelTitle= snippet.channelTitle;                      
-                      var playlistId  = snippet.playlistId;                      
+                          var id          = item.id;                      
+                          var etag        = item.etag;
 
-                      var resourceId  = snippet.resourceId;
-                      var videoId     = resourceId.videoId;
+                          var snippet     = item.snippet;                      
 
-                      var thumbnails  = snippet.thumbnails;                      
+                          var title       = snippet.title;
+                          var channelId   = snippet.channelId;                      
+                          var description = snippet.description;                      
+                          var position    = snippet.position;                      
 
-                      var _time =  new Date();
+                          console.log("title: " + title);
+                          console.log("channelId: " + channelId);
 
-                      var _json = {  
-                        id:videoId, 
-                        etag:etag,                        
-                        title:title,
-                        channelId:channelId,
-                        description:description,
-                        position:position,                                                
-                        channelTitle:channelTitle,
-                        playlistId:playlistId,
-                        description:description,
-                        //videoId:videoId,
-                        thumbnails:thumbnails,
-                        last_update:_time                            
-                      };                        
+                          var channelTitle= snippet.channelTitle;                      
+                          var playlistId  = snippet.playlistId;                      
 
-                      json_videos.push(JSON.stringify(_json));
+                          var resourceId  = snippet.resourceId;
+                          var videoId     = resourceId.videoId;
 
-                      promise_videos.push(
-                        firestore.collection("media").doc(playlistId).collection("videos").add(_json)
-                      );                      
+                          var thumbnails  = snippet.thumbnails;                      
 
-                      if (count == (lenght-1)) {                                                   
-                          return promise_videos;
-                      }
+                          var _time =  new Date();
 
-                      count++;
+                          var _json = {  
+                            id:videoId, 
+                            etag:etag,                        
+                            title:title,
+                            channelId:channelId,
+                            description:description,
+                            position:position,                                                
+                            channelTitle:channelTitle,
+                            playlistId:playlistId,
+                            description:description,
+                            //videoId:videoId,
+                            thumbnails:thumbnails,
+                            last_update:_time                            
+                          };                        
+
+                          json_videos.push(JSON.stringify(_json));
+
+                          promise_videos.push(
+                            firestore.collection("media").doc(playlistId).collection("videos").add(_json)
+                          );  
+
+                        }
+
+                        if (count == (length_playlists-1)) {                                                   
+                            return promise_videos;
+                        }
+
+                        count++;
 
                     });
 
