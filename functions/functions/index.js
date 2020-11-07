@@ -54,7 +54,7 @@
     exports.streaming = require("./streaming");
     
     var OPTION_SHARE  = 'share';            
-    var OPTION_OAUTH2CALLBACK  = 'oauth2callback';            
+    var OPTION_OAUTH2CALLBACK  = 'oauth2callback';              
 
     const app = express();
     app.engine('html', engines.hogan); 
@@ -85,8 +85,8 @@
       }     
 
       var static_url;   
-      
-      if ( pathParam === OPTION_OAUTH2CALLBACK ) {       
+
+     if ( pathParam === OPTION_OAUTH2CALLBACK ) {       
         
         console.log(OPTION_OAUTH2CALLBACK + " : " + JSON.stringify(urlParams));
 
