@@ -29,7 +29,7 @@ class _StreamingPageState extends State<StreamingPage> {
   void initState() {
     super.initState();
 
-    _globals.getStreamingData();
+    _globals.getMedia();
 
     _globals.eventBus.on().listen((event) {
       String _event = event.toString();

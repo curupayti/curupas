@@ -4,6 +4,7 @@
   import 'package:curupas/ui/screens/drawer/content_viewer.dart';
   import 'package:curupas/ui/widgets/add_media_screen.dart';
   import 'package:curupas/ui/widgets/youtube/player_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
   import 'package:firebase_crashlytics/firebase_crashlytics.dart';
   import 'package:flutter/material.dart';
   import 'package:flutter/services.dart';
@@ -21,7 +22,7 @@
   import 'models/add_media.dart';
   import 'models/event_calendar.dart';
   import 'models/post.dart';
-import 'models/streaming.dart';
+  import 'models/streaming.dart';
   //import 'models/streaming.dart';
 
   //Flutter awesome
@@ -29,10 +30,11 @@ import 'models/streaming.dart';
 
   Future main() async {
     WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
     FirebaseFirestore.instance.settings;
-    Crashlytics.instance.enableInDevMode = true;
+    FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    SharedPreferences.getInstance().then((prefs) {
+    SharedPreferences.getInstance().then((prefs) async {
       runApp(
         NotifierProvider(
           child: CurupaApp(prefs: prefs),

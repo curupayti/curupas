@@ -1,11 +1,16 @@
 
   import 'dart:async';
-  import 'package:curupas/models/HTML.dart';
+import 'dart:collection';
+  import 'package:cloud_functions/cloud_functions.dart';
+import 'package:curupas/models/HTML.dart';
   import 'package:curupas/models/HTMLS.dart';
 import 'package:curupas/models/curupa_user.dart';
   import 'package:curupas/models/group_media.dart';
   import 'package:curupas/models/museum.dart';
   import 'package:curupas/models/notification.dart';
+import 'package:curupas/models/streaming.dart';
+import 'package:curupas/models/streaming_thumbnails.dart';
+import 'package:curupas/models/streaming_video.dart';
   import 'package:firebase_analytics/firebase_analytics.dart';
   import 'package:firebase_auth/firebase_auth.dart';
   import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,6 +22,7 @@ import 'package:curupas/models/curupa_user.dart';
   import 'package:flutter/services.dart';
   import 'package:curupas/globals.dart' as _globals;
   import 'package:shared_preferences/shared_preferences.dart';
+  import 'dart:convert';
 
   enum authProblems { UserNotFound, PasswordNotValid, NetworkError, UnknownError }
 
@@ -171,14 +177,14 @@ import 'package:curupas/models/curupa_user.dart';
 
     static Future<DocumentReference> getRoleGroupReference() async {
       DocumentReference roleRef =
-          await Firestore.instance.document("roles/group");
+          await FirebaseFirestore.instance.doc("roles/group");
       return roleRef;
     }
 
     static Future<bool> checkUserExist(String userId) async {
       bool exists = false;
       try {
-        await Firestore.instance.document("users/${userId}").get().then((doc) {
+        await FirebaseFirestore.instance.doc("users/${userId}").get().then((doc) {
           if (doc.exists)
             exists = true;
           else
@@ -198,8 +204,8 @@ import 'package:curupas/models/curupa_user.dart';
 
     static Future<bool> checkYearExist(String year) async {
       QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection("years").getDocuments();
-      for (var doc in querySnapshot.documents) {
+          await FirebaseFirestore.instance.collection("years").get();
+      for (var doc in querySnapshot.docs) {
         String docYear = doc['year'];
         if (year == docYear) {
           return true;
@@ -276,7 +282,7 @@ import 'package:curupas/models/curupa_user.dart';
     }
 
     static Future<SMS> getUserDataForSMS(String userID) async {
-      return await Firestore.instance.document("users/${userID}").get().then((doc) {
+      return await FirebaseFirestore.instance.doc("users/${userID}").get().then((doc) {
         if (doc.exists) {
           SMS sms = new SMS();
           sms.smsCode = doc.data()["smsCode"];
@@ -292,16 +298,16 @@ import 'package:curupas/models/curupa_user.dart';
     static Future<DocumentReference> getUserDocumentReference(
         String userID) async {
       DocumentReference document =
-          await Firestore.instance.collection('users').document(userID);
+          await FirebaseFirestore.instance.collection('users').doc(userID);
       return document;
     }
 
     static Stream<Description> getDescription() {
-      return Firestore.instance
+      return FirebaseFirestore.instance
           .collection("titles")
           .snapshots()
           .map((QuerySnapshot snapshot) {
-        return snapshot.documents.map((doc) {
+        return snapshot.docs.map((doc) {
           return Description.fromDocument(doc);
         }).first;
       });
@@ -310,7 +316,7 @@ import 'package:curupas/models/curupa_user.dart';
     static Future<HTMLS> getHtmlContentByType(String type) async {
       HTMLS _drawerContent = HTMLS();
       String carajo_la_puta_madre = type;
-      await Firestore.instance.document("contents/${type}").get().then((document) async {
+      await FirebaseFirestore.instance.doc("contents/${type}").get().then((document) async {
         if (document.exists) {
           await getContenHtmls(document).then((listContentHtml) {
             //Map<String, dynamic> map = {"doc":document,"list":listContentHtml};
@@ -324,7 +330,7 @@ import 'package:curupas/models/curupa_user.dart';
 
     static Future<HTMLS> getHtmlContentByTypeAndGroup(String type, DocumentReference group_red) async {
       HTMLS _htmlContent = HTMLS();
-      await Firestore.instance.document("contents/${type}").get().then((document) async {
+      await FirebaseFirestore.instance.doc("contents/${type}").get().then((document) async {
         if (document.exists) {
           await getContenHtmlsBygroup(document, group_red).then((listContentHtml) {
             _htmlContent = HTMLS.fromDocument(document, listContentHtml);
@@ -338,7 +344,7 @@ import 'package:curupas/models/curupa_user.dart';
       QuerySnapshot collectionSnapshot = await document.reference.collection("collection").getDocuments();
       List<DocumentSnapshot> templist;
       List<HTML> listContentHtml = new List();
-      templist = collectionSnapshot.documents;
+      templist = collectionSnapshot.docs;
       listContentHtml = await templist.map((DocumentSnapshot docSnapshot) {
         return HTML.fromDocument(docSnapshot);
       }).toList();
@@ -348,8 +354,8 @@ import 'package:curupas/models/curupa_user.dart';
     static Future<List<HTML>> getContenHtmlsBygroup(DocumentSnapshot document, DocumentReference group_red) async {
       List<DocumentSnapshot> templist;
       List<HTML> listContentHtml = new List();
-      QuerySnapshot collectionSnapshot = await document.reference.collection('collection').where("group_ref",isEqualTo: group_red).getDocuments();
-      templist = collectionSnapshot.documents;
+      QuerySnapshot collectionSnapshot = await document.reference.collection('collection').where("group_ref",isEqualTo: group_red).get();
+      templist = collectionSnapshot.docs;
       listContentHtml = await templist.map((DocumentSnapshot docSnapshot) {
         return HTML.fromDocument(docSnapshot);
       }).toList();
@@ -358,8 +364,8 @@ import 'package:curupas/models/curupa_user.dart';
 
     static Future<List<NotificationCloud>> getNotifications() async {
       List<NotificationCloud> notiList = new List();
-      QuerySnapshot collectionSnapshot = await Firestore.instance.collectionGroup('notifications').getDocuments();
-      for (var doc in collectionSnapshot.documents)  {
+      QuerySnapshot collectionSnapshot = await FirebaseFirestore.instance.collectionGroup('notifications').get();
+      for (var doc in collectionSnapshot.docs)  {
         //print(doc.data);
         //DocumentReference notiRef = doc.reference.parent().reference().parent();
 //        await notiRef.get().then((notiSnapshot) async {
@@ -399,7 +405,7 @@ import 'package:curupas/models/curupa_user.dart';
 
     static Future<List<GroupMedia>> getGroupVideoMediaByType(String documentId) async {
       List<GroupMedia> list = new List();
-      await Firestore.instance.document("years/${documentId}").get().then((DocumentSnapshot document) async {
+      await FirebaseFirestore.instance.doc("years/${documentId}").get().then((DocumentSnapshot document) async {
         if (document.exists) {
           await getMedias(document).then((listGroupMedia) {
             setMediaListener(documentId);
@@ -429,9 +435,9 @@ import 'package:curupas/models/curupa_user.dart';
     static Future<List<DocumentSnapshot>> getPostSnapshots() async {
       List<DocumentSnapshot> templist;
       List<Post> list = new List();
-      CollectionReference collectionRef = Firestore.instance.collection("posts");
-      QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
-      return collectionSnapshot.documents;
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection("posts");
+      QuerySnapshot collectionSnapshot = await collectionRef.get();
+      return collectionSnapshot.docs;
     }
 
     static Future<List<Post>> getPost(List<DocumentSnapshot> snapshots) async {
@@ -439,16 +445,17 @@ import 'package:curupas/models/curupa_user.dart';
       List<Post> posts = new List();
       List<DocumentSnapshot> templist;
       for (var snapshot in snapshots) {
-        CollectionReference collectionRef = Firestore.instance
+        CollectionReference collectionRef = FirebaseFirestore.instance
             .collection('posts')
-            .document(snapshot.documentID)
+            .doc(snapshot.id)
             .collection('images');
-        QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
-        templist = collectionSnapshot.documents; // <--- ERROR
+        QuerySnapshot collectionSnapshot = await collectionRef.get();
+        templist = collectionSnapshot.docs; // <--- ERROR
         try {
           List<String> imageList = new List();
           templist.map((DocumentSnapshot docSnapshot) {
-            Map<String, Object> doc = docSnapshot.data as Map<String, Object>;
+            //Map<String, dynamic> doc = docSnapshot.data as Map<String, dynamic>;
+            Map<String, dynamic> doc = new Map<String, dynamic>.from(docSnapshot.data());
             String url = doc["downloadURL"];
             imageList.add(url);
           }).toList();
@@ -467,9 +474,9 @@ import 'package:curupas/models/curupa_user.dart';
     static Future<List<DocumentSnapshot>> getMuseumSnapshots() async {
       List<DocumentSnapshot> templist;
       List<Museum> list = new List();
-      CollectionReference collectionRef = Firestore.instance.collection("museums");
-      QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
-      return collectionSnapshot.documents;
+      CollectionReference collectionRef = FirebaseFirestore.instance.collection("museums");
+      QuerySnapshot collectionSnapshot = await collectionRef.get();
+      return collectionSnapshot.docs;
     }
 
     static Future<List<Museum>> getMuseum(List<DocumentSnapshot> snapshots) async {
@@ -477,16 +484,17 @@ import 'package:curupas/models/curupa_user.dart';
       List<Museum> museums = new List();
       List<DocumentSnapshot> templist;
       for (var snapshot in snapshots) {
-        CollectionReference collectionRef = Firestore.instance
+        CollectionReference collectionRef = FirebaseFirestore.instance
             .collection('museums')
-            .document(snapshot.documentID)
+            .doc(snapshot.id)
             .collection('images');
-        QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
-        templist = collectionSnapshot.documents; // <--- ERROR
+        QuerySnapshot collectionSnapshot = await collectionRef.get();
+        templist = collectionSnapshot.docs;
+        var i = templist.length;
         try {
           List<String> imageList = new List();
           templist.map((DocumentSnapshot docSnapshot) {
-            Map<String, Object> doc = docSnapshot.data as Map<String, Object>;
+            Map<String, dynamic> doc = new Map<String, dynamic>.from(docSnapshot.data());
             String url = doc["downloadURL"];
             imageList.add(url);
           }).toList();
@@ -499,57 +507,20 @@ import 'package:curupas/models/curupa_user.dart';
       return museums;
     }
 
-    /*static Future<List<DocumentSnapshot>> getPumasSnapshots() async {
-      List<DocumentSnapshot> templist;
-      List<Museum> list = new List();
-      CollectionReference collectionRef = Firestore.instance.collection("pumas");
-      QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
-      return collectionSnapshot.documents;
-    }
-
-    static Future<List<Pumas>> getPumas(List<DocumentSnapshot> snapshots) async {
-      var length = snapshots.length;
-      List<Pumas> pumas = new List();
-      List<DocumentSnapshot> templist;
-      for (var snapshot in snapshots) {
-        CollectionReference collectionRef = Firestore.instance
-            .collection('pumas')
-            .document(snapshot.documentID)
-            .collection('images');
-        QuerySnapshot collectionSnapshot = await collectionRef.getDocuments();
-        templist = collectionSnapshot.documents; // <--- ERROR
-        try {
-          List<String> imageList = new List();
-          templist.map((DocumentSnapshot docSnapshot) {
-            Map<String, Object> doc = docSnapshot.data;
-            String url = doc["downloadURL"];
-            imageList.add(url);
-          }).toList();
-          Pumas _pumas = Pumas.fromDocument(snapshot, imageList);
-          pumas.add(_pumas);
-        } on Exception catch (_) {
-          print("Error: " + _.toString());
-        }
-      }
-      return pumas;
-    }*/
-
     static Future<QuerySnapshot> getCalendarData(String name) async {
-      QuerySnapshot userEvents = await Firestore.instance
+      QuerySnapshot userEvents = await FirebaseFirestore.instance
           .collection('calendar/$name/${name}_collection')
-          .getDocuments();
+          .get();
       return userEvents;
     }
-    //.where(
-    //          'start', isGreaterThanOrEqualTo: new DateTime(_dateTime.year, _dateTime.month))
 
     static Future<QuerySnapshot> getCalendarEvents(DateTime _eventDate, String name) async {
-        QuerySnapshot events = await Firestore.instance
+        QuerySnapshot events = await FirebaseFirestore.instance
             .collection('calendar/$name/${name}_collection')
             .where('start', isGreaterThan: new DateTime(_eventDate.year, _eventDate.month, _eventDate.day-1, 23, 59, 59))
             .where('start', isLessThan: new DateTime(_eventDate.year, _eventDate.month, _eventDate.day+1))
-            .getDocuments();
-        debugPrint("${events.documents.length}");
+            .get();
+        debugPrint("${events.docs.length}");
         return events;
     }
 
@@ -574,6 +545,147 @@ import 'package:curupas/models/curupa_user.dart';
       } else {
         return 'Unknown error occured.';
       }
+    }
+
+    static Future<List<Streaming>> getStreaming() async {
+
+      List<Streaming> streaminlistg = new List<Streaming>();
+
+      try {
+
+        final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+          functionName: 'streaming-media',
+        );
+
+        final results = await callable();
+        Map<dynamic, dynamic> channels = results.data;
+
+        List<StreamingVideo> streamingvideos = new List<StreamingVideo>();
+
+        for (var channel in channels.values) {
+
+          var id = channel["channelId"];
+          var videos = channel["videos"];
+
+          for (var video in videos) {
+
+            StreamingVideo streamingvideo = new StreamingVideo();
+            streamingvideo.id             = video["id"];
+            streamingvideo.title          = video["title"];
+            streamingvideo.description    = video["description"];
+            streamingvideo.channelId      = video["channelId"];
+            streamingvideo.position       = video["position"];
+            streamingvideo.videoId        = video["videoId"];
+            streamingvideo.publishedAt    = video["publishedAt"];
+            streamingvideo.playlistId     = video["playlistId"];
+            var thumbnail                 = video["thumbnail"];
+            if ( thumbnail != "" ) {
+              StreamingThumbnail st = new StreamingThumbnail();
+              st.url = video["thumbnail"];
+              streamingvideo.thumbnail = st;
+            }
+            streamingvideos.add(streamingvideo);
+
+          }
+
+          StreamingThumbnail pthumbnail = new StreamingThumbnail();
+          pthumbnail.url = channel['thumbnail'];
+
+          Streaming streaming = new Streaming(
+            id: channel['id'],
+            title: channel['title'],
+            channelId: channel['channelId'],
+            playListId: channel['playListId'],
+            description: channel['description'],
+            videos: streamingvideos,
+            thumbnail:pthumbnail,
+          );
+
+          streaminlistg.add(streaming);
+
+        }
+
+        return streaminlistg;
+
+      } catch (e) {
+        print('caught generic exception');
+        print(e);
+      }
+    }
+
+    static Future<List<Streaming>> getVideos(List<DocumentSnapshot> snapshots) async {
+
+        var length = snapshots.length;
+
+        List<Streaming> streamings = new List();
+
+        try {
+
+          for (var snapshot in snapshots) {
+            Streaming streaming = new Streaming();
+
+            StreamingThumbnail streamingThumbnails = new StreamingThumbnail();
+
+            int thumbnail_height = snapshot['thumbnail_height'];
+            int thumbnail_width = snapshot['thumbnail_width'];
+            String thumbnail_url = snapshot['thumbnail_url'];
+
+            streamingThumbnails.height = thumbnail_height;
+            streamingThumbnails.width = thumbnail_width;
+            streamingThumbnails.url = thumbnail_url;
+
+            streaming.thumbnail = streamingThumbnails;
+
+            String id = snapshot.id;
+
+            List<DocumentSnapshot> templistVideos;
+            CollectionReference collectionRefVideos = FirebaseFirestore.instance
+                .collection('media')
+                .doc(id)
+                .collection('videos');
+
+            QuerySnapshot collectionSnapshotVideos = await collectionRefVideos
+                .get();
+            List<StreamingVideo> videosList = new List();
+
+            for (var doc in collectionSnapshotVideos.docs) {
+
+              StreamingVideo streamingVideo = new StreamingVideo();
+              streamingVideo.id = doc["id"];
+              streamingVideo.title = doc["title"];
+              streamingVideo.channelId = doc["channelId"];
+              streamingVideo.channelTitle = doc["channelTitle"];
+              streamingVideo.playlistId = doc["playlistId"];
+              streamingVideo.position = doc["position"];
+              streamingVideo.isLive = doc["isLive"];
+
+              StreamingThumbnail streamingThumbnailsVideo = new StreamingThumbnail();
+
+              int video_thumbnail_height = snapshot['thumbnail_height'];
+              int video_thumbnail_width = snapshot['thumbnail_width'];
+              String video_thumbnail_url = snapshot['thumbnail_url'];
+
+              streamingThumbnailsVideo.width = video_thumbnail_height;
+              streamingThumbnailsVideo.height = video_thumbnail_width;
+              streamingThumbnailsVideo.url = video_thumbnail_url;
+
+              streamingVideo.thumbnail = streamingThumbnailsVideo;
+              videosList.add(streamingVideo);
+
+
+            }
+
+            Streaming _streaming = Streaming.fromDocument(
+                snapshot, streamingThumbnails, videosList);
+            streamings.add(_streaming);
+
+          }
+
+        } on Exception catch (_) {
+          print("Error: " + _.toString());
+        }
+
+      return streamings;
     }
 
   }

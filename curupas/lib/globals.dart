@@ -40,6 +40,7 @@
     List<Post> posts = new List<Post>();
     List<Museum> museums = new List<Museum>();
     List<Pumas> pumas = new List<Pumas>();
+    List<Streaming> streamings = new List<Streaming>();
 
     //HTML CONTENT
     HTMLS drawerContent = new HTMLS();
@@ -196,10 +197,11 @@
     }
 
     void showErrorAlert(
-        {BuildContext context,
+        { BuildContext context,
           String title,
           String content,
-          VoidCallback onPressed}) {
+          VoidCallback onPressed } ) {
+
       showDialog(
         barrierDismissible: true,
         context: context,
@@ -211,6 +213,7 @@
           );
         },
       );
+
     }
 
     class FilePickerGlobal {
@@ -501,43 +504,12 @@
       });
     }
 
-    Future<bool> getStreamingData() async {
-      /*List<YT_API> ytResult = [];
-      List<Streaming> streamingList = [];
-      try {
-        ytResult = await ytApi.channel(channelId);
-      } on Exception catch (exception) {
-        print(exception.toString());
-      } catch (error) {
-        print(error.toString());
-      }
-      if (ytResult.length > 0) {
-        print(ytResult.toString());
-        streamingReachable = true;
-        setYoutubeApi(ytResult);
-        for (var i = 0; i < ytResult.length; i++) {
-          Streaming streaming = new Streaming();
-          YT_API ytapi = ytResult[i];
-          //writeYoutubeLog(i, ytapi.toString());
-          streaming.id = ytapi.id;
-          streaming.title = ytapi.title;
-          streaming.kind = ytapi.kind;
-          Map _default = ytapi.thumbnail['high'];
-          String thubnailUrl = _default['url'];
-          streaming.thumnailUrl = thubnailUrl;
-          streaming.videoUrl = ytapi.url;
-          String kind = ytapi.kind;
-          if (kind == "live") {
-            streaming.isLive = true;
-            streammer.setIsLiveStreaming(true);
-          } else {
-            streaming.isLive = false;
-          }
-          streamingList.add(streaming);
-        }
-        streammer.serStreamings(streamingList);
-        eventBus.fire("streaming-games-loaded");
-      }*/
+    //MEDIA
+    void getMedia() {
+      Auth.getStreaming().then((_streamings) {
+        streamings = _streamings;
+        eventBus.fire("home-streamings");
+      });
     }
 
     Future<File> writeYoutubeLog(int counter, String content) async {
