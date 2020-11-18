@@ -52,6 +52,7 @@
 
     //streaming
     exports.streaming = require("./streaming");
+    exports.share     = require("./share");
     
     var OPTION_SHARE  = 'share';            
     var OPTION_OAUTH2CALLBACK  = 'oauth2callback';              
@@ -459,8 +460,6 @@
       } 
 
     });
-
-
 
     exports.notification = functions.firestore
       .document('notifications/{notificationsId}')
