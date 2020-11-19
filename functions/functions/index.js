@@ -9,17 +9,19 @@
     const jsdom = require("jsdom");
     const { JSDOM } = jsdom;
     
-    const cors = require('cors')({ origin: true });
-    var path = require('path');       
-    var fs = require('fs'); 
+    const cors  = require('cors')({ origin: true });
+    var path    = require('path');       
+    var fs      = require('fs'); 
+    const os    = require('os');
 
-    const mkdirp = require('mkdirp-promise');
+    const mkdirp  = require('mkdirp-promise');
     const request = require('request');
+    const spawn   = require('child-process-promise').spawn;
 
     const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; 
 
     const express = require('express');
-    var engines = require('consolidate');
+    var engines   = require('consolidate');
       
     serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
     db_url = "https://curupas-app.firebaseio.com";
