@@ -118,6 +118,13 @@ import 'package:curupas/models/streaming_video.dart';
       return user.uid;
     }
 
+    static Future<String> signInGuest () async {
+      UserCredential userCredential = await _auth.signInAnonymously();
+      User user = userCredential.user;
+      setUserFrefs(user.uid);
+      return user.uid;
+    }
+
     static void setUserFrefs(String userId) async {
       prefs = await SharedPreferences.getInstance();
       prefs.setBool('registered', true);

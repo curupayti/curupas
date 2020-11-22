@@ -13,7 +13,6 @@
     import 'package:curupas/models/curupa_user.dart';
     import 'package:curupas/ui/widgets/alert_dialog.dart';
     import 'package:video_thumbnail/video_thumbnail.dart';
-    //import 'package:youtube_api/youtube_api.dart';
     import 'business/auth.dart';
     import 'models/HTML.dart';
     import 'models/HTMLS.dart';
@@ -25,6 +24,8 @@
     import 'package:path/path.dart' as p;
     import 'dart:math' as math;
     import 'package:path_provider/path_provider.dart';
+
+    import 'models/streammer.dart';
 
     CurupaUser user = new CurupaUser();
     Group group = new Group();
@@ -40,7 +41,9 @@
     List<Post> posts = new List<Post>();
     List<Museum> museums = new List<Museum>();
     List<Pumas> pumas = new List<Pumas>();
-    List<Streaming> streamings = new List<Streaming>();
+    //List<Streaming> streammer = new List<Streaming>();
+
+    Streammer streammer = new Streammer();
 
     //HTML CONTENT
     HTMLS drawerContent = new HTMLS();
@@ -52,12 +55,10 @@
     //Youtube
     String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";
     String channelId = "UCeLNPJoPAio9rT2GAdXDVmw";
-    //YoutubeAPI ytApi = new YoutubeAPI(key);
 
     List<NotificationCloud> notifications = new List<NotificationCloud>();
 
-    //Streammer streammer;
-    bool streamingReachable = false;
+    //bool streamingReachable = false;
     FilePickerGlobal filePickerGlobal;
 
     String error_email_already_in_use = "ERROR_EMAIL_ALREADY_IN_USE";
@@ -103,56 +104,9 @@
       }
     }
 
-    /*class Streammer {
-      List<YT_API> ytResult = [];
-      List<Streaming> streamings;
-      bool _isLiveStreaming = false;
-      IconData videoIcon;
-      String showLivestreamingMessage;
-      Streaming activeStreaming;
-
-      Streammer() {
-        setIsLiveStreaming(false);
-      }
-
-      void setIsLiveStreaming(bool _isLive) {
-        if (_isLive) {
-          showLivestreamingMessage = "Transmisión en vivo";
-          videoIcon = Icons.live_tv;
-        } else {
-          showLivestreamingMessage = "Video ya emitido";
-          videoIcon = Icons.tv;
-        }
-        _isLiveStreaming = _isLive;
-      }
-
-      /*void setYtResutl(List<YT_API> _ytResult) {
-        ytResult = _ytResult;
-      }*/
-
-      void serStreamings(List<Streaming> _streamings) {
-        activeStreaming = _streamings[0];
-        streamings = _streamings;
-      }
-    }*/
-
-    //TODO from backend
-    /*class YT_API {
-      String id;
-      String title;
-      String kind;
-      String thubnailUrl;
-      String url;
-    }*/
-
     void setFilePickerGlobal() {
       filePickerGlobal = new FilePickerGlobal();
     }
-
-    /*void setYoutubeApi(List<YT_API> _ytResult) {
-      streammer = new Streammer();
-      streammer.setYtResutl(_ytResult);
-    }*/
 
     void initData() {
       AppData _dataPost = new AppData(
@@ -507,7 +461,7 @@
     //MEDIA
     void getMedia() {
       Auth.getStreaming().then((_streamings) {
-        streamings = _streamings;
+        streammer.serStreamings(_streamings);
         eventBus.fire("home-streamings");
       });
     }

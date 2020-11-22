@@ -1,171 +1,101 @@
-import 'dart:async';
+  import 'dart:async';
 
-import "package:flutter/material.dart";
-import 'package:curupas/globals.dart' as _globals;
-import 'package:curupas/models/streaming.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-//import 'package:youtube_api/youtube_api.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+  import "package:flutter/material.dart";
+  import 'package:curupas/globals.dart' as _globals;
+  import 'package:curupas/models/streaming.dart';
+  import 'package:flutter_spinkit/flutter_spinkit.dart';
+  //import 'package:youtube_api/youtube_api.dart';
+  import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-class StreamingPage extends StatefulWidget {
-  StreamingPage({Key key}) : super(key: key);
-  @override
-  _StreamingPageState createState() => _StreamingPageState();
-}
 
-class _StreamingPageState extends State<StreamingPage> {
-
-  bool _loading = true;
-  int _counting = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: HomeStream(_loading),
-    );
+  class StreamingPage extends StatefulWidget {
+    StreamingPage({Key key}) : super(key: key);
+    @override
+    _StreamingPageState createState() => _StreamingPageState();
   }
 
-  @override
-  void initState() {
-    super.initState();
+  class _StreamingPageState extends State<StreamingPage> {
 
-    _globals.getMedia();
+    bool _loading = true;
+    int _counting = 0;
 
-    _globals.eventBus.on().listen((event) {
-      String _event = event.toString();
-      if (_event.contains("streaming")) {
-        _counting = _counting + 1;
-        if (_counting == 1) {
-          _globals.setDataFromGlobal();
-          _counting = 0;
-          setState(() {
-            _loading = false;
-          });
-        }
-      }
-      print("Counting : ${_counting}");
-    });
-
-  }
-}
-
-class HomeStream extends StatefulWidget {
-
-  final bool loading;
-
-  HomeStream(this.loading);
-
-  @override
-  _HomeStreamState createState() => new _HomeStreamState();
-}
-
-class _HomeStreamState extends State<HomeStream> {
-
-  final Completer<WebViewController> _controller =
-  Completer<WebViewController>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Scaffold(
-            body: WebView(
-              initialUrl: "https://www.youtube.com/channel/UCeLNPJoPAio9rT2GAdXDVmw/featured",
-              javascriptMode: JavascriptMode.unrestricted,
-              onWebViewCreated: (WebViewController webViewController) {
-                _controller.complete(webViewController);
-              },
-            )
-        ),
-      ),
-    );
-  }
-}
-
-
-
-
-
-/*class HomeScreeTopPart extends StatelessWidget {
-
-  final bool loading;
-
-  HomeScreeTopPart(this.loading);
-
-  @override
-  Widget build(BuildContext context) {
-
-    if (loading) {
-
-      return SpinKitFadingCircle(
-        itemBuilder: (BuildContext context, int index) {
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              color: index.isEven ? Colors.red : Colors.green,
-            ),
-          );
-        },
+    @override
+    Widget build(BuildContext context) {
+      return Container(
+        child: HomeStream(_loading),
       );
+    }
 
-    } else {
+    @override
+    void initState() {
+      super.initState();
 
-      if (!_globals.streamingReachable) {
+      _globals.getMedia();
 
-        return Stack(children: <Widget>[
-          new Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              color: Colors.white,
-            ),
-            child: new Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 50.0, bottom: 50.0),
-                    child: new Image.asset("assets/images/not_available.png",
-                        height: 100.0, width: 100.0, fit: BoxFit.cover),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 50.0),
-                  child: new Text(
-                    "El servicio de streaming \n no se encuentra disponible",
-                    softWrap: true,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.grey,
-                      decoration: TextDecoration.none,
-                      fontSize: 25.0,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: "OpenSans",
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10.0),
-                Padding(
-                  padding: const EdgeInsets.only(top: 50.0),
-                  child: new Text(
-                    "Volve a intentarlo mas tarde por favor",
-                    softWrap: true,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.grey,
-                      decoration: TextDecoration.none,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: "OpenSans",
-                    ),
-                  ),
-                ),
-              ],
-            ),
+      _globals.eventBus.on().listen((event) {
+        String _event = event.toString();
+        if (_event.contains("streaming")) {
+          _counting = _counting + 1;
+          if (_counting == 1) {
+            _globals.setDataFromGlobal();
+            _counting = 0;
+            setState(() {
+              _loading = false;
+            });
+          }
+        }
+        print("Counting : ${_counting}");
+      });
+    }
+  }
+
+  class HomeStream extends StatefulWidget {
+
+    final bool loading;
+
+
+    HomeStream(this.loading);
+
+    @override
+    _HomeStreamState createState() => new _HomeStreamState();
+  }
+
+  class _HomeStreamState extends State<HomeStream> {
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[HomeScreeTopPart(widget.loading), HomeScreenBottomPart(widget.loading)],
           ),
-        ]);
+        ),
+      );
+    }
+  }
+
+  class HomeScreeTopPart extends StatelessWidget {
+
+    final bool loading;
+
+    HomeScreeTopPart(this.loading);
+
+    @override
+    Widget build(BuildContext context) {
+
+      if (loading) {
+
+        return SpinKitFadingCircle(
+          itemBuilder: (BuildContext context, int index) {
+            return DecoratedBox(
+              decoration: BoxDecoration(
+                color: index.isEven ? Colors.red : Colors.green,
+              ),
+            );
+          },
+        );
+
       } else {
+
         return new Container(
           height: 320.0,
           child: Stack(
@@ -183,7 +113,7 @@ class _HomeStreamState extends State<HomeStream> {
                   child: Stack(
                     children: <Widget>[
                       Image.network(
-                          _globals.streammer.activeStreaming.thumnailUrl,
+                          _globals.streammer.activeStreaming.thumbnail.url,
                           fit: BoxFit.cover,
                           width: double.infinity),
                       Container(
@@ -283,179 +213,170 @@ class _HomeStreamState extends State<HomeStream> {
             ],
           ),
         );
-
       }
-
     }
   }
-}*/
-
-/*class HomeScreenBottomPart extends StatefulWidget {
 
 
-  final bool loading;
+  class HomeScreenBottomPart extends StatefulWidget {
 
-  HomeScreenBottomPart(this.loading);
+    final bool loading;
 
-  @override
-  _HomeScreenBottomPartState createState() => _HomeScreenBottomPartState();
-}
+    HomeScreenBottomPart(this.loading);
 
-class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
-
-  static String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";// ** ENTER YOUTUBE API KEY HERE **
-
-  //YoutubeAPI ytApi = new YoutubeAPI(key, type: "playlist");
-  //List<YT_API> ytResult = [];
-
-  callAPI() async {
-    print('UI callled');
-    String query = "Entrenamientos Infantiles";
-    ytResult = await ytApi.search(query);
-    print("length ======= ${ytResult.length}");
-    print("ytResult channelurl ========= ${ytResult[0].channelurl}");
-    print("ytResult channelTitle ========= ${ytResult[0]}");
-
-    print("ytResult channelurl ========= ${ytResult[1].channelurl}");
-    print("ytResult channelTitle ========= ${ytResult[1].channelTitle}");
-
-    print("ytResult channelurl ========= ${ytResult[2].channelurl}");
-    print("ytResult channelTitle ========= ${ytResult[2].channelTitle}");
-
-    print("ytResult channelurl ========= ${ytResult[3].channelurl}");
-    print("ytResult channelTitle ========= ${ytResult[3].channelTitle}");
+    @override
+    _HomeScreenBottomPartState createState() => _HomeScreenBottomPartState();
   }
 
+  class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
 
-  List<Widget> movies() {
-    List<Widget> movieList = new List();
-    for (int i = 0; i < 3; i++) {
-      var movieitem = Padding(
-        padding: EdgeInsets.symmetric(vertical: 25.0, horizontal: 12.0),
-        child: new GestureDetector(
-          onTap: () {
-            print("Container clicked");
-          },
-          child: Container(
-            height: 220.0,
-            width: 135.0,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.0),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10.0,
-                      offset: Offset(0.0, 10.0))
-                ]),
-            child: Column(
-              children: <Widget>[
-                ClipRRect(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20.0),
-                      topRight: Radius.circular(20.0)),
-                  child: Image.network(
-                    _globals.streammer.streamings[i].thumnailUrl,
-                    width: double.infinity,
-                    height: 130.0,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Padding(
-                  padding:
-                  const EdgeInsets.only(top: 4.0, left: 8.0, right: 8.0),
-                  child: Text(_globals.streammer.streamings[i].title,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 16.0, fontFamily: "SF-Pro-Display-Bold")),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 3.0),
-                  child: Text(i == 0 ? "Season 2" : ""),
-                )
-              ],
-            ),
-          ),
-        ),
-      );
-      movieList.add(movieitem);
-    }
-    return movieList;
+    static String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";// ** ENTER YOUTUBE API KEY HERE **
 
-  }
+    //YoutubeAPI ytApi = new YoutubeAPI(key, type: "playlist");
+    //List<YT_API> ytResult = [];
 
-  @override
-  void initState() {
-    //callAPI();
-    super.initState();
+    /*callAPI() async {
+      print('UI callled');
+      String query = "Entrenamientos Infantiles";
+      ytResult = await ytApi.search(query);
+      print("length ======= ${ytResult.length}");
+      print("ytResult channelurl ========= ${ytResult[0].channelurl}");
+      print("ytResult channelTitle ========= ${ytResult[0]}");
 
-  }
+      print("ytResult channelurl ========= ${ytResult[1].channelurl}");
+      print("ytResult channelTitle ========= ${ytResult[1].channelTitle}");
 
-  @override
-  Widget build(BuildContext context) {
+      print("ytResult channelurl ========= ${ytResult[2].channelurl}");
+      print("ytResult channelTitle ========= ${ytResult[2].channelTitle}");
 
-    if (widget.loading) {
+      print("ytResult channelurl ========= ${ytResult[3].channelurl}");
+      print("ytResult channelTitle ========= ${ytResult[3].channelTitle}");
+    }*/
 
-      return Container();
 
-    } else {
-
-      return new Container(
-        height: 360.0,
-        margin: EdgeInsets.only(left: 45.0),
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    List<Widget> movies() {
+      List<Widget> movieList = new List();
+      for (int i = 0; i < 3; i++) {
+        var movieitem = Padding(
+          padding: EdgeInsets.symmetric(vertical: 25.0, horizontal: 12.0),
+          child: new GestureDetector(
+            onTap: () {
+              print("Container clicked");
+            },
+            child: Container(
+              height: 220.0,
+              width: 135.0,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10.0,
+                        offset: Offset(0.0, 10.0))
+                  ]),
+              child: Column(
                 children: <Widget>[
-                  Text(
-                    "Mirar ahora",
-                    style: TextStyle(
-                        fontSize: 22.0, fontFamily: "SF-Pro-Display-Bold"),
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20.0),
+                        topRight: Radius.circular(20.0)),
+                    child: Image.network(
+                      _globals.streammer.streamings[i].thumbnail.url,
+                      width: double.infinity,
+                      height: 130.0,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  FlatButton(
-                    child: Text("Ver mas"),
-                    onPressed: () {},
+                  Padding(
+                    padding:
+                    const EdgeInsets.only(top: 4.0, left: 8.0, right: 8.0),
+                    child: Text(_globals.streammer.streamings[i].title,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 16.0, fontFamily: "SF-Pro-Display-Bold")),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 3.0),
+                    child: Text(i == 0 ? "Season 2" : ""),
                   )
                 ],
               ),
             ),
-            Container(
-              height: 280.0,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: movies(),
+          ),
+        );
+        movieList.add(movieitem);
+      }
+      return movieList;
+
+    }
+
+    @override
+    void initState() {
+      //callAPI();
+      super.initState();
+
+    }
+
+    @override
+    Widget build(BuildContext context) {
+
+        return new Container(
+          height: 360.0,
+          margin: EdgeInsets.only(left: 45.0),
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      "Mirar ahora",
+                      style: TextStyle(
+                          fontSize: 22.0, fontFamily: "SF-Pro-Display-Bold"),
+                    ),
+                    FlatButton(
+                      child: Text("Ver mas"),
+                      onPressed: () {},
+                    )
+                  ],
+                ),
               ),
-            )
-          ],
-        ),
-      );
+              Container(
+                height: 280.0,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: movies(),
+                ),
+              )
+            ],
+          ),
+        );
+      }
+    }
+
+
+  class Mclipper extends CustomClipper<Path> {
+    @override
+    Path getClip(Size size) {
+      var path = new Path();
+      path.lineTo(0.0, size.height - 100.0);
+
+      var controlpoint = Offset(35.0, size.height);
+      var endpoint = Offset(size.width / 2, size.height);
+
+      path.quadraticBezierTo(
+          controlpoint.dx, controlpoint.dy, endpoint.dx, endpoint.dy);
+
+      path.lineTo(size.width, size.height);
+      path.lineTo(size.width, 0.0);
+
+      return path;
+    }
+
+    @override
+    bool shouldReclip(CustomClipper<Path> oldClipper) {
+      return true;
     }
   }
-}*/
-
-/*class Mclipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = new Path();
-    path.lineTo(0.0, size.height - 100.0);
-
-    var controlpoint = Offset(35.0, size.height);
-    var endpoint = Offset(size.width / 2, size.height);
-
-    path.quadraticBezierTo(
-        controlpoint.dx, controlpoint.dy, endpoint.dx, endpoint.dy);
-
-    path.lineTo(size.width, size.height);
-    path.lineTo(size.width, 0.0);
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return true;
-  }
-}*/
