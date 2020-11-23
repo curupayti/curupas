@@ -9,14 +9,15 @@
     margin: 0 auto; 
   }
   
+*/
   .modal-dialog {
       max-width: 800px !important;;
-      height: 90% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      max-width:none !important;
+      /* height: 90% !important; */
+      /* margin: 0 !important; */
+      /* padding: 0 !important; */
+      /* max-width:none !important; */
   }
-  
+/*
   .modal-content {
       height: auto !important;
       width:800px  !important;;

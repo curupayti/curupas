@@ -49,10 +49,10 @@ $(document).ready(function () {
             </td>
             <td>${_time}</td>  
             <td><a href="#" id="${document.id}" class="js-view-images">${_size}</a></td>        
-            <td>
+            <td class="d-flex">
                 <a href="#" id="${document.id}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                 </a>
-                <a href="#" id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                <a id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
                 </a>
             </td>
             </tr>`;
@@ -84,20 +84,6 @@ $(document).ready(function () {
     $(document).on('click', '.js-view-images', function () {
        
     });
-
-    function formatDate(date) {
-        var d = new Date(date),
-            month = '' + (d.getMonth() + 1),
-            day = '' + d.getDate(),
-            year = d.getFullYear();
-    
-        if (month.length < 2) 
-            month = '0' + month;
-        if (day.length < 2) 
-            day = '0' + day;
-    
-        return [day, month, year].join('-');
-    }
 
     // ADD EMPLOYEE
     $("#add-post-form").submit(function (event) {

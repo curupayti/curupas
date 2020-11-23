@@ -62,10 +62,10 @@ $(document).ready(function () {
             </td>
             <td>${_time}</td>  
             <td><a href="#" id="${document.id}" class="js-view-images">${_size}</a></td>        
-            <td>
+            <td class="d-flex">
                 <a href="#" id="${document.id}" class="edit js-edit-post"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                 </a>
-                <a href="#" id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                <a id="${document.id}" class="delete js-delete-post"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
                 </a>
             </td>
             </tr>`;
@@ -97,20 +97,6 @@ $(document).ready(function () {
     $(document).on('click', '.js-view-images', function () {
        
     });
-
-    function formatDate(date) {
-        var d = new Date(date),
-            month = '' + (d.getMonth() + 1),
-            day = '' + d.getDate(),
-            year = d.getFullYear();
-    
-        if (month.length < 2) 
-            month = '0' + month;
-        if (day.length < 2) 
-            day = '0' + day;
-    
-        return [day, month, year].join('-');
-    }
 
     // ADD EMPLOYEE
     $("#add-post-form").submit(function (event) {
@@ -228,12 +214,15 @@ $(document).ready(function () {
         
         let _images = _imageSnapshot[id];
 
-        _images.docs.forEach(doc => {
-            //doc.data()
-            let _url = doc.data().downloadURL;
-            deleteImageByUrl(_url);
-
-        });          
+        console.log(_images, 'xxxxxxxx');
+        if(!_images.empty) {
+            _images.docs.forEach(doc => {
+                //doc.data()
+                let _url = doc.data().downloadURL;
+                deleteImageByUrl(_url);
+    
+            });          
+        }
     }
 
     function deleteImageByUrl(url) {
@@ -264,8 +253,9 @@ $(document).ready(function () {
     // UPDATE EMPLOYEE
     $(document).on('click', '.js-edit-post', function () {
         let id = $(this).attr('id');
+        console.log(id, 'ggggggg');
         $('#edit-employee-form').attr('edit-id', id);
-        db.collection('employees').doc(id).get().then(function (document) {
+        db.collection('posts').doc(id).get().then(function (document) {
             if (document.exists) {
                 $('#edit-employee-form #employee-name').val(document.data().name);
                 $('#edit-employee-form #employee-email').val(document.data().email);

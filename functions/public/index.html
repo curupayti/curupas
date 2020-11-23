@@ -20,6 +20,28 @@
         <header></header>  
 
         <div id="content"></div>
+
+        <!-- <div id="deleteModal" class="modal fade"  data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-confirm">
+                <div class="modal-content">
+                    <div class="modal-header flex-column">
+                        <div class="icon-box">
+                            <i class="material-icons">&#xE5CD;</i>
+                        </div>						
+                        <h4 class="modal-title w-100">Are you sure?</h4>	
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Do you really want to delete these records? This process cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" onclick="confirmDeletion()">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>     
+         -->
  
         <footer></footer>        
 
@@ -34,6 +56,9 @@
         <script src="https://www.gstatic.com/firebasejs/7.2.0/firebase-auth.js"></script>            
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-database.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-functions.js"></script>        
+        
+        <!-- helper -->
+        <script src="js/utils/helper.js"></script>        
 
     </body>
 
@@ -41,6 +66,21 @@
         
         var _user = {};
         var _role = {};
+
+        // var deleteReference = null;
+
+        // function setDeletion (collection, id) {
+        //     deleteReference = { collection, id };
+        //     $("#deleteModal").modal("show");
+        // }
+
+        // function confirmDeletion (collection, id) {
+        //     if(deleteReference)
+        //         db.collection(deleteReference.collection).doc(deleteReference.id).delete().then(()=> {
+        //             deleteReference = null;
+        //             $("#deleteModal").modal('hide');
+        //         })
+        // }
 
         var _rolePagesArray = [];
         var _dropDownMenuObj = {};
@@ -128,14 +168,17 @@
 
                 var previous = db.collection("users").where("email", "==", user.email)
                 .get()
-                .then(function(querySnapshotUser) {
-                    querySnapshotUser.forEach(function(docUser) {                        
+                .then(function (querySnapshotUser) {
+                    querySnapshotUser.forEach( async function(docUser) {                        
                         var roleReference =  docUser.data().roleRef;
                         var yearReference =  docUser.data().yearRef;
 
                         _user.userId = docUser.data().userID;
                         _user.name = docUser.data().name;
-                        _user.profilePictureURL = docUser.data().profilePictureURL;            
+                        console.log(docUser.data(), 'cccccc');
+                        const ref = storage.ref(docUser.data().profilePicture);
+                        _user.profilePictureURL = await ref.getDownloadURL();
+                        // _user.profilePictureURL = docUser.data().profilePictureURL;            
                         _user.roleReference = roleReference;                        
                         _user.yearReference = yearReference;                        
 

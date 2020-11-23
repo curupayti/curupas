@@ -4,6 +4,8 @@
 
     let deleteIDs = [];
     
+    let deleteThis = "", updateThis = "";
+
     let lastVisible;
     let firstVisible;          
 
@@ -21,12 +23,33 @@
     
     var _clicked = false;
 
+
     loadData();
 
     window.mainActiveTable = 0;
     window.mainTotalMain = 0;
     window.mainSteps = 0;
     window.mainPartial = 0;
+
+    window.openAddDetailModal = (id, data) => {
+      updateThis = id;
+      $("#addDetailModal").modal('show');
+    }
+
+    window.openDeleteContentModal = (id) =>{
+      deleteThis = id;
+      $("#myModal").modal('show');
+    }
+
+    window.confirmDeleteContent = () => {
+      if(deleteThis)
+        db.collection('contents').doc(deleteThis).delete().then(()=> {
+          deleteThis = ""
+          $("#myModal").modal('hide');
+          $('#main-table tbody').html('');   
+          loadData();
+        })
+    }
 
     function loadData() {
       const mostrar = parseInt($('#mostrar-select').val());
@@ -142,6 +165,7 @@
         document.ref.collection("images").get().then(function(imagesSnapshot) {
             
             _imageSnapshot[document.id] = imagesSnapshot;
+            console.log(document.id, 'cccccccc');
         
             let item = `<tr class="clickable-row-main" 
                 data-id="${document.id}" 
@@ -157,11 +181,11 @@
             <td>${document.data().amount}</td>                 
             <td>${document.data().name}</td>                              
             <td>${document.data().desc}</td>  
-            <td>${_last_update}</td>    
-            <td>
-                <a href="#" id="${document.id}" class="edit js-edit-main"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
+            <td width="150px">${_last_update}</td>    
+            <td width="100px">
+                <a onclick="openAddDetailModal('${document.id}', )" data-toggle="modal" id="${document.id}" class="edit js-edit-main"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                 </a>
-                <a href="#" id="${document.id}" class="delete js-delete-main"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                <a onclick="openDeleteContentModal('${document.id}')" id="${document.id}" class="delete js-delete-main"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
                 </a>
             </td>                                  
             </tr>`;
@@ -531,37 +555,6 @@
           }
         });
     }
-
-
-    function getDateFrom(_date) {      
-
-        var year = _date.getFullYear();
-        var month = _date.getMonth()+1;
-        var day = _date.getDate();
-
-        if (day < 10) {
-          day = '0' + day;
-        }
-        if (month < 10) {
-          month = '0' + month;
-        }
-        var formattedDate = day + '-' + month + '-' + year;
-        return formattedDate;
-      }
-
-      function formatDate(date) {
-          var d = new Date(date),
-              month = '' + (d.getMonth() + 1),
-              day = '' + d.getDate(),
-              year = d.getFullYear();
-      
-          if (month.length < 2) 
-              month = '0' + month;
-          if (day.length < 2) 
-              day = '0' + day;
-      
-          return [day, month, year].join('-');
-      }     
       
       // Publish
       $('#button-publish').click(function(event) { 
@@ -678,7 +671,7 @@
         _clicked = false;
 
         var firepad_userlist_div = $( "<div id='firepad-userlist'></div>" );        
-        let firepad_div = $(`<textarea id="basic-example"></textarea>`);                
+        let firepad_div = $(`<textarea id="basic-example" style="visibility:hidden"></textarea>`);                
 
         $( "#firepad-container" ).append( firepad_userlist_div );
         $( "#firepad-container").append( firepad_div );                 
