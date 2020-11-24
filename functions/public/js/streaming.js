@@ -15,7 +15,7 @@ $(document).ready(function () {
     }
 
     // REAL TIME LISTENER
-    db.collection('streaming').onSnapshot(snapshot => {
+    db.collection('control').onSnapshot(snapshot => {
        
         let size = snapshot.size;
         $('.count').text(size);        
@@ -83,10 +83,10 @@ $(document).ready(function () {
 
         $("#code-spinner").addClass("fa-spinner fa-spin");
 
-        db.collection('streaming')
-        .doc("control").delete().then(document => {
+        db.collection('control')
+        .doc("streaming").delete().then(document => {
 
-            db.collection('streaming').doc("control")
+            db.collection('control').doc("streaming")
                 .set({
                     fetch_code_trigger:true,
                     fetch_token_trigger:false,
@@ -115,7 +115,7 @@ $(document).ready(function () {
 
         $("#token-spinner").addClass("fa-spinner fa-spin");
 
-        db.collection('streaming').doc("control")
+        db.collection('control').doc("streaming")
             .set({
                 fetch_token_trigger:true
             },{ merge: true }).then(docRefSet => { 
@@ -127,15 +127,45 @@ $(document).ready(function () {
 
         $("#token-spinner").addClass("fa-spinner fa-spin");
 
-        db.collection('streaming').doc("control")
+        db.collection('control').doc("streaming")
             .set({
-                fetch_token_trigger:true
+                get_playlists:true
             },{ merge: true }).then(docRefSet => { 
         }); 
     });
-   
- 
 
+
+    // REAL TIME LISTENER
+    db.collection('media').onSnapshot(snapshot => {
+       
+        let size = snapshot.size;
+        $('.count').text(size);        
+       
+        let changes = snapshot.docChanges();
+
+        if (changes.length>0) {
+
+            var settings = {
+                "url": "https://us-central1-curupas-app.cloudfunctions.net/backup",
+                "method": "POST",
+                "timeout": 0,
+                "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "data": JSON.stringify({
+                        "collection":"media"                
+                    }),
+            };        
+                     
+            $.ajax(settings).done(function (response) {                            
+
+                $('#videos-renderer').jsonViewer(response);
+                
+            }); 
+
+        }
+        
+    });
 
     //# sourceURL=streaming.js   
     

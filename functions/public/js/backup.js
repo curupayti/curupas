@@ -60,7 +60,7 @@ $(document).ready(function () {
         }); 
     }   
 
-    let classesArray = ["calendar","contents","museums","notifications","pages","posts","roles","titles","users","years","streaming"];  
+    let classesArray = ["calendar","contents","museums","notifications","pages","posts","roles","titles","users","years","control","media"];  
 
     for (var i=0; i<classesArray.length; i++) {        
         renderPost(classesArray[i]);

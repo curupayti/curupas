@@ -9,17 +9,19 @@
     const jsdom = require("jsdom");
     const { JSDOM } = jsdom;
     
-    const cors = require('cors')({ origin: true });
-    var path = require('path');       
-    var fs = require('fs'); 
+    const cors  = require('cors')({ origin: true });
+    var path    = require('path');       
+    var fs      = require('fs'); 
+    const os    = require('os');
 
-    const mkdirp = require('mkdirp-promise');
+    const mkdirp  = require('mkdirp-promise');
     const request = require('request');
+    const spawn   = require('child-process-promise').spawn;
 
     const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; 
 
     const express = require('express');
-    var engines = require('consolidate');
+    var engines   = require('consolidate');
       
     serviceAccount = require("./key/curupas-app-firebase-adminsdk-5t7xp-cb5f62c82a.json");
     db_url = "https://curupas-app.firebaseio.com";
@@ -52,6 +54,7 @@
 
     //streaming
     exports.streaming = require("./streaming");
+    exports.share     = require("./share");
     
     var OPTION_SHARE  = 'share';            
     var OPTION_OAUTH2CALLBACK  = 'oauth2callback';              
@@ -59,9 +62,19 @@
     const app = express();
     app.engine('html', engines.hogan); 
     app.set('views', path.join(__dirname, 'views'));    
-    app.use(cors);     
+    app.use(cors);  
+
+    const getOpenGraph = (image, desc, title) => {
+      let og = `<meta property="fb:app_id" content="921373517372" />`;
+      og += `<meta property="og:type" content="website" />`;      
+      og += `<meta property="og:title" content="${title}" />`;
+      og += `<meta property="og:description" content="${desc}" />`;
+      og += `<meta property="og:image" content="${image}" />`;
+      og += `<meta property="og:url" content="https://example.com" />`;
+      return og;      
+    };   
       
-    app.get('*', (req, res) => {
+    app.get('*', async (req, res) => {
         
       console.log("<<<<<<<<<<<<<<<<<<<<======================");
 
@@ -106,55 +119,61 @@
 
       } else if ( pathParam === OPTION_SHARE ) {    
 
-        var document = req.path.split('/')[1];
+        var docId = req.path.split('/')[2];
         
         const userAgent = req.headers['user-agent'].toLowerCase();
 
         let views = path.join(__dirname, 'views');      
         let indexHTML = fs.readFileSync(views + '/share.html').toString();     
 
-        let appPath = "share/" + document;
-        console.log("document: " + document);
+        let sharePath = "share/" + docId;
+        console.log("sharePath: " + sharePath);
 
-        firestore.doc(appPath)
-        .get().then(document => {
-                        
-              var ogPlaceholder = '<meta name="functions-insert-dynamic-og">';          
-              var DesignAppIdPlaceholder = "<functions-path-design-app-id>";       
+        const snapshot = await firestore.doc(sharePath).get();
 
-              var document_path = document.data().document_path;
+        console.log("id: " + snapshot.id);
 
-              firestore.doc(document_path)
-              .get().then(document => {
+        const dataShare = snapshot.data();
+        if (dataShare) {
+          console.log("DATA dataShare");
+        }       
 
-                  let description = document.data().description;
-                  let icon_original = document.data().icon_original;
-                  let name = document.data().name;
+        let shareref = dataShare.shareref;        
 
-                  let html_meta = getOpenGraph(icon_original, description, name);
+        let dataref = await shareref.get().then((doc) => {
+            
+            console.log("ID:: " + doc.id)
+            console.log("Document data:", doc.data().name);  
 
-                  console.log(html_meta);               
-                  
-                  indexHTML = indexHTML.replace(ogPlaceholder, html_meta);
-                  indexHTML = indexHTML.replace(DesignAppIdPlaceholder, document_path);         
+            var document_path = doc.ref.path;
 
-                  res.status(200).send(indexHTML);    
-                  
-                  return indexHTML;
+            console.log("document_path: " + document_path);            
 
-                }).catch((error) => {
-                  console.log("error: " + error);
-                  return error;
-          
-                }); 
+            var ogPlaceholder = '<meta name="functions-insert-dynamic-og">';          
+            var DesignAppIdPlaceholder = "<functions-path-design-app-id>"; 
 
-                return document_path;
+            let description = doc.data().description;
+            let icon_original = doc.data().icon_original;
+            let name = doc.data().name;
+
+            let html_meta = getOpenGraph(icon_original, description, name);
+
+            console.log(html_meta);               
+            
+            indexHTML = indexHTML.replace(ogPlaceholder, html_meta);
+            indexHTML = indexHTML.replace(DesignAppIdPlaceholder, document_path);         
+
+            res.status(200).send(indexHTML);    
+            
+            return indexHTML;
 
         }).catch((error) => {
+
           console.log("error: " + error);
           return error;
 
-        });     
+        });      
+            
 
       } else {         
 
@@ -180,6 +199,7 @@
       }
       
     });
+
 
     exports.app = functions.https.onRequest(app);
 
@@ -459,8 +479,6 @@
       } 
 
     });
-
-
 
     exports.notification = functions.firestore
       .document('notifications/{notificationsId}')

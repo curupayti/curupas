@@ -9,223 +9,157 @@
   var {google} = require('googleapis');
   var OAuth2 = google.auth.OAuth2;   
 
-  //Add thumbnail to root level
-
-  /*exports.mediaplaylist = functions.firestore
-    .document('media/{playlistId}')
-    .onCreate( async (change, context) => {
-
-      var newValue = change.after.data(); 
-
-      let snippet     = newValue.snippet;    
-      let thumbnails  = snippet.thumbnails;
-      let standard    = thumbnails.standard;
-
-      if (standard) { 
-
-        let has_thumbnail = newValue.has_thumbnail; 
-        let id     = newValue.id;    
-
-        var _time =  new Date();     
-
-        if (standard.url && !has_thumbnail) {
-
-          firestore.collection("media").doc(id).set({                   
-            has_thumbnail: true,
-            thumbnails_url: standard.url,
-            last_update: _time 
-          },{ merge: true }); 
-
-        }
-
-      }
-
-  });*/
-
-
-  //Add thumbnail to videos root level
-
-  /*exports.mediavideo = functions.firestore
-    .document('media/{playlistId}/videos/{videoId}')
-    .onCreate( async (change, context) => {       
-
-      var newValue = change.after.data(); 
-
-      let parent = change.after.ref.parent.parent;
-
-      let parentId = parent.id;
-     
-      let snippet     = newValue.snippet;    
-      let thumbnails  = snippet.thumbnails;
-      let defaul    = thumbnails.default; 
-
-      if (defaul) {
-
-        console.log("snippet: " + snippet);
-
-        let has_thumbnail = newValue.has_thumbnail; 
-        let id     = newValue.id;    
-
-        var _time =  new Date();     
-
-        if (standard.url && !has_thumbnail) {
-
-          firestore.collection("media").doc(parentId).collection(videos).doc(id).set({                   
-            has_thumbnail: true,
-            thumbnails_url: standard.url,
-            last_update: _time 
-          },{ merge: true }); 
-
-        }
-
-      }
-
-  });*/
-
-
-  exports.media = functions.https.onRequest((request, response) => { 
+  exports.media = functions.runWith({ timeoutSeconds: 540 })
+                  .https.onCall((data, context) => {       
 
       var _json = {};  
 
-      try {      
+      try { 
 
-          firestore.collection("media").get()
-          .then(async (querySnapshotPlaylist) => {
+          const result = new Promise(async (resolve, reject) => {     
 
-            var playlistLength = querySnapshotPlaylist.size;
-            var countPlaylist = 1;
+              firestore.collection("media").get()
+              .then(async (querySnapshotPlaylist) => {
 
-            console.log("playlistLength: " + playlistLength);
+                var playlistLength = querySnapshotPlaylist.size;
+                var countPlaylist = 1;
 
-            querySnapshotPlaylist.forEach(async (docPlaylist) => {
+                //console.log("playlistLength: " + playlistLength);
 
-                let docp        = docPlaylist.data();
-                var idp         = docp.id;
-                var snippetp    = docp.snippet;   
-                let thumbnailsp = snippetp.thumbnails;                                    
-                var defaulp     = thumbnailsp.default;                                                                 
+                querySnapshotPlaylist.forEach(async (docPlaylist) => {
 
-                let title         = snippetp.title;
-                title = title.replace(/['"]+/g, '');
+                    let docp        = docPlaylist.data();
+                    var idp         = docp.id;
+                    var snippetp    = docp.snippet;   
+                    let thumbnailsp = snippetp.thumbnails;                                    
+                    var defaulp     = thumbnailsp.default;                                                                 
 
-                let description   = snippetp.description;
-                let channelTitle  = snippetp.channelTitle;
-                let channelId     = snippetp.channelId; 
-                let publishedAt   = snippetp.publishedAt;                            
-                let thumbnailp    = "";                            
+                    let title         = snippetp.title;
+                    title = title.replace(/['"]+/g, '');
 
-                if (defaulp) {
-                  thumbnailp = defaulp.url; 
-                }                     
+                    let description   = snippetp.description;
+                    let channelTitle  = snippetp.channelTitle;
+                    let channelId     = snippetp.channelId; 
+                    let publishedAt   = snippetp.publishedAt;                            
+                    let thumbnailp    = "";                            
 
-                let j = `{                                                
-                    "id":"${idp}", 
-                    "title":"${title}", 
-                    "description":"${description}", 
-                    "channelTitle":"${channelTitle}", 
-                    "channelId":"${channelId}", 
-                    "thumbnail":"${thumbnailp}", 
-                    "publishedAt":"${publishedAt}",
-                    "videos":[]                      
-                }`;                    
+                    if (defaulp) {
+                      thumbnailp = defaulp.url; 
+                    }                     
 
-                var json = JSON.parse(j);
-                _json[idp] = json;                      
+                    let j = `{                                                
+                        "id":"${idp}", 
+                        "title":"${title}", 
+                        "description":"${description}", 
+                        "channelTitle":"${channelTitle}", 
+                        "channelId":"${channelId}", 
+                        "thumbnail":"${thumbnailp}", 
+                        "publishedAt":"${publishedAt}",
+                        "videos":[]                      
+                    }`;                    
 
-                countPlaylist++; 
+                    var json = JSON.parse(j);
+                    _json[idp] = json;                      
 
-                if ( countPlaylist === playlistLength ) {                                            
+                    countPlaylist++; 
 
-                  countPlaylist = 0;
+                    if ( countPlaylist === playlistLength ) {                                            
 
-                }                 
+                      countPlaylist = 0;
 
-                firestore.collection("media").doc(idp).collection("videos").get()
-                .then(async (querySnapshotVideo) => {
+                    }                 
 
-                    var videosLength = querySnapshotVideo.size;
-                    var countVideos = 1;  
+                    firestore.collection("media").doc(idp).collection("videos").get()
+                    .then(async (querySnapshotVideo) => {
 
-                    console.log("videosLength: " + videosLength);                                        
+                        var videosLength = querySnapshotVideo.size;
+                        var countVideos = 1;  
 
-                    querySnapshotVideo.forEach(async (docVideo) => {
+                        //console.log("videosLength: " + videosLength);                                        
 
-                      let docv        = docVideo.data();
-                      var snippetv    = docv.snippet;    
-                      let thumbnailsv = snippetv.thumbnails;
-                      var defaulv     = thumbnailsv.default; 
+                        querySnapshotVideo.forEach(async (docVideo) => {
 
-                      let idv           = docv.id;
-                      let title         = snippetv.title;
-                      var description   = "";
+                          let docv        = docVideo.data();
+                          var snippetv    = docv.snippet;    
+                          let thumbnailsv = snippetv.thumbnails;
+                          var defaulv     = thumbnailsv.default; 
 
-                      if (snippetv.description) {
-                          description = snippetv.description;
-                      }
+                          let idv           = docv.id;
+                          let title         = snippetv.title;
+                          var description   = "";
 
-                      let channelId     = snippetv.channelId;                           
-                      let position      = snippetv.position;                        
-
-                      let videoId       = snippetv.resourceId.videoId;
-                      let publishedAt   = snippetv.publishedAt;                            
-
-                      let playlistId    = snippetv.playlistId;  
-                      var thumbnailv    = "";
-
-                      if (defaulv) {
-                        thumbnailv = defaulv.url;
-                      }
-
-                      let j  = `{
-                          "id":"${idv}", 
-                          "title":"${title}", 
-                          "description":"${description}",                               
-                          "channelId":"${channelId}", 
-                          "position":${position}, 
-                          "videoId":"${videoId}", 
-                          "publishedAt":"${publishedAt}", 
-                          "playlistId":"${playlistId}", 
-                          "thumbnail":"${thumbnailv}", 
-                          "publishedAt":"${publishedAt}"
-                         }`;                            
-
-                      let json_video = JSON.parse( j );   
-                      _json[playlistId].videos.push(json_video);                            
-
-                      if ( countVideos === videosLength ) {                                                               
-                          
-                          if ( countPlaylist === playlistLength ) {                                  
-
-                            response.status(200).send(_json);                        
-
+                          if (snippetv.description) {
+                              description = snippetv.description;
                           }
+
+                          let channelId     = snippetv.channelId;                           
+                          let position      = snippetv.position;                        
+
+                          let videoId       = snippetv.resourceId.videoId;
+                          let publishedAt   = snippetv.publishedAt;                            
+
+                          let playlistId    = snippetv.playlistId;  
+                          var thumbnailv    = "";
+
+                          if (defaulv) {
+                            thumbnailv = defaulv.url;
+                          }
+
+                          let j  = `{
+                              "id":"${idv}", 
+                              "title":"${title}", 
+                              "description":"${description}",                               
+                              "channelId":"${channelId}", 
+                              "position":${position}, 
+                              "videoId":"${videoId}", 
+                              "publishedAt":"${publishedAt}", 
+                              "playlistId":"${playlistId}", 
+                              "thumbnail":"${thumbnailv}"                              
+                             }`;                            
+
+                          let json_video = JSON.parse( j );   
+                          _json[playlistId].videos.push(json_video);                            
+
+                          if ( countVideos === videosLength ) {                                                               
+                              
+                              if ( countPlaylist === playlistLength ) {                                  
+
+                                //response.status(200).send(_json);                        
+
+                                resolve(_json);
+
+                              }
+                              
+                              countPlaylist++; 
+                              countVideos = 1;
+
+                          }  else  {
+
+                            json += `,`;
+
+                          }                     
                           
-                          countPlaylist++; 
-                          countVideos = 1;
+                          countVideos++;
 
-                      }  else  {
+                        });
 
-                        json += `,`;
+                        return {};              
 
-                      }                     
-                      
-                      countVideos++;
+                    }).catch((error) => {     
+                      console.error("Error adding document: ", error);           
+                    }); 
 
-                    });
+                  });
 
-                    return {};              
+                  return {};  
 
-                }).catch((error) => {     
-                  console.error("Error adding document: ", error);           
-                }); 
-
+              }).catch((error) => {     
+                console.error("Error adding document: ", error);           
               });
 
-              return {};  
-
-          }).catch((error) => {     
-            console.error("Error adding document: ", error);           
           }); 
+
+          return result;
 
         } catch (e) {
           console.error(e);
