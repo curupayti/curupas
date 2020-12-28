@@ -293,7 +293,7 @@ class UpperSection extends StatelessWidget {
     return Column(
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.all(20.0),
+          padding: EdgeInsets.only(left:20.0, right:20, top:20),
           child: Column(
             children: <Widget>[
               new Stack(fit: StackFit.loose, children: <Widget>[
@@ -301,48 +301,82 @@ class UpperSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    new Container(
-                      width: 120.0,
-                      height: 120.0,
-                      decoration: new BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: parent != null && parent._avatarImage != null
-                            ? parent._avatarImage
-                            : "",
+                    _globals.curupaGuest.isGuest == false ?
+                      new Container(
+                        width: 120.0,
+                        height: 120.0,
+                        decoration: new BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: parent != null && parent._avatarImage != null
+                              ? parent._avatarImage
+                              : "",
+                        ),
+                      ):
+                      Text(
+                        _globals.user.name,
+                        style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
                       ),
-                    ),
                   ],
                 ),
-                Padding(
-                    padding: EdgeInsets.only(top: 80.0, right: 60.0),
-                    child: new Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        new GestureDetector(
-                          onTap: () {
-                            optionForPic(context);
-                          },
-                          child: new CircleAvatar(
-                            backgroundColor: Colors.red,
-                            radius: 25.0,
-                            child: new Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
+                _globals.curupaGuest.isGuest == false ?
+                  Padding(
+                      padding: EdgeInsets.only(top: 80.0, right: 60.0),
+                      child: new Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          new GestureDetector(
+                            onTap: () {
+                              optionForPic(context);
+                            },
+                            child: new CircleAvatar(
+                              backgroundColor: Colors.red,
+                              radius: 25.0,
+                              child: new Icon(
+                                Icons.camera_alt,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    )),
+                        ],
+                      )) :
+                  Padding(
+                    padding: const EdgeInsets.only(left:20.0, right:20.0, top:50.0),
+                    child: Text(
+                      "Registrate a la app y comparti tu experiencia con tu camada",
+                      softWrap: true,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey,
+                        decoration: TextDecoration.none,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w300,
+                        fontFamily: "OpenSans",
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left:80.0, top:120.0),
+                    child: CustomFlatButton(
+                      enabled: true,
+                      title: "REGISTRAR",
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      textColor: Colors.white,
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/signup',
+                          arguments: _globals.user,
+                        );
+                      },
+                      splashColor: Colors.red,
+                      borderColor: Color.fromRGBO(0, 29, 126, 1),
+                      borderWidth: 0,
+                      color: Colors.red,
+                    ),
+                  ),
+
               ]),
-              SizedBox(
-                height: 16.0,
-              ),
-              Text(
-                _globals.user.name != null ? _globals.user.name : "",
-                style: TextStyle(
-                  fontSize: 30.0,
-                ),
-              )
             ],
           ),
         ),

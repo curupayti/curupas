@@ -7,6 +7,7 @@ import "package:flutter/material.dart";
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //https://github.com/mattgraham1/FlutterCalendar
 
@@ -33,6 +34,8 @@ class _CalendarPageState extends State<CalendarPage> {
 
   String _calendarSelect = "camada";
 
+  SharedPreferences prefs;
+
   _CalendarPageState(){
     _dateTime = DateTime.now();
     setMonthPadding();
@@ -45,10 +48,15 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   @override
-  void initState() {
+  void initState()  {
     super.initState();
-
-    getCalendar("camada");
+    String type;
+    if (_globals.curupaGuest.isGuest) {
+      type = "curupa";
+    } else {
+      type = "camada";
+    }
+    getCalendar(type);
   }
 
   void getCalendar(String _type) async {
@@ -107,35 +115,36 @@ class _CalendarPageState extends State<CalendarPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               mainAxisSize: MainAxisSize.max,
                               children: <Widget>[
-                                SizedBox(
-                                  height: 50.0,
-                                  width: button_width,
-                                  child: FlatButton(
-                                      color: _calendarSelect == "camada"
-                                          ? _getEventColor()
-                                          : Colors.white,
-                                      child: Text(
-                                        "Camada",
-                                        style: new TextStyle(
-                                          fontSize: 20.0,
-                                          height: 1.5,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
+                                _globals.curupaGuest.isGuest == false ?
+                                  SizedBox(
+                                    height: 50.0,
+                                    width: button_width,
+                                    child: FlatButton(
+                                        color: _calendarSelect == "camada"
+                                            ? _getEventColor()
+                                            : Colors.white,
+                                        child: Text(
+                                          "Camada",
+                                          style: new TextStyle(
+                                            fontSize: 20.0,
+                                            height: 1.5,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      onPressed: () {
-                                        getCalendar("camada");
-                                        setState(() {
-                                          _calendarSelect = "camada";
-                                          loading = true;
-                                        });
-                                        Timer(Duration(seconds: 3), () {
+                                        onPressed: () {
+                                          getCalendar("camada");
                                           setState(() {
-                                            loading = false;
+                                            _calendarSelect = "camada";
+                                            loading = true;
                                           });
-                                        });
-                                      }),
-                                ),
+                                          Timer(Duration(seconds: 3), () {
+                                            setState(() {
+                                              loading = false;
+                                            });
+                                          });
+                                        }),
+                                  ):
                                 SizedBox(
                                   height: 50.0,
                                   width: button_width,

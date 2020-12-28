@@ -1,16 +1,16 @@
 
   import 'dart:async';
-import 'dart:collection';
+  import 'dart:collection';
   import 'package:cloud_functions/cloud_functions.dart';
-import 'package:curupas/models/HTML.dart';
+  import 'package:curupas/models/HTML.dart';
   import 'package:curupas/models/HTMLS.dart';
-import 'package:curupas/models/curupa_user.dart';
+  import 'package:curupas/models/curupa_user.dart';
   import 'package:curupas/models/group_media.dart';
   import 'package:curupas/models/museum.dart';
   import 'package:curupas/models/notification.dart';
-import 'package:curupas/models/streaming.dart';
-import 'package:curupas/models/streaming_thumbnails.dart';
-import 'package:curupas/models/streaming_video.dart';
+  import 'package:curupas/models/streaming.dart';
+  import 'package:curupas/models/streaming_thumbnails.dart';
+  import 'package:curupas/models/streaming_video.dart';
   import 'package:firebase_analytics/firebase_analytics.dart';
   import 'package:firebase_auth/firebase_auth.dart';
   import 'package:cloud_firestore/cloud_firestore.dart';
@@ -149,6 +149,15 @@ import 'package:curupas/models/streaming_video.dart';
       return user.uid;
     }
 
+    static Future<void> deleteGuestAccount() async {
+      User user = await FirebaseAuth.instance.currentUser;
+      return user.delete();
+    }
+
+    static Future<void> deleteUserById(String userId) async {
+      return await FirebaseFirestore.instance.collection('users').doc(userId).delete();
+    }
+
     static Future<void> signOut() async {
       return FirebaseAuth.instance.signOut();
     }
@@ -182,9 +191,9 @@ import 'package:curupas/models/streaming_video.dart';
       return await _globals.getUserData(userId);
     }
 
-    static Future<DocumentReference> getRoleGroupReference() async {
+    static Future<DocumentReference> getRoleGroupReferenceByPath(String path) async {
       DocumentReference roleRef =
-          await FirebaseFirestore.instance.doc("roles/group");
+          await FirebaseFirestore.instance.doc(path);
       return roleRef;
     }
 
@@ -231,6 +240,17 @@ import 'package:curupas/models/streaming_video.dart';
           return Group.fromDocument(doc);
         }).first;
       });
+    }
+
+
+    static Future<QuerySnapshot> getGroupSnapshot() async {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("years").get();
+      return querySnapshot;
+    }
+
+    static Future<QuerySnapshot> getClubSnapshot() async {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("clubs").get();
+      return querySnapshot;
     }
 
     static setMediaListener(String documentId) {
@@ -300,6 +320,11 @@ import 'package:curupas/models/streaming_video.dart';
           return sms;
         }
       });
+    }
+
+    static void updateUserPhone(String phone) async {
+      String userID = _globals.user.userID;
+      await FirebaseFirestore.instance.doc("users/${userID}").set({'phone': phone}, SetOptions(merge:true));
     }
 
     static Future<DocumentReference> getUserDocumentReference(

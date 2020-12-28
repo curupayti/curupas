@@ -1,7 +1,9 @@
 
-  import 'package:curupas/models/HTML.dart';
+  import 'package:curupas/globals.dart';
+import 'package:curupas/models/HTML.dart';
   import 'package:curupas/ui/screens/calendar/event_creator.dart';
   import 'package:curupas/ui/screens/drawer/content_viewer.dart';
+import 'package:curupas/ui/screens/guest_screen.dart';
   import 'package:curupas/ui/widgets/add_media_screen.dart';
   import 'package:curupas/ui/widgets/youtube/player_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,7 +22,8 @@ import 'package:firebase_core/firebase_core.dart';
   import 'package:cloud_firestore/cloud_firestore.dart';
 
   import 'models/add_media.dart';
-  import 'models/event_calendar.dart';
+  import 'models/curupa_user.dart';
+import 'models/event_calendar.dart';
   import 'models/post.dart';
   import 'models/streaming.dart';
   //import 'models/streaming.dart';
@@ -36,9 +39,11 @@ import 'package:firebase_core/firebase_core.dart';
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SharedPreferences.getInstance().then((prefs) async {
       runApp(
-        NotifierProvider(
-          child: CurupaApp(prefs: prefs),
-        ),
+          RestartWidget(
+            child: NotifierProvider(
+              child: CurupaApp(prefs: prefs),
+            ),
+          ),
       );
     });
   }
@@ -56,7 +61,8 @@ import 'package:firebase_core/firebase_core.dart';
           '/walkthrough': (BuildContext context) => new WalkthroughScreen(),
           '/welcomeScreen': (BuildContext context) => new WelcomeScreen(),
           '/signin': (BuildContext context) => new SignInScreen(),
-          '/signup': (BuildContext context) => new SignUpScreen(),
+          //'/signup': (BuildContext context) => new SignUpScreen(),
+          '/guest': (BuildContext context) => new GuestScreen(),
           '/group': (BuildContext context) => new SignUpGroupScreen(),
           '/main': (BuildContext context) => new MainScreen(),
         },
@@ -95,6 +101,13 @@ import 'package:firebase_core/firebase_core.dart';
       String set = settings.name;
       print(set);
       switch (settings.name) {
+        case '/signup':
+          return MaterialPageRoute(
+            builder: (_) => SignUpScreen(
+              user : settings.arguments
+            ),
+          );
+          break;
         case '/postswipe':
           if (args is Post) {
             return MaterialPageRoute(
@@ -156,5 +169,37 @@ import 'package:firebase_core/firebase_core.dart';
           ),
         );
       });
+    }
+
+  }
+
+  class RestartWidget extends StatefulWidget {
+    RestartWidget({this.child});
+
+    final Widget child;
+
+    static void restartApp(BuildContext context) {
+      context.findAncestorStateOfType<_RestartWidgetState>().restartApp();
+    }
+
+    @override
+    _RestartWidgetState createState() => _RestartWidgetState();
+  }
+
+  class _RestartWidgetState extends State<RestartWidget> {
+    Key key = UniqueKey();
+
+    void restartApp() {
+      setState(() {
+        key = UniqueKey();
+      });
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      return KeyedSubtree(
+        key: key,
+        child: widget.child,
+      );
     }
   }

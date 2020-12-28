@@ -1,7 +1,10 @@
+import 'package:curupas/business/auth.dart';
 import 'package:curupas/ui/widgets/flat_button.dart';
 import 'package:flutter/material.dart';
 
 class WelcomeScreen extends StatelessWidget {
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,17 +74,37 @@ class WelcomeScreen extends StatelessWidget {
               title: "Registrate",
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              textColor: Colors.black54,
+              textColor: Colors.white,
               onPressed: () {
                 Navigator.of(context).pushNamed("/signup");
               },
-              splashColor: Colors.black12,
+              splashColor: Colors.black54,
               borderColor: Colors.black12,
               borderWidth: 2,
+              color: Color.fromRGBO(191, 4, 17, 1),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                vertical: 14.0, horizontal: 40.0),
+            child: CustomFlatButton(
+              enabled: true,
+              title: "Visitantes",
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              textColor: Colors.white,
+              onPressed: () {
+                Navigator.of(context).pushNamed("/guest");
+              },
+              splashColor: Colors.black,
+              borderColor: Color.fromRGBO(59, 89, 152, 1.0),
+              borderWidth: 0,
+              color: Colors.grey,
             ),
           ),
         ],
       ),
     );
   }
+
 }

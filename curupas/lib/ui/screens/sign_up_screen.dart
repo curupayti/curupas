@@ -14,6 +14,7 @@
   import 'package:flutter/services.dart';
   import 'package:curupas/models/curupa_user.dart';
   import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
   import 'package:intl/intl.dart';
   import 'package:curupas/ui/widgets/alert_sms_dialog.dart';
   import 'package:curupas/ui/widgets/flat_button.dart';
@@ -22,12 +23,20 @@
   import 'package:curupas/globals.dart' as _globals;
   import 'package:location/location.dart';
 
+import '../../main.dart';
+
   class SignUpScreen extends StatefulWidget {
+
+    final CurupaUser user;
+
+    SignUpScreen({this.user});
+
     @override
     _SignUpScreenState createState() => _SignUpScreenState();
   }
 
   class _SignUpScreenState extends State<SignUpScreen> {
+
     final TextEditingController _fullname = new TextEditingController();
     final TextEditingController _number = new TextEditingController();
     final TextEditingController _birthday = new TextEditingController();
@@ -195,12 +204,18 @@
         }
       });
 
-      setState(() {
-        _fullname.text = "Jose Vigil";
-        _number.text = "1169776624";
-        _birthday.text = "30/09/1973";
-        _email.text = "josemanuelvigil@gmail.com";
-      });
+      if (widget.user != null) {
+
+        setState(() {
+          /*_fullname.text = "Jose Vigil";
+          _number.text = "1169776624";
+          _birthday.text = "30/09/1973";
+          _email.text = "josemanuelvigil@gmail.com";*/
+          _fullname.text  = widget.user.name;
+          _number.text    = widget.user.phone;
+        });
+
+      }
     }
 
     void _getLocaton() async {
@@ -379,14 +394,48 @@
                                     onTap: () {
                                       _globals.filePickerGlobal
                                           .getImagePath(FileType.image)
-                                          .then((result) {
+                                          .then((result) async {
                                         File _file = new File(result);
-                                        if (_file != null) {
+                                        if (_file != null)  {
                                           _imageSelected = true;
                                           _imagePath = result;
-                                          Image _newImage = new Image.file(_file);
-                                          _avatarImage = _newImage;
-                                          _rebuild();
+
+                                          try {
+
+                                            File croppedFile = await ImageCropper.cropImage(
+                                                sourcePath: _file.path,
+                                                aspectRatioPresets: [
+                                                  CropAspectRatioPreset.square,
+                                                  //CropAspectRatioPreset.ratio3x2,
+                                                  //CropAspectRatioPreset.original,
+                                                  //CropAspectRatioPreset.ratio4x3,
+                                                  //CropAspectRatioPreset.ratio16x9
+                                                ],
+                                                androidUiSettings: AndroidUiSettings(
+                                                    toolbarTitle: 'Recortar imagen',
+                                                    toolbarColor: Colors.blue,
+                                                    toolbarWidgetColor: Colors.white,
+                                                    initAspectRatio: CropAspectRatioPreset.square,
+                                                    lockAspectRatio: true,
+                                                    hideBottomControls: true),
+                                                iosUiSettings: IOSUiSettings(
+                                                  minimumAspectRatio: 1.0,
+                                                    rotateButtonsHidden:true,
+                                                    resetButtonHidden:true,
+                                                    aspectRatioPickerButtonHidden:true,
+                                                    resetAspectRatioEnabled:true,
+                                                )
+                                            );
+                                            Image _newImage = new Image.file(croppedFile);
+                                            _avatarImage = _newImage;
+                                            _rebuild();
+
+                                          } on Exception catch (exception) {
+                                            print(exception.toString());
+                                          } catch (error) {
+                                            print(error.toString());
+                                          }
+
                                         }
                                       });
                                     },
@@ -520,139 +569,143 @@
         String email,
         String password,
         BuildContext context}) async {
-      if ( //Validator.validateName(fullname) &&
-          Validator.validatePhone(phone) &&
-              Validator.validateBirthday(birthday) &&
-              Validator.validateEmail(email) &&
-              Validator.validatePassword(password)) {
-        setState(() {
-          _loadingInProgress = true;
-        });
-        try {
-          SystemChannels.textInput.invokeMethod('TextInput.hide');
-          _changeBlackVisible();
-          await Auth.signUp(email, password).then((uID) async {
-            if (_imageSelected) {
-              if (uID == _globals.error_email_already_in_use) {
-                _globals.showErrorAlert(
-                  context: context,
-                  title: _globals.register_error_title,
-                  content: "Tu mail yo se encuentra registrado.",
-                  onPressed: () {
+
+        bool validated = true;
+
+        if ( !Validator.validatePhone(phone) ) {
+            _globals.showToast("El telefono es invalido");
+            validated = false;
+        }
+
+        if ( !Validator.validateBirthday(birthday) ) {
+
+          _globals.showToast("Falta tu cumpleaños");
+          validated = false;
+
+        }
+
+        if ( !Validator.validateEmail(email) ) {
+          _globals.showToast("el email es invalido");
+          validated = false;
+        }
+
+        if ( !Validator.validatePassword(password) ) {
+          _globals.showToast("El password es muy corto");
+          validated = false;
+        }
+
+        if (validated) {
+
+          setState(() {
+            _loadingInProgress = true;
+          });
+
+          try {
+
+            SystemChannels.textInput.invokeMethod('TextInput.hide');
+            _changeBlackVisible();
+
+            if (_globals.curupaGuest.isGuest) {
+              await Auth.deleteGuestAccount();
+              String guest_user_id = _globals.curupaGuest.user.userID;
+              await Auth.deleteUserById(guest_user_id);
+            }
+
+            await Auth.signUp(email, password).then((uID) async {
+
+              if (_imageSelected) {
+                if (uID == _globals.error_email_already_in_use) {
+                  _globals.showErrorAlert(
+                    context: context,
+                    title: _globals.register_error_title,
+                    content: "Tu mail yo se encuentra registrado.",
+                    onPressed: () {
+                      setState(() {
+                        _email.clear();
+                        _blackVisible = !_blackVisible;
+                        _loadingInProgress = false;
+                      });
+                    },
+                  );
+                } else if (uID == _globals.error_unknown) {
+                  _globals.showErrorAlert(
+                    context: context,
+                    title: _globals.register_error_title,
+                    content: "Error desconocido, contacta al adinistrador.",
+                    onPressed: _changeBlackVisible,
+                  );
+
+                } else {
+
+                  String loweName = fullname.toLowerCase();
+                  String toUnderscore = loweName.replaceAll(" ", "_");
+                  String toNonSpecial = removeDiacritics(toUnderscore);
+
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  prefs.setString('userId', uID);
+                  prefs.setBool('guest', false);
+                  prefs.setString('_imagePath', _imagePath);
+                  prefs.setString('toNonSpecial', toNonSpecial);
+
+                  int code = await _globals.generateRandom();
+
+                  DocumentReference roleRef = await Auth.getRoleGroupReferenceByPath("roles/group");
+
+                  CurupaUser user = new CurupaUser(
+                      userID: uID,
+                      phone: phone,
+                      email: email,
+                      name: fullname,
+                      birthday: birthday,
+                      nonSpName: toNonSpecial,
+                      roleRef: roleRef,
+                      smsCode: code,
+                      accepted: false,
+                      locationData: _locationData);
+
+                  var message = _globals.getCodeMessgae(code);
+
+                  bool added = await Auth.addUser(user);
+                  if (added) {
+                    prefs.setBool('registered', true);
+                    _globals.sendUserSMSVerification(phone, message, uID, code);
+                    if (inputDoneSignUp != null) {
+                      phoneNumberFocusNodeSignUp = null;
+                      inputDoneSignUp = null;
+                    }
                     setState(() {
-                      _email.clear();
-                      _blackVisible = !_blackVisible;
                       _loadingInProgress = false;
                     });
-                  },
-                );
-              } else if (uID == _globals.error_unknown) {
-                _globals.showErrorAlert(
-                  context: context,
-                  title: _globals.register_error_title,
-                  content: "Error desconocido, contacta al adinistrador.",
-                  onPressed: _changeBlackVisible,
-                );
-              } else {
-                String loweName = fullname.toLowerCase();
-                String toUnderscore = loweName.replaceAll(" ", "_");
-                String toNonSpecial = removeDiacritics(toUnderscore);
 
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.setString('userId', uID);
-                prefs.setString('_imagePath', _imagePath);
-                prefs.setString('toNonSpecial', toNonSpecial);
-
-                int code = await _globals.generateRandom();
-
-                Map<String, dynamic> data = new Map<String, dynamic>();
-                data["locationData"] = _locationData;
-
-                List<int> userType = new List<int>();
-                userType.add(2);
-
-                DocumentReference roleRef = await Auth.getRoleGroupReference();
-
-                CurupaUser user = new CurupaUser(
-                    userID: uID,
-                    phone: phone,
-                    email: email,
-                    name: fullname,
-                    birthday: birthday,
-                    nonSpName: toNonSpecial,
-                    roleRef: roleRef,
-                    smsCode: code,
-                    accepted: false,
-                    locationData: _locationData);
-
-                var message = _globals.getCodeMessgae(code);
-
-                bool added = await Auth.addUser(user);
-                if (added) {
-                  prefs.setBool('registered', true);
-                  _globals.sendUserSMSVerification(phone, message, uID, code);
-                  if (inputDoneSignUp != null) {
-                    phoneNumberFocusNodeSignUp = null;
-                    inputDoneSignUp = null;
+                    if (!_globals.curupaGuest.isGuest) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) =>
+                        new SMSDialog(userId: uID, phone: _number.text),
+                      );
+                    } else {
+                      RestartWidget.restartApp(context);
+                    }
                   }
-                  setState(() {
-                    _loadingInProgress = false;
-                  });
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) =>
-                      new SMSDialog(userId: uID),
-                  );
                 }
               }
-            }
-          });
-        } catch (e) {
-          print("Error in sign up: $e");
-          String exception = Auth.getExceptionText(e);
-          _globals.showErrorAlert(
-            context: context,
-            title: _globals.register_error_title,
-            content: exception,
-            onPressed: _changeBlackVisible,
-          );
-          setState(() {
-            _loadingInProgress = false;
-          });
+            });
+          } catch (e) {
+            print("Error in sign up: $e");
+            String exception = Auth.getExceptionText(e);
+            _globals.showErrorAlert(
+              context: context,
+              title: _globals.register_error_title,
+              content: exception,
+              onPressed: _changeBlackVisible,
+            );
+            setState(() {
+              _loadingInProgress = false;
+            });
+          }
         }
-      }
-    }
 
-    /*Widget _buildSendSMSDialog(BuildContext context) {
-      return new AlertDialog(
-        title: Text('Confirmación de numero',
-            style: TextStyle(
-                color: Colors.blue, fontSize: ScreenUtil().setSp(40.0))),
-        content: new Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _buildAboutText(),
-          ],
-        ),
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(top: 5.0, right: 15.0, left: 15.0),
-            child: new FlatButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed("/group");
-              },
-              textColor: Colors.white,
-              child: Text(
-                'SIGUIENTE',
-                style: TextStyle(
-                    color: Colors.blue, fontSize: ScreenUtil().setSp(40.0)),
-              ),
-            ),
-          ),
-        ],
-      );
-    }*/
+    }
 
     Widget _buildAboutText() {
       return new RichText(

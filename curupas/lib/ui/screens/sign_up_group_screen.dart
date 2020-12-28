@@ -85,7 +85,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
     });
 
     _createNewTextGroup("Si tu camada no esta en el menu crea una nueva");
-    _setButtonEnabled(false);
+    setButtonEnabled(false);
 
     _newGroupField = new CustomTextField(
       baseColor: Colors.grey,
@@ -154,12 +154,11 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
 
   Future<List<DropdownMenuItem<String>>> getGroupsList() async {
     List<DropdownMenuItem<String>> items = new List();
-    QuerySnapshot querySnapshot =
-        await Firestore.instance.collection("years").getDocuments();
+    QuerySnapshot querySnapshot = await Auth.getGroupSnapshot();
     items.add(new DropdownMenuItem(value: null, child: new Text("----")));
-    for (var doc in querySnapshot.documents) {
+    for (var doc in querySnapshot.docs) {
       String year = doc['year'];
-      String documentID = doc.documentID;
+      String documentID = doc.id;
       _groups.add(new Group(
           year: year, documentID: documentID, yearRef: doc.reference));
       items.add(new DropdownMenuItem(value: documentID, child: new Text(year)));
@@ -349,33 +348,6 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
     });
   }
 
-  void _setButtonEnabled(bool enabled) {
-    Color color, borderColor, textColor;
-    if (enabled) {
-      color = Color.fromRGBO(59, 89, 152, 1.0);
-      borderColor = Color.fromRGBO(59, 89, 152, 1.0);
-      textColor = Colors.white;
-    } else {
-      color = Colors.black26;
-      borderColor = Colors.black54;
-      textColor = Colors.black26;
-    }
-    _saveGroupButton = CustomFlatButton(
-      title: "Guardar Camada",
-      enabled: enabled,
-      fontSize: 22,
-      fontWeight: FontWeight.w700,
-      textColor: textColor,
-      onPressed: () {
-        _saveGroup(context);
-      },
-      splashColor: Colors.black12,
-      borderColor: borderColor,
-      borderWidth: 0,
-      color: color,
-    );
-  }
-
   void _changedGroupItem(String selected) {
     setState(() {
       _loadingInProgress = false;
@@ -420,7 +392,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
           DocumentSnapshot docsnapshot = await yearRef.get();
           if (docsnapshot.exists) {
             String year = docsnapshot['year'];
-            String documentID = docsnapshot.documentID;
+            String documentID = docsnapshot.id;
             setState(() {
               _loadingInProgress = true;
             });
@@ -444,7 +416,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
     String year = _currentGroup.year;
 
     DocumentReference yearRef =
-        Firestore.instance.collection('years').document(groupId);
+        FirebaseFirestore.instance.collection('years').doc(groupId);
 
     int nowTime = new DateTime.now().millisecondsSinceEpoch;
 

@@ -167,36 +167,43 @@ class _MainScreenState extends State<MainScreen> {
         if (result) {
           _globals.setFilePickerGlobal();
           String userId = prefs.getString('userId');
-          await _globals.getUserData(userId).then((user) async {
+          await _globals.getUserData(userId).then((CurupaUser user) async {
 
-            await _firebaseMessaging.getToken().then((token) async {
-              Map<String, dynamic> data = new Map<String, dynamic>();
-              if (isPhysicalDevice) {
-                data['token'] = token;
-              }
-              data['device'] = device;
-              await Auth.updateUser(userId, data).then((CurupaUser user) async {
-                _globals.user.token = token;
-              });
-            });
+                if (_globals.curupaGuest.isGuest) {
+                  _globals.curupaGuest.user = user;
+                  _globals.curupaGuest.phone = user.phone;
+                }
 
-            _globals.user = user;
-            _globals.initData();
-            _globals.getDrawers();
+                await _firebaseMessaging.getToken().then((token) async {
+                  Map<String, dynamic> data = new Map<String, dynamic>();
+                  if (isPhysicalDevice) {
+                    data['token'] = token;
+                  }
+                  data['device'] = device;
+                  await Auth.updateUser(userId, data).then((CurupaUser user) async {
+                    _globals.user.token = token;
+                  });
+                });
 
-            if (!user.smsChecked) {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) =>
-                new SMSDialog(userId: user.userID),
-              );
-            } else if (!user.accepted) {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) =>
-                    _buildNotAcceptedDialog(context),
-              );
-            }
+                _globals.user = user;
+                _globals.initData();
+                _globals.getDrawers();
+
+                if (user.smsChecked == null) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) =>
+                    new SMSDialog(userId: user.userID, phone: _globals.curupaGuest.phone),
+                  );
+                } else if (!user.accepted) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) =>
+                        _buildNotAcceptedDialog(context),
+                  );
+                }
+
+
           });
         }
      });
@@ -290,6 +297,8 @@ class _MainScreenState extends State<MainScreen> {
   Future<bool> getRegistered() async {
     prefs = await SharedPreferences.getInstance();
     bool registered = prefs.getBool('registered');
+    bool guest = (prefs.getBool('guest') ?? false);
+    _globals.curupaGuest.isGuest = guest;
     return registered;
   }
 
@@ -611,16 +620,48 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void updeteWidget() {
+
     group = _globals.group.year;
-    pageTitles = ["Home", "Calendario", "Streaming", group, "Perfil"];
+
+    if (_globals.curupaGuest.isGuest) {
+      pageTitles = ["Home", "Calendario", "Streaming", "Perfil"];
+    } else {
+      pageTitles = ["Home", "Calendario", "Streaming", group, "Perfil"];
+    }
+
     pageTitle = pageTitles[0];
-    tabItems = List.of([
+
+    TabData home = new TabData(iconData: Icons.home, title: pageTitles[0]);
+    TabData calendar_today = new TabData(iconData: Icons.calendar_today, title: pageTitles[1]);
+    TabData videoCam = new TabData(iconData: Icons.videocam, title: pageTitles[2]);
+    TabData group_work, account_circle;
+
+    if (_globals.curupaGuest.isGuest) {
+      account_circle = new TabData(iconData: Icons.account_circle, title: pageTitles[3]);
+    } else {
+      group_work = new TabData(iconData: Icons.group_work, title: pageTitles[3]);
+      account_circle = new TabData(iconData: Icons.account_circle, title: pageTitles[4]);
+    }
+
+    List<TabData> tabs;
+
+    if (_globals.curupaGuest.isGuest) {
+      tabs = [home, calendar_today, videoCam, account_circle];
+    } else {
+      tabs = [home, calendar_today, videoCam, group_work, account_circle];
+    }
+
+    tabItems = List.of(tabs);
+
+    /*tabItems = List.of([
       new TabData(iconData: Icons.home, title: pageTitles[0]),
       new TabData(iconData: Icons.calendar_today, title: pageTitles[1]),
       new TabData(iconData: Icons.videocam, title: pageTitles[2]),
       new TabData(iconData: Icons.group_work, title: pageTitles[3]),
       new TabData(iconData: Icons.account_circle, title: pageTitles[4]),
-    ]);
+    ]);*/
+
+    int length = tabItems.length;
 
     HomePage one = new HomePage(
       key: keyOne,
@@ -642,10 +683,18 @@ class _MainScreenState extends State<MainScreen> {
       key: keyFive,
     );
 
-    navBarIcons = [_home, _calendar, _videos, _group, _profile];
+    if (_globals.curupaGuest.isGuest) {
+      navBarIcons = [_home, _calendar, _videos, _profile];
+    } else {
+      navBarIcons = [_home, _calendar, _videos, _group, _profile];
+    }
 
     setState(() {
-      pages = [one, two, three, four, five];
+      if (_globals.curupaGuest.isGuest) {
+        pages = [one, two, three, five];
+      } else {
+        pages = [one, two, three, four, five];
+      }
       currentPage = one;
       currentIconButton = _home;
       _loading = false;

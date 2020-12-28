@@ -191,24 +191,6 @@ class _SignInScreenState extends State<SignInScreen> {
                           vertical: 14.0, horizontal: 40.0),
                       child: CustomFlatButton(
                         enabled: true,
-                        title: "Invitado",
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        textColor: Colors.white,
-                        onPressed: () {
-                          _guestLogin(context: context);
-                        },
-                        splashColor: Colors.black12,
-                        borderColor: Color.fromRGBO(59, 89, 152, 1.0),
-                        borderWidth: 0,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 14.0, horizontal: 40.0),
-                      child: CustomFlatButton(
-                        enabled: true,
                         title: "Facebook",
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
@@ -284,12 +266,6 @@ class _SignInScreenState extends State<SignInScreen> {
         }
       });
     }
-  }
-
-  void _guestLogin({BuildContext context}) async {
-
-
-
   }
 
   void _facebookLogin({BuildContext context}) async {

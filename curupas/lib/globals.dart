@@ -2,8 +2,10 @@
     import 'dart:io';
     import 'package:cloud_firestore/cloud_firestore.dart';
     import 'package:cloud_functions/cloud_functions.dart';
+    import 'package:diacritic/diacritic.dart';
     import 'package:event_bus/event_bus.dart';
     import 'package:file_picker/file_picker.dart';
+    import 'package:firebase_auth/firebase_auth.dart';
     import 'package:firebase_storage/firebase_storage.dart';
     import 'package:flutter/cupertino.dart';
     import 'package:flutter/material.dart';
@@ -12,6 +14,10 @@
     import 'package:curupas/models/group.dart';
     import 'package:curupas/models/curupa_user.dart';
     import 'package:curupas/ui/widgets/alert_dialog.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+    import 'package:location/location.dart';
+    import 'package:shared_preferences/shared_preferences.dart';
+    import 'package:url_launcher/url_launcher.dart';
     import 'package:video_thumbnail/video_thumbnail.dart';
     import 'business/auth.dart';
     import 'models/HTML.dart';
@@ -28,6 +34,7 @@
     import 'models/streammer.dart';
 
     CurupaUser user = new CurupaUser();
+    CurupaGuest curupaGuest = new CurupaGuest();
     Group group = new Group();
 
     //Events
@@ -50,9 +57,7 @@
     HTMLS newsletterContent = new HTMLS();
     HTMLS anecdoteContent = new HTMLS();
     HTMLS pumasContent = new HTMLS();
-    HTMLS valoresContent = new HTMLS();
-
-    //Youtube
+    HTMLS valoresContent = new HTMLS(); //Youtube
     String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";
     String channelId = "UCeLNPJoPAio9rT2GAdXDVmw";
 
@@ -76,7 +81,6 @@
             if (userSnapshot.exists) {
               DocumentReference yearDocumentReference =
               userSnapshot.data()["yearRef"];
-
               if (yearDocumentReference != null) {
                 await yearDocumentReference.get().then((yearSnapshot) async {
                   if (yearSnapshot.exists) {
@@ -102,6 +106,17 @@
         });
         return _user;
       }
+    }
+
+    class CurupaGuest {
+      bool isGuest = false;
+      String phone;
+      User user_anonymous;
+      CurupaUser user;
+      void set guest(bool isguest) {
+        isGuest = isguest;
+      }
+      bool get guest => isGuest;
     }
 
     void setFilePickerGlobal() {
@@ -297,6 +312,14 @@
       final String url;
     }
 
+    void launchURL(String url) async {
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch $url';
+      }
+    }
+
     Future<int> generateRandom() {
       int resutl = 0;
       var rnd = new math.Random();
@@ -319,7 +342,7 @@
       return allcode;
     }
 
-    void sendUserSMSVerification(
+    Future<bool> sendUserSMSVerification(
         String phone, String message, String userId, int smsCode) async {
       try {
         final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
@@ -481,4 +504,15 @@
       final directory = await getApplicationDocumentsDirectory();
 
       return directory.path;
+    }
+
+    void showToast(String text) {
+      Fluttertoast.showToast(
+          msg: text,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
     }
