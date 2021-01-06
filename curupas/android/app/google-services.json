@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "813267916846-d8qffo3kn2gl1j3kma0hs82ifg87ghm3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.curupayti.curupas",
+            "certificate_hash": "cf7c2599ea7aa044b6eda95523b8f3c4b9ebad64"
+          }
+        },
+        {
           "client_id": "813267916846-gt4fsracj8r5lt9lbpju5ud1a0gpo9ab.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -31,14 +39,6 @@
           }
         },
         {
-          "client_id": "813267916846-d8qffo3kn2gl1j3kma0hs82ifg87ghm3.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.curupayti.curupas",
-            "certificate_hash": "cf7c2599ea7aa044b6eda95523b8f3c4b9ebad64"
-          }
-        },
-        {
           "client_id": "813267916846-a98om8f0l9uui77o8jnfu80b3tc0msde.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -52,7 +52,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "813267916846-ohh2dmalgh5rvm0dsj4kp5qfo6onhmg6.apps.googleusercontent.com",
+              "client_id": "813267916846-a98om8f0l9uui77o8jnfu80b3tc0msde.apps.googleusercontent.com",
               "client_type": 3
             },
             {

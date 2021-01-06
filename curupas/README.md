@@ -1,6 +1,6 @@
 # curupas
 
-A new Flutter project.
+Camadas Curupas
 
 ## Getting Started
 

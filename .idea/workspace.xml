@@ -1,8 +1,201 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="87ec4a84-0df7-4b7e-903b-e8a86bc4249e" name="Default Changelist" comment="" />
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <list default="true" id="87ec4a84-0df7-4b7e-903b-e8a86bc4249e" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/.flutter-plugins-dependencies" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/.flutter-plugins-dependencies" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/.metadata" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/.metadata" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/Could" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/Execution" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/Failed" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/Task" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/adb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/.project" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/.settings/org.eclipse.buildship.core.prefs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/.classpath" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/.project" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/.settings/org.eclipse.buildship.core.prefs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/.settings/org.eclipse.jdt.core.prefs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/google-services.json" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/google-services.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/key/curupa" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/key/private_key.pepk" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/debug/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/debug/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/java/com/curupayti/curupas/Application.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/java/com/curupayti/curupas/FirebaseCloudMessagingPluginRegistrant.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/java/com/curupayti/curupas/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/main/java/com/curupayti/curupas/MainActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/res/drawable/launch_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/main/res/drawable/launch_background.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/res/drawable/splash.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/res/mipmap-hdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/main/res/mipmap-hdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/res/mipmap-mdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/main/res/mipmap-mdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/res/values/colors.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/res/values/strings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/main/res/values/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/main/res/values/styles.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/app/src/profile/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/app/src/profile/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/android/settings.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/android/settings_aar.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/html/drawer_base.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/10.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/11.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/12.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/8.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/9.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/camadas.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/cancha.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/curupa_anexo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/default.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/escudo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/group_backgrnd.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/icon-710x599-android.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/icon-710x599-ios.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/icon-background.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/not_available.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/notimation.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/pelota_small.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/assets/images/test.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Flutter/.last_build_id" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Flutter/AppFrameworkInfo.plist" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Flutter/AppFrameworkInfo.plist" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Flutter/Debug.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Flutter/Debug.xcconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Flutter/Flutter.podspec" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Flutter/Release.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Flutter/Release.xcconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Podfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Podfile.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner.xcworkspace/contents.xcworkspacedata" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner.xcworkspace/contents.xcworkspacedata" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/AppDelegate.swift" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-50x50@1x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-50x50@2x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-57x57@1x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-57x57@2x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-72x72@1x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-72x72@2x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/Contents.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/img_splash.imageset/Contents.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Assets.xcassets/img_splash.imageset/Icon-App-1024x1024@1x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Base.lproj/LaunchScreen.storyboard" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Base.lproj/LaunchScreen.storyboard" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Base.lproj/Main.storyboard" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Base.lproj/Main.storyboard" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/GoogleService-Info.plist" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/ios/Runner/Info.plist" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Runner-Bridging-Header.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/ios/Runner/Runner.entitlements" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/business/auth.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/business/validator.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/globals.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/HTML.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/HTMLS.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/add_media.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/club.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/credit_card.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/curupa_user.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/description.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/event_calendar.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/group.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/group_media.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/museum.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/notification.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/post.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/pumas.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/sms.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/streaming.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/streaming_thumbnails.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/streaming_video.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/streammer.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/models/walkthrough.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/draw/line.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/icons/customicon.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/pages/calendar_page.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/pages/group_page.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/pages/group_photos_video_details.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/pages/home_page.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/pages/notification_details.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/pages/photo_viewer.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/pages/profile_page.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/pages/streaming_page.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/pages/video_player_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/calendar/event_creator.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/calendar/event_view.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/drawer/about.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/drawer/content_viewer.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/friend_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/group/editor_page.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/guest_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/main_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/post/post_card.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/post/post_swiper_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/sign_in_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/sign_up_group_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/sign_up_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/video_scree.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/walk_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/screens/welcome_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/add_media_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/alert_dialog.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/alert_sms_dialog.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/anecdote/anecdote_card.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/anecdote/anecdote_widget.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/anectodes.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/credit_card.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/flat_button.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/gallery/galleryPhotoViewWrapper.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/gallery/gallery_example_item.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/museum.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/newsletter/newsletter_card.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/newsletter/newsletter_widget.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/pumas/pumas_card.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/pumas/pumas_widget.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/staggered.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/text_field.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/valores/valores_card.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/valores/valores_widget.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/youtube/fullscreen_youtube_player.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/youtube/player_screen.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/ui/widgets/youtube/video_list.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/utils/common_class.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/utils/errors.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/lib/utils/toast_util.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/curupas/test/widget_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/curupas/test/widget_test.dart" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -24,25 +217,20 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1goEO5snBu6m0EBWyVDVQU5u87t" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="android.project.structure.last.selected" value="SDK Location" />
     <property name="android.project.structure.proportion" value="0.15" />
     <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
+    <property name="dart.analysis.tool.window.visible" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="AndroidSdkUpdater" />
     <property name="show.migrate.to.gradle.popup" value="false" />
-  </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
   </component>
   <component name="RunManager">
     <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
@@ -71,12 +259,11 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
+            <State />
           </value>
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>
