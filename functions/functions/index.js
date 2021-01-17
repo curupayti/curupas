@@ -97,7 +97,7 @@
         urlParams = getJsonFromUrl(params[1]);        
       }     
 
-      var static_url;   
+      var static_url = req.path;   
 
      if ( pathParam === OPTION_OAUTH2CALLBACK ) {       
         
@@ -175,9 +175,12 @@
         });      
             
 
-      } else {         
+      } else {                 
 
-          //urlParams
+        console.log("++++++++++++++++++++++++++++++++++++++++");          
+
+        console.log("urlParams:: " + urlParams);
+        console.log("static_url:: " + static_url);
 
         if (urlParams) {
           return res.render(static_url, urlParams); 
@@ -480,6 +483,107 @@
 
     });
 
+
+    exports.posts = functions.firestore
+      .document('users/{userId}')
+      .onCreate( async (snap,contex) => {
+
+        var data = snap.data();       
+        const birthday = data.birthday;
+        var name = data.name;
+
+        var desc = "Cumpleaños de " + name;
+        var type = "Camadas";
+
+        var start_time = "00:00";
+        var end_time = "24:00";
+
+        const shrs = start_time.split(":")[0];
+        const smin = start_time.split(":")[1];
+        if (end && end_time) {
+          const ehrs = end_time.split(":")[0];
+          const emin = end_time.split(":")[1];
+          end.setHours(ehrs, emin, 0);
+        }
+
+        db.collection("calendar")
+        .doc(type)
+        .collection(type + "_collection")
+        .add({
+          name,
+          summary: desc,
+          start: new Date(new Date(start).setHours(shrs, smin, 0)),
+          end: end ? new Date(end) : null,
+          createdAt: new Date(),
+        });
+      
+    });
+
+
+  /*$("#calendar-form").on("submit", function (e) {
+    e.preventDefault();
+    const name = $("#name").val();
+    const desc = $("#description").val();
+    const type = $("#type").val();
+    const start = $("#start").val();
+    const start_time = $("#start_time").val();
+    const end = $("#end").val();
+    const end_tonCreateime = $("#end_time").val();
+    console.log(start_time);
+
+    const shrs = start_time.split(":")[0];
+    const smin = start_time.split(":")[1];
+    if (end && end_time) {
+      const ehrs = end_time.split(":")[0];
+      const emin = end_time.split(":")[1];
+      end.setHours(ehrs, emin, 0);
+    }
+    if (!selectedEvent) {
+      db.collection("calendar")
+        .doc(type)
+        .collection(type + "_collection")
+        .add({
+          name,
+          summary: desc,
+          start: new Date(new Date(start).setHours(shrs, smin, 0)),
+          end: end ? new Date(end) : null,
+          createdAt: new Date(),
+        })
+        .then((res) => {
+          $("#name").val("");
+          $("#description").val("");
+          $("#start").val("");
+          $("#end").val("");
+          $("#exampleModalLong").modal("toggle");
+          alert("Event Added");
+        });
+    } else {
+      db.collection("calendar")
+        .doc(type)
+        .collection(type + "_collection")
+        .doc(selectedEvent)
+        .set(
+          {
+            name,
+            summary: desc,
+            start: new Date(new Date(start).setHours(shrs, smin, 0)),
+            end: end ? new Date(end) : null,
+          },
+          { merge: true }
+        )
+        .then(() => {
+          $("#name").val("");
+          $("#description").val("");
+          $("#start").val("");
+          $("#type").prop("disabled", false);
+          $("#end").val("");
+          $("#exampleModalLong").modal("toggle");
+          selectedEvent = "";
+          alert("Event Updated");
+        });
+    }
+  });*/
+
     exports.notification = functions.firestore
       .document('notifications/{notificationsId}')
       .onWrite((change, context) => {    
@@ -559,7 +663,7 @@
             'Authorization': 'Bearer 7FA7ED241142E7BE36671CE0FEC9E84F'
         };
 
-        var dataString = '{"recipient":' + phone + ',"message":"' + payload + '"}';  
+        var dataString = '{"recipient":' + phone + ',"message":"' + payload + ',"service_id":' + 110 + '}';        
 
         var options = {
             url: 'https://api.notimation.com/api/v1/sms',
