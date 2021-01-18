@@ -23,21 +23,16 @@ if (flutterVersionName == null) {
 
 apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 29
-
-    lintOptions {
-        disable 'InvalidPackage'
-        checkReleaseBuilds false
-    }
+    compileSdkVersion 30
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.curupayti.curupas"
         minSdkVersion 17
-        targetSdkVersion 29
+        targetSdkVersion 30
+        multiDexEnabled true
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -53,4 +48,8 @@ android {
 
 flutter {
     source '../..'
+}
+
+dependencies {
+    implementation "androidx.multidex:multidex:2.0.1"
 }

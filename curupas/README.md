@@ -1,6 +1,6 @@
 # curupas
 
-Camadas Curupas
+Aplicación de Curupayti
 
 ## Getting Started
 
