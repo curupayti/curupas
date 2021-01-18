@@ -16,5 +16,5 @@ flutter clean
 cd ios
 pod install
 pod update
-flutter build ios --release
+flutter build apk --no-tree-shake-icons
 ```
