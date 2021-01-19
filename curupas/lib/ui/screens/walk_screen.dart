@@ -34,10 +34,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
         ScreenUtil(width: 640, height: 1136, allowFontScaling: true)
           ..init(context);*/
 
-    return ScreenUtilInit(
-        designSize: Size(640, 1136),
-        allowFontScaling: false,
-        child:  Scaffold(
+    return Scaffold(
         body: Swiper.children(
           autoplay: false,
           index: 0,
@@ -57,7 +54,6 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
           ),
           children: _getPages(context),
         ),
-      ),
     );
 
   }

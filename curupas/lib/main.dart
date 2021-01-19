@@ -17,6 +17,7 @@ import 'package:curupas/ui/screens/sign_in_screen.dart';
 import "package:curupas/ui/screens/walk_screen.dart";
 import 'package:curupas/ui/screens/sign_up_screen.dart';
 import 'package:curupas/ui/screens/welcome_screen.dart';
+import 'package:flutter_screenutil/screenutil_init.dart';
 import 'package:notifier/notifier_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -40,16 +41,22 @@ Future main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SharedPreferences.getInstance().then((prefs) async {
     runApp(
-      RestartWidget(
-        child: NotifierProvider(
-          child: CurupaApp(prefs: prefs),
+        ScreenUtilInit(
+          designSize: Size(640, 1136),
+          allowFontScaling: false,
+          child:
+            RestartWidget(
+            child: NotifierProvider(
+              child: CurupaApp(prefs: prefs),
+            ),
+          ),
         ),
-      ),
     );
   });
 }
 
 class CurupaApp extends StatelessWidget {
+
   final SharedPreferences prefs;
   CurupaApp({this.prefs});
 
