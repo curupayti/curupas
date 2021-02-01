@@ -99,7 +99,7 @@ class _GroupPageState extends State<GroupPage> {
           labelStyle: TextStyle(fontSize: 18.0),
           onTap: () {
             _globals.filePickerGlobal
-                .getImagePath(FileType.image)
+                .getImagePath(FileType.media)
                 .then((result) async {
 
                   //File _file = new File(result);

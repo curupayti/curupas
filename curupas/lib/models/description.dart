@@ -5,13 +5,19 @@ class Description {
   final String title;
   final String description;
   final String documentID;
-  final String version;
+  String version;
+  String appName;
+  String packageName;
+  String buildNumber;
 
   Description({
     this.title,
     this.description,
     this.documentID,
     this.version,
+    this.appName,
+    this.packageName,
+    this.buildNumber,
   });
 
   Map<String, Object> toJson() {
@@ -20,6 +26,9 @@ class Description {
       'description': description,
       'documentID': documentID,
       'version': version,
+      'appName': appName,
+      'packageName': packageName,
+      'buildNumber': buildNumber,
     };
   }
 
@@ -29,6 +38,9 @@ class Description {
       description: doc['description'],
       documentID: documentID,
       version: doc['version'],
+      appName: doc['appName'],
+      packageName: doc['packageName'],
+      buildNumber: doc['buildNumber'],
     );
     return description;
   }

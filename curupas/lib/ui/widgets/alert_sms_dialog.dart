@@ -45,6 +45,7 @@ class _SMSDialogState extends State<SMSDialog> {
   SharedPreferences prefs;
 
   SMS sms;
+  int _code;
 
   int countFails = 0;
 
@@ -68,31 +69,33 @@ class _SMSDialogState extends State<SMSDialog> {
     Auth.getUserDataForSMS(widget.userId).then((smsUser) {
       sms = smsUser;
       _phone = sms.phone;
+      _code = smsUser.smsCode;
       _textFieldController.text = _phone;
     });
 
     try {
 
-      KeyboardVisibility.onChange.listen(
-        (bool visible) {
-          setState(() {
-            if (visible) {
-              _resendVisibility = false;
-            } else {
-              _resendVisibility = true;
-              Duration d = new Duration();
-              sleep(new Duration(seconds: 2));
-              if (!validated) {
-                _messageToShow = _messageInit;
-              }
-              _messageStyle = TextStyle(
-                  color: Colors.green, fontSize: ScreenUtil().setSp(50.0));
-              initMessage();
-              _smsGroup.clear();
+      var keyboardVisibilityController = KeyboardVisibilityController();
+
+      keyboardVisibilityController.onChange.listen((bool visible) {
+        print('Keyboard visibility update. Is visible: ${visible}');
+        setState(() {
+          if (visible) {
+            _resendVisibility = false;
+          } else {
+            _resendVisibility = true;
+            Duration d = new Duration();
+            sleep(new Duration(seconds: 2));
+            if (!validated) {
+              _messageToShow = _messageInit;
             }
-          });
-        },
-      );
+            _messageStyle = TextStyle(
+                color: Colors.green, fontSize: ScreenUtil().setSp(50.0));
+            initMessage();
+            _smsGroup.clear();
+          }
+        });
+      });
 
     } on Exception catch (error) {
       print(error.toString());
@@ -124,7 +127,8 @@ class _SMSDialogState extends State<SMSDialog> {
         if ((text.length != null) && text.length > 3) {
           var code = int.parse(text);
           setState(() {
-            if (code == sms.smsCode) {
+            int c = _code;
+            if ( code == c ) {
               _messageToShow = "Correcto";
               _messageStyle = TextStyle(
                   color: Colors.green, fontSize: ScreenUtil().setSp(50.0));

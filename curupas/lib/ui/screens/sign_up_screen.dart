@@ -209,15 +209,27 @@ import '../../main.dart';
       if (widget.user != null) {
 
         setState(() {
+
           /*_fullname.text = "Jose Vigil";
           _number.text = "1169776624";
           _birthday.text = "30/09/1973";
           _email.text = "josemanuelvigil@gmail.com";*/
+
           _fullname.text  = widget.user.name;
           _number.text    = widget.user.phone;
         });
 
       }
+
+      setState(() {
+
+        _fullname.text = "Atilio Beronelli";
+        _number.text = "1169776624";
+        _birthday.text = "30/09/1973";
+        _email.text = "atilio@gmail.com";
+
+      });
+
     }
 
     void _getLocaton() async {

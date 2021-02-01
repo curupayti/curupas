@@ -15,7 +15,9 @@
     import 'package:curupas/models/curupa_user.dart';
     import 'package:curupas/ui/widgets/alert_dialog.dart';
     import 'package:fluttertoast/fluttertoast.dart';
+    import 'package:image_picker/image_picker.dart';
     import 'package:location/location.dart';
+    import 'package:package_info/package_info.dart';
     import 'package:shared_preferences/shared_preferences.dart';
     import 'package:url_launcher/url_launcher.dart';
     import 'package:video_thumbnail/video_thumbnail.dart';
@@ -65,6 +67,8 @@
 
     //bool streamingReachable = false;
     FilePickerGlobal filePickerGlobal;
+    final picker = ImagePicker();
+    File _image;
 
     String error_email_already_in_use = "ERROR_EMAIL_ALREADY_IN_USE";
     String error_unknown = "ERROR_UNKNOWN";
@@ -198,44 +202,67 @@
 
       Future<String> getImagePath(FileType fileType) async {
 
-        String _path;
+        String _pathImage;
 
-        _pickingType = fileType; //FileType.IMAGE;
-        _hasValidMime = true;
-        _paths = null;
+        try {
 
-        FilePickerResult result = await FilePicker.platform.pickFiles(
-          type: _pickingType,
-          allowedExtensions: ['jpg', 'png', 'doc'],
-        );
+          //_pickingType = fileType; //FileType.IMAGE;
+          //_hasValidMime = true;
+          //_paths = null;
 
-        //_path = await FilePicker.getFilePath(
-            //type: _pickingType); //, fileExtension: _extension);
+          /*FilePickerResult result = await FilePicker.platform.pickFiles(
+            //type: fileType,
+            type: FileType.custom,
+            allowedExtensions: ['jpg', 'pdf', 'doc'],//['jpg', 'png'],
+          );*/
 
-        /*if (upload) {
-              await uploadFile(_path).then((url) async {
-                return url;
-              });
-            } else {
-              return _path;
-            }*/
+          //FilePickerResult result = await FilePicker.platform.pickFiles();
 
-        if(result != null) {
-          PlatformFile file = result.files.first;
+          //_path = await FilePicker.getFilePath(
+          //type: _pickingType); //, fileExtension: _extension);
 
-          _path = file.path;
+          /*if (upload) {
+                await uploadFile(_path).then((url) async {
+                  return url;
+                });
+              } else {
+                return _path;
+              }*/
 
-          /*print(file.name);
-          print(file.bytes);
-          print(file.size);
-          print(file.extension);
-          print(file.path);*/
+          final pickedFile = await picker.getImage(source: ImageSource.camera);
 
-        } else {
-          // User canceled the picker
+          if (pickedFile != null) {
+
+            _image = File(pickedFile.path);
+
+            //_path = pickedFile.path;
+
+            _pathImage = _image.path;
+
+            //PlatformFile file = result.files.single;
+
+            //File file = File(result.files.single.path);
+
+            //_path = file.path;
+
+            /*print(file.name);
+            print(file.bytes);
+            print(file.size);
+            print(file.extension);
+            print(file.path);*/
+
+          } else {
+            // User canceled the picker
+          }
+
+        } catch (err) {
+
+          print('Caught error: $err');
+
         }
 
-        return _path;
+        return _pathImage;
+
       }
 
       Future<Image> getThumbnailFromVideo(String path) async {
@@ -430,7 +457,19 @@
 
     void getDescription() {
       Stream<Description> descStream = Auth.getDescription();
-      descStream.listen((Description _desc) {
+      descStream.listen((Description _desc) async {
+
+        PackageInfo packageInfo = await PackageInfo.fromPlatform();
+        String appName = packageInfo.appName;
+        String packageName = packageInfo.packageName;
+        String version = packageInfo.version;
+        String buildNumber = packageInfo.buildNumber;
+
+        _desc.appName = appName;
+        _desc.packageName = packageName;
+        _desc.version = version;
+        _desc.buildNumber = buildNumber;
+
         description = _desc;
         eventBus.fire("home-description");
         return _desc;
