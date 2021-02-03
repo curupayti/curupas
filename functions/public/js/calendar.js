@@ -180,7 +180,7 @@ $(document).ready(function () {
     const type = $("#type").val();
     const start = $("#start").val();
     const start_time = $("#start_time").val();
-    const end = $("#end").val();
+    var end = $("#end").val();
     const end_time = $("#end_time").val();
     console.log(start_time);
 
@@ -188,8 +188,10 @@ $(document).ready(function () {
     const smin = start_time.split(":")[1];
     if (end && end_time) {
       const ehrs = end_time.split(":")[0];
-      const emin = end_time.split(":")[1];
-      end.setHours(ehrs, emin, 0);
+      const emin = end_time.split(":")[1];      
+      const _end = new Date(new Date(end).setHours(ehrs, emin, 0));
+      end = _end.toString();
+      //end.setHours(ehrs, emin, 0);
     }
     if (!selectedEvent) {
       db.collection("calendar")
