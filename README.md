@@ -19,7 +19,7 @@ pod update
 flutter build apk --no-tree-shake-icons
 ```
 
-Debugging
+Wifi Debugging
 =========
 
 ```sh
