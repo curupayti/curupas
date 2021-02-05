@@ -16,7 +16,7 @@ flutter clean
 cd ios
 pod install
 pod update
-flutter build apk --no-tree-shake-icons
+flutter build ios --no-tree-shake-icons
 ```
 
 Wifi Debugging
