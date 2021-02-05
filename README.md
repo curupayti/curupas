@@ -10,7 +10,7 @@ Curupas project consis of two branches, functions and mobile. Functions contains
 # [Functions](https://gitlab.com/JoseVigil/curupa/-/tree/functions)
 
 
-# [Mobile](https://gitlab.com/JoseVigil/curupa/-/tree/mobile)
+# [Mobile Fresh](https://gitlab.com/JoseVigil/curupa/-/tree/fresh)
 
 
 
