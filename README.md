@@ -171,3 +171,17 @@ node import.js emulate contents.json
 </p>  
 
 TODO: Fix formats
+
+Troubleshooting
+---------------
+
+## firestore: Port 8080 is not open on localhost
+
+
+```sh
+lsof -i :8080
+ps ax | grep XXXX
+kill XXXX
+```
+
+
