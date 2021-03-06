@@ -15,7 +15,7 @@ $(document).ready(function () {
     }
 
     // REAL TIME LISTENER
-    db.collection('control').onSnapshot(snapshot => {
+    db.collection("streaming").onSnapshot(snapshot => {
        
         let size = snapshot.size;
         $('.count').text(size);        
@@ -70,11 +70,7 @@ $(document).ready(function () {
 
                 $("#expiry_date").empty();                
                 $("#expiry_date").append(expiry_date);
-
-
-            }
-
-           
+            }          
             
         });
     });
@@ -125,9 +121,9 @@ $(document).ready(function () {
 
     $("#get-playlist").click(function () {
 
-        $("#token-spinner").addClass("fa-spinner fa-spin");
+        $("#playlist-spinner").addClass("fa-spinner fa-spin");
 
-        db.collection('control').doc("streaming")
+        db.collection("streaming").doc("control")
             .set({
                 get_playlists:true
             },{ merge: true }).then(docRefSet => { 
@@ -136,7 +132,7 @@ $(document).ready(function () {
 
 
     // REAL TIME LISTENER
-    db.collection('media').onSnapshot(snapshot => {
+    db.collection('streaming/control/media').onSnapshot(snapshot => {
        
         let size = snapshot.size;
         $('.count').text(size);        
@@ -159,7 +155,50 @@ $(document).ready(function () {
                      
             $.ajax(settings).done(function (response) {                            
 
-                $('#videos-renderer').jsonViewer(response);
+                $('#videos-renderer').jsonViewer(response.media, {collapsed:true});                
+            }); 
+
+        }
+        
+    });
+
+    $("#convert-playlist").click(function () {
+
+        $("#covert-playlist-spinner").addClass("fa-spinner fa-spin");
+
+        db.collection("streaming").doc("control")
+            .set({
+                convert_playlists:true
+            },{ merge: true }).then(docRefSet => { 
+        }); 
+    });
+
+
+    // REAL TIME LISTENER
+    db.collection('streaming/control/videos').onSnapshot(snapshot => {
+       
+        let size = snapshot.size;
+        $('.count').text(size);        
+       
+        let changes = snapshot.docChanges();
+
+        if (changes.length>0) {
+
+            var settings = {
+                "url": "https://us-central1-curupas-app.cloudfunctions.net/backup",
+                "method": "POST",
+                "timeout": 0,
+                "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "data": JSON.stringify({
+                        "collection":"videos"                
+                    }),
+            };        
+                     
+            $.ajax(settings).done(function (response) {                            
+
+                $('#converted-videos-renderer').jsonViewer(response.videos, {collapsed:true});  
                 
             }); 
 

@@ -55,6 +55,7 @@
     //streaming
     exports.streaming = require("./streaming");
     exports.share     = require("./share");
+    exports.authorize = require("./authorize");
     
     var OPTION_SHARE  = 'share';            
     var OPTION_OAUTH2CALLBACK  = 'oauth2callback';              
@@ -105,7 +106,7 @@
 
         var _time =  new Date();
 
-        firestore.collection("control").doc("streaming").set({ 
+        firestore.collection("streaming").doc("control").set({ 
           code: urlParams.ode,
           scope: urlParams.scope,            
           fetch_code_trigger: false,        
@@ -448,7 +449,7 @@
           let _time = admin.firestore.FieldValue.serverTimestamp();            
           let fileThumb = bucket.file(thumbFilePath);
           
-          // Get the Signed URLs for the thumbnail and original image.
+          // GeFt the Signed URLs for the thumbnail and original image.
           let signedUrl = await fileThumb.getSignedUrl(config);
           let thumbResult = signedUrl[0];
 
@@ -486,7 +487,7 @@
 
     exports.posts = functions.firestore
       .document('users/{userId}')
-      .onCreate( async (snap,contex) => {
+      .onCreate( async (snap,contex) => {       
 
         var data = snap.data();       
         const birthday = data.birthday;
@@ -500,20 +501,18 @@
 
         const shrs = start_time.split(":")[0];
         const smin = start_time.split(":")[1];
-        if (end && end_time) {
-          const ehrs = end_time.split(":")[0];
-          const emin = end_time.split(":")[1];
-          end.setHours(ehrs, emin, 0);
-        }
 
-        db.collection("calendar")
+        const ehrs = end_time.split(":")[0];
+        const emin = end_time.split(":")[1];
+
+        firestore.collection("calendar")
         .doc(type)
         .collection(type + "_collection")
         .add({
           name,
           summary: desc,
           start: new Date(new Date(start).setHours(shrs, smin, 0)),
-          end: end ? new Date(end) : null,
+          end: new Date(new Date(start).setHours(ehrs, emin, 0)),
           createdAt: new Date(),
         });
       

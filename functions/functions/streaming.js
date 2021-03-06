@@ -171,13 +171,16 @@
 
   
   exports.control = functions.firestore
-    .document('control/streaming')
+    .document('streaming/control')
     .onUpdate( async (change, context) => {    
 
       var newValue = change.after.data();       
-      let fetch_code_trigger    = newValue.fetch_code_trigger;     
-      let fetch_token_trigger   = newValue.fetch_token_trigger;
-      let get_playlists         = newValue.get_playlists;
+      var fetch_code_trigger    = newValue.fetch_code_trigger;     
+      var fetch_token_trigger   = newValue.fetch_token_trigger;
+      var get_playlists         = newValue.get_playlists;
+      var convert_playlists     = newValue.convert_playlists;
+      var last_update           = newValue.last_update.toDate();
+
       var expiry_date;
       if (newValue.tokens) {
               expiry_date = newValue.tokens.expiry_date;    
@@ -187,6 +190,9 @@
       console.log("fetch_code_trigger: " + fetch_code_trigger);
       console.log("fetch_token_trigger: " + fetch_token_trigger);
       console.log("get_playlists: " + get_playlists);
+      console.log("convert_playlists: " + convert_playlists);
+      console.log("last_update: " + last_update);
+      console.log("");
 
       var client_secret = path.join(__dirname, '/key/client_secret.json');
       var code = newValue.code; 
@@ -217,7 +223,9 @@
 
                 var _time =  new Date();
 
-                firestore.collection("control").doc("streaming").set({ 
+                console.log("::: Updating ::: fetch_token_trigger");
+
+                firestore.collection("streaming").doc("control").set({ 
                   tokens: _tokens.tokens,
                   fetch_token_trigger: false,
                   last_update: _time 
@@ -275,8 +283,12 @@
 
                       playlistids.push(id);                 
 
-                      promise_playlist.push(
+                      /*promise_playlist.push(
                         firestore.collection("media").doc(id).set(json,{merge:true})
+                      );*/
+
+                      promise_playlist.push(
+                        firestore.collection("streaming").doc("control").collection("media").doc(id).set(json,{merge:true})
                       );                  
                      
                   }  
@@ -350,8 +362,12 @@
                             var snippet     = item.snippet;  
                             var playlistId  = snippet.playlistId; 
 
-                            promise_videos.push(
+                            /*promise_videos.push(
                               firestore.collection("media").doc(playlistId).collection("videos").add(item)
+                            );*/
+
+                            promise_videos.push(
+                              firestore.collection("streaming").doc("control").collection("media").doc(playlistId).collection("videos").add(item)
                             );  
 
                         }
@@ -364,9 +380,11 @@
               })
               .then(async (finalresults) => {
 
+                  console.log("::: Updating ::: get_playlists");
+
                   var _time =  new Date();
 
-                  return firestore.collection("control").doc("streaming").set({                   
+                  return firestore.collection("streaming").doc("control").set({                   
                     get_playlists: false,
                     last_update: _time 
                   },{ merge: true });
@@ -399,18 +417,193 @@
 
       }         
 
-      if ( expiry_date && (token_expiry_date_stored !== true)) {
+      /*if ( expiry_date && (token_expiry_date_stored !== true)) {
+
+        console.log("::: Updating ::: expiry_date && token_expiry_date_stored==false");
 
         var d = new Date(expiry_date);
         var _time =  new Date();
 
-        firestore.collection("control").doc("streaming").set({                   
+        firestore.collection("streaming").doc("control").set({                   
           token_expiry_date: d,
-          token_expiry_date_stored: true,
+          token_expiry_date_stored: false,
           last_update: _time 
         },{ merge: true });
 
-      }   
+      }*/   
+
+      if ( convert_playlists ) {  
+
+       
+          const result = new Promise(async (resolve, reject) => {
+
+            var promise_playlist = [];
+            var playlists = [];
+
+            var promise_videos   = []; 
+
+            var countPlaylist = 1; 
+
+            var playlistLength = 0;
+
+            firestore.collection("streaming").doc("control").collection("media").get()
+              .then(async (querySnapshotPlaylist) => {
+
+                playlistLength = querySnapshotPlaylist.size;                              
+
+                querySnapshotPlaylist.forEach(async (docPlaylist) => { 
+
+
+                    let docp        = docPlaylist.data();
+                    var idp         = docp.id;
+                    var snippetp    = docp.snippet;   
+                    let thumbnailsp = snippetp.thumbnails;                                    
+                    var defaulp     = thumbnailsp.default;                                                                 
+
+                    let title         = snippetp.title;
+                    title = title.replace(/['"]+/g, '');
+
+                    let description   = snippetp.description;
+                    let channelTitle  = snippetp.channelTitle;
+                    let channelId     = snippetp.channelId; 
+                    let publishedAt   = snippetp.publishedAt;                            
+                    let thumbnailp    = "";                            
+
+                    if (defaulp) {
+                      thumbnailp = defaulp.url; 
+                    }   
+
+                    let j = `{"id":"${idp}","title":"${title}","description":"${description}","channelTitle":"${channelTitle}","channelId":"${channelId}","thumbnail":"${thumbnailp}","publishedAt":"${publishedAt}","videos":[]}`;                    
+
+                    var json = JSON.parse(j);
+
+                    playlists.push(json);
+
+                    promise_playlist.push(
+                      firestore.collection("streaming").doc("control").collection("videos").doc(idp).set(json,{merge:true})
+                    );  
+
+                    countPlaylist++; 
+
+                    if ( countPlaylist === playlistLength ) {                                            
+
+                      countPlaylist = 0;
+                      return await Promise.all(promise_playlist);
+
+                    }
+                }); 
+
+                return {};                
+
+            }).then(async (playlist_results) => {
+
+                  for (var i=0; i<playlists.length; i++) {
+
+                    let idp = playlists[i].id;
+
+                    firestore.collection("streaming").doc("control").collection("media")
+                    .doc(idp).collection("videos").get()
+                    .then(async (querySnapshotVideo) => {
+
+                        var videosLength = querySnapshotVideo.size;
+                        var countVideos = 1;  
+
+                        //console.log("videosLength: " + videosLength);                                        
+
+                        querySnapshotVideo.forEach(async (docVideo) => {
+
+                          let docv        = docVideo.data();
+                          var snippetv    = docv.snippet;    
+                          let thumbnailsv = snippetv.thumbnails;
+                          var defaulv     = thumbnailsv.default; 
+
+                          let idv           = docv.id;
+                          let title         = snippetv.title;
+                          var description   = "";
+
+                          if (snippetv.description) {
+                              description = snippetv.description;
+                          }
+
+                          let channelId     = snippetv.channelId;                           
+                          let position      = snippetv.position;                        
+
+                          let videoId       = snippetv.resourceId.videoId;
+                          let publishedAt   = snippetv.publishedAt;                            
+
+                          let playlistId    = snippetv.playlistId;  
+                          var thumbnailv    = "";
+
+                          if (defaulv) {
+                            thumbnailv = defaulv.url;
+                          }
+
+                          let j  = `{"id":"${idv}","title":"${title}","description":"${description}","channelId":"${channelId}","position":${position},"videoId":"${videoId}","publishedAt":"${publishedAt}","playlistId":"${playlistId}","thumbnail":"${thumbnailv}"}`;                            
+
+                          let json_video = JSON.parse( j );                            
+
+                          promise_videos.push(
+                            firestore.collection("streaming").doc("control").collection("videos").doc(playlistId).collection("videos").add(json_video)
+                          );                         
+
+                          if ( countVideos === videosLength ) {                                                               
+                              
+                              if ( countPlaylist === playlistLength ) {                                                                                                 
+
+                                console.error("");
+                                console.error("promise_videos: ", JSON.stringify(promise_videos));
+                                await Promise.all(promise_videos);   
+
+                                if (result) {  
+
+                                  console.log("::: Updating ::: convert_playlists");       
+
+                                  var _time =  new Date();
+
+                                  firestore.collection("streaming").doc("control").set({                   
+                                    convert_playlists: false,
+                                    last_update: _time 
+                                  },{ merge: true });
+                                  
+                                  return {};  
+
+                                }                 
+
+                                resolve(true);
+
+                              }
+                              
+                              countPlaylist++; 
+                              countVideos = 1;
+
+                          }                    
+                          
+                          countVideos++;
+
+                        });    
+
+                        return {};
+
+                    //end videos     
+                    }).catch((error) => {
+                      console.log('Error saving videos:', error);
+                      return error;
+                    });
+
+                  // end for
+                  }
+                  return {};
+
+            // end 
+            }).catch((error) => {
+              console.log('Error saving videos:', error);
+              return error;
+            });
+
+        // end promise
+        }); 
+
+      }
 
       return newValue;
 
@@ -447,7 +640,7 @@
       var _time =  new Date();
       //var base64 = Buffer.from(authUrl).toString('base64')
 
-      firestore.collection("control").doc("streaming").set({ 
+      firestore.collection("streaming").doc("control").set({ 
         url_authorization: authUrl, 
         fetch_code_trigger: false,                               
         last_update: _time 

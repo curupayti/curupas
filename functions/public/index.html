@@ -176,9 +176,12 @@
                         _user.userId = docUser.data().userID;
                         _user.name = docUser.data().name;
                         console.log(docUser.data(), 'cccccc');
-                        const ref = storage.ref(docUser.data().profilePicture);
-                        _user.profilePictureURL = await ref.getDownloadURL();
-                        // _user.profilePictureURL = docUser.data().profilePictureURL;            
+
+                        //const ref = storage.ref(docUser.data().profilePicture);
+                        //_user.profilePictureURL = await ref.getDownloadURL();
+
+                        _user.profilePictureURL = docUser.data().profilePictureURL;            
+
                         _user.roleReference = roleReference;                        
                         _user.yearReference = yearReference;                        
 
