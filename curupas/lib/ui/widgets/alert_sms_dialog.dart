@@ -1,21 +1,20 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:curupas/business/auth.dart';
 import 'package:curupas/business/validator.dart';
+import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/sms.dart';
 import 'package:curupas/ui/widgets/text_field.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 //import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:curupas/globals.dart' as _globals;
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'flat_button.dart';
 
 class SMSDialog extends StatefulWidget {
-
   final String userId;
   final String phone;
 
@@ -74,7 +73,6 @@ class _SMSDialogState extends State<SMSDialog> {
     });
 
     try {
-
       var keyboardVisibilityController = KeyboardVisibilityController();
 
       keyboardVisibilityController.onChange.listen((bool visible) {
@@ -96,7 +94,6 @@ class _SMSDialogState extends State<SMSDialog> {
           }
         });
       });
-
     } on Exception catch (error) {
       print(error.toString());
     }
@@ -128,7 +125,8 @@ class _SMSDialogState extends State<SMSDialog> {
           var code = int.parse(text);
           setState(() {
             int c = _code;
-            if ( code == c ) {
+
+            if (code == c) {
               _messageToShow = "Correcto";
               _messageStyle = TextStyle(
                   color: Colors.green, fontSize: ScreenUtil().setSp(50.0));
@@ -136,7 +134,8 @@ class _SMSDialogState extends State<SMSDialog> {
               validated = true;
               FocusScope.of(context).requestFocus(FocusNode());
               prefs.setBool('smsvalidated', true);
-              Map<String, dynamic> data = <String, dynamic>{'smsChecked': true};
+
+              //Map<String, dynamic> data = <String, dynamic>{'smsChecked': true};
 
               bool guest = (prefs.getBool('guest') ?? false);
               String page;
@@ -147,12 +146,10 @@ class _SMSDialogState extends State<SMSDialog> {
                 page = "/group";
               }
 
-              Auth.updateUser(sms.userId, data).then((user) async {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                    page, (Route<dynamic> route) => false);
-              });
+              Auth.updateUserSmsChecked(sms.userId, true);
 
-
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  page, (Route<dynamic> route) => false);
             } else {
               _messageToShow = "Incorrecto";
               _messageStyle = TextStyle(
@@ -245,7 +242,6 @@ class _SMSDialogState extends State<SMSDialog> {
           _isSendingSMS = true;
           _reSendSMS();
         });
-
       },
       splashColor: Colors.black12,
       borderColor: borderColor,
@@ -254,9 +250,7 @@ class _SMSDialogState extends State<SMSDialog> {
     );
 
     _circularProgressIndicator = new CircularProgressIndicator();
-
   }
-
 
   @override
   void dispose() {
@@ -266,18 +260,16 @@ class _SMSDialogState extends State<SMSDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return
-      WillPopScope(
+    return WillPopScope(
         onWillPop: _onBackPressed,
         child: new AlertDialog(
-        title:
-        new Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text("+549${_phone}",
-                style: TextStyle(
-                    color: Colors.blue, fontSize: ScreenUtil().setSp(40.0))),
+          title: new Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("+549${_phone}",
+                  style: TextStyle(
+                      color: Colors.blue, fontSize: ScreenUtil().setSp(40.0))),
               Spacer(),
               IconButton(
                 icon: Icon(Icons.edit),
@@ -313,7 +305,7 @@ class _SMSDialogState extends State<SMSDialog> {
               ),
             ],
           ),
-    ));
+        ));
     /*actions: <Widget>[
           Padding(
             padding: const EdgeInsets,only(
@@ -362,107 +354,106 @@ class _SMSDialogState extends State<SMSDialog> {
 
   Future<bool> _onBackPressed() {
     return showDialog(
-      context: context,
-      builder: (context) => new AlertDialog(
-        title: new Text('Información'),
-        content: new Text('Es necesario que valides tu celular para poder utilizar la aplicación.'),
-        actions: <Widget>[
-          new GestureDetector(
-            onTap: () => Navigator.of(context).pop(false),
-            child: Text("Cerrar"),
-          ),
-          //SizedBox(height: 16),
-          /*new GestureDetector(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: new Text('Información'),
+            content: new Text(
+                'Es necesario que valides tu celular para poder utilizar la aplicación.'),
+            actions: <Widget>[
+              new GestureDetector(
+                onTap: () => Navigator.of(context).pop(false),
+                child: Text("Cerrar"),
+              ),
+              //SizedBox(height: 16),
+              /*new GestureDetector(
             onTap: () => Navigator.of(context).pop(true),
             child: Text("YES"),
           ),*/
-        ],
-      ),
-    ) ??
+            ],
+          ),
+        ) ??
         false;
   }
 
   Widget _resend(BuildContext context) {
-      return Stack(children: <Widget>[
-        new Container(
-          child: new Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-            Row(
-              children: [
-                _resendSMSButton,
-                SizedBox(width: 20),
-                _isSendingSMS == true ?
-                _circularProgressIndicator: new Container(),
-              ]
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: new Text(
-                  "powered by",
-                  softWrap: true,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    color: Colors.grey,
-                    decoration: TextDecoration.none,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w300,
-                    fontFamily: "OpenSans",
-                  ),
+    return Stack(children: <Widget>[
+      new Container(
+        child: new Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Row(children: [
+              _resendSMSButton,
+              SizedBox(width: 20),
+              _isSendingSMS == true
+                  ? _circularProgressIndicator
+                  : new Container(),
+            ]),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: new Text(
+                "powered by",
+                softWrap: true,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: Colors.grey,
+                  decoration: TextDecoration.none,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w300,
+                  fontFamily: "OpenSans",
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 5.0),
-                child:
-                  InkWell(
-                    onTap: () {
-                      _globals.launchURL("https://landing.notimation.com.ar/");
-                    },
-                    child:
-                      Container(
-                        child: Image.asset("assets/images/notimation.png"),
-                      ),
-                  ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 5.0),
+              child: InkWell(
+                onTap: () {
+                  _globals.launchURL("https://landing.notimation.com.ar/");
+                },
+                child: Container(
+                  child: Image.asset("assets/images/notimation.png"),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ]);
-    }
+      ),
+    ]);
+  }
 
   void _reSendSMS() async {
     int code = await _globals.generateRandom();
     var message = _globals.getCodeMessgae(code);
     //String phone = _smsGroup.text;
-    _globals.sendUserSMSVerification(_phone, message, sms.userId, code).then((bool resutl) =>
-      _onSMSMessageResutl(resutl)
-    );
+    _globals
+        .sendUserSMSVerification(_phone, message, sms.userId, code)
+        .then((bool resutl) => _onSMSMessageResutl(resutl));
   }
 
   Future<bool> _onSMSMessageResutl(bool resutl) {
     return showDialog(
-      context: context,
-      builder: (context) => new AlertDialog(
-        title: new Text('Envio SMS'),
-        content:
-        resutl == false || resutl == null ?
-          new Text('No se pudo enviar el mensaje de texto, por favor volve a intentarlo mas tarde.')
-        :new Text('Se envio un nuevo codigo de verificación correctamente.'),
-        actions: <Widget>[
-          new GestureDetector(
-            onTap: () => Navigator.of(context).pop(false),
-            child: Text("Cerrar"),
-          ),
-          //SizedBox(height: 16),
-          /*new GestureDetector(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: new Text('Envio SMS'),
+            content: resutl == false || resutl == null
+                ? new Text(
+                    'No se pudo enviar el mensaje de texto, por favor volve a intentarlo mas tarde.')
+                : new Text(
+                    'Se envio un nuevo codigo de verificación correctamente.'),
+            actions: <Widget>[
+              new GestureDetector(
+                onTap: () => Navigator.of(context).pop(false),
+                child: Text("Cerrar"),
+              ),
+              //SizedBox(height: 16),
+              /*new GestureDetector(
             onTap: () => Navigator.of(context).pop(true),
             child: Text("YES"),
           ),*/
-        ],
-      ),
-    ) ??
+            ],
+          ),
+        ) ??
         false;
   }
 
@@ -471,11 +462,9 @@ class _SMSDialogState extends State<SMSDialog> {
       _phone = phone;
     });
   }
-
 }
 
 class DialogExample extends StatefulWidget {
-
   @override
   _DialogExampleState createState() => new _DialogExampleState();
 }
@@ -484,45 +473,48 @@ class _DialogExampleState extends State<DialogExample> {
   String _text = "initial";
   TextEditingController _c;
   @override
-  initState(){
+  initState() {
     _c = new TextEditingController();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       body: new Center(
           child: new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new Text(_text),
-              new ElevatedButton(onPressed: () {
-               return showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      new Column(
-                        children: <Widget>[
-                          new TextField(
-                            decoration: new InputDecoration(hintText: "Update Info"),
-                            controller: _c,
-
-                          ),
-                          new TextButton(
-                            child: new Text("Save"),
-                            onPressed: (){
-                              setState((){
-                                this._text = _c.text;
-                              });
-                              Navigator.pop(context);
-                            },
-                          )
-                        ],
-                      );
-                    });
-              },child: new Text("Show Dialog"),)
-            ],
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          new Text(_text),
+          new ElevatedButton(
+            onPressed: () {
+              return showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    new Column(
+                      children: <Widget>[
+                        new TextField(
+                          decoration:
+                              new InputDecoration(hintText: "Update Info"),
+                          controller: _c,
+                        ),
+                        new TextButton(
+                          child: new Text("Save"),
+                          onPressed: () {
+                            setState(() {
+                              this._text = _c.text;
+                            });
+                            Navigator.pop(context);
+                          },
+                        )
+                      ],
+                    );
+                  });
+            },
+            child: new Text("Show Dialog"),
           )
-      ),
+        ],
+      )),
     );
   }
 }

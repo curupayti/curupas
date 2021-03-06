@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curupas/business/cache.dart';
+import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/event_calendar.dart';
 import 'package:curupas/ui/screens/calendar/event_view.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:curupas/globals.dart' as _globals;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,7 +37,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   SharedPreferences prefs;
 
-  _CalendarPageState(){
+  _CalendarPageState() {
     _dateTime = DateTime.now();
     setMonthPadding();
   }
@@ -48,20 +49,27 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   @override
-  void initState()  {
+  void initState() {
     super.initState();
     String type;
-    if (_globals.curupaGuest.isGuest) {
+    if (Cache.appData.curupaGuest.isGuest) {
       type = "curupa";
     } else {
       type = "camada";
     }
-    getCalendar(type);
+    if (_globals.home_data_loaded == false) {
+      getCalendar(type);
+    } else {
+      setState(() {
+        loading = false;
+      });
+    }
   }
 
   void getCalendar(String _type) async {
     futureCalendarSnapshot = await _globals.getCalendar(_type).then((snapshot) {
       calendarSnapshot = snapshot;
+      _globals.home_data_loaded == true;
       setState(() {
         loading = false;
       });
@@ -89,11 +97,11 @@ class _CalendarPageState extends State<CalendarPage> {
       // 55 is for iPhoneX clipping issue.
 
       final double itemHeight = (size.height -
-          kToolbarHeight -
-          kBottomNavigationBarHeight -
-          24 -
-          28 -
-          55) /
+              kToolbarHeight -
+              kBottomNavigationBarHeight -
+              24 -
+              28 -
+              55) /
           6;
       final double itemWidth = size.width / numWeekDays;
 
@@ -115,65 +123,65 @@ class _CalendarPageState extends State<CalendarPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               mainAxisSize: MainAxisSize.max,
                               children: <Widget>[
-                                _globals.curupaGuest.isGuest == false ?
-                                  SizedBox(
-                                    height: 50.0,
-                                    width: button_width,
-                                    child: FlatButton(
-                                        color: _calendarSelect == "camada"
-                                            ? _getEventColor()
-                                            : Colors.white,
-                                        child: Text(
-                                          "Camada",
-                                          style: new TextStyle(
-                                            fontSize: 20.0,
-                                            height: 1.5,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          getCalendar("camada");
-                                          setState(() {
-                                            _calendarSelect = "camada";
-                                            loading = true;
-                                          });
-                                          Timer(Duration(seconds: 3), () {
-                                            setState(() {
-                                              loading = false;
-                                            });
-                                          });
-                                        }),
-                                  ):
-                                SizedBox(
-                                  height: 50.0,
-                                  width: button_width,
-                                  child: FlatButton(
-                                      color: _calendarSelect == "curupa"
-                                          ? _getEventColor()
-                                          : Colors.white,
-                                      child: Text(
-                                        "Curupa",
-                                        style: new TextStyle(
-                                          fontSize: 20.0,
-                                          height: 1.5,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                Cache.appData.curupaGuest.isGuest == false
+                                    ? SizedBox(
+                                        height: 50.0,
+                                        width: button_width,
+                                        child: FlatButton(
+                                            color: _calendarSelect == "camada"
+                                                ? _getEventColor()
+                                                : Colors.white,
+                                            child: Text(
+                                              "Camada",
+                                              style: new TextStyle(
+                                                fontSize: 20.0,
+                                                height: 1.5,
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              getCalendar("camada");
+                                              setState(() {
+                                                _calendarSelect = "camada";
+                                                loading = true;
+                                              });
+                                              Timer(Duration(seconds: 3), () {
+                                                setState(() {
+                                                  loading = false;
+                                                });
+                                              });
+                                            }),
+                                      )
+                                    : SizedBox(
+                                        height: 50.0,
+                                        width: button_width,
+                                        child: FlatButton(
+                                            color: _calendarSelect == "curupa"
+                                                ? _getEventColor()
+                                                : Colors.white,
+                                            child: Text(
+                                              "Curupa",
+                                              style: new TextStyle(
+                                                fontSize: 20.0,
+                                                height: 1.5,
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              getCalendar("curupa");
+                                              setState(() {
+                                                loading = true;
+                                                _calendarSelect = "curupa";
+                                              });
+                                              Timer(Duration(seconds: 3), () {
+                                                setState(() {
+                                                  loading = false;
+                                                });
+                                              });
+                                            }),
                                       ),
-                                      onPressed: () {
-                                        getCalendar("curupa");
-                                        setState(() {
-                                          loading = true;
-                                          _calendarSelect = "curupa";
-                                        });
-                                        Timer(Duration(seconds: 3), () {
-                                          setState(() {
-                                            loading = false;
-                                          });
-                                        });
-                                      }),
-                                ),
                                 SizedBox(
                                   height: 50.0,
                                   width: button_width,
@@ -214,7 +222,8 @@ class _CalendarPageState extends State<CalendarPage> {
                               child: Padding(
                                 padding: EdgeInsets.only(bottom: 15.0),
                                 child: new Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
                                   mainAxisSize: MainAxisSize.max,
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: <Widget>[
@@ -266,38 +275,45 @@ class _CalendarPageState extends State<CalendarPage> {
                                 new Expanded(
                                     child: new Text('D', //'S',
                                         textAlign: TextAlign.center,
-                                        style:
-                                        Theme.of(context).textTheme.subtitle)),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .subtitle)),
                                 new Expanded(
                                     child: new Text('L', //'M',
                                         textAlign: TextAlign.center,
-                                        style:
-                                        Theme.of(context).textTheme.subtitle)),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .subtitle)),
                                 new Expanded(
                                     child: new Text('M', //'T',
                                         textAlign: TextAlign.center,
-                                        style:
-                                        Theme.of(context).textTheme.subtitle)),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .subtitle)),
                                 new Expanded(
                                     child: new Text('M', //'W',
                                         textAlign: TextAlign.center,
-                                        style:
-                                        Theme.of(context).textTheme.subtitle)),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .subtitle)),
                                 new Expanded(
                                     child: new Text('J', //'T',
                                         textAlign: TextAlign.center,
-                                        style:
-                                        Theme.of(context).textTheme.subtitle)),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .subtitle)),
                                 new Expanded(
                                     child: new Text('V', //'F',
                                         textAlign: TextAlign.center,
-                                        style:
-                                        Theme.of(context).textTheme.subtitle)),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .subtitle)),
                                 new Expanded(
                                     child: new Text('S', //'S',
                                         textAlign: TextAlign.center,
-                                        style:
-                                        Theme.of(context).textTheme.subtitle)),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .subtitle)),
                               ],
                             ),
                             new GridView.count(
@@ -306,7 +322,8 @@ class _CalendarPageState extends State<CalendarPage> {
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
                               children: List.generate(
-                                  getNumberOfDaysInMonth(_dateTime.month), (index) {
+                                  getNumberOfDaysInMonth(_dateTime.month),
+                                  (index) {
                                 int dayNumber = index + 1;
                                 return new GestureDetector(
                                   // Used for handling tap on each day view
@@ -316,7 +333,8 @@ class _CalendarPageState extends State<CalendarPage> {
                                     margin: const EdgeInsets.all(2.0),
                                     padding: const EdgeInsets.all(1.0),
                                     decoration: new BoxDecoration(
-                                        border: new Border.all(color: Colors.grey)),
+                                        border:
+                                            new Border.all(color: Colors.grey)),
                                     child: new Column(
                                       children: <Widget>[
                                         buildDayNumberWidget(dayNumber),
@@ -598,13 +616,11 @@ class _CalendarPageState extends State<CalendarPage> {
       case 0:
         break;
       case 1:
-      //Navigator.pushNamed(context, Constants.calContactsRoute);
+        //Navigator.pushNamed(context, Constants.calContactsRoute);
         break;
     }
   }
 }
-
-
 
 SpeedDial buildSpeedDial() {
   return SpeedDial(
@@ -637,8 +653,6 @@ SpeedDial buildSpeedDial() {
     ],
   );
 }
-
-
 
 //https://www.youtube.com/watch?v=jhtKTKn6PlI
 //https://github.com/lohanidamodar/flutter_calendar/tree/part2

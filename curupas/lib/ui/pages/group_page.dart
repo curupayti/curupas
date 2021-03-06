@@ -1,22 +1,22 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curupas/business/cache.dart';
+import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/HTML.dart';
 import 'package:curupas/models/add_media.dart';
-import 'package:curupas/ui/widgets/anecdote/anecdote_widget.dart';
 import 'package:curupas/ui/widgets/anectodes.dart';
 import 'package:curupas/ui/widgets/staggered.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/gestures.dart';
-import "package:flutter/material.dart";
 import 'package:flutter/cupertino.dart';
+import "package:flutter/material.dart";
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:curupas/globals.dart' as _globals;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:ui' as ui;
 
 class GroupPage extends StatefulWidget {
   GroupPage({Key key}) : super(key: key);
@@ -52,22 +52,41 @@ class _GroupPageState extends State<GroupPage> {
   void initState() {
     super.initState();
 
-    _globals.getGroupVideoMedia();
-    _globals.getAnecdotes();
-
-    _globals.eventBus.on().listen((event) {
-      String _event = event.toString();
-      if (_event.contains("group")) {
-        _counting = _counting + 1;
-        if (_counting == 2) {
-          _globals.setDataFromGlobal();
-          _counting = 0;
-          setState(() {
-            _loading = false;
-          });
+    if (_globals.group_data_loaded == false) {
+      _globals.getGroupVideoMedia();
+      _globals.getAnecdotes();
+      _globals.eventBus.on().listen((event) {
+        String _event = event.toString();
+        if (_event.contains("group")) {
+          _counting = _counting + 1;
+          if (_counting == 6) {
+            _counting = 0;
+            if (mounted) {
+              loaded();
+            } else {
+              Timer.periodic(Duration(seconds: 5), (timer) {
+                if (mounted) {
+                  loaded();
+                  timer.cancel();
+                }
+                print("Home timer 5 seconds call mountedf");
+              });
+            }
+          }
+          print("Counting : ${_counting}");
         }
-        print("Counting : ${_counting}");
-      }
+      });
+    } else {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  void loaded() {
+    _globals.group_data_loaded = true;
+    setState(() {
+      _loading = false;
     });
   }
 
@@ -101,8 +120,7 @@ class _GroupPageState extends State<GroupPage> {
             _globals.filePickerGlobal
                 .getImagePath(FileType.media)
                 .then((result) async {
-
-                  //File _file = new File(result);
+              //File _file = new File(result);
 
               File croppedFile = await ImageCropper.cropImage(
                   sourcePath: result,
@@ -122,16 +140,14 @@ class _GroupPageState extends State<GroupPage> {
                       hideBottomControls: true),
                   iosUiSettings: IOSUiSettings(
                     minimumAspectRatio: 1.0,
-                    rotateButtonsHidden:true,
-                    resetButtonHidden:true,
-                    aspectRatioPickerButtonHidden:true,
-                    resetAspectRatioEnabled:true,
-                  )
-              );
+                    rotateButtonsHidden: true,
+                    resetButtonHidden: true,
+                    aspectRatioPickerButtonHidden: true,
+                    resetAspectRatioEnabled: true,
+                  ));
               Image _newImage = new Image.file(croppedFile);
 
               if (_newImage != null) {
-
                 _imagePath = result;
                 //Image _newImage = new Image.file(_file);
 
@@ -227,8 +243,7 @@ class GroupBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double _statusBarHeight = MediaQuery.of(context).padding.top;
-    double bottomPadding =
-        _statusBarHeight + ScreenUtil().setHeight(30.0);
+    double bottomPadding = _statusBarHeight + ScreenUtil().setHeight(30.0);
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -237,7 +252,7 @@ class GroupBackground extends StatelessWidget {
             padding: EdgeInsets.only(bottom: bottomPadding),
             child: Container(
               child: Image.asset(
-                _globals.appData.group_background,
+                Cache.appData.group_background,
                 fit: BoxFit.cover,
               ),
             ),
@@ -283,10 +298,7 @@ Widget _buildContent(BuildContext context, bool loading) {
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            MuseumSection(loading),
-            StaggeredWidget(_height)
-          ],
+          children: <Widget>[MuseumSection(loading), StaggeredWidget(_height)],
         ),
       ),
     );
@@ -322,7 +334,7 @@ class MuseumSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<HTML> anecdotes = _globals.anecdoteContent.contents;
+    List<HTML> anecdotes = Cache.appData.anecdoteContent.contents;
 
     double width = MediaQuery.of(context).size.width;
 

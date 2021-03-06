@@ -1,5 +1,9 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
+import 'package:curupas/business/cache.dart';
+import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/ui/screens/post/post_card.dart';
 import 'package:curupas/ui/widgets/museum.dart';
 import 'package:curupas/ui/widgets/newsletter/newsletter_widget.dart';
 import 'package:curupas/ui/widgets/pumas/pumas_widget.dart';
@@ -7,10 +11,7 @@ import 'package:curupas/ui/widgets/valores/valores_widget.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:curupas/globals.dart' as _globals;
-import 'dart:ui' as ui;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:curupas/ui/screens/post/post_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -22,6 +23,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _loading = true;
+  //bool data_loaded = false;
   int _counting = 0;
 
   @override
@@ -37,22 +39,44 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     initDynamicLinks(context);
 
-    loadHomeData();
-
-    _globals.eventBus.on().listen((event) {
-      String _event = event.toString();
-      if (_event.contains("home")) {
-        _counting = _counting + 1;
-        if (_counting == 6) {
-          _globals.setDataFromGlobal();
-          _counting = 0;
+    if (_globals.home_data_loaded == false) {
+      loadHomeData();
+      _globals.eventBus.on().listen((event) {
+        String _event = event.toString();
+        if (_event.contains("home")) {
+          _counting = _counting + 1;
+          if (_counting == 6) {
+            _counting = 0;
+            if (mounted) {
+              loaded();
+            } else {
+              Timer.periodic(Duration(seconds: 5), (timer) {
+                if (mounted) {
+                  loaded();
+                  timer.cancel();
+                }
+                print("Home timer 5 seconds call mountedf");
+              });
+            }
+          }
+          print("Counting : ${_counting}");
         }
-      }
-      print("Counting : ${_counting}");
+      });
+    } else {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  void loaded() {
+    _globals.home_data_loaded = true;
+    setState(() {
+      _loading = false;
     });
   }
 
-  void loadHomeData() {
+  void loadHomeData() async {
     setState(() {
       _loading = true;
     });
@@ -62,11 +86,6 @@ class _HomePageState extends State<HomePage> {
     _globals.getPumas();
     _globals.getValores();
     _globals.getNewsletters();
-    Timer(Duration(seconds: 5), () {
-      setState(() {
-        _loading = false;
-      });
-    });
   }
 }
 
@@ -101,11 +120,13 @@ void initDynamicLinks(BuildContext context) async {
     });*/
 }
 
+//https://github.com/flutter/flutter/tree/e10df3c1a65f9d7db3fc5340cffef966f7bd40a6/packages/flutter/lib/src/material/animated_icons/data
+
 SpeedDial buildSpeedDial() {
   return SpeedDial(
     marginRight: 25,
     marginBottom: 18,
-    animatedIcon: AnimatedIcons.menu_close,
+    animatedIcon: AnimatedIcons.add_event,
     animatedIconTheme: IconThemeData(size: 22.0),
     visible: true,
     closeManually: false,
@@ -190,8 +211,8 @@ class HomeBackground extends StatelessWidget {
         children: <Widget>[
           Padding(
             padding: EdgeInsets.only(bottom: bottomPadding),
-            child: Image.asset(_globals.appData.home_background,
-                fit: BoxFit.cover),
+            child:
+                Image.asset(Cache.appData.home_background, fit: BoxFit.cover),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: bottomPadding),
@@ -228,7 +249,7 @@ class HomeBackground extends StatelessWidget {
       );
     } else {
       return SingleChildScrollView(
-        child: _globals.appData != null
+        child: Cache.appData != null
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -270,7 +291,7 @@ class HomeBackground extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(left: ScreenUtil().setHeight(10.0)),
           child: Text(
-            _globals.appData.name != null ? _globals.appData.name : "",
+            Cache.appData.name != null ? Cache.appData.name : "",
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -282,7 +303,7 @@ class HomeBackground extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(top: ScreenUtil().setHeight(16.0)),
           child: Text(
-            _globals.appData.location != null ? _globals.appData.location : "",
+            Cache.appData.location != null ? Cache.appData.location : "",
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
               fontWeight: FontWeight.w500,
@@ -296,7 +317,7 @@ class HomeBackground extends StatelessWidget {
           height: 1.0,
         ),
         Text(
-          _globals.appData.biography != null ? _globals.appData.biography : "",
+          Cache.appData.biography != null ? Cache.appData.biography : "",
           style: TextStyle(
             color: Colors.white.withOpacity(0.85),
             fontSize: ScreenUtil().setSp(30.0),
@@ -322,14 +343,14 @@ class HomeBackground extends StatelessWidget {
         right: ScreenUtil().setWidth(20.0),
         bottom: ScreenUtil().setWidth(20.0),
       ),
-      child: Image.asset(_globals.appData.avatar),
+      child: Image.asset(Cache.appData.avatar),
     );
   }
 
   Widget _buildPostScroller() {
-    return _globals.appData != null &&
-            _globals.appData.posts != null &&
-            _globals.appData.posts.length > 0
+    return Cache.appData != null &&
+            Cache.appData.posts != null &&
+            Cache.appData.posts.length > 0
         ? Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: SizedBox.fromSize(
@@ -337,9 +358,9 @@ class HomeBackground extends StatelessWidget {
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                itemCount: _globals.appData.posts.length,
+                itemCount: Cache.appData.posts.length,
                 itemBuilder: (BuildContext context, int index) {
-                  var post = _globals.appData.posts[index];
+                  var post = Cache.appData.posts[index];
                   return PostCard(post);
                 },
               ),
@@ -349,41 +370,40 @@ class HomeBackground extends StatelessWidget {
   }
 
   Widget _buildNewsletterTimeline() {
-    return _globals.appData.newsletters != null &&
-            _globals.appData.newsletters.length > 0
+    return Cache.appData.newsletters != null &&
+            Cache.appData.newsletters.length > 0
         ? Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: SizedBox.fromSize(
               size: Size.fromHeight(200.0),
-              child: new NewsletterWidget(
-                  newsletters: _globals.appData.newsletters),
+              child:
+                  new NewsletterWidget(newsletters: Cache.appData.newsletters),
             ),
           )
         : Container();
   }
 
   Widget _buildMuseumTimeline() {
-    return _globals.appData.museums != null &&
-            _globals.appData.museums.length > 0
+    return Cache.appData.museums != null && Cache.appData.museums.length > 0
         ? Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: SizedBox.fromSize(
               size: Size.fromHeight(170.0),
-              child: new MuseumWidget(museums: _globals.appData.museums),
+              child: new MuseumWidget(museums: Cache.appData.museums),
             ),
           )
         : Container();
   }
 
   Widget _buildPumasTimeline() {
-    return _globals.appData.pumas != null && _globals.appData.pumas.length > 0
+    return Cache.appData.pumas != null && Cache.appData.pumas.length > 0
         ? Padding(
-      padding: const EdgeInsets.only(top: 16.0),
-      child: SizedBox.fromSize(
-        size: Size.fromHeight(170.0),
-        child: new PumasWidget(pumas: _globals.appData.pumas),
-      ),
-    )
+            padding: const EdgeInsets.only(top: 16.0),
+            child: SizedBox.fromSize(
+              size: Size.fromHeight(170.0),
+              child: new PumasWidget(pumas: Cache.appData.pumas),
+            ),
+          )
         : new Container();
   }
 
@@ -392,13 +412,8 @@ class HomeBackground extends StatelessWidget {
       padding: const EdgeInsets.only(top: 16.0),
       child: SizedBox.fromSize(
         size: Size.fromHeight(170.0),
-        child: new ValoresWidget(pumas: _globals.appData.valores),
+        child: new ValoresWidget(pumas: Cache.appData.valores),
       ),
     );
   }
-
 }
-
-
-
-

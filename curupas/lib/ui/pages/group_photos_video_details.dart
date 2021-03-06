@@ -1,11 +1,7 @@
-import 'dart:io';
-
 import 'package:chewie/chewie.dart';
 import 'package:curupas/models/group_media.dart';
 import 'package:curupas/ui/pages/photo_viewer.dart';
-import 'package:curupas/ui/pages/video_player_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 class GroupMediaDetails extends StatefulWidget {
@@ -125,7 +121,6 @@ class _GroupMediaDetailsState extends State<GroupMediaDetails> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.media.type == 1) {
       _controller = VideoPlayerController.network(widget.media.videoUrl)

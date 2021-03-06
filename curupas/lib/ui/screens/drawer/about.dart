@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import "package:flutter/material.dart";
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/business/cache.dart';
 import 'package:curupas/ui/screens/friend_screen.dart';
+import 'package:flutter/cupertino.dart';
+import "package:flutter/material.dart";
 
 var currentUserEmail;
 var _scaffoldContext;
@@ -81,7 +80,7 @@ class UpperSection extends StatelessWidget {
                       child: new Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          new Text(_globals.group.year,
+                          new Text(Cache.appData.group.year,
                               style: TextStyle(
                                 fontSize: 50.0,
                               )),
@@ -150,7 +149,7 @@ class MiddleSection extends StatelessWidget {
                                         "Este es un espacio destinado a la camada ",
                                     children: <TextSpan>[
                                       TextSpan(
-                                          text: "${_globals.group.year}, ",
+                                          text: "${Cache.appData.group.year}, ",
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold)),
                                       TextSpan(

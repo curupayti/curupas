@@ -2,21 +2,20 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:curupas/business/auth.dart';
+import 'package:curupas/business/cache.dart';
+import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/credit_card.dart';
 import 'package:curupas/ui/pages/notification_details.dart';
 import 'package:curupas/ui/widgets/credit_card.dart';
 import 'package:curupas/ui/widgets/flat_button.dart';
 import 'package:curupas/utils/toast_util.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:curupas/globals.dart' as _globals;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -57,15 +56,15 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     _globals.getNotifications();
 
-    _fullnameController.text = _globals.user.name;
-    _groupController.text = _globals.group.year;
-    _emailController.text = _globals.user.email;
-    _phoneController.text = _globals.user.phone;
-    _birthdayController.text = _globals.user.birthday;
+    _fullnameController.text = Cache.appData.user.name;
+    _groupController.text = Cache.appData.group.year;
+    _emailController.text = Cache.appData.user.email;
+    _phoneController.text = Cache.appData.user.phone;
+    _birthdayController.text = Cache.appData.user.birthday;
 
     _avatarImage = new DecorationImage(
-      image: new NetworkImage(_globals.user.thumbnailPictureURL != null
-          ? _globals.user.thumbnailPictureURL
+      image: new NetworkImage(Cache.appData.user.thumbnailPictureURL != null
+          ? Cache.appData.user.thumbnailPictureURL
           : ""),
       fit: BoxFit.cover,
     );
@@ -75,7 +74,6 @@ class _ProfilePageState extends State<ProfilePage> {
       if (_event.contains("profile")) {
         _counting = _counting + 1;
         if (_counting == 1) {
-          _globals.setDataFromGlobal();
           _counting = 0;
         }
       }
@@ -140,10 +138,10 @@ class ProfilePageScreen extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.green, Colors.blue],
-                          //begin: Alignment.topCenter,
-                          //end:Alignment.bottomCenter
-                        )),
+                      colors: [Colors.green, Colors.blue],
+                      //begin: Alignment.topCenter,
+                      //end:Alignment.bottomCenter
+                    )),
                     child: TabBarView(
                       children: [
                         Container(
@@ -186,7 +184,7 @@ class ProfilePageScreen extends StatelessWidget {
           child: new ListTile(
             leading: CircleAvatar(
               backgroundImage:
-              NetworkImage(_globals.notifications[index].thumbnailImageURL),
+                  NetworkImage(_globals.notifications[index].thumbnailImageURL),
             ),
             title: new Text(
               _globals.notifications[index].title,
@@ -290,10 +288,11 @@ class UpperSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(Cache.appData.curupaGuest.isGuest);
     return Column(
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.only(left:20.0, right:20, top:20),
+          padding: EdgeInsets.only(left: 20.0, right: 20, top: 20),
           child: Column(
             children: <Widget>[
               new Stack(fit: StackFit.loose, children: <Widget>[
@@ -301,81 +300,84 @@ class UpperSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    _globals.curupaGuest.isGuest == false ?
-                      new Container(
-                        width: 120.0,
-                        height: 120.0,
-                        decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: parent != null && parent._avatarImage != null
-                              ? parent._avatarImage
-                              : "",
-                        ),
-                      ):
-                      Text(
-                        _globals.user.name,
-                        style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
-                      ),
+                    Cache.appData.curupaGuest.isGuest == false
+                        ? new Container(
+                            width: 120.0,
+                            height: 120.0,
+                            decoration: new BoxDecoration(
+                              shape: BoxShape.circle,
+                              image:
+                                  parent != null && parent._avatarImage != null
+                                      ? parent._avatarImage
+                                      : "",
+                            ),
+                          )
+                        : Text(
+                            Cache.appData.user.name,
+                            style: DefaultTextStyle.of(context)
+                                .style
+                                .apply(fontSizeFactor: 2.0),
+                          ),
                   ],
                 ),
-                _globals.curupaGuest.isGuest == false ?
-                  Padding(
-                      padding: EdgeInsets.only(top: 80.0, right: 60.0),
-                      child: new Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          new GestureDetector(
-                            onTap: () {
-                              optionForPic(context);
-                            },
-                            child: new CircleAvatar(
-                              backgroundColor: Colors.red,
-                              radius: 25.0,
-                              child: new Icon(
-                                Icons.camera_alt,
-                                color: Colors.white,
+                Cache.appData.curupaGuest.isGuest == false
+                    ? Padding(
+                        padding: EdgeInsets.only(top: 80.0, right: 60.0),
+                        child: new Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            new GestureDetector(
+                              onTap: () {
+                                optionForPic(context);
+                              },
+                              child: new CircleAvatar(
+                                backgroundColor: Colors.red,
+                                radius: 25.0,
+                                child: new Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
+                          ],
+                        ))
+                    : Padding(
+                        padding: const EdgeInsets.only(
+                            left: 20.0, right: 20.0, top: 50.0),
+                        child: Text(
+                          "Registrate a la app y comparti tu experiencia con tu camada",
+                          softWrap: true,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey,
+                            decoration: TextDecoration.none,
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w300,
+                            fontFamily: "OpenSans",
                           ),
-                        ],
-                      )) :
-                  Padding(
-                    padding: const EdgeInsets.only(left:20.0, right:20.0, top:50.0),
-                    child: Text(
-                      "Registrate a la app y comparti tu experiencia con tu camada",
-                      softWrap: true,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.grey,
-                        decoration: TextDecoration.none,
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w300,
-                        fontFamily: "OpenSans",
+                        ),
                       ),
-                    ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 80.0, top: 120.0),
+                  child: CustomFlatButton(
+                    enabled: true,
+                    title: "REGISTRAR",
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    textColor: Colors.white,
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/signup',
+                        arguments: Cache.appData.user,
+                      );
+                    },
+                    splashColor: Colors.red,
+                    borderColor: Color.fromRGBO(0, 29, 126, 1),
+                    borderWidth: 0,
+                    color: Colors.red,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left:80.0, top:120.0),
-                    child: CustomFlatButton(
-                      enabled: true,
-                      title: "REGISTRAR",
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      textColor: Colors.white,
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/signup',
-                          arguments: _globals.user,
-                        );
-                      },
-                      splashColor: Colors.red,
-                      borderColor: Color.fromRGBO(0, 29, 126, 1),
-                      borderWidth: 0,
-                      color: Colors.red,
-                    ),
-                  ),
-
+                ),
               ]),
             ],
           ),
@@ -533,21 +535,21 @@ void updateAvatar(BuildContext context, _ProfilePageState parent, File _file) {
     fit: BoxFit.cover,
   );
 
-  String year = _globals.group.year;
-  String userId = _globals.user.userID;
+  String year = Cache.appData.group.year;
+  String userId = Cache.appData.user.userID;
 
   Map<String, String> meta = new Map<String, String>();
   meta["thumbnail"] = "true";
   meta["type"] = "5";
   meta["userId"] = "${userId}";
-  meta["profilePictureToDelete"] = _globals.user.profilePicture;
-  meta["thumbnailPictureToDelete"] = _globals.user.thumbnailPicture;
+  meta["profilePictureToDelete"] = Cache.appData.user.profilePicture;
+  meta["thumbnailPictureToDelete"] = Cache.appData.user.thumbnailPicture;
 
   SettableMetadata metadata = new SettableMetadata(
     customMetadata: meta,
   );
 
-  String toNonSpecial = _globals.user.nonSpName;
+  String toNonSpecial = Cache.appData.user.nonSpName;
   String filePath = "${year}/users/${toNonSpecial}-${nowTime}";
 
   _globals.filePickerGlobal
@@ -567,9 +569,9 @@ class ProfileDataWidget extends StatefulWidget {
 }
 
 class _ProfileDataWidgetState extends State<ProfileDataWidget> {
-
   DateTime todayDate = DateTime.now();
   DateTime selectedDate;
+  SharedPreferences prefs;
 
   @override
   Widget build(BuildContext context) {
@@ -612,7 +614,6 @@ class _ProfileDataWidgetState extends State<ProfileDataWidget> {
                         enabled: !_status,
                         autofocus: !_status,
                         controller: _fullnameController,
-
                       ),
                     ),
                   ],
@@ -737,7 +738,7 @@ class _ProfileDataWidgetState extends State<ProfileDataWidget> {
                   ],
                 )),
             GestureDetector(
-              onTap: (){
+              onTap: () {
                 _selectDate(context);
               },
               child: AbsorbPointer(
@@ -763,7 +764,7 @@ class _ProfileDataWidgetState extends State<ProfileDataWidget> {
               height: 10,
             ),
             GestureDetector(
-              onTap: (){
+              onTap: () {
                 _updateUserProfile();
               },
               child: Container(
@@ -831,15 +832,14 @@ class _ProfileDataWidgetState extends State<ProfileDataWidget> {
     };
     Auth.updateUser(userId, data).then((user) async {
       if (user != null) {
-        _fullnameController.text = _globals.user.name;
-        _groupController.text = _globals.group.year;
-        _emailController.text = _globals.user.email;
-        _phoneController.text = _globals.user.phone;
-        _birthdayController.text = _globals.user.birthday;
+        _fullnameController.text = Cache.appData.user.name;
+        _groupController.text = Cache.appData.group.year;
+        _emailController.text = Cache.appData.user.email;
+        _phoneController.text = Cache.appData.user.phone;
+        _birthdayController.text = Cache.appData.user.birthday;
         AlertToast.showToastMsg("Profile updated successfully");
       }
     });
-
   }
 }
 
@@ -911,8 +911,8 @@ class CreditCardWidget extends StatelessWidget {
                 height: 16.0,
               ),
               Text(
-                _globals.user != null && _globals.user.name != null
-                    ? _globals.user.name
+                Cache.appData.user != null && Cache.appData.user.name != null
+                    ? Cache.appData.user.name
                     : "",
                 style: TextStyle(
                   fontSize: 30.0,

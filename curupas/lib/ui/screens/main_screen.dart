@@ -1,5 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+
+import 'package:curupas/business/auth.dart';
+import 'package:curupas/business/cache.dart';
+import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/HTML.dart';
 import 'package:curupas/models/curupa_user.dart';
 import 'package:curupas/models/message.dart';
@@ -19,9 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:curupas/business/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:curupas/globals.dart' as _globals;
 
 //https://pub.dev/packages/flutter_staggered_grid_view#-example-tab-
 
@@ -31,13 +33,18 @@ class MainScreen extends StatefulWidget {
   _MainScreenState createState() => _MainScreenState();
 }
 
+class PopChoice {
+  const PopChoice({this.title, this.icon, this.id}); //, this.tabId});
+  final String title;
+  final IconData icon;
+  final int id;
+  //final int tabId;
+}
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   int selectedPos = 0;
-
-  //double bottomNavBarHeight = 80;
   GlobalKey bottomNavigationKey = GlobalKey();
   List<TabData> tabItems;
 
@@ -56,6 +63,7 @@ class _MainScreenState extends State<MainScreen> {
 
   List<Widget> pages;
   Widget currentPage;
+  List<PopChoice> currentChoice;
 
   _MainScreenState me;
 
@@ -75,13 +83,54 @@ class _MainScreenState extends State<MainScreen> {
   IconButton _group;
   IconButton _profile;
 
+  PopChoice _selectedChoice;
+
+  HomePage one;
+  CalendarPage two;
+  StreamingPage three;
+  GroupPage four;
+  ProfilePage five;
+
+  // ignore: deprecated_member_use
+  List<List<PopChoice>> pop_choices = new List<List<PopChoice>>();
+
+  final List<PopChoice> choice_home = <PopChoice>[
+    PopChoice(title: 'Ayuda', icon: Icons.help, id: 0),
+  ];
+
+  final List<PopChoice> choice_calendar = <PopChoice>[
+    PopChoice(title: 'Ayuda', icon: Icons.help, id: 0),
+  ];
+
+  final List<PopChoice> choice_videos = <PopChoice>[
+    PopChoice(title: 'Ayuda', icon: Icons.help, id: 0),
+  ];
+
+  final List<PopChoice> choice_group = <PopChoice>[
+    PopChoice(title: 'Ayuda', icon: Icons.help, id: 0),
+  ];
+
+  final List<PopChoice> choice_profile = <PopChoice>[
+    PopChoice(title: 'Configuración', icon: Icons.settings, id: 0),
+    PopChoice(title: 'Editar Perfil', icon: Icons.edit, id: 1),
+    PopChoice(title: 'Salir', icon: Icons.all_out, id: 2),
+  ];
+
+  void _select(PopChoice choice) {
+    setState(() {
+      // Causes the app to rebuild with the new _selectedChoice.
+      _selectedChoice = choice;
+    });
+  }
+
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   /// Define a top-level named handler which background/terminated messages will
   /// call.
   ///
   /// To verify things are working, check out the native platform logs.
-  Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  Future<void> _firebaseMessagingBackgroundHandler(
+      RemoteMessage message) async {
     // If you're going to use other Firebase services in the background, such as Firestore,
     // make sure you call `initializeApp` before using other Firebase services.
     await Firebase.initializeApp();
@@ -99,7 +148,7 @@ class _MainScreenState extends State<MainScreen> {
   );
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   TapGestureRecognizer _flutterTapRecognizer;
 
@@ -163,7 +212,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<Map<String, dynamic>> initPlatformState() async {
-
     Map<String, dynamic> deviceData;
 
     try {
@@ -185,8 +233,9 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
 
-    initPlatformState().then((device) {
+    _selectedChoice = choice_profile[0];
 
+    initPlatformState().then((device) {
       if (device["isPhysicalDevice"]) {
         isPhysicalDevice = device["isPhysicalDevice"];
       }
@@ -196,46 +245,43 @@ class _MainScreenState extends State<MainScreen> {
           _globals.setFilePickerGlobal();
           String userId = prefs.getString('userId');
           await _globals.getUserData(userId).then((CurupaUser user) async {
+            if (Cache.appData.curupaGuest.isGuest) {
+              Cache.appData.curupaGuest.user = user;
+              Cache.appData.curupaGuest.phone = user.phone;
+            } else {
+              Cache.appData.curupaGuest.isGuest = false;
+            }
 
-                if (_globals.curupaGuest.isGuest) {
-                  _globals.curupaGuest.user = user;
-                  _globals.curupaGuest.phone = user.phone;
-                }
+            await _firebaseMessaging.getToken().then((token) async {
+              Map<String, dynamic> data = new Map<String, dynamic>();
+              if (isPhysicalDevice) {
+                data['token'] = token;
+              }
+              data['device'] = device;
+              await Auth.updateUser(userId, data).then((CurupaUser user) async {
+                Cache.appData.user.token = token;
+              });
+            });
 
-                await _firebaseMessaging.getToken().then((token) async {
-                  Map<String, dynamic> data = new Map<String, dynamic>();
-                  if (isPhysicalDevice) {
-                    data['token'] = token;
-                  }
-                  data['device'] = device;
-                  await Auth.updateUser(userId, data).then((CurupaUser user) async {
-                    _globals.user.token = token;
-                  });
-                });
+            Cache.appData.user = user;
+            _globals.getDrawers();
 
-                _globals.user = user;
-                _globals.initData();
-                _globals.getDrawers();
-
-                if (user.smsChecked == null) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) =>
-                    new SMSDialog(userId: user.userID, phone: _globals.curupaGuest.phone),
-                  );
-                } else if (!user.accepted) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) =>
-                        _buildNotAcceptedDialog(context),
-                  );
-                }
-
-
+            if (user.smsChecked == null) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => new SMSDialog(
+                    userId: user.userID, phone: Cache.appData.curupaGuest.phone),
+              );
+            } else if (!user.accepted) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) =>
+                    _buildNotAcceptedDialog(context),
+              );
+            }
           });
         }
-     });
-
+      });
     });
 
     _home = IconButton(
@@ -308,7 +354,6 @@ class _MainScreenState extends State<MainScreen> {
   void handleClick(String value) {
     switch (value) {
       case 'Update':
-
         break;
     }
   }
@@ -326,7 +371,7 @@ class _MainScreenState extends State<MainScreen> {
     prefs = await SharedPreferences.getInstance();
     bool registered = prefs.getBool('registered');
     bool guest = (prefs.getBool('guest') ?? false);
-    _globals.curupaGuest.isGuest = guest;
+    Cache.appData.curupaGuest.isGuest = guest;
     return registered;
   }
 
@@ -367,7 +412,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildAboutText() {
     String message =
-        "Falta que tu referente de la camada ${_globals.group.year} apruebe tu ingreso. Te va a llegar un mensaje de texto SMS cuando lo haga.";
+        "Falta que tu referente de la camada ${Cache.appData.group.year} apruebe tu ingreso. Te va a llegar un mensaje de texto SMS cuando lo haga.";
     return new RichText(
       text: new TextSpan(
         text: "${message}\n\n",
@@ -376,7 +421,7 @@ class _MainScreenState extends State<MainScreen> {
         children: <TextSpan>[
           new TextSpan(
               text:
-              'Mientras tanto, podes ver mas información del proyecto en ',
+                  'Mientras tanto, podes ver mas información del proyecto en ',
               style: TextStyle(
                   color: Colors.black87, fontSize: ScreenUtil().setSp(30.0))),
           new TextSpan(
@@ -418,15 +463,15 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-
       /*ScreenUtil.instance =
       ScreenUtil(width: 640, height: 1136, allowFontScaling: true)
         ..init(context);*/
 
-     return ScreenUtilInit(
+      return ScreenUtilInit(
         designSize: Size(640, 1136),
         allowFontScaling: false,
-        child: Stack(children: <Widget>[
+        child: Stack(
+          children: <Widget>[
             new Container(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
@@ -451,7 +496,8 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(50.0)),
+                    padding:
+                        EdgeInsets.only(bottom: ScreenUtil().setHeight(50.0)),
                     child: new Text(
                       "Cargando datos",
                       softWrap: true,
@@ -491,9 +537,8 @@ class _MainScreenState extends State<MainScreen> {
           ],
         ),
       );
-
     } else {
-      int _length = _globals.drawerContent.contents.length;
+      int _length = Cache.appData.drawerContent.contents.length;
       return Scaffold(
         key: _scaffoldKey,
         appBar: new AppBar(
@@ -503,7 +548,32 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () => _scaffoldKey.currentState.openDrawer()),
           title: Text(pageTitle),
           centerTitle: true,
-          actions: <Widget>[currentIconButton],
+          actions: <Widget>[
+            currentIconButton,
+            Padding(
+              padding: EdgeInsets.only(right: 10.0),
+              child: PopupMenuButton<PopChoice>(
+                onSelected: _select,
+                itemBuilder: (BuildContext context) {
+                  return currentChoice.map((PopChoice choice) {
+                    return PopupMenuItem<PopChoice>(
+                      value: choice,
+                      child: new GestureDetector(
+                          onTap: () {
+                            print("Clicked choice : ${choice.id}");
+                            _runPopChoice(choice);
+                          },
+                          child: Row(children: <Widget>[
+                            Icon(choice.icon),
+                            VerticalDivider(color: Colors.white, width: 10),
+                            Text(choice.title),
+                          ])),
+                    );
+                  }).toList();
+                },
+              ),
+            ),
+          ],
         ),
         drawer: Drawer(
           child: ListView.separated(
@@ -512,7 +582,7 @@ class _MainScreenState extends State<MainScreen> {
               if (index == 0) {
                 return _createHeader();
               } else {
-                HTML contentHtml = _globals.drawerContent.contents[index];
+                HTML contentHtml = Cache.appData.drawerContent.contents[index];
                 int icon = int.parse(contentHtml.icon);
                 return _createDrawerItem(
                     contentHtml: contentHtml,
@@ -556,14 +626,62 @@ class _MainScreenState extends State<MainScreen> {
           key: bottomNavigationKey,
           onTabChangedListener: (index) {
             setState(() {
+              currentTab = index;
               pageTitle = pageTitles[index];
               currentPage = pages[index];
               currentIconButton = navBarIcons[index];
+              currentChoice = pop_choices[index];
             });
           },
         ),
       );
     }
+  }
+
+  void _runPopChoice(PopChoice choice) {
+    if (currentPage == one) {
+    } else if (currentPage == two) {
+    } else if (currentPage == three) {
+    } else if (currentPage == four) {
+    } else if (currentPage == five) {
+      if (choice.id == 2) {
+        //Logout
+        // TODO: 41.1 "Salir" is working though should quit the main screen and go back to the sign_up.dat
+        _showLogoutDialog(context);
+      }
+    }
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = FlatButton(
+      child: Text("Cancelar"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+    Widget continueButton = FlatButton(
+      child: Text("Salir"),
+      onPressed: () {
+        _logOut();
+      },
+    );
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Consulta"),
+      content: Text("¿Queres salir de la aplicación?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   IconData getIconFromInt(int id) {
@@ -585,7 +703,7 @@ class _MainScreenState extends State<MainScreen> {
           Positioned(
               top: 15.0,
               right: 15.0,
-              child: Text("Versión ${_globals.description.version}",
+              child: Text("Versión ${Cache.appData.description.version}",
                   style: TextStyle(color: Colors.white, fontSize: 20.0))),
           Positioned(
               bottom: 12.0,
@@ -600,10 +718,10 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _createDrawerItem(
       {HTML contentHtml,
-        int index,
-        IconData icon,
-        String text,
-        GestureTapCallback onTap}) {
+      int index,
+      IconData icon,
+      String text,
+      GestureTapCallback onTap}) {
     return ListTile(
       title: Row(
         children: <Widget>[
@@ -638,12 +756,13 @@ class _MainScreenState extends State<MainScreen> {
     /// default FCM channel to enable heads up notifications.
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
     /// Update the iOS foreground notification presentation options to allow
     /// heads up notifications.
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
@@ -658,12 +777,13 @@ class _MainScreenState extends State<MainScreen> {
     /// default FCM channel to enable heads up notifications.
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
     /// Update the iOS foreground notification presentation options to allow
     /// heads up notifications.
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
@@ -692,7 +812,7 @@ class _MainScreenState extends State<MainScreen> {
                 channel.id,
                 channel.name,
                 channel.description,
-                // TODO add a proper drawable resource to android, for now using
+                // TODO: add a proper drawable resource to android, for now using
                 //      one that already exists in example app.
                 icon: 'launch_background',
               ),
@@ -721,7 +841,6 @@ class _MainScreenState extends State<MainScreen> {
         //_navigateToItemDetail(message);
       },
     );*/
-
   }
 
   void iOS_Permission() {
@@ -733,10 +852,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void updeteWidget() {
+    group = Cache.appData.group.year;
 
-    group = _globals.group.year;
-
-    if (_globals.curupaGuest.isGuest) {
+    if (Cache.appData.curupaGuest.isGuest) {
       pageTitles = ["Home", "Calendario", "Streaming", "Perfil"];
     } else {
       pageTitles = ["Home", "Calendario", "Streaming", group, "Perfil"];
@@ -745,20 +863,25 @@ class _MainScreenState extends State<MainScreen> {
     pageTitle = pageTitles[0];
 
     TabData home = new TabData(iconData: Icons.home, title: pageTitles[0]);
-    TabData calendar_today = new TabData(iconData: Icons.calendar_today, title: pageTitles[1]);
-    TabData videoCam = new TabData(iconData: Icons.videocam, title: pageTitles[2]);
+    TabData calendar_today =
+        new TabData(iconData: Icons.calendar_today, title: pageTitles[1]);
+    TabData videoCam =
+        new TabData(iconData: Icons.videocam, title: pageTitles[2]);
     TabData group_work, account_circle;
 
-    if (_globals.curupaGuest.isGuest) {
-      account_circle = new TabData(iconData: Icons.account_circle, title: pageTitles[3]);
+    if (Cache.appData.curupaGuest.isGuest) {
+      account_circle =
+          new TabData(iconData: Icons.account_circle, title: pageTitles[3]);
     } else {
-      group_work = new TabData(iconData: Icons.group_work, title: pageTitles[3]);
-      account_circle = new TabData(iconData: Icons.account_circle, title: pageTitles[4]);
+      group_work =
+          new TabData(iconData: Icons.group_work, title: pageTitles[3]);
+      account_circle =
+          new TabData(iconData: Icons.account_circle, title: pageTitles[4]);
     }
 
     List<TabData> tabs;
 
-    if (_globals.curupaGuest.isGuest) {
+    if (Cache.appData.curupaGuest.isGuest) {
       tabs = [home, calendar_today, videoCam, account_circle];
     } else {
       tabs = [home, calendar_today, videoCam, group_work, account_circle];
@@ -766,49 +889,59 @@ class _MainScreenState extends State<MainScreen> {
 
     tabItems = List.of(tabs);
 
-    /*tabItems = List.of([
-      new TabData(iconData: Icons.home, title: pageTitles[0]),
-      new TabData(iconData: Icons.calendar_today, title: pageTitles[1]),
-      new TabData(iconData: Icons.videocam, title: pageTitles[2]),
-      new TabData(iconData: Icons.group_work, title: pageTitles[3]),
-      new TabData(iconData: Icons.account_circle, title: pageTitles[4]),
-    ]);*/
-
     int length = tabItems.length;
 
-    HomePage one = new HomePage(
+    one = new HomePage(
       key: keyOne,
     );
 
-    CalendarPage two = new CalendarPage(
+    two = new CalendarPage(
       key: keyTwo,
     );
 
-    StreamingPage three = new StreamingPage(
+    three = new StreamingPage(
       key: keyThree,
     );
 
-    GroupPage four = new GroupPage(
+    four = new GroupPage(
       key: keyFour,
     );
 
-    ProfilePage five = new ProfilePage(
+    five = new ProfilePage(
       key: keyFive,
     );
 
-    if (_globals.curupaGuest.isGuest) {
+    if (Cache.appData.curupaGuest.isGuest) {
       navBarIcons = [_home, _calendar, _videos, _profile];
     } else {
       navBarIcons = [_home, _calendar, _videos, _group, _profile];
     }
 
+    if (Cache.appData.curupaGuest.isGuest) {
+      pop_choices = [
+        choice_home,
+        choice_calendar,
+        choice_videos,
+        choice_profile
+      ];
+    } else {
+      pop_choices = [
+        choice_home,
+        choice_calendar,
+        choice_videos,
+        choice_group,
+        choice_profile
+      ];
+    }
+
     setState(() {
-      if (_globals.curupaGuest.isGuest) {
+      if (Cache.appData.curupaGuest.isGuest) {
         pages = [one, two, three, five];
       } else {
         pages = [one, two, three, four, five];
       }
       currentPage = one;
+      currentChoice = choice_home;
       currentIconButton = _home;
       _loading = false;
     });
@@ -824,6 +957,7 @@ class _MainScreenState extends State<MainScreen> {
     prefs.setBool('registered', false);
     prefs.setBool('group', false);
     prefs.setString('userId', null);
+    prefs.setBool('guest', false);
     Auth.signOut();
     Navigator.of(context).pushNamed("/signin");
   }

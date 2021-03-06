@@ -1,3 +1,4 @@
+import 'package:curupas/business/cache.dart';
 import 'package:curupas/ui/pages/group_photos_video_details.dart';
 import 'package:flutter/material.dart';
 import 'package:curupas/globals.dart' as _globals;
@@ -36,13 +37,13 @@ class StaggeredWidget extends StatelessWidget {
       padding:
           const EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0, bottom: 8.0),
       crossAxisCount: 4,
-      itemCount: _globals.group.medias.length,
+      itemCount: Cache.appData.group.medias.length,
       itemBuilder: (context, j) {
         bool isVideo = false;
-        String imgPath = _globals.group.medias[j].thumbnailUrl;
-        String title = _globals.group.medias[j].title;
-        String description = _globals.group.medias[j].description;
-        if (_globals.group.medias[j].type == 1) {
+        String imgPath = Cache.appData.group.medias[j].thumbnailUrl;
+        String title = Cache.appData.group.medias[j].title;
+        String description = Cache.appData.group.medias[j].description;
+        if (Cache.appData.group.medias[j].type == 1) {
           isVideo = true;
         }
         return GestureDetector(
@@ -51,7 +52,7 @@ class StaggeredWidget extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => GroupMediaDetails(
-                  media: _globals.group.medias[j],
+                  media: Cache.appData.group.medias[j],
                 ),
               ),
             );

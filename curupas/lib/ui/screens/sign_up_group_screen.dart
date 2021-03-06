@@ -1,8 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curupas/business/auth.dart';
+import 'package:curupas/business/cache.dart';
+import 'package:curupas/business/validator.dart';
+import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/models/group.dart';
+import 'package:curupas/ui/widgets/flat_button.dart';
+import 'package:curupas/ui/widgets/text_field.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,14 +17,6 @@ import 'package:flutter/gestures.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import 'package:curupas/business/auth.dart';
-import 'package:curupas/business/validator.dart';
-import 'package:curupas/models/group.dart';
-import 'package:curupas/models/curupa_user.dart';
-import 'package:curupas/globals.dart' as _globals;
-import 'package:curupas/ui/widgets/flat_button.dart';
-import 'package:curupas/ui/widgets/text_field.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -28,9 +27,8 @@ class SignUpGroupScreen extends StatefulWidget {
 }
 
 class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
-
   List<DropdownMenuItem<String>> _groupMenuItems = new List();
-  List<Group> _groups = new List();
+  List<Group> _groups = [];
   Group _currentGroup;
   String _currentItem;
 
@@ -59,7 +57,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
 
   TapGestureRecognizer _flutterTapRecognizer;
 
-  final FirebaseMessaging _fcm = FirebaseMessaging();
+  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
 
   void _rebuild() {
     setState(() {});
@@ -105,16 +103,15 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
       focusNode: phoneNumberFocusNodeGroup,
     );
 
-    getGroupsList().then((val) =>
-      setState(() {
-        _loadingInProgress = false;
-        _groupMenuItems = val;
-        print(_groupMenuItems.length);
-        _currentItem = _groupMenuItems[0].value;
-      }));
-      onBackPress = () {
-        Navigator.of(context).pop();
-      };
+    getGroupsList().then((val) => setState(() {
+          _loadingInProgress = false;
+          _groupMenuItems = val;
+          print(_groupMenuItems.length);
+          _currentItem = _groupMenuItems[0].value;
+        }));
+    onBackPress = () {
+      Navigator.of(context).pop();
+    };
   }
 
   void _enableButton() {
@@ -153,8 +150,8 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
   }
 
   Future<List<DropdownMenuItem<String>>> getGroupsList() async {
-    List<DropdownMenuItem<String>> items = new List();
-    QuerySnapshot querySnapshot = await Auth.getGroupSnapshot();
+    List<DropdownMenuItem<String>> items = [];
+    QuerySnapshot querySnapshot = await Cache.getCacheCollectionByPath("years");
     items.add(new DropdownMenuItem(value: null, child: new Text("----")));
     for (var doc in querySnapshot.docs) {
       String year = doc['year'];
@@ -454,10 +451,10 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
         _globals.filePickerGlobal
             .uploadFile(_imagePath, filePath, metadata)
             .then((url) {
-          _globals.user = user;
+          Cache.appData.user = user;
           prefs.setBool('group', true);
           prefs.setString('year', year);
-          _globals.user.yearRef = yearRef;
+          Cache.appData.user.yearRef = yearRef;
           showDialog(
             context: context,
             builder: (BuildContext context) => _buildAboutDialog(context),
