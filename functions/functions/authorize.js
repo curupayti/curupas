@@ -12,26 +12,46 @@
       var yearRef = dataAfter.yearRef;
 
       //console.log("roleRef: " + JSON.stringify(roleRef));
-      //console.log("");
+      
       //console.log("yearRef: " + JSON.stringify(yearRef));
+      //console.log("yearRef: " + yearRef.id);
 
-      let groupAdminRef = await firestore.collection("roles").doc("group");
+      let groupRef = await firestore.collection("roles").doc("group");
 
-      if (roleRef === groupAdminRef) {
+      console.log("");
+      console.log("roleRef: " + roleRef.id);      
+      console.log("groupRef: " + groupRef.id);
+      console.log("");
 
-        let docYear = yearRef.get();
+      if (roleRef.id === groupRef.id) {
+
+        console.log("USER IS GROUP MEMBER OF: " + yearRef.id);
+
+        let docYear = await yearRef.get();
         let docYearId = docYear.id;
 
         console.log("docYearId: " + docYearId);
 
-        const documentId = contex.params.postId;
+        const documentId = contex.params.userId;
 
-        firestore.collection("years").doc(docYearId).set({                   
-          group_admins: [documentId],          
+        console.log("documentId: " + documentId);
+
+        let _time = admin.firestore.FieldValue.serverTimestamp();              
+
+        /*firestore.collection("years").doc(docYearId).set({                   
+          users_autorization: [documentId],          
           last_update: _time 
-        },{ merge: true });
+        },{ merge: true });*/
 
-      }
+        firestore.collection("years").doc(`${docYearId}`)
+        .collection("user-auth").add({          
+          userId: documentId,      
+          userRef: firestore.doc('users/' + documentId),
+          authorized: false,
+          last_update: _time 
+        },{ merge: true });        
+
+      } 
 
       /*var registered = 	data.registered;   
       var authorized =  data.authorized;  

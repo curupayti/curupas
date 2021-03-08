@@ -4,14 +4,13 @@
 
     let deleteIDs = [];
     
-    let deleteThis = "", updateThis = "";
+    let deleteThis = "", updateThis = "";    
 
     let lastVisible;
     let firstVisible;          
 
-    let _imageSnapshot = {};        
-
-    window.editDocuments = [];
+    let _imageSnapshot      = {};
+    window.editDocuments    = [];    
 
     window._is_detail_drawer = false;
     window._short;
@@ -21,15 +20,20 @@
 
     window.array_images_selected;
     
-    var _clicked = false;
-
-
-    loadData();
-
+    var _clicked = false;   
+    
     window.mainActiveTable = 0;
     window.mainTotalMain = 0;
     window.mainSteps = 0;
     window.mainPartial = 0;
+
+    var queryEdits;
+
+    if (_role.short != "admin") {
+      $('#add-category-button').hide();
+    }
+
+    loadData();
 
     window.openAddDetailModal = (id, data) => {
       updateThis = id;
@@ -49,18 +53,20 @@
           $('#main-table tbody').html('');   
           loadData();
         })
-    }
+    }    
 
     function loadData() {
       const mostrar = parseInt($('#mostrar-select').val());
-      db.collection('contents').onSnapshot(snapshot => {
+      queryEdits = db.collection('contents').where('short', 'in', _role.editor);
+
+      queryEdits.onSnapshot(snapshot => {
           window.mainTotalMain = snapshot.size;
           window.mainSteps = Math.round(window.mainTotalMain/mostrar) - 1;
           $('.count-visible-main').text(mostrar);
           $('.count-total-main').text(window.mainTotalMain);    
       });  
       
-      var first = db.collection("contents").limit(mostrar);
+      var first = queryEdits.limit(mostrar);
 
       first.get().then(function (documentSnapshots) {         
           var count = 0;
@@ -83,7 +89,7 @@
           return false;
       }   
       $('#main-table tbody').html('');   
-      var next = db.collection("contents")
+      var next = queryEdits//db.collection("contents")
           .startAfter(lastVisible)
           .limit(3);
       next.get().then(function (documentSnapshots) {           
@@ -116,7 +122,7 @@
     });
     
     $("#mostrar-select").on("change", (e) => {
-      const initial = db.collection("contents").limit(parseInt(e.target.value));
+      const initial = queryEdits.limit(parseInt(e.target.value)); //db.collection("contents").limit(parseInt(e.target.value));
       window.mainActiveTable = 0;
       $('#main-table tbody').html('');
       initial.get().then(function (documentSnapshots) {
@@ -134,11 +140,12 @@
       var previous;
       const mostrar = parseInt($('#mostrar-select').val());
       if (window.mainActiveTable == 0) {
-        previous = db.collection("contents").limit(mostrar);
+        previous = queryEdits.limit(mostrar); //db.collection("contents").limit(mostrar);
         $('#js-next-main').closest('.page-item').addClass('enabled');
       } else  {
-        var previous = db.collection("contents")          
+        var previous = //db.collection("contents")          
           //.orderBy(firebase.firestore.FieldPath.documentId(), "desc")
+          queryEdits
           .startAt(firstVisible)
           .limit(mostrar);
       }     

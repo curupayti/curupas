@@ -195,9 +195,11 @@
                             var count = Object.keys(json).length;
                             var a = 0;    
                             
-                            _role.desc = json.role;     
-                            if(json.homesRef) {
-                                const data = await json.homesRef.get();
+                            _role.desc = json.role; 
+                            _role.short = json.short; 
+                            
+                            if(json.homeRef) {
+                                const data = await json.homeRef.get();
                                 _role.homepageData = data.data();
                             }
                             
@@ -220,14 +222,23 @@
                                     let isArray = Array.isArray(json[id]);
 
                                     if (isArray) {                                           
-                                  
-                                        var arrayNav = json[id];                                            
 
-                                        for (var i=0; i<arrayNav.length; i++) {
+                                        if (id == "Editor") {
 
-                                            let key = arrayNav[i];
+                                            var arrayEditor = json[id];                             
 
-                                            _dropDownMenuObj[key] = id;
+                                            _role.editor = arrayEditor;
+
+                                        } else {
+                                      
+                                            var arrayNav = json[id];                                
+
+                                            for (var i=0; i<arrayNav.length; i++) {
+
+                                                let key = arrayNav[i];
+
+                                                _dropDownMenuObj[key] = id;
+                                            }
                                         }  
                                     }
                                 }                                  
