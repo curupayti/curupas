@@ -149,13 +149,17 @@ $(document).ready(function () {
                         "Content-Type": "application/json"
                     },
                     "data": JSON.stringify({
-                        "collection":"media"                
+                        "collection":"streaming"                
                     }),
             };        
                      
-            $.ajax(settings).done(function (response) {                            
+            $.ajax(settings).done(function (response) {   
 
-                $('#videos-renderer').jsonViewer(response.media, {collapsed:true});                
+                let control = response.streaming.control;
+
+                let media = control.subCollection["streaming/control/media"];                         
+
+                $('#videos-renderer').jsonViewer(media, {collapsed:true});                
             }); 
 
         }
@@ -192,13 +196,17 @@ $(document).ready(function () {
                         "Content-Type": "application/json"
                     },
                     "data": JSON.stringify({
-                        "collection":"videos"                
+                        "collection":"streaming"                
                     }),
             };        
                      
             $.ajax(settings).done(function (response) {                            
 
-                $('#converted-videos-renderer').jsonViewer(response.videos, {collapsed:true});  
+                let control = response.streaming.control;
+
+                let videos = control.subCollection["streaming/control/videos"];
+
+                $('#converted-videos-renderer').jsonViewer(videos, {collapsed:true});  
                 
             }); 
 
