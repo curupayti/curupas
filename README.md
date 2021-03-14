@@ -172,10 +172,33 @@ node import.js emulate contents.json
 
 TODO: Fix formats
 
+Streaming
+---------
+
+On Firestore class /streaming/control the following boolean fields trigger actions:
+
+1. **fetch_code_trigger**
+
+Fetches the authorization code defined into Credentials [OAuth 2.0 Client IDs](https://console.cloud.google.com/apis/credentials?project=curupas-app) into [YouTube Data API Quickstart](https://console.cloud.google.com/apis/credentials/oauthclient/813267916846-d2sjp7brbcsphks3r8idas1qjgj47a9j.apps.googleusercontent.com?project=curupas-app). The value of the webhook on the server is https://app.curupas.com.ar/oauth2callback so when fetch_code_trigger is activated an authorization url is created. 
+
+Once created open the url and authorize the app. 
+
+2. **fetch_token_trigger**
+
+Fetches tokens and stored them into the database. With them you will be able to consult the API to get the channels and videos, next. 
+
+3. **get_playlists**
+
+Gets the playlist channel and videos and stores them into Firestore /streaming/control/media, however in raw mode. After the videos are stored a final **convert_playlists** is automatically triggered and the videos stored into medio without format are reformatted into /streaming/control/videos that are finally consummed from the app. 
+
+4. **refresh_access_tokens**
+
+Refresh access token without authorizing the application. This will allow to consult the API every day. 
+
 Troubleshooting
 ---------------
 
-## firestore: Port 8080 is not open on localhost
+**firestore: Port 8080 is not open on localhost**
 
 
 ```sh
