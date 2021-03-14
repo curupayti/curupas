@@ -370,7 +370,7 @@
 
               }).then(async (playlist_results) => {
 
-                  console.log("playlist_results::::  " + JSON.stringify(playlist_results));
+                  //console.log("playlist_results::::  " + JSON.stringify(playlist_results));
 
                   for (var i=0; i<playlists.length; i++) {
 
@@ -458,13 +458,17 @@
 
                         });
 
+                        return {};  
+
                     //end videos     
                     }).catch((error) => {
                       console.log('Error saving videos:', error);
                       return error;
                     });
                   // end for
-                  }                    
+                  }    
+
+                  return {};                
 
               }).then(async (promise_videos_results) => {
 
@@ -563,7 +567,7 @@
       oauth2Client.credentials.refresh_token = refreshToken;
 
       oauth2Client.refreshAccessToken( async (error, tokens) => {
-        
+
         var _time =  new Date();
 
         console.log("::: Refresh ::: refresh_access_tokens");

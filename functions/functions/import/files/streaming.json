@@ -1,1 +1,1 @@
-{"streaming":{"control":{"fetch_code_trigger":false,"fetch_token_trigger":false,"get_playlists":false,"refresh_access_tokens":false,"convert_playlists":false,"last_update":"","subCollection":{}}}}
+{"streaming":{"control":{"refresh_access_tokens":false,"fetch_code_trigger":false,"fetch_token_trigger":false,"get_playlists":false,"last_update":{"_seconds":1615313422,"_nanoseconds":392000000},"convert_playlists":false,"subCollection":{}}}}
