@@ -28,22 +28,15 @@ import 'business/cache.dart';
 import 'models/HTMLS.dart';
 import 'models/group_media.dart';
 import 'models/museum.dart';
-import 'models/notification.dart';
-import 'models/streammer.dart';
+import 'models/streaming.dart';
 
 //Events
 EventBus eventBus = EventBus();
-
-//APP CONTENT FOR Data
-//List<Streaming> streammer = new List<Streaming>();
-Streammer streammer = new Streammer();
 
 //HTML CONTENT
 //Youtube
 String key = "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg";
 String channelId = "UCeLNPJoPAio9rT2GAdXDVmw";
-
-List<NotificationCloud> notifications = new List<NotificationCloud>();
 
 //bool streamingReachable = false;
 FilePickerGlobal filePickerGlobal;
@@ -58,7 +51,9 @@ String signin_error_title = "Error de autentificación";
 
 bool home_data_loaded = false;
 bool calendar_data_loaded = false;
+bool streaming_data_loaded = false;
 bool group_data_loaded = false;
+bool profile_data_loaded = false;
 
 Future<CurupaUser> getUserData(String userId) async {
   CurupaUser _user = new CurupaUser();
@@ -283,6 +278,10 @@ Future<bool> sendUserSMSVerification(
   }
 }
 
+//UPDATES
+
+void getUpdatesSnapshots() {}
+
 //MAIN
 
 void getDrawers() async {
@@ -389,41 +388,55 @@ Future<QuerySnapshot> getCalendarEvents(DateTime dateTime, String name) {
 
 //GROUP
 
-void getGroupVideoMedia() {
-  String groupId = Cache.appData.group.documentID;
-  Auth.getGroupVideoMediaByType(groupId)
-      .then((List<GroupMedia> listGroupMedia) {
+void getGroupVideoMedia() async {
+  if (Cache.appData.group.medias == null) {
+    String groupId = Cache.appData.group.documentID;
+    List<GroupMedia> listGroupMedia =
+        await Auth.getGroupVideoMediaByType(groupId);
     Cache.appData.group.medias = listGroupMedia;
-    eventBus.fire("group-media");
-  });
+  }
+  eventBus.fire("group-media");
 }
 
 void getAnecdotes() async {
-  HTMLS _anecdote = await Auth.getHtmlContentByTypeAndGroup(
-      "anecdote", Cache.appData.group.yearRef);
-  Cache.appData.anecdoteContent = _anecdote;
-  Cache.appData.anecdoteContent.contents.sort((a, b) {
-    return a.last_update.compareTo(b.last_update);
-  });
+  if (Cache.appData.anecdoteContent == null) {
+    HTMLS _anecdoteContent = await Auth.getHtmlContentByType("anecdote");
+    Cache.appData.anecdoteContent = _anecdoteContent;
+    Cache.appData.anecdoteContent.contents.sort((a, b) {
+      return a.last_update.compareTo(b.last_update);
+    });
+  }
   eventBus.fire("group-anecdotes");
 }
 
-void getNotifications() async {
-  Auth.getNotifications().then((data) {
-    notifications = data;
-    notifications.sort((a, b) {
+void getGiras() async {
+  if (Cache.appData.girasContent == null) {
+    HTMLS _girasContent = await Auth.getHtmlContentByType("giras");
+    Cache.appData.girasContent = _girasContent;
+    Cache.appData.girasContent.contents.sort((a, b) {
       return a.last_update.compareTo(b.last_update);
     });
-    eventBus.fire("profile-notifications");
-  });
+  }
+  eventBus.fire("group-giras");
+}
+
+void getNotifications() async {
+  if (Cache.appData.notifications == null) {
+    Auth.getNotifications().then((data) {
+      Cache.appData.notifications = data;
+      Cache.appData.notifications.sort((a, b) {
+        return a.last_update.compareTo(b.last_update);
+      });
+    });
+  }
+  eventBus.fire("profile-notifications");
 }
 
 //MEDIA
-void getMedia() {
-  Auth.getStreaming().then((_streamings) {
-    streammer.serStreamings(_streamings);
-    eventBus.fire("home-streamings");
-  });
+void getStreaming() async {
+  List<Streaming> _streamings = await Auth.getStreaming();
+  Cache.appData.streammer.serStreamings(_streamings);
+  eventBus.fire("home-streamings");
 }
 
 Future<File> writeYoutubeLog(int counter, String content) async {

@@ -8,6 +8,7 @@ import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/HTML.dart';
 import 'package:curupas/models/add_media.dart';
 import 'package:curupas/ui/widgets/anectodes.dart';
+import 'package:curupas/ui/widgets/giras/giras_widget.dart';
 import 'package:curupas/ui/widgets/staggered.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -53,13 +54,12 @@ class _GroupPageState extends State<GroupPage> {
     super.initState();
 
     if (_globals.group_data_loaded == false) {
-      _globals.getGroupVideoMedia();
-      _globals.getAnecdotes();
+      loadGroupData();
       _globals.eventBus.on().listen((event) {
         String _event = event.toString();
         if (_event.contains("group")) {
           _counting = _counting + 1;
-          if (_counting == 6) {
+          if (_counting == 3) {
             _counting = 0;
             if (mounted) {
               loaded();
@@ -81,6 +81,15 @@ class _GroupPageState extends State<GroupPage> {
         _loading = false;
       });
     }
+  }
+
+  void loadGroupData() async {
+    setState(() {
+      _loading = true;
+    });
+    _globals.getGroupVideoMedia();
+    _globals.getAnecdotes();
+    _globals.getGiras();
   }
 
   void loaded() {
@@ -266,6 +275,8 @@ class GroupBackground extends StatelessWidget {
                 child: Column(
                   children: <Widget>[
                     UpperSection(loading),
+                    //AnecdoteSection(loading),
+                    //GirasSection(loading),
                     _buildContent(context, loading),
                   ],
                 ),
@@ -275,32 +286,6 @@ class GroupBackground extends StatelessWidget {
         ],
       ),
       //floatingActionButton: buildSpeedDial(),
-    );
-  }
-}
-
-Widget _buildContent(BuildContext context, bool loading) {
-  if (loading) {
-    return SpinKitFadingCircle(
-      itemBuilder: (BuildContext context, int index) {
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: index.isEven ? Colors.red : Colors.green,
-          ),
-        );
-      },
-    );
-  } else {
-    double height = MediaQuery.of(context).size.height;
-    double _height = height - 150;
-
-    return Expanded(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[MuseumSection(loading), StaggeredWidget(_height)],
-        ),
-      ),
     );
   }
 }
@@ -324,13 +309,39 @@ class UpperSection extends StatelessWidget {
   }
 }
 
-// double height = MediaQuery.of(context).size.height;
-//      double gridHeight = height - 200;
+Widget _buildContent(BuildContext context, bool loading) {
+  if (loading) {
+    return SpinKitFadingCircle(
+      itemBuilder: (BuildContext context, int index) {
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: index.isEven ? Colors.red : Colors.green,
+          ),
+        );
+      },
+    );
+  } else {
+    double height = MediaQuery.of(context).size.height;
+    double _height = height - 150;
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            GirasSection(loading),
+            AnecdoteSection(loading),
+            StaggeredWidget(_height)
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-class MuseumSection extends StatelessWidget {
+class AnecdoteSection extends StatelessWidget {
   final bool loading;
 
-  MuseumSection(this.loading);
+  AnecdoteSection(this.loading);
 
   @override
   Widget build(BuildContext context) {
@@ -350,84 +361,25 @@ class MuseumSection extends StatelessWidget {
   }
 }
 
-/*class StaggeredSection
-        extends StatelessWidget {
+class GirasSection extends StatelessWidget {
+  final bool loading;
 
-      //final _GroupPageState parent;
-      //bool verticalGallery = false;
+  GirasSection(this.loading);
 
-      //StaggeredSection({Key key, @required this.parent}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    List<HTML> giras = Cache.appData.girasContent.contents;
 
-      @override
-      Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
 
-        double height = MediaQuery.of(context).size.height;
-        double gridHeight = height - 200;
+    Size _size = new Size(width, 150);
 
-        return Column(
-          children: <Widget>[
-            SizedBox(
-              height: gridHeight,
-              child: StaggeredGridView.countBuilder(
-                padding:
-                const EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0, bottom: 8.0),
-                crossAxisCount: 4,
-                itemCount: _globals.group.medias.length,
-                itemBuilder: (context, j) {
-                  bool isVideo = false;
-                  String imgPath = _globals.group.medias[j].thumbnailUrl;
-                  String title = _globals.group.medias[j].title;
-                  String description = _globals.group.medias[j].description;
-                  if (_globals.group.medias[j].type == 1) {
-                    isVideo = true;
-                  }
-                  return new Card(
-                    child: new Column(
-                      children: <Widget>[
-                        new Center(
-                          child:
-                          Stack(
-                              children: <Widget>[
-                                new Image.network(imgPath),
-                                Visibility(
-                                  visible: isVideo,
-                                  child: IconButton(
-                                    icon: Icon(
-                                      Icons.play_circle_outline,
-                                      size: 60.0,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                          ),
-                        ),
-                        new Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: new Column(
-                            children: <Widget>[
-                              new Text(
-                                title,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              new Text(
-                                description,
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  );
-                },
-                staggeredTileBuilder: (j) =>
-                new StaggeredTile.fit(2),
-                mainAxisSpacing: 10.0,
-                crossAxisSpacing: 10.0,
-              ),
-            ),
-          ],
-        );
-      }
-    }*/
+    return Padding(
+      padding: const EdgeInsets.only(top: 5.0, left: 10.0, right: 10.0),
+      child: SizedBox.fromSize(
+        size: _size,
+        child: new GirasWidget(giras: giras),
+      ),
+    );
+  }
+}

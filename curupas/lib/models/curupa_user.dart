@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:location/location.dart';
-import 'package:curupas/business/auth.dart';
 import 'package:curupas/models/group.dart';
+import 'package:location/location.dart';
 
 class CurupaUser {
   final String userID;
@@ -19,7 +18,7 @@ class CurupaUser {
   final DocumentReference roleRef;
   Group group;
   final String nonSpName;
-  final bool accepted;
+  final bool authorized;
   final int smsCode;
   final int smsId;
   final bool smsChecked;
@@ -39,7 +38,7 @@ class CurupaUser {
       this.yearRef,
       this.group,
       this.nonSpName,
-      this.accepted,
+      this.authorized,
       this.roleRef,
       this.smsCode,
       this.smsId,
@@ -66,7 +65,7 @@ class CurupaUser {
       'location': geo,
       'year': year,
       'nonSpName': nonSpName,
-      'accepted': accepted,
+      'authorized': authorized,
       'roleRef': roleRef,
       'smsCode': smsCode,
       'smsId': smsId,
@@ -104,7 +103,7 @@ class CurupaUser {
       yearRef: yearReference,
       group: doc['group'],
       nonSpName: doc['nonSpName'],
-      accepted: doc['accepted'],
+      authorized: doc['authorized'],
       roleRef: doc['roleRef'],
       smsChecked: doc['smsChecked'],
       token: doc['token'],

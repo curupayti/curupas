@@ -393,7 +393,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
             setState(() {
               _loadingInProgress = true;
             });
-            _groups = new List();
+            _groups = [];
             getGroupsList().then((val) {
               _newGroup.clear();
               _groupMenuItems = val;
@@ -430,7 +430,8 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
 
     Map<String, dynamic> data = <String, dynamic>{
       'year': _currentGroup.year,
-      'yearRef': yearRef
+      'yearRef': yearRef,
+      'stage': 0
     };
 
     Auth.updateUser(userId, data).then((user) async {

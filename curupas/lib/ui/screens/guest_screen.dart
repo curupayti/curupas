@@ -250,7 +250,7 @@ class _GuestScreenState extends State<GuestScreen> {
           phone: phone,
           roleRef: roleRef,
           smsCode: code,
-          accepted: true,
+          authorized: true,
           locationData: _locationData);
 
       var message = _globals.getCodeMessgae(code);

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/HTML.dart';
 import 'package:curupas/models/HTMLS.dart';
@@ -195,6 +194,26 @@ class Auth {
     return await _globals.getUserData(userId);
   }
 
+  //TODO listen update and load accordingly
+  static updateListener(String documentId) {
+    CollectionReference reference =
+        FirebaseFirestore.instance.collection("updates");
+    reference.snapshots().listen((querySnapshot) {
+      querySnapshot.docChanges.forEach((change) {
+        switch (change.newIndex.toString()) {
+          case "calendar":
+            break;
+          case "group":
+            break;
+          case "home":
+            break;
+          case "profile":
+            break;
+        }
+      });
+    });
+  }
+
   static void updateUserSmsChecked(String userID, bool checked) async {
     await FirebaseFirestore.instance
         .doc("users/${userID}")
@@ -348,17 +367,13 @@ class Auth {
   static Future<HTMLS> getHtmlContentByTypeAndGroup(
       String type, DocumentReference group_red) async {
     HTMLS _htmlContent = HTMLS();
-    await FirebaseFirestore.instance
-        .doc("contents/${type}")
-        .get()
-        .then((document) async {
-      if (document.exists) {
-        await getContenHtmlsBygroup(document, group_red)
-            .then((listContentHtml) {
-          _htmlContent = HTMLS.fromDocument(document, listContentHtml);
-        });
-      }
-    });
+    DocumentSnapshot document =
+        await Cache.getCacheDocument("contents/${type}");
+    //await FirebaseFirestore.instance.doc("contents/${type}").get();
+    if (document.exists) {
+      List<HTML> _content = await getContenHtmlsBygroup(document, group_red);
+      _htmlContent = HTMLS.fromDocument(document, _content);
+    }
     return _htmlContent;
   }
 
@@ -576,190 +591,86 @@ class Auth {
 
   static Future<List<Streaming>> getStreaming() async {
     List<Streaming> streaminlistg = [];
-    List<DocumentSnapshot> templist;
+    try {
+      if (Cache.appData.streammer.streamings.length == 0) {
+        List<DocumentSnapshot> templist;
+        CollectionReference collectionRef = FirebaseFirestore.instance
+            .collection('streaming')
+            .doc("control")
+            .collection('videos');
+        QuerySnapshot collectionSnapshot =
+            await Cache.getCacheCollection(collectionRef);
+        templist = collectionSnapshot.docs;
+        var docsLength = templist.length;
+        var count = 0;
+        List<String> imageList = [];
+        templist.map((DocumentSnapshot docSnapshot) async {
+          Map<String, dynamic> doc =
+              new Map<String, dynamic>.from(docSnapshot.data());
+          var id = doc["uid"];
+          //var channelId = doc["channelId"];
+          List<StreamingVideo> streamingvideos =
+              await getStreamingVideosById(id);
+          StreamingThumbnail pthumbnail = new StreamingThumbnail();
+          pthumbnail.url = doc['thumbnail'];
+          Streaming streaming = new Streaming(
+            id: doc['id'],
+            title: doc['title'],
+            channelId: doc['channelId'],
+            playListId: doc['playListId'],
+            description: doc['description'],
+            videos: streamingvideos,
+            thumbnail: pthumbnail,
+          );
+          streaminlistg.add(streaming);
+          print("count: ${count} docsLength: ${docsLength}");
+          if (count == (docsLength - 1)) {
+            return streaminlistg;
+          }
+          count++;
+        }).toList();
+      } else {
+        streaminlistg = Cache.appData.streammer.streamings;
+      }
+    } on Exception catch (_) {
+      print("Error: " + _.toString());
+    }
+  }
+
+  static Future<List<StreamingVideo>> getStreamingVideosById(String id) async {
+    List<StreamingVideo> streamingvideos = [];
     CollectionReference collectionRef = FirebaseFirestore.instance
         .collection('streaming')
         .doc("control")
-        .collection('videos');
-    QuerySnapshot collectionSnapshot =
+        .collection('videos')
+        .doc(id)
+        .collection("videos");
+    QuerySnapshot subCollectionSnapshot =
         await Cache.getCacheCollection(collectionRef);
-    templist = collectionSnapshot.docs;
-    var i = templist.length;
-    try {
-      List<String> imageList = [];
-      templist.map((DocumentSnapshot docSnapshot) {
-        Map<String, dynamic> doc =
-            new Map<String, dynamic>.from(docSnapshot.data());
-        var id = doc["channelId"];
-        var videos = doc["videos"];
-        List<StreamingVideo> streamingvideos = [];
-
-        for (var video in videos) {
-          StreamingVideo streamingvideo = new StreamingVideo();
-          streamingvideo.id = video["id"];
-          streamingvideo.title = video["title"];
-          streamingvideo.description = video["description"];
-          streamingvideo.channelId = video["channelId"];
-          streamingvideo.position = video["position"];
-          streamingvideo.videoId = video["videoId"];
-          streamingvideo.publishedAt = video["publishedAt"];
-          streamingvideo.playlistId = video["playlistId"];
-          var thumbnail = video["thumbnail"];
-          if (thumbnail != "") {
-            StreamingThumbnail st = new StreamingThumbnail();
-            st.url = video["thumbnail"];
-            streamingvideo.thumbnail = st;
-          }
-          streamingvideos.add(streamingvideo);
-        }
-
-        StreamingThumbnail pthumbnail = new StreamingThumbnail();
-        pthumbnail.url = doc['thumbnail'];
-
-        Streaming streaming = new Streaming(
-          id: doc['id'],
-          title: doc['title'],
-          channelId: doc['channelId'],
-          playListId: doc['playListId'],
-          description: doc['description'],
-          videos: streamingvideos,
-          thumbnail: pthumbnail,
-        );
-
-        streaminlistg.add(streaming);
-      }).toList();
-    } on Exception catch (_) {
-      print("Error: " + _.toString());
-    }
-
-    return streaminlistg;
-  }
-
-  static Future<List<Streaming>> getStreamingCallable() async {
-    List<Streaming> streaminlistg = new List<Streaming>();
-
-    try {
-      final HttpsCallable callable =
-          FirebaseFunctions.instance.httpsCallable('streaming-media');
-
-      final results = await callable();
-      Map<dynamic, dynamic> channels = results.data;
-
-      List<StreamingVideo> streamingvideos = new List<StreamingVideo>();
-
-      for (var channel in channels.values) {
-        var id = channel["channelId"];
-        var videos = channel["videos"];
-
-        for (var video in videos) {
-          StreamingVideo streamingvideo = new StreamingVideo();
-          streamingvideo.id = video["id"];
-          streamingvideo.title = video["title"];
-          streamingvideo.description = video["description"];
-          streamingvideo.channelId = video["channelId"];
-          streamingvideo.position = video["position"];
-          streamingvideo.videoId = video["videoId"];
-          streamingvideo.publishedAt = video["publishedAt"];
-          streamingvideo.playlistId = video["playlistId"];
-          var thumbnail = video["thumbnail"];
-          if (thumbnail != "") {
-            StreamingThumbnail st = new StreamingThumbnail();
-            st.url = video["thumbnail"];
-            streamingvideo.thumbnail = st;
-          }
-          streamingvideos.add(streamingvideo);
-        }
-
-        StreamingThumbnail pthumbnail = new StreamingThumbnail();
-        pthumbnail.url = channel['thumbnail'];
-
-        Streaming streaming = new Streaming(
-          id: channel['id'],
-          title: channel['title'],
-          channelId: channel['channelId'],
-          playListId: channel['playListId'],
-          description: channel['description'],
-          videos: streamingvideos,
-          thumbnail: pthumbnail,
-        );
-
-        streaminlistg.add(streaming);
+    List<DocumentSnapshot> subTemplist = subCollectionSnapshot.docs;
+    //var docsSubLength = subTemplist.length;
+    //var countSub = 0;
+    await subTemplist.map((DocumentSnapshot subDocSnapshot) async {
+      Map<String, dynamic> subDoc =
+          new Map<String, dynamic>.from(subDocSnapshot.data());
+      var subId = subDoc["id"];
+      StreamingVideo streamingvideo = new StreamingVideo();
+      streamingvideo.id = subDoc["id"];
+      streamingvideo.title = subDoc["title"];
+      streamingvideo.description = subDoc["description"];
+      streamingvideo.channelId = subDoc["channelId"];
+      streamingvideo.position = subDoc["position"];
+      streamingvideo.videoId = subDoc["videoId"];
+      streamingvideo.publishedAt = subDoc["publishedAt"];
+      streamingvideo.playlistId = subDoc["playlistId"];
+      var thumbnail = subDoc["thumbnail"];
+      if (thumbnail != "") {
+        StreamingThumbnail st = new StreamingThumbnail();
+        st.url = subDoc["thumbnail"];
+        streamingvideo.thumbnail = st;
       }
-
-      return streaminlistg;
-    } catch (e) {
-      print('caught generic exception');
-      print(e);
-    }
-  }
-
-  static Future<List<Streaming>> getVideos(
-      List<DocumentSnapshot> snapshots) async {
-    var length = snapshots.length;
-
-    List<Streaming> streamings = new List();
-
-    try {
-      for (var snapshot in snapshots) {
-        Streaming streaming = new Streaming();
-
-        StreamingThumbnail streamingThumbnails = new StreamingThumbnail();
-
-        int thumbnail_height = snapshot['thumbnail_height'];
-        int thumbnail_width = snapshot['thumbnail_width'];
-        String thumbnail_url = snapshot['thumbnail_url'];
-
-        streamingThumbnails.height = thumbnail_height;
-        streamingThumbnails.width = thumbnail_width;
-        streamingThumbnails.url = thumbnail_url;
-
-        streaming.thumbnail = streamingThumbnails;
-
-        String id = snapshot.id;
-
-        List<DocumentSnapshot> templistVideos;
-        CollectionReference collectionRefVideos = FirebaseFirestore.instance
-            .collection('media')
-            .doc(id)
-            .collection('videos');
-
-        QuerySnapshot collectionSnapshotVideos =
-            await collectionRefVideos.get();
-        List<StreamingVideo> videosList = new List();
-
-        for (var doc in collectionSnapshotVideos.docs) {
-          StreamingVideo streamingVideo = new StreamingVideo();
-          streamingVideo.id = doc["id"];
-          streamingVideo.title = doc["title"];
-          streamingVideo.channelId = doc["channelId"];
-          streamingVideo.channelTitle = doc["channelTitle"];
-          streamingVideo.playlistId = doc["playlistId"];
-          streamingVideo.position = doc["position"];
-          streamingVideo.isLive = doc["isLive"];
-
-          StreamingThumbnail streamingThumbnailsVideo =
-              new StreamingThumbnail();
-
-          int video_thumbnail_height = snapshot['thumbnail_height'];
-          int video_thumbnail_width = snapshot['thumbnail_width'];
-          String video_thumbnail_url = snapshot['thumbnail_url'];
-
-          streamingThumbnailsVideo.width = video_thumbnail_height;
-          streamingThumbnailsVideo.height = video_thumbnail_width;
-          streamingThumbnailsVideo.url = video_thumbnail_url;
-
-          streamingVideo.thumbnail = streamingThumbnailsVideo;
-          videosList.add(streamingVideo);
-        }
-
-        Streaming _streaming =
-            Streaming.fromDocument(snapshot, streamingThumbnails, videosList);
-        streamings.add(_streaming);
-      }
-    } on Exception catch (_) {
-      print("Error: " + _.toString());
-    }
-
-    return streamings;
+      streamingvideos.add(streamingvideo);
+    }).toList();
+    return streamingvideos;
   }
 }

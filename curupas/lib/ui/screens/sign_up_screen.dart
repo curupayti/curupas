@@ -665,7 +665,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   nonSpName: toNonSpecial,
                   roleRef: roleRef,
                   smsCode: code,
-                  accepted: false,
+                  authorized: false,
                   locationData: _locationData);
 
               var message = _globals.getCodeMessgae(code);

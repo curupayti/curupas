@@ -1,11 +1,14 @@
+import 'dart:core';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:curupas/models/HTML.dart';
 import 'package:curupas/models/HTMLS.dart';
 import 'package:curupas/models/curupa_user.dart';
 import 'package:curupas/models/description.dart';
 import 'package:curupas/models/group.dart';
 import 'package:curupas/models/museum.dart';
+import 'package:curupas/models/notification.dart';
 import 'package:curupas/models/post.dart';
+import 'package:curupas/models/streammer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,21 +25,20 @@ class AppData {
       this.location,
       this.biography,
       this.posts,
-      this.museums,
-      this.pumas,
-      this.drawers,
-      this.newsletters,
-      this.anecdotes,
-      this.valores,
       this.description,
       this.drawerContent,
       this.newsletterContent,
       this.anecdoteContent,
+      this.girasContent,
       this.pumasContent,
       this.valoresContent,
       this.user,
       this.curupaGuest,
-      this.group}) {
+      this.group,
+      this.streammer,
+      this.futureCalendarSnapshot,
+      this.notifications,
+      this.calendarSnapshot}) {
     this.name = 'Curupa';
     this.avatar = 'assets/images/escudo.png';
     this.home_background = 'assets/images/cancha.png';
@@ -45,8 +47,8 @@ class AppData {
     this.user = new CurupaUser();
     this.curupaGuest = new CurupaGuest();
     this.group = new Group();
+    this.streammer = new Streammer();
   }
-
   String name;
   String avatar;
   String home_background;
@@ -55,20 +57,21 @@ class AppData {
   String biography;
   List<Post> posts;
   List<Museum> museums;
-  List<HTML> pumas;
-  List<HTML> valores;
-  final List<HTML> drawers;
-  List<HTML> newsletters;
-  List<HTML> anecdotes;
   Description description;
   HTMLS drawerContent;
   HTMLS newsletterContent;
   HTMLS anecdoteContent;
+  HTMLS girasContent;
   HTMLS pumasContent;
   HTMLS valoresContent;
+  HTMLS museumContent;
   CurupaUser user;
   CurupaGuest curupaGuest;
   Group group;
+  Streammer streammer;
+  Future<QuerySnapshot> futureCalendarSnapshot;
+  List<NotificationCloud> notifications;
+  QuerySnapshot calendarSnapshot;
 }
 
 class Video {

@@ -272,7 +272,7 @@ class _MainScreenState extends State<MainScreen> {
                 builder: (BuildContext context) => new SMSDialog(
                     userId: user.userID, phone: Cache.appData.curupaGuest.phone),
               );
-            } else if (!user.accepted) {
+            } else if (!user.authorized) {
               showDialog(
                 context: context,
                 builder: (BuildContext context) =>

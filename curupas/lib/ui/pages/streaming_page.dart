@@ -1,3 +1,4 @@
+import 'package:curupas/business/cache.dart';
 import 'package:curupas/globals.dart' as _globals;
 import "package:flutter/material.dart";
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -22,21 +23,32 @@ class _StreamingPageState extends State<StreamingPage> {
   @override
   void initState() {
     super.initState();
-
-    _globals.getMedia();
-
-    _globals.eventBus.on().listen((event) {
-      String _event = event.toString();
-      if (_event.contains("streaming")) {
-        _counting = _counting + 1;
-        if (_counting == 1) {
-          _counting = 0;
-          setState(() {
-            _loading = false;
-          });
+    if (_globals.streaming_data_loaded == false) {
+      _globals.getStreaming();
+      _globals.eventBus.on().listen((event) {
+        String _event = event.toString();
+        if (_event.contains("streaming")) {
+          _counting = _counting + 1;
+          if (_counting == 1) {
+            _counting = 0;
+            setState(() {
+              _loading = false;
+            });
+          }
         }
-      }
-      print("Counting : ${_counting}");
+        print("Counting : ${_counting}");
+      });
+    } else {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  void loaded() {
+    _globals.streaming_data_loaded = true;
+    setState(() {
+      _loading = false;
     });
   }
 }
@@ -101,7 +113,7 @@ class HomeScreeTopPart extends StatelessWidget {
                 child: Stack(
                   children: <Widget>[
                     Image.network(
-                        _globals.streammer.activeStreaming.thumbnail.url,
+                        Cache.appData.streammer.activeStreaming.thumbnail.url,
                         fit: BoxFit.cover,
                         width: double.infinity),
                     Container(
@@ -126,7 +138,7 @@ class HomeScreeTopPart extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              _globals.streammer.activeStreaming.title,
+                              Cache.appData.streammer.activeStreaming.title,
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 40.0,
@@ -153,7 +165,7 @@ class HomeScreeTopPart extends StatelessWidget {
                         Navigator.pushNamed(
                           context,
                           '/videoplayer',
-                          arguments: _globals.streammer.activeStreaming,
+                          arguments: Cache.appData.streammer.activeStreaming,
                         );
                       },
                       child: Icon(
@@ -176,14 +188,14 @@ class HomeScreeTopPart extends StatelessWidget {
                           children: <Widget>[
                             RotatedBox(
                               quarterTurns: 2,
-                              child: Icon(_globals.streammer.videoIcon,
+                              child: Icon(Cache.appData.streammer.videoIcon,
                                   size: 30.0, color: Color(0xFFe2d504)),
                             ),
                             SizedBox(
                               width: 20.0,
                             ),
                             Text(
-                              _globals.streammer
+                              Cache.appData.streammer
                                   .showLivestreamingMessage, //"Mirar Ahora",
                               style: TextStyle(
                                   color: Colors.white,
@@ -267,7 +279,7 @@ class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
                       topLeft: Radius.circular(20.0),
                       topRight: Radius.circular(20.0)),
                   child: Image.network(
-                    _globals.streammer.streamings[i].thumbnail.url,
+                    Cache.appData.streammer.streamings[i].thumbnail.url,
                     width: double.infinity,
                     height: 130.0,
                     fit: BoxFit.cover,
@@ -276,7 +288,7 @@ class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
                 Padding(
                   padding:
                       const EdgeInsets.only(top: 4.0, left: 8.0, right: 8.0),
-                  child: Text(_globals.streammer.streamings[i].title,
+                  child: Text(Cache.appData.streammer.streamings[i].title,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 16.0, fontFamily: "SF-Pro-Display-Bold")),

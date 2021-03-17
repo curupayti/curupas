@@ -54,36 +54,47 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _globals.getNotifications();
 
-    _fullnameController.text = Cache.appData.user.name;
-    _groupController.text = Cache.appData.group.year;
-    _emailController.text = Cache.appData.user.email;
-    _phoneController.text = Cache.appData.user.phone;
-    _birthdayController.text = Cache.appData.user.birthday;
-
-    _avatarImage = new DecorationImage(
-      image: new NetworkImage(Cache.appData.user.thumbnailPictureURL != null
-          ? Cache.appData.user.thumbnailPictureURL
-          : ""),
-      fit: BoxFit.cover,
-    );
-
-    _globals.eventBus.on().listen((event) {
-      String _event = event.toString();
-      if (_event.contains("profile")) {
-        _counting = _counting + 1;
-        if (_counting == 1) {
-          _counting = 0;
+    if (_globals.profile_data_loaded == false) {
+      loadProfileData();
+      _globals.eventBus.on().listen((event) {
+        String _event = event.toString();
+        if (_event.contains("profile")) {
+          _counting = _counting + 1;
+          if (_counting == 1) {
+            loaded();
+          }
         }
-      }
-      print("Counting : ${_counting}");
-    });
-
-    Timer(Duration(seconds: 5), () {
-      setState(() {
-        _loading = false;
+        print("Counting : ${_counting}");
       });
+    } else {
+      loaded();
+      _fullnameController.text = Cache.appData.user.name;
+      _groupController.text = Cache.appData.group.year;
+      _emailController.text = Cache.appData.user.email;
+      _phoneController.text = Cache.appData.user.phone;
+      _birthdayController.text = Cache.appData.user.birthday;
+
+      _avatarImage = new DecorationImage(
+        image: new NetworkImage(Cache.appData.user.thumbnailPictureURL != null
+            ? Cache.appData.user.thumbnailPictureURL
+            : ""),
+        fit: BoxFit.cover,
+      );
+    }
+  }
+
+  void loadProfileData() async {
+    setState(() {
+      _loading = true;
+    });
+    _globals.getNotifications();
+  }
+
+  void loaded() {
+    _globals.profile_data_loaded = true;
+    setState(() {
+      _loading = false;
     });
   }
 }
@@ -170,7 +181,7 @@ class ProfilePageScreen extends StatelessWidget {
 
   renderNotifications(BuildContext context) {
     return ListView.builder(
-      itemCount: _globals.notifications.length,
+      itemCount: Cache.appData.notifications.length,
       itemBuilder: _getItemUI,
       padding: EdgeInsets.all(0.0),
     );
@@ -183,11 +194,11 @@ class ProfilePageScreen extends StatelessWidget {
         child: Container(
           child: new ListTile(
             leading: CircleAvatar(
-              backgroundImage:
-                  NetworkImage(_globals.notifications[index].thumbnailImageURL),
+              backgroundImage: NetworkImage(
+                  Cache.appData.notifications[index].thumbnailImageURL),
             ),
             title: new Text(
-              _globals.notifications[index].title,
+              Cache.appData.notifications[index].title,
               style: new TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
             ),
             subtitle: new Column(
@@ -198,7 +209,7 @@ class ProfilePageScreen extends StatelessWidget {
                   height: 5,
                 ),
                 new Text(
-                  _globals.notifications[index].notification,
+                  Cache.appData.notifications[index].notification,
                   style: new TextStyle(
                     fontSize: 13.0,
                     fontWeight: FontWeight.normal,
@@ -224,7 +235,7 @@ class ProfilePageScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => NotificationDetails(
-                    notification: _globals.notifications[index],
+                    notification: Cache.appData.notifications[index],
                   ),
                 ),
               );

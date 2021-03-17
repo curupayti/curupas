@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curupas/business/cache.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/event_calendar.dart';
@@ -22,19 +21,11 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   bool _loading = true;
   int _counting = 0;
-
   DateTime dateTime;
-
   bool loading = true;
-
-  Future<QuerySnapshot> futureCalendarSnapshot;
-  QuerySnapshot calendarSnapshot;
-
   int _beginMonthPadding = 0;
   DateTime _dateTime;
-
   String _calendarSelect = "camada";
-
   SharedPreferences prefs;
 
   _CalendarPageState() {
@@ -57,7 +48,7 @@ class _CalendarPageState extends State<CalendarPage> {
     } else {
       type = "camada";
     }
-    if (_globals.home_data_loaded == false) {
+    if (_globals.calendar_data_loaded == false) {
       getCalendar(type);
     } else {
       setState(() {
@@ -67,13 +58,16 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void getCalendar(String _type) async {
-    futureCalendarSnapshot = await _globals.getCalendar(_type).then((snapshot) {
-      calendarSnapshot = snapshot;
-      _globals.home_data_loaded == true;
-      setState(() {
-        loading = false;
+    if (Cache.appData.futureCalendarSnapshot == null) {
+      Cache.appData.futureCalendarSnapshot =
+          await _globals.getCalendar(_type).then((snapshot) {
+        Cache.appData.calendarSnapshot = snapshot;
+        _globals.home_data_loaded == true;
+        setState(() {
+          loading = false;
+        });
       });
-    });
+    }
   }
 
   @override
@@ -111,7 +105,7 @@ class _CalendarPageState extends State<CalendarPage> {
         body: SingleChildScrollView(
           child: Container(
             child: new FutureBuilder(
-                future: futureCalendarSnapshot,
+                future: Cache.appData.futureCalendarSnapshot,
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   return Container(
                     child: new Column(
@@ -406,7 +400,7 @@ class _CalendarPageState extends State<CalendarPage> {
     int eventCount = 0;
     DateTime eventDate;
     String eventName;
-    calendarSnapshot.docs.forEach((doc) {
+    Cache.appData.calendarSnapshot.docs.forEach((doc) {
       eventDate = DateTime.fromMicrosecondsSinceEpoch(
           doc.data()['start'].microsecondsSinceEpoch);
       eventName = doc.data()['name'];

@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
                   loaded();
                   timer.cancel();
                 }
-                print("Home timer 5 seconds call mountedf");
+                print("Home timer 5 seconds call mounted");
               });
             }
           }
@@ -63,9 +63,7 @@ class _HomePageState extends State<HomePage> {
         }
       });
     } else {
-      setState(() {
-        _loading = false;
-      });
+      loaded();
     }
   }
 
@@ -82,10 +80,10 @@ class _HomePageState extends State<HomePage> {
     });
     _globals.getDescription();
     _globals.getPosts();
+    _globals.getNewsletters();
+    _globals.getValores();
     _globals.getMuseums();
     _globals.getPumas();
-    _globals.getValores();
-    _globals.getNewsletters();
   }
 }
 
@@ -370,14 +368,14 @@ class HomeBackground extends StatelessWidget {
   }
 
   Widget _buildNewsletterTimeline() {
-    return Cache.appData.newsletters != null &&
-            Cache.appData.newsletters.length > 0
+    return Cache.appData.newsletterContent.contents != null &&
+            Cache.appData.newsletterContent.contents.length > 0
         ? Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: SizedBox.fromSize(
               size: Size.fromHeight(200.0),
-              child:
-                  new NewsletterWidget(newsletters: Cache.appData.newsletters),
+              child: new NewsletterWidget(
+                  newsletters: Cache.appData.newsletterContent.contents),
             ),
           )
         : Container();
@@ -396,12 +394,14 @@ class HomeBackground extends StatelessWidget {
   }
 
   Widget _buildPumasTimeline() {
-    return Cache.appData.pumas != null && Cache.appData.pumas.length > 0
+    return Cache.appData.pumasContent.contents != null &&
+            Cache.appData.pumasContent.contents.length > 0
         ? Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: SizedBox.fromSize(
               size: Size.fromHeight(170.0),
-              child: new PumasWidget(pumas: Cache.appData.pumas),
+              child:
+                  new PumasWidget(pumas: Cache.appData.pumasContent.contents),
             ),
           )
         : new Container();
@@ -412,7 +412,7 @@ class HomeBackground extends StatelessWidget {
       padding: const EdgeInsets.only(top: 16.0),
       child: SizedBox.fromSize(
         size: Size.fromHeight(170.0),
-        child: new ValoresWidget(pumas: Cache.appData.valores),
+        child: new ValoresWidget(pumas: Cache.appData.valoresContent.contents),
       ),
     );
   }
