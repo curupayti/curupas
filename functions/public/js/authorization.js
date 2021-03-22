@@ -7,7 +7,7 @@
         let firstVisible;
 
         var contLoded = 0;
-        var size = 0;
+        var size = 0;        
 
         db.collection('years').doc(_user.yearReference.id).collection("user-auth")
         .onSnapshot(snapshot => {
@@ -49,10 +49,10 @@
     
 
         function renderUser(document) {  
-            _documents[document.id] = document;      
+            _documents[document.id] = document;  
 
+            var authId = document.id;
             let authorized = document.data().authorized;
-
             let userRef = document.data().userRef;
 
             userRef.get()
@@ -63,17 +63,18 @@
                 if (authorized) {
                     status = "Autorizado"
                 } else {
-                    status = "No autorizado"
+                    status = "Pendiente"
                 }
 
-
-                 let itemObj = {
+                let itemObj = {
                     avatar: docUser.data().thumbnailPictureURL,
                     id: docUser.id,
                     name: docUser.data().name,
                     year: docUser.data().year, 
                     status: status,
-                    accepted: docUser.data().accepted
+                    authorized: authorized,
+                    roleRefId: docUser.data().roleRef.id,
+                    authId: authId 
                 };
 
                 let item = `<tbody onclick="rowClick('` 
@@ -81,51 +82,24 @@
                     + itemObj.avatar + `','`               
                     + itemObj.name + `','` 
                     + itemObj.year + `','` 
-                    + itemObj.status + `','` 
-                    + itemObj.accepted + `');"><tr data-id="${itemObj.id}">
-                <td>
-                    <span class="custom-checkbox">
-                        <input type="checkbox" id="${itemObj.id}" name="options[]" value="${itemObj.id}">
-                        <label for="${itemObj.id}"></label>
-                    </span>
-                </td>
+                    + itemObj.authorized + `','`
+                    + itemObj.roleRefId + `','`                     
+                    + itemObj.authId + `');"><tr data-id="${itemObj.id}">`;               
+                item += `                
+                <td>Usuario</td>
                 <td>
                     <img id="image_${itemObj.id}" class="rounded-circle avatar-preview-list" width="40" height="40" src="${itemObj.avatar}" alt="your image" />            
                 </td>
-                <td>Usuario</td>
-                <td>${itemObj.name}</td>
-                <td>${itemObj.year}</td>       
+                <td>${itemObj.name}</td>                
+                <td>${itemObj.year}</td>                       
                 <td>${itemObj.status}</td>
-                </tr></tbody>`;        
+                </tr></tbody>`;
                 $('#user-table').append(item);                   
-                
-                var checkbox = $('table tbody input[type="checkbox"]');
-                $("#selectAll").click(function () {
-                    if (this.checked) {
-                        checkbox.each(function () {
-                            console.log(this.id);
-                            deleteIDs.push(this.id);
-                            this.checked = true;
-                        });
-                    } else {
-                        checkbox.each(function () {
-                            this.checked = false;
-                        });
-                    }
-                });
-                checkbox.click(function () {
-                    if (!this.checked) {
-                        $("#selectAll").prop("checked", false);
-                    }
-                });
-
                 if (contLoded==(size-1)) {
                     homeLoader.hide();
                 }
                 contLoded++;
-
-            });
-           
+            });           
         }               
 
         // VIEW IMAGES
@@ -133,20 +107,26 @@
             alert('clicked!');
         });               
 
-        $("#edit-user-form").submit(function (event) {
-            event.preventDefault();
-            
-            
-            /*let id = $(this).attr('edit-id');
-            db.collection('employees').doc(id).update({
-                name: $('#edit-user-form #employee-name').val(),
-                email: $('#edit-user-form #employee-email').val(),
-                address: $('#edit-user-form #employee-address').val(),
-                phone: $('#edit-user-form  #employee-phone').val()
-            });*/
+        $("#edit-user-form").submit(function (event) {            
+            event.preventDefault();                      
+            let userId = $(event.target).attr('edit-id');
+            let authId = $(event.target).attr('auth-id');
+            let checked = $('#enableUser').is(":checked");             
+            var groupText = $("#dropdown-button").find('.appended').text();
+            var groupId = $("#dropdown-button").find('.appended').attr("data-id");          
 
-            $(evt.target).is(':checked');
+            if (window.roleRefId != groupId) {
 
+            }
+
+            if (window.authorized != checked) {
+
+                if (checked) {
+
+                }
+            }
+
+            //db.collection('years').doc(_user.yearReference.id).collection("user-auth").doc();
 
             $('#editUserModal').modal('hide');
         });
@@ -207,15 +187,15 @@
             }, 3000);
         }
 
-        db.collection("roles").get().then(function(querySnapshotRole) {
-            querySnapshotRole.forEach(function(docRole) {                               
+        db.collection("roles").where(firebase.firestore.FieldPath.documentId(), "in", ['group','group-admin'])
+        .get().then(function(querySnapshotRole) {            
+            querySnapshotRole.forEach(function(docRole) {   
                 _roleAuthSnapshot.push({
                     id:docRole.id,
                     role: docRole.data().role
-                });
+                });                
             });
         });
-
 
         //# sourceURL=authorization.js
 
@@ -223,19 +203,20 @@
 
     let _roleAuthSnapshot = [];   
 
-    function rowClick(id, avatar, name, year, phone, accepted) {              
+    function rowClick(id, avatar, name, year, authorized, roleRefId, authId) {    
+        
+        window.roleRefId = roleRefId;     
+        window.authorized = authorized;
+
         $('#edit-user-form').attr('edit-id', id);
+        $('#edit-user-form').attr('auth-id', authId);
         $('#edit-user-form #avatar-preview').attr("src", avatar);        
         $('#edit-user-form #user-name').val(name);
         $('#edit-user-form #user-year').val(year);
-        $('#edit-user-form #user-phone').val(phone);
-
-        if (accepted) {
+        if (authorized) {
             $('#enableUser').attr('checked','checked');
-        }
-
-        let roleReference = _user.roleReference;
-        let activeRole = roleReference.id;
+        }        
+        let activeRole = roleRefId;
         let length = _roleAuthSnapshot.length;
         for (var i=0; i<length;i++){
             let _role = _roleAuthSnapshot[i];
@@ -244,7 +225,7 @@
             let _class = ' class="dropdown-item';
             if (id==activeRole) {
                 _class += ' active"';
-                $("#dropdown-button").append('<span class="appended">' + role + '</span>');
+                $("#dropdown-button").append('<span class="appended" data-id='+ activeRole +'>' + role + '</span>');
             } else {
                 _class += '"';
             }            
