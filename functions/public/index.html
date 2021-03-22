@@ -133,49 +133,37 @@
                 }
             }
         };       
-        //var role = getUrlParameter('role');
-
-        //if (role==undefined) {   
+        
 
         firebase.auth().onAuthStateChanged(function (user) {
 
-            if (user) {
-
-
-                /*firebase.auth().currentUser.getIdToken(rue).then(function(idToken) {
-                  
-                    let token = idToken;
-
-                    console.log(token);
-
-                }).catch(function(error) {
-                    // Handle error
-                });*/
-
-                /*let idToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjYzZTllYThmNzNkZWExMTRkZWI5YTY0OTcxZDJhMjkzN2QwYzY3YWEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vY3VydXBhcy1hcHAiLCJhdWQiOiJjdXJ1cGFzLWFwcCIsImF1dGhfdGltZSI6MTU3NTk4MTE1MiwidXNlcl9pZCI6IlpBdldRakZhYjJmaXYyN2czSHUwa2NwU0NYUDIiLCJzdWIiOiJaQXZXUWpGYWIyZml2MjdnM0h1MGtjcFNDWFAyIiwiaWF0IjoxNTgxNTM0OTA1LCJleHAiOjE1ODE1Mzg1MDUsImVtYWlsIjoiam9zZW1hbnVlbHZpZ2lsQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJqb3NlbWFudWVsdmlnaWxAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.Sb5coyhk8PAotRplIEDN8wd-1qVn6X_cOcEUxUZVs34c3-frpAhLunyqwECNsA5YHYC6y339e0zRhZDid_zp_hHo8KNEwddsM-bg5RJMTe6FiVxSTiwhseUYm4q74W051pRL0LGRidENXjAzh9WpEhJ-HmW8_R9ViAsD4UfSHbzIQbz-ynx3zRUXVmzMqF-FT-UzBm-mYJb8PxSWH01lqsH5-IkCaAJeQNIdkyu-9Xmj31dcQzMLqR1bulAWAfUQSTQwwdL8WOyPCeCy5N82-WAbBeVeNy887EtYwosBO6fS3acYx70kbmQMgK6Eep68qfJg8JN3IO99YFLtrjpQ1A";
-
-                firebase.auth().verifyIdToken(idToken)
-                .then(function(decodedToken) {
-                    let uid = decodedToken.uid;
-                    console.log(uid);
-                    // ...
-                }).catch(function(error) {
-                    // Handle error
-                });*/
+            if (user) { 
 
                 
                 console.log(user.email);
 
                 var previous = db.collection("users").where("email", "==", user.email)
                 .get()
-                .then(function (querySnapshotUser) {
-                    querySnapshotUser.forEach( async function(docUser) {                        
+                .then(async function (querySnapshotUser) {
+
+                    querySnapshotUser.forEach( async function(docUser) {     
+                                       
                         var roleReference =  docUser.data().roleRef;
                         var yearReference =  docUser.data().yearRef;
 
                         _user.userId = docUser.data().userID;
                         _user.name = docUser.data().name;
                         console.log(docUser.data(), 'cccccc');
+
+                        if (roleReference.id == "group-admin") {
+
+                            //Authorizations
+                            let authorizations = await yearReference.collection("user-auth").where("authorized", "==", false).get();
+
+                            if ( authorizations.docs.length > 0 ) {
+                                _user.authorizations = authorizations.docs.length;
+                            } 
+                        }
 
                         //const ref = storage.ref(docUser.data().profilePicture);
                         //_user.profilePictureURL = await ref.getDownloadURL();
@@ -186,9 +174,9 @@
                         _user.yearReference = yearReference;                        
 
                         roleReference.get()
-                        .then(async function (docPage) {                     
+                        .then(async function (docRole) {                     
 
-                            var json = docPage.data();  
+                            var json = docRole.data();  
                             
                             let type = typeof json;
                             
@@ -253,7 +241,7 @@
 
                                             let pageResponse = responses[i];
 
-                                            let page = pageResponse.data();                                                
+                                            let page = pageResponse.data();                                       
                                             
                                             var _id   =  page.id;
                                             var _name =  page.name;
@@ -296,6 +284,7 @@
                     console.log("Error getting documents: ", error);
                 });
 
+            //No user
             } else {
 
                 homeLoader.hide();
@@ -315,9 +304,11 @@
                     $.getScript("js/login.js");
                 });                         
             }
+        
+        //end of auth
         });
                 
-        //} 
+        
         
         function renderNavbar (navBar)  {
 
@@ -392,9 +383,20 @@
                             _lastMenu = menu;
                         }                        
 
-                    } else  {                                                
+                    } else  { 
 
-                        $("#navbar").append('<li class="nav-item"><a id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + baseLoad + '\'); return false;">' + desc + '</a></li>');           
+                        
+                        let badge = "";
+
+                        if ( desc == "Autorizaciones" )  {                            
+
+                            if ( _user.authorizations > 0 ) {
+                                badge = '&nbsp;&nbsp;<span class="badge badge-light">' + _user.authorizations + '</span>'
+                            }
+
+                        }                                                                       
+
+                        $("#navbar").append('<li class="nav-item"><a id="' + id + '" class="nav-link" href="javascript:void(0);" onclick="loadPage(\'' + baseLoad + '\'); return false;">' + desc + badge + '</a></li>');           
                         
                     }      
                     

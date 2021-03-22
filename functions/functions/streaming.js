@@ -445,9 +445,7 @@
                           console.log("countVideos: " + countVideos + " videosLength: " + videosLength + " countPlaylist: " + countPlaylist + " playlistLength: " + playlistLength);   
 
                           if ( countVideos === videosLength ) {                                                                                               
-                            if ( countPlaylist === playlistLength ) {
-
-                              console.log("LLEGA!!!");
+                            if ( countPlaylist === playlistLength ) {                         
 
                               return Promise.all(promise_videos);                                                        
                             }                                
