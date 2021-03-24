@@ -107,7 +107,7 @@
             alert('clicked!');
         });               
 
-        $("#edit-user-form").submit(function (event) {            
+        $("#edit-user-form").submit(async function (event) {            
             event.preventDefault();                      
             let userId = $(event.target).attr('edit-id');
             let authId = $(event.target).attr('auth-id');
@@ -115,15 +115,32 @@
             var groupText = $("#dropdown-button").find('.appended').text();
             var groupId = $("#dropdown-button").find('.appended').attr("data-id");          
 
-            if (window.roleRefId != groupId) {
-
-            }
-
             if (window.authorized != checked) {
+
+                var _json = {};
 
                 if (checked) {
 
+                    if (window.roleRefId != groupId) {
+
+                        _json.roleRef = firestore.doc('users/' + groupId);
+
+                    }
+
+                    _json.authorized = true;
+
+                } else {
+
+                    _json.authorized = false;
                 }
+
+                await db.collection('users').doc(userId).set(_json,{merge:true});
+
+                await db.collection('years').doc(_user.yearReference.id)
+                        .collection('user-auth').doc(authId).set({authorized:checked},{merge:true});
+
+                ///years/DnEa0Q5unZJXHJluRtt3/user-auth/1C6BMlSf1u2DPf3foWJD
+
             }
 
             //db.collection('years').doc(_user.yearReference.id).collection("user-auth").doc();
@@ -205,17 +222,22 @@
 
     function rowClick(id, avatar, name, year, authorized, roleRefId, authId) {    
         
-        window.roleRefId = roleRefId;     
-        window.authorized = authorized;
+        window.roleRefId = roleRefId;        
 
         $('#edit-user-form').attr('edit-id', id);
         $('#edit-user-form').attr('auth-id', authId);
         $('#edit-user-form #avatar-preview').attr("src", avatar);        
         $('#edit-user-form #user-name').val(name);
         $('#edit-user-form #user-year').val(year);
-        if (authorized) {
-            $('#enableUser').attr('checked','checked');
-        }        
+        
+        var isAuthorized = (authorized === 'true');
+        window.authorized = isAuthorized;
+
+        if (isAuthorized) {
+            $('#enableUser').prop('checked',true);
+        } else {
+            $('#enableUser').prop('checked',false);
+        }       
         let activeRole = roleRefId;
         let length = _roleAuthSnapshot.length;
         for (var i=0; i<length;i++){

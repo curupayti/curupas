@@ -28,23 +28,24 @@
 
         console.log("docYearId: " + docYearId);
 
-        const documentId = contex.params.userId;
+        const userId = contex.params.userId;
 
-        console.log("documentId: " + documentId);
+        console.log("userId: " + userId);
 
         let _time = admin.firestore.FieldValue.serverTimestamp();                    
 
         //SEND NOTIFICATION TO REFERENTS
         //CREATE CALENDAR 
 
-        firestore.collection("years").doc(`${docYearId}`)
+        await firestore.collection("users").doc(userId).set({stage:1},{merge:true});
+
+        await firestore.collection("years").doc(`${docYearId}`)
         .collection("user-auth").add({          
-          userId: documentId,      
-          userRef: firestore.doc('users/' + documentId),
-          authorized: false,
-          stage:1,
+          userId: userId,      
+          userRef: firestore.doc('users/' + userId),
+          authorized: false,          
           last_update: _time 
-        },{ merge: true });        
+        },{ merge: true });         
 
       } 
    
