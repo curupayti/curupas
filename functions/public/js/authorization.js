@@ -48,11 +48,17 @@
         });
     
 
-        function renderUser(document) {  
+        async function renderUser(document) {  
             _documents[document.id] = document;  
 
             var authId = document.id;
             let authorized = document.data().authorized;
+
+            let authorized_byRef = document.data().authorized_by;
+
+            let authorizer = await authorized_byRef.get();
+            var authorizer_name = authorizer.data().name;
+
             let userRef = document.data().userRef;
 
             userRef.get()
@@ -61,7 +67,7 @@
                 var status;
 
                 if (authorized) {
-                    status = "Autorizado"
+                    status = "Autorizado por " + authorizer_name;
                 } else {
                     status = "Pendiente"
                 }
@@ -137,7 +143,10 @@
                 await db.collection('users').doc(userId).set(_json,{merge:true});
 
                 await db.collection('years').doc(_user.yearReference.id)
-                        .collection('user-auth').doc(authId).set({authorized:checked},{merge:true});
+                        .collection('user-auth').doc(authId).set({
+                            authorized:checked, 
+                            authorized_by: firestore.doc('users/' + _user.userId)
+                        },{merge:true});
 
                 ///years/DnEa0Q5unZJXHJluRtt3/user-auth/1C6BMlSf1u2DPf3foWJD
 

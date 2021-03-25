@@ -33,9 +33,37 @@
         console.log("userId: " + userId);
 
         let _time = admin.firestore.FieldValue.serverTimestamp();                    
-
-        //SEND NOTIFICATION TO REFERENTS
+        
         //CREATE CALENDAR 
+
+        var data = snap.data();       
+        const birthday = data.birthday;
+        var name = data.name;
+
+        var desc = "Cumpleaños de " + name;
+        var type = "Camadas";
+
+        var start_time = "00:00";
+        var end_time = "24:00";
+
+        const shrs = start_time.split(":")[0];
+        const smin = start_time.split(":")[1];
+
+        const ehrs = end_time.split(":")[0];
+        const emin = end_time.split(":")[1];
+
+        firestore.collection("calendar")
+        .doc(type)
+        .collection(type + "_collection")
+        .add({
+          name,
+          summary: desc,
+          start: new Date(new Date(start).setHours(shrs, smin, 0)),
+          end: new Date(new Date(start).setHours(ehrs, emin, 0)),
+          createdAt: new Date(),
+        });
+
+        //SAVE USER AND AUTHORIZATION
 
         await firestore.collection("users").doc(userId).set({stage:1},{merge:true});
 
@@ -46,6 +74,10 @@
           authorized: false,          
           last_update: _time 
         },{ merge: true });         
+
+        //SEND NOTIFICATION TO REFERENTS
+
+        
 
       } 
    
