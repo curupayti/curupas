@@ -9,6 +9,7 @@ import 'package:curupas/models/museum.dart';
 import 'package:curupas/models/notification.dart';
 import 'package:curupas/models/post.dart';
 import 'package:curupas/models/streammer.dart';
+import 'package:curupas/models/update.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,28 +18,27 @@ import '../globals.dart';
 SharedPreferences prefs;
 
 class AppData {
-  AppData(
-      {this.name,
-      this.avatar,
-      this.home_background,
-      this.group_background,
-      this.location,
-      this.biography,
-      this.posts,
-      this.description,
-      this.drawerContent,
-      this.newsletterContent,
-      this.anecdoteContent,
-      this.girasContent,
-      this.pumasContent,
-      this.valoresContent,
-      this.user,
-      this.curupaGuest,
-      this.group,
-      this.streammer,
-      this.futureCalendarSnapshot,
-      this.notifications,
-      this.calendarSnapshot}) {
+  AppData({
+    this.name,
+    this.avatar,
+    this.home_background,
+    this.group_background,
+    this.location,
+    this.biography,
+    this.posts,
+    this.description,
+    this.drawerContent,
+    this.newsletterContent,
+    this.anecdoteContent,
+    this.girasContent,
+    this.pumasContent,
+    this.valoresContent,
+    this.user,
+    this.curupaGuest,
+    this.group,
+    this.streammer,
+    this.notifications,
+  }) {
     this.name = 'Curupa';
     this.avatar = 'assets/images/escudo.png';
     this.home_background = 'assets/images/cancha.png';
@@ -69,8 +69,18 @@ class AppData {
   CurupaGuest curupaGuest;
   Group group;
   Streammer streammer;
-  Future<QuerySnapshot> futureCalendarSnapshot;
   List<NotificationCloud> notifications;
+  List<CalendarCache> calendarCacheCurupas;
+  UpdateCache updateCache;
+  // calendarCacheCurupas;
+  //CalendarCache calendarCachePartidos;
+  //CalendarCache calendarCacheCamadas;
+}
+
+class CalendarCache {
+  String name;
+  int id;
+  Future<QuerySnapshot> futureCalendarSnapshot;
   QuerySnapshot calendarSnapshot;
 }
 
@@ -127,13 +137,17 @@ class Cache {
       docCache = await document.get(GetOptions(source: Source.cache));
       if (docCache.exists) {
         docuentSnapshot = docCache;
-      } else {
-        docCache = await document.get(GetOptions(source: Source.server));
-        docuentSnapshot = docCache;
+        return docuentSnapshot;
       }
+      //else {
+      //  docCache = await document.get(GetOptions(source: Source.server));
+      //  docuentSnapshot = docCache;
+      //}
     } catch (exception) {
       print("cae");
     }
+    docCache = await document.get(GetOptions(source: Source.server));
+    docuentSnapshot = docCache;
     return docuentSnapshot;
   }
 
@@ -145,13 +159,17 @@ class Cache {
       docCache = await document.get(GetOptions(source: Source.cache));
       if (docCache.exists) {
         docuentSnapshot = docCache;
-      } else {
-        docCache = await document.get(GetOptions(source: Source.server));
-        docuentSnapshot = docCache;
+        return docuentSnapshot;
       }
+      //else {
+      //  docCache = await document.get(GetOptions(source: Source.server));
+      //  docuentSnapshot = docCache;
+      //}
     } catch (exception) {
       print("cae");
     }
+    docCache = await document.get(GetOptions(source: Source.server));
+    docuentSnapshot = docCache;
     return docuentSnapshot;
   }
 

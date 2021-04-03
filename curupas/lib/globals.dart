@@ -4,7 +4,6 @@ import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:curupas/models/curupa_user.dart';
 import 'package:curupas/models/description.dart';
 import 'package:curupas/models/group.dart';
 import 'package:curupas/models/post.dart';
@@ -26,6 +25,7 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 import 'business/auth.dart';
 import 'business/cache.dart';
 import 'models/HTMLS.dart';
+import 'models/curupa_user.dart';
 import 'models/group_media.dart';
 import 'models/museum.dart';
 import 'models/streaming.dart';
@@ -280,7 +280,30 @@ Future<bool> sendUserSMSVerification(
 
 //UPDATES
 
-void getUpdatesSnapshots() {}
+/*Future<bool> getUpdates() async {
+  List<Update> _updates = await Auth.getUpdates();
+  UpdateCache updateCache = new UpdateCache();
+  for (var u in _updates) {
+    switch (u.updateType.name) {
+      case "main":
+        updateCache.main = u.updateType;
+        break;
+      case "calendar":
+        updateCache.calendar = u.updateType;
+        break;
+      case "group":
+        updateCache.group = u.updateType;
+        break;
+      case "home":
+        updateCache.home = u.updateType;
+        break;
+      case "profile":
+        updateCache.profile = u.updateType;
+        break;
+    }
+  }
+  await updateCache.checkCache();
+}*/
 
 //MAIN
 

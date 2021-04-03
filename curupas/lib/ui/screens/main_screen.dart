@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curupas/business/auth.dart';
 import 'package:curupas/business/cache.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/HTML.dart';
 import 'package:curupas/models/curupa_user.dart';
+import 'package:curupas/models/device.dart';
 import 'package:curupas/models/message.dart';
 import 'package:curupas/ui/pages/calendar_page.dart';
 import 'package:curupas/ui/pages/group_page.dart';
@@ -235,54 +237,105 @@ class _MainScreenState extends State<MainScreen> {
 
     _selectedChoice = choice_profile[0];
 
-    initPlatformState().then((device) {
-      if (device["isPhysicalDevice"]) {
-        isPhysicalDevice = device["isPhysicalDevice"];
-      }
-
-      isRegistered().then((result) async {
-        if (result) {
-          _globals.setFilePickerGlobal();
-          String userId = prefs.getString('userId');
-          await _globals.getUserData(userId).then((CurupaUser user) async {
-            if (Cache.appData.curupaGuest.isGuest) {
-              Cache.appData.curupaGuest.user = user;
-              Cache.appData.curupaGuest.phone = user.phone;
-            } else {
-              Cache.appData.curupaGuest.isGuest = false;
-            }
-
-            await _firebaseMessaging.getToken().then((token) async {
-              Map<String, dynamic> data = new Map<String, dynamic>();
-              if (isPhysicalDevice) {
-                data['token'] = token;
-              }
-              data['device'] = device;
-              await Auth.updateUser(userId, data).then((CurupaUser user) async {
-                Cache.appData.user.token = token;
-              });
-            });
-
-            Cache.appData.user = user;
-            _globals.getDrawers();
-
-            if (user.smsChecked == null) {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) => new SMSDialog(
-                    userId: user.userID, phone: Cache.appData.curupaGuest.phone),
-              );
-            } else if (!user.authorized) {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) =>
-                    _buildNotAcceptedDialog(context),
-              );
-            }
-          });
+    try {
+      initPlatformState().then((device) {
+        if (device["isPhysicalDevice"]) {
+          isPhysicalDevice = device["isPhysicalDevice"];
         }
+
+        isRegistered().then((result) async {
+          if (result) {
+            _globals.setFilePickerGlobal();
+            String userId = prefs.getString('userId');
+            await _globals.getUserData(userId).then((CurupaUser user) async {
+              if (Cache.appData.curupaGuest.isGuest) {
+                Cache.appData.curupaGuest.user = user;
+                Cache.appData.curupaGuest.phone = user.phone;
+              } else {
+                Cache.appData.curupaGuest.isGuest = false;
+              }
+
+              await _firebaseMessaging.getToken().then((token) async {
+                try {
+                  Map<String, dynamic> data = new Map<String, dynamic>();
+                  Map<String, dynamic> deviceData = new Map<String, dynamic>();
+                  bool newToken = false;
+                  bool newDevice = false;
+                  CurupaDevice curupaDevice;
+                  if (isPhysicalDevice) {
+                    if (user.token != token) {
+                      data['token'] = token;
+                    }
+                  }
+
+                  bool hasDeviceCache;
+                  if (Cache.appData.user.curupaDevice != null) {
+                    hasDeviceCache = true;
+                  }
+
+                  curupaDevice = new CurupaDevice();
+
+                  if ((hasDeviceCache) &&
+                      (device["device"] !=
+                          Cache.appData.user.curupaDevice.device)) {
+                    String _device = device["device"];
+                    String manufacturer = device["manufacturer"];
+                    String brand = device["brand"];
+                    String hardware = device["hardware"];
+                    String model = device["model"];
+                    deviceData["manufacturer"] = _device;
+                    deviceData["brand"] = device;
+                    deviceData["device"] = device;
+                    deviceData["hardware"] = device;
+                    deviceData["model"] = device;
+                    curupaDevice.device = _device;
+                    curupaDevice.manufacturer = manufacturer;
+                    curupaDevice.brand = brand;
+                    curupaDevice.hardware = hardware;
+                    curupaDevice.model = model;
+                  }
+
+                  deviceData["last_run"] = FieldValue.serverTimestamp();
+                  data['device_log'] = deviceData;
+                  Auth.updateUser(userId, deviceData)
+                      .then((CurupaUser user) async {
+                    //TODO esto no se esta guardando en cache guarda
+                    if (newToken) {
+                      Cache.appData.user.token = token;
+                    }
+                    if (newDevice) {
+                      Cache.appData.user.curupaDevice = curupaDevice;
+                    }
+                  });
+                } catch (e) {
+                  print(e);
+                }
+              });
+
+              Cache.appData.user = user;
+              _globals.getDrawers();
+
+              if (user.smsChecked == null) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) => new SMSDialog(
+                      userId: user.userID,
+                      phone: Cache.appData.curupaGuest.phone),
+                );
+              } else if (!user.authorized) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      _buildNotAcceptedDialog(context),
+                );
+              }
+            });
+          }
+        });
       });
-    });
+    } catch (e) {
+      print(e);
+    }
 
     _home = IconButton(
       icon: Icon(

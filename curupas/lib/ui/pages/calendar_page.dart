@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:curupas/business/cache.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/event_calendar.dart';
+import 'package:curupas/models/update.dart';
 import 'package:curupas/ui/screens/calendar/event_view.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -25,8 +26,10 @@ class _CalendarPageState extends State<CalendarPage> {
   bool loading = true;
   int _beginMonthPadding = 0;
   DateTime _dateTime;
-  String _calendarSelect = "camada";
+  //String _calendarSelect = "camada";
   SharedPreferences prefs;
+
+  ActiveUpdate active = new ActiveUpdate();
 
   _CalendarPageState() {
     _dateTime = DateTime.now();
@@ -42,14 +45,14 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    String type;
+    var type = {};
     if (Cache.appData.curupaGuest.isGuest) {
-      type = "curupa";
+      setActiveUpdate(1);
     } else {
-      type = "camada";
+      setActiveUpdate(0);
     }
     if (_globals.calendar_data_loaded == false) {
-      getCalendar(type);
+      getCalendar();
     } else {
       setState(() {
         loading = false;
@@ -57,16 +60,35 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
-  void getCalendar(String _type) async {
-    if (Cache.appData.futureCalendarSnapshot == null) {
-      Cache.appData.futureCalendarSnapshot =
-          await _globals.getCalendar(_type).then((snapshot) {
-        Cache.appData.calendarSnapshot = snapshot;
+  void getCalendar() async {
+    if (Cache.appData.calendarCacheCurupas[active.id].futureCalendarSnapshot ==
+        null) {
+      Cache.appData.calendarCacheCurupas[active.id].futureCalendarSnapshot =
+          await _globals.getCalendar(active.name).then((snapshot) {
+        Cache.appData.calendarCacheCurupas[active.id].calendarSnapshot =
+            snapshot;
         _globals.home_data_loaded == true;
         setState(() {
           loading = false;
         });
       });
+    }
+  }
+
+  void setActiveUpdate(int id) {
+    switch (id) {
+      case 0:
+        active.name = "camada";
+        active.id = id;
+        break;
+      case 1:
+        active.name = "curupa";
+        active.id = id;
+        break;
+      case 2:
+        active.name = "partidos";
+        active.id = id;
+        break;
     }
   }
 
@@ -105,7 +127,8 @@ class _CalendarPageState extends State<CalendarPage> {
         body: SingleChildScrollView(
           child: Container(
             child: new FutureBuilder(
-                future: Cache.appData.futureCalendarSnapshot,
+                future: Cache.appData.calendarCacheCurupas[active.id]
+                    .futureCalendarSnapshot,
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   return Container(
                     child: new Column(
@@ -122,7 +145,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                         height: 50.0,
                                         width: button_width,
                                         child: FlatButton(
-                                            color: _calendarSelect == "camada"
+                                            color: active.id == 0 //"camada"
                                                 ? _getEventColor()
                                                 : Colors.white,
                                             child: Text(
@@ -135,9 +158,9 @@ class _CalendarPageState extends State<CalendarPage> {
                                               ),
                                             ),
                                             onPressed: () {
-                                              getCalendar("camada");
+                                              setActiveUpdate(0);
+                                              getCalendar();
                                               setState(() {
-                                                _calendarSelect = "camada";
                                                 loading = true;
                                               });
                                               Timer(Duration(seconds: 3), () {
@@ -151,7 +174,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                         height: 50.0,
                                         width: button_width,
                                         child: FlatButton(
-                                            color: _calendarSelect == "curupa"
+                                            color: active.id == 1 //"curupa"
                                                 ? _getEventColor()
                                                 : Colors.white,
                                             child: Text(
@@ -164,10 +187,10 @@ class _CalendarPageState extends State<CalendarPage> {
                                               ),
                                             ),
                                             onPressed: () {
-                                              getCalendar("curupa");
+                                              setActiveUpdate(1);
+                                              getCalendar();
                                               setState(() {
                                                 loading = true;
-                                                _calendarSelect = "curupa";
                                               });
                                               Timer(Duration(seconds: 3), () {
                                                 setState(() {
@@ -180,7 +203,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                   height: 50.0,
                                   width: button_width,
                                   child: FlatButton(
-                                      color: _calendarSelect == "partidos"
+                                      color: active.id == 2 //"partidos"
                                           ? _getEventColor()
                                           : Colors.white,
                                       child: Text(
@@ -193,10 +216,10 @@ class _CalendarPageState extends State<CalendarPage> {
                                         ),
                                       ),
                                       onPressed: () {
-                                        getCalendar("partidos");
+                                        setActiveUpdate(2);
+                                        getCalendar();
                                         setState(() {
                                           loading = true;
-                                          _calendarSelect = "partidos";
                                         });
                                         Timer(Duration(seconds: 3), () {
                                           setState(() {
@@ -400,7 +423,8 @@ class _CalendarPageState extends State<CalendarPage> {
     int eventCount = 0;
     DateTime eventDate;
     String eventName;
-    Cache.appData.calendarSnapshot.docs.forEach((doc) {
+    Cache.appData.calendarCacheCurupas[active.id].calendarSnapshot.docs
+        .forEach((doc) {
       eventDate = DateTime.fromMicrosecondsSinceEpoch(
           doc.data()['start'].microsecondsSinceEpoch);
       eventName = doc.data()['name'];
@@ -433,11 +457,11 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Color _getEventColor() {
-    if (_calendarSelect == "camada") {
+    if (active.name == "camada") {
       return Color(0XFF67ABCC);
-    } else if (_calendarSelect == "curupa") {
+    } else if (active.name == "curupa") {
       return Color(0XFFF3F3F3);
-    } else if (_calendarSelect == "partidos") {
+    } else if (active.name == "partidos") {
       return Color(0XFF7986D0);
     } else {
       return Colors.yellowAccent;
@@ -589,7 +613,7 @@ class _CalendarPageState extends State<CalendarPage> {
       new MaterialPageRoute(
         builder: (BuildContext context) => new EventsView(
             new DateTime(_dateTime.year, _dateTime.month, day),
-            this._calendarSelect),
+            this.active.name),
       ),
     );
   }
@@ -650,170 +674,3 @@ SpeedDial buildSpeedDial() {
 
 //https://www.youtube.com/watch?v=jhtKTKn6PlI
 //https://github.com/lohanidamodar/flutter_calendar/tree/part2
-
-/*class CalendarSection extends StatefulWidget {
-    @override
-    _CalendarState createState() => _CalendarState();
-  }
-
-  class _CalendarState extends State<CalendarSection> {
-    CalendarController _controller;
-    Map<DateTime,List<dynamic>> _events;
-    List<dynamic> _selectedEvents;
-    TextEditingController _eventController;
-    SharedPreferences prefs;
-
-    final Map<DateTime, List> _holidays = {
-      DateTime(2019, 1, 1): ['New Year\'s Day'],
-      DateTime(2019, 1, 6): ['Epiphany'],
-      DateTime(2019, 2, 14): ['Valentine\'s Day'],
-      DateTime(2019, 4, 21): ['Easter Sunday'],
-      DateTime(2019, 4, 22): ['Easter Monday'],
-    };
-
-    @override
-    void initState() {
-      super.initState();
-      _controller = CalendarController();
-      _eventController = TextEditingController();
-      _events = {};
-      _selectedEvents = [];
-      initPrefs();
-    }
-
-    initPrefs() async {
-      prefs = await SharedPreferences.getInstance();
-      setState(() {
-        final _selectedDay = DateTime.now();
-        _events = {
-          _selectedDay.subtract(Duration(days: 30)): ['Event A0', 'Event B0', 'Event C0'],
-          _selectedDay.subtract(Duration(days: 27)): ['Event A1'],
-          _selectedDay.subtract(Duration(days: 20)): ['Event A2', 'Event B2', 'Event C2', 'Event D2'],
-          _selectedDay.subtract(Duration(days: 16)): ['Event A3', 'Event B3'],
-          _selectedDay.subtract(Duration(days: 10)): ['Event A4', 'Event B4', 'Event C4'],
-          _selectedDay.subtract(Duration(days: 4)): ['Event A5', 'Event B5', 'Event C5'],
-          _selectedDay.subtract(Duration(days: 2)): ['Event A6', 'Event B6'],
-          _selectedDay: ['Event A7', 'Event B7', 'Event C7', 'Event D7'],
-          _selectedDay.add(Duration(days: 1)): ['Event A8', 'Event B8', 'Event C8', 'Event D8'],
-          _selectedDay.add(Duration(days: 3)): Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
-          _selectedDay.add(Duration(days: 7)): ['Event A10', 'Event B10', 'Event C10'],
-          _selectedDay.add(Duration(days: 11)): ['Event A11', 'Event B11'],
-          _selectedDay.add(Duration(days: 17)): ['Event A12', 'Event B12', 'Event C12', 'Event D12'],
-          _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
-          _selectedDay.add(Duration(days: 26)): ['Event A14', 'Event B14', 'Event C14'],
-        };
-      });
-    }
-
-    Map<String,dynamic> encodeMap(Map<DateTime,dynamic> map) {
-      Map<String,dynamic> newMap = {};
-      map.forEach((key,value) {
-        newMap[key.toString()] = map[key];
-      });
-      return newMap;
-    }
-
-    Map<DateTime,dynamic> decodeMap(Map<String,dynamic> map) {
-      Map<DateTime,dynamic> newMap = {};
-      map.forEach((key,value) {
-        newMap[DateTime.parse(key)] = map[key];
-      });
-      return newMap;
-    }
-
-    @override
-    Widget build(BuildContext context) {
-      return
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                TableCalendar(
-                  events: _events,
-                  initialCalendarFormat: CalendarFormat.week,
-                  calendarStyle: CalendarStyle(
-                      canEventMarkersOverflow: true,
-                      todayColor: Colors.orange,
-                      selectedColor: Theme.of(context).primaryColor,
-                      todayStyle: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18.0,
-                          color: Colors.white)),
-                  headerStyle: HeaderStyle(
-                    centerHeaderTitle: true,
-                    formatButtonDecoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    formatButtonTextStyle: TextStyle(color: Colors.white),
-                    formatButtonShowsNext: false,
-                  ),
-                  startingDayOfWeek: StartingDayOfWeek.monday,
-                  onDaySelected: (date, events) {
-                    setState(() {
-                      _selectedEvents = events;
-                    });
-                  },
-                  builders: CalendarBuilders(
-                    selectedDayBuilder: (context, date, events) => Container(
-                        margin: const EdgeInsets.all(4.0),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(10.0)),
-                        child: Text(
-                          date.day.toString(),
-                          style: TextStyle(color: Colors.white),
-                        )),
-                    todayDayBuilder: (context, date, events) => Container(
-                        margin: const EdgeInsets.all(4.0),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            color: Colors.orange,
-                            borderRadius: BorderRadius.circular(10.0)),
-                        child: Text(
-                          date.day.toString(),
-                          style: TextStyle(color: Colors.white),
-                        )),
-                  ),
-                  calendarController: _controller,
-                ),
-                ..._selectedEvents.map((event) => ListTile(
-                  title: Text(event),
-                )),
-              ],
-            ),
-          ),
-        );
-    }
-
-    _showAddDialog() {
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            content: TextField(
-              controller: _eventController,
-            ),
-            actions: <Widget>[
-              FlatButton(
-                child: Text("Save"),
-                onPressed: (){
-                  if(_eventController.text.isEmpty) return;
-                  setState(() {
-                    if(_events[_controller.selectedDay] != null) {
-                      _events[_controller.selectedDay].add(_eventController.text);
-                    }else{
-                      _events[_controller.selectedDay] = [_eventController.text];
-                    }
-                    //prefs.setString("events", json.encode(encodeMap(_events)));
-                    _eventController.clear();
-                    Navigator.pop(context);
-                  });
-                },
-              )
-            ],
-          )
-      );
-    }
-  }*/

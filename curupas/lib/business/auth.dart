@@ -15,6 +15,7 @@ import 'package:curupas/models/sms.dart';
 import 'package:curupas/models/streaming.dart';
 import 'package:curupas/models/streaming_thumbnails.dart';
 import 'package:curupas/models/streaming_video.dart';
+import 'package:curupas/models/update.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -302,6 +303,19 @@ class Auth {
     return false;
   }
 
+  static Future<List<Update>> getUpdates() async {
+    CollectionReference updateCollection =
+        await FirebaseFirestore.instance.collection("updates");
+    QuerySnapshot collectionSnapshot = await updateCollection.get();
+    List<DocumentSnapshot> templist = [];
+    List<Update> listUpdates = [];
+    templist = collectionSnapshot.docs;
+    listUpdates = await templist.map((DocumentSnapshot docSnapshot) {
+      return Update.fromDocument(docSnapshot);
+    }).toList();
+    return listUpdates;
+  }
+
   static Future<List<GroupMedia>> getMedias(DocumentSnapshot document) async {
     CollectionReference collectionReference =
         await document.reference.collection("media");
@@ -528,7 +542,7 @@ class Auth {
       templist = collectionSnapshot.docs;
       var i = templist.length;
       try {
-        List<String> imageList = new List();
+        List<String> imageList = [];
         templist.map((DocumentSnapshot docSnapshot) {
           Map<String, dynamic> doc =
               new Map<String, dynamic>.from(docSnapshot.data());

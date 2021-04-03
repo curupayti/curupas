@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curupas/models/device.dart';
 import 'package:curupas/models/group.dart';
 import 'package:location/location.dart';
 
@@ -23,6 +24,7 @@ class CurupaUser {
   final int smsId;
   final bool smsChecked;
   String token;
+  CurupaDevice curupaDevice;
 
   CurupaUser(
       {this.userID,
@@ -43,7 +45,8 @@ class CurupaUser {
       this.smsCode,
       this.smsId,
       this.smsChecked,
-      this.token});
+      this.token,
+      this.curupaDevice});
 
   Map<String, Object> toJson() {
     GeoPoint geo = GeoPoint(locationData.latitude, locationData.longitude);
@@ -71,6 +74,7 @@ class CurupaUser {
       'smsId': smsId,
       'smsChecked': smsChecked,
       'token': token,
+      'device': curupaDevice
     };
   }
 
@@ -89,25 +93,31 @@ class CurupaUser {
       print(error.toString());
     }
     DocumentReference yearReference = doc['yearRef'];
+    CurupaDevice curupaDevice;
+    if (doc['device_log'] != null) {
+      DocumentSnapshot docDevice = doc['device_log'] as DocumentSnapshot;
+      curupaDevice = new CurupaDevice.fromDocument(docDevice);
+    }
+
     CurupaUser user = new CurupaUser(
-      userID: doc['userID'],
-      phone: doc['phone'],
-      name: doc['name'],
-      birthday: doc['birthday'],
-      email: doc['email'],
-      profilePictureURL: doc['profilePictureURL'],
-      profilePicture: doc['profilePicture'],
-      thumbnailPictureURL: doc['thumbnailPictureURL'],
-      thumbnailPicture: doc['thumbnailPicture'],
-      locationData: locData,
-      yearRef: yearReference,
-      group: doc['group'],
-      nonSpName: doc['nonSpName'],
-      authorized: doc['authorized'],
-      roleRef: doc['roleRef'],
-      smsChecked: doc['smsChecked'],
-      token: doc['token'],
-    );
+        userID: doc['userID'],
+        phone: doc['phone'],
+        name: doc['name'],
+        birthday: doc['birthday'],
+        email: doc['email'],
+        profilePictureURL: doc['profilePictureURL'],
+        profilePicture: doc['profilePicture'],
+        thumbnailPictureURL: doc['thumbnailPictureURL'],
+        thumbnailPicture: doc['thumbnailPicture'],
+        locationData: locData,
+        yearRef: yearReference,
+        group: doc['group'],
+        nonSpName: doc['nonSpName'],
+        authorized: doc['authorized'],
+        roleRef: doc['roleRef'],
+        smsChecked: doc['smsChecked'],
+        token: doc['token'],
+        curupaDevice: curupaDevice);
     return user;
   }
 
