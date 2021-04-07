@@ -9,6 +9,7 @@ import 'package:curupas/models/HTML.dart';
 import 'package:curupas/models/curupa_user.dart';
 import 'package:curupas/models/device.dart';
 import 'package:curupas/models/message.dart';
+import 'package:curupas/models/update.dart';
 import 'package:curupas/ui/pages/calendar_page.dart';
 import 'package:curupas/ui/pages/group_page.dart';
 import 'package:curupas/ui/pages/home_page.dart';
@@ -45,6 +46,9 @@ class PopChoice {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  List<Update> _updates;
+  bool _registered;
 
   int selectedPos = 0;
   GlobalKey bottomNavigationKey = GlobalKey();
@@ -238,99 +242,103 @@ class _MainScreenState extends State<MainScreen> {
     _selectedChoice = choice_profile[0];
 
     try {
+      // _loadUpdates();
+
       initPlatformState().then((device) {
         if (device["isPhysicalDevice"]) {
           isPhysicalDevice = device["isPhysicalDevice"];
         }
+        _loadUpdates().then((resultUpdated) async {
+          isRegistered().then((result) async {
+            if (result) {
+              _globals.setFilePickerGlobal();
+              String userId = prefs.getString('userId');
+              await _globals.getUserData(userId).then((CurupaUser user) async {
+                if (Cache.appData.curupaGuest.isGuest) {
+                  Cache.appData.curupaGuest.user = user;
+                  Cache.appData.curupaGuest.phone = user.phone;
+                } else {
+                  Cache.appData.curupaGuest.isGuest = false;
+                }
 
-        isRegistered().then((result) async {
-          if (result) {
-            _globals.setFilePickerGlobal();
-            String userId = prefs.getString('userId');
-            await _globals.getUserData(userId).then((CurupaUser user) async {
-              if (Cache.appData.curupaGuest.isGuest) {
-                Cache.appData.curupaGuest.user = user;
-                Cache.appData.curupaGuest.phone = user.phone;
-              } else {
-                Cache.appData.curupaGuest.isGuest = false;
-              }
-
-              await _firebaseMessaging.getToken().then((token) async {
-                try {
-                  Map<String, dynamic> data = new Map<String, dynamic>();
-                  Map<String, dynamic> deviceData = new Map<String, dynamic>();
-                  bool newToken = false;
-                  bool newDevice = false;
-                  CurupaDevice curupaDevice;
-                  if (isPhysicalDevice) {
-                    if (user.token != token) {
-                      data['token'] = token;
+                await _firebaseMessaging.getToken().then((token) async {
+                  try {
+                    Map<String, dynamic> data = new Map<String, dynamic>();
+                    Map<String, dynamic> deviceData =
+                        new Map<String, dynamic>();
+                    bool newToken = false;
+                    bool newDevice = false;
+                    CurupaDevice curupaDevice;
+                    if (isPhysicalDevice) {
+                      if (user.token != token) {
+                        data['token'] = token;
+                      }
                     }
-                  }
 
-                  bool hasDeviceCache;
-                  if (Cache.appData.user.curupaDevice != null) {
-                    hasDeviceCache = true;
-                  }
-
-                  curupaDevice = new CurupaDevice();
-
-                  if ((hasDeviceCache) &&
-                      (device["device"] !=
-                          Cache.appData.user.curupaDevice.device)) {
-                    String _device = device["device"];
-                    String manufacturer = device["manufacturer"];
-                    String brand = device["brand"];
-                    String hardware = device["hardware"];
-                    String model = device["model"];
-                    deviceData["manufacturer"] = _device;
-                    deviceData["brand"] = device;
-                    deviceData["device"] = device;
-                    deviceData["hardware"] = device;
-                    deviceData["model"] = device;
-                    curupaDevice.device = _device;
-                    curupaDevice.manufacturer = manufacturer;
-                    curupaDevice.brand = brand;
-                    curupaDevice.hardware = hardware;
-                    curupaDevice.model = model;
-                  }
-
-                  deviceData["last_run"] = FieldValue.serverTimestamp();
-                  data['device_log'] = deviceData;
-                  Auth.updateUser(userId, deviceData)
-                      .then((CurupaUser user) async {
-                    //TODO esto no se esta guardando en cache guarda
-                    if (newToken) {
-                      Cache.appData.user.token = token;
+                    bool hasDeviceCache;
+                    if (Cache.appData.user.curupaDevice != null) {
+                      hasDeviceCache = true;
                     }
-                    if (newDevice) {
-                      Cache.appData.user.curupaDevice = curupaDevice;
+
+                    curupaDevice = new CurupaDevice();
+
+                    if ((hasDeviceCache) &&
+                        (device["device"] !=
+                            Cache.appData.user.curupaDevice.device)) {
+                      String _device = device["device"];
+                      String manufacturer = device["manufacturer"];
+                      String brand = device["brand"];
+                      String hardware = device["hardware"];
+                      String model = device["model"];
+                      deviceData["manufacturer"] = _device;
+                      deviceData["brand"] = device;
+                      deviceData["device"] = device;
+                      deviceData["hardware"] = device;
+                      deviceData["model"] = device;
+                      curupaDevice.device = _device;
+                      curupaDevice.manufacturer = manufacturer;
+                      curupaDevice.brand = brand;
+                      curupaDevice.hardware = hardware;
+                      curupaDevice.model = model;
                     }
-                  });
-                } catch (e) {
-                  print(e);
+
+                    deviceData["last_run"] = FieldValue.serverTimestamp();
+                    data['device_log'] = deviceData;
+                    Auth.updateUser(userId, deviceData)
+                        .then((CurupaUser user) async {
+                      //TODO esto no se esta guardando en cache guarda
+                      if (newToken) {
+                        Cache.appData.user.token = token;
+                      }
+                      if (newDevice) {
+                        Cache.appData.user.curupaDevice = curupaDevice;
+                      }
+                    });
+                  } catch (e) {
+                    print(e);
+                  }
+                });
+
+                Cache.appData.user = user;
+                _globals.getDrawers();
+
+                if (user.smsChecked == null) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => new SMSDialog(
+                        userId: user.userID,
+                        phone: Cache.appData.curupaGuest.phone),
+                  );
+                } else if (!user.authorized) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) =>
+                        _buildNotAcceptedDialog(context),
+                  );
                 }
               });
-
-              Cache.appData.user = user;
-              _globals.getDrawers();
-
-              if (user.smsChecked == null) {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) => new SMSDialog(
-                      userId: user.userID,
-                      phone: Cache.appData.curupaGuest.phone),
-                );
-              } else if (!user.authorized) {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) =>
-                      _buildNotAcceptedDialog(context),
-                );
-              }
-            });
-          }
+            }
+          });
         });
       });
     } catch (e) {
@@ -404,6 +412,157 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Future<void> _loadUpdates() async {
+    prefs = await SharedPreferences.getInstance();
+    _updates = await Auth.getUpdates();
+    if (_updates.length > 0) {
+      updated(_updates);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //UPDATES
+  Future<void> updated(List<Update> _updates) async {
+    UpdateCache updateCache = new UpdateCache();
+    for (var u in _updates) {
+      switch (u.updateType.name) {
+        case "main":
+          updateCache.main = u.updateType;
+          break;
+        case "calendar":
+          updateCache.calendar = u.updateType;
+          break;
+        case "group":
+          updateCache.group = u.updateType;
+          break;
+        case "home":
+          updateCache.home = u.updateType;
+          break;
+        case "profile":
+          updateCache.profile = u.updateType;
+          break;
+      }
+    }
+    Cache.appData.updateCache = updateCache;
+    checkUpdateByType(Cache.appData.updateCache.main);
+    checkUpdateByType(Cache.appData.updateCache.home);
+    checkUpdateByType(Cache.appData.updateCache.calendar);
+    checkUpdateByType(Cache.appData.updateCache.group);
+    checkUpdateByType(Cache.appData.updateCache.profile);
+  }
+
+  Future<void> checkUpdateByType(UpdateType updateType) async {
+    try {
+      bool updated = false;
+      for (var da in updateType.updates) {
+        String id = da.id;
+        var key = "${updateType.name}-${id}";
+        int timecal = prefs.getInt(key);
+        if (timecal != null) {
+          if (timecal > 0) {
+            DateTime dateCache = DateTime.fromMillisecondsSinceEpoch(
+                (prefs.getInt(key) ?? DateTime.now().millisecondsSinceEpoch));
+            DateTime dateUpdate = da.date.toDate();
+            Duration timeDifference = dateUpdate.difference(dateCache);
+            if (timeDifference.inMilliseconds > 0) {
+              if (updateType.name == "main") {
+                switch (id) {
+                  case "user":
+                    Cache.appData.user = null;
+                    updated = true;
+                    break;
+                  case "drawer":
+                    Cache.appData.drawerContent = null;
+                    updated = true;
+                    break;
+                }
+              }
+              if (updateType.name == "home") {
+                switch (id) {
+                  case "description":
+                    Cache.appData.description = null;
+                    updated = true;
+                    break;
+                  case "museums":
+                    Cache.appData.museumContent = null;
+                    updated = true;
+                    break;
+                  case "newsletter":
+                    Cache.appData.newsletterContent = null;
+                    updated = true;
+                    break;
+                  case "posts":
+                    Cache.appData.posts = null;
+                    updated = true;
+                    break;
+                  case "posts":
+                    Cache.appData.posts = null;
+                    updated = true;
+                    break;
+                  case "pumas":
+                    Cache.appData.pumasContent = null;
+                    updated = true;
+                    break;
+                  case "valores":
+                    Cache.appData.valoresContent = null;
+                    updated = true;
+                    break;
+                }
+              }
+              if (updateType.name == "calendar") {
+                switch (id) {
+                  case "camada":
+                    Cache.appData.calendarCacheCurupas[0] = null;
+                    updated = true;
+                    break;
+                  case "curupa":
+                    Cache.appData.calendarCacheCurupas[1] = null;
+                    updated = true;
+                    break;
+                  case "partidos":
+                    Cache.appData.calendarCacheCurupas[2] = null;
+                    updated = true;
+                    break;
+                }
+              }
+              if (updateType.name == "group") {
+                switch (id) {
+                  case "anecdote":
+                    Cache.appData.anecdoteContent = null;
+                    updated = true;
+                    break;
+                  case "media":
+                    Cache.appData.group.medias = null;
+                    updated = true;
+                    break;
+                  case "giras":
+                    Cache.appData.girasContent = null;
+                    updated = true;
+                    break;
+                }
+              }
+            }
+          } else {
+            setDate(key, da);
+          }
+        } else {
+          setDate(key, da);
+        }
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void setDate(String key, UpdateTime da) {
+    int timeUpdate =
+        DateTime.fromMicrosecondsSinceEpoch(da.date.microsecondsSinceEpoch)
+            .millisecondsSinceEpoch;
+    prefs.setInt(key, timeUpdate);
+  }
+
   void handleClick(String value) {
     switch (value) {
       case 'Update':
@@ -421,7 +580,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<bool> getRegistered() async {
-    prefs = await SharedPreferences.getInstance();
     bool registered = prefs.getBool('registered');
     bool guest = (prefs.getBool('guest') ?? false);
     Cache.appData.curupaGuest.isGuest = guest;

@@ -19,6 +19,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -42,6 +43,8 @@ String channelId = "UCeLNPJoPAio9rT2GAdXDVmw";
 FilePickerGlobal filePickerGlobal;
 final picker = ImagePicker();
 File _image;
+
+SharedPreferences prefs;
 
 String error_email_already_in_use = "ERROR_EMAIL_ALREADY_IN_USE";
 String error_unknown = "ERROR_UNKNOWN";
@@ -277,33 +280,6 @@ Future<bool> sendUserSMSVerification(
     print(e);
   }
 }
-
-//UPDATES
-
-/*Future<bool> getUpdates() async {
-  List<Update> _updates = await Auth.getUpdates();
-  UpdateCache updateCache = new UpdateCache();
-  for (var u in _updates) {
-    switch (u.updateType.name) {
-      case "main":
-        updateCache.main = u.updateType;
-        break;
-      case "calendar":
-        updateCache.calendar = u.updateType;
-        break;
-      case "group":
-        updateCache.group = u.updateType;
-        break;
-      case "home":
-        updateCache.home = u.updateType;
-        break;
-      case "profile":
-        updateCache.profile = u.updateType;
-        break;
-    }
-  }
-  await updateCache.checkCache();
-}*/
 
 //MAIN
 
