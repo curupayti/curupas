@@ -2,6 +2,7 @@
    
     functions = require('firebase-functions');
     admin = require('firebase-admin');
+    FieldValue = require('firebase-admin').firestore.FieldValue;
     firebase = require('firebase');  
     var firestoreService = require('firestore-export-import');  
 
@@ -18,7 +19,7 @@
     const request = require('request');
     const spawn   = require('child-process-promise').spawn;
 
-    const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path; 
+    const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;    
 
     const express = require('express');
     var engines   = require('consolidate');
