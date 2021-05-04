@@ -8,8 +8,8 @@
       .document('users/{userId}')
       .onWrite( async (change,contex) => {
 
-      const dataAfter  = change.after.exists ? change.after.data() : null;
-      const dataBefore = change.before.data();
+      var dataAfter  = change.after.exists ? change.after.data() : null;
+      //const dataBefore = change.before.data();
 
       var stage = dataAfter.stage; 
 
@@ -21,7 +21,7 @@
       console.log("");
       console.log("stage: " + stage);   
       console.log("yearRef id: " + yearRef.id);   
-      //console.log("roleRef: " + roleRef.id);      
+      console.log("roleRef: " + roleRef.id);      
       console.log("groupRef: " + groupRef.id);
       console.log("");
 
@@ -34,10 +34,11 @@
 
         console.log("Visitor Id: " + visitorRef.id);
 
-        let docYear = await yearRef.get();
-        let docYearId = docYear.id;
-        console.log("");
-        console.log("docYearId: " + docYearId);
+        //let docYear = await yearRef.get();
+        var yearId = yearRef.id;
+        console.log("yearId: " + yearId);
+        
+        console.log("");        
         const userId = contex.params.userId;
         console.log("userId: " + userId);
         console.log("");
@@ -70,48 +71,97 @@
           start: new Date(new Date(birthday).setHours(shrs, smin, 0)),
           end: new Date(new Date(birthday).setHours(ehrs, emin, 0)),
           createdAt: new Date(),
-        });
-
-        //SAVE USER AND AUTHORIZATION
+        });        
 
         await firestore.collection("users").doc(userId).set({
           stage:1,
           yearsRef: FieldValue.arrayUnion(...[firestore.doc('years/' + visitorRef.id)]) 
         },{merge:true});
 
-        await firestore.collection("years").doc(`${docYearId}`)
+        //SAVE AUTHORIZATION
+        await firestore.collection("years").doc()
         .collection("user-auth").add({          
           userId: userId,      
           userRef: firestore.doc('users/' + userId),
           authorized: false,          
           last_update: _time 
-        },{ merge: true });         
+        },{ merge: true });              
 
-        //SEND NOTIFICATION TO REFERENTS        
+        //SAVE NOTIFICATION            
+        let title = `Nuevo usuario ${name}`;
+        let message = `Ingresa al panel y autoriza a ${name} para utilizar la app.`;
+        let newNotification = await firestore.collection("notifications").add({            
+            title: title, 
+            notification: message,   
+            thumbnailImageURL: dataAfter.profilePictureURL,              
+            last_update: new Date(),                        
+        });
+        console.log("newNotification::: " + newNotification.id);
 
+        //SEND NOTIFICATION TO REFERENTS  
+        var data = {
+          //title   : title,
+          //message : message,
+          id      : newNotification.id, 
+          role    : "group-admin",
+          year    : yearId
+        };
+        await notificatonToGroup(data);
       } 
    
   });   
 
+  var notificatonToGroup = async function ( data )  {   
 
-  exports.authorizations = functions.firestore
-    .document('authorizations/{authorizationId}')
-    .onWrite( async (snap,contex) => {
+        console.log();
+        console.log("data: " + JSON.stringify(data));
+        console.log();
 
-    
+        var notificationId = data.id;
 
-  });
+        const role = data.role;
+        const year = data.year;
 
-  exports.years = functions.firestore
-      .document('years/{yearId}')
-      .onWrite( async (change,contex) => {
+        console.log();
+        console.log("role: " + role);
+        console.log("year: " + year);
+        console.log();
 
-      const dataAfter  = change.after.exists ? change.after.data() : null;      
-      
-      var name = dataAfter.name;       
-    
-      console.log("");
-      console.log("name: " + name);      
-      console.log("");
+        let userRef = firestore.collection("users");
+        let queryResutl = await userRef
+        .where("roleRef", "==", firestore.doc('roles/' + role))
+        .where("yearsRef", "array-contains", firestore.doc('years/' + year)).get()
+        .then(async (querySnapshot) => {
+            
+            size = querySnapshot.docs.length;
+            console.log("size: "+ size);
 
-});
+            if (size>0) {                   
+            
+                await querySnapshot.forEach(async (doc) => {
+
+                    let user = doc.data();
+
+                    /*var notificationRef = await firestore.collection("notifications");         
+                    var notiDoc = await notificationRef.add({            
+                        title: title, 
+                        notification: notification,   
+                        thumbnailImageURL: user.profilePictureURL,              
+                        last_update: new Date(),                        
+                    });*/       
+
+                    var document_path = "notifications/" + notificationId + "/user-token-chat";                 
+                    await firestore.collection(document_path).add({                        
+                        token: user.token,   
+                        userId: user.userID,                                    
+                    });
+                    
+
+                });
+            }
+
+            return {};
+        });
+     
+    };
+

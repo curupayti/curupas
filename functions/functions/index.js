@@ -53,10 +53,19 @@
     };
     firebase.initializeApp(firebaseConfig);  
 
+    //if (location.hostname == "127.0.0.1" || 
+      //location.hostname == "localhost") {
+      //console.log('This is local emulator environment');
+      //functions.useFunctionsEmulator("http://localhost:5001");
+    //}
+
+    firebase.functions().useFunctionsEmulator("http://localhost:5001");
+
     //streaming
     exports.streaming = require("./streaming");
     exports.share     = require("./share");
     exports.authorize = require("./authorize");
+    exports.notifications = require("./notifications");
     
     var OPTION_SHARE  = 'share';            
     var OPTION_OAUTH2CALLBACK  = 'oauth2callback';              
@@ -485,72 +494,7 @@
 
     });
    
-    exports.notification = functions.firestore
-      .document('notifications/{notificationsId}')
-      .onWrite((change, context) => {    
-
-      const newValue = change.after.data();       
-      let thumbnailImageURL = newValue.thumbnailImageURL;
-
-      console.log("thumbnailImageURL " + thumbnailImageURL);
-
-      if (thumbnailImageURL !== undefined) {
-
-        let title = newValue.title;
-        let message = newValue.notification;
-        let urlimage = newValue.thumbnailImageURL;
-        let notificationId = context.params.notificationsId;
-        let document_path = "notifications/" + notificationId + "/user-token-chat";
-        
-        console.log("document_path " + document_path);    
-        
-        
-        return firestore.collection(document_path).get()      
-        .then(function(usersSnapshot) {
-            
-            usersSnapshot.forEach(function(docUserNotification) {
-
-              let notiData = docUserNotification.data();   
-              let token = notiData.token;          
-
-              const payload = {
-                "notification": {
-                    "title": title,
-                    "body": message,
-                    "image":urlimage,
-                  },
-                  "data" : {
-                    "notificationId" : notificationId,
-                  }
-              };      
-                            
-              console.log("payload " + JSON.stringify(payload));          
-
-              admin.messaging().sendToDevice(token, payload).then(function(response) {
-                console.log('Successfully sent message:', response);
-                return response;
-              }).catch((error) => {
-                console.log('Error sending message:', error);
-                return error;
-              });
-              
-              return docUserNotification;
-
-            });    
-
-            return null;
-        
-        }).catch(err=>{
-          console.log("error:  " + err);
-          return err;
-        });  
-
-      } else {
-        return {};
-      }
-
     
-    });  
 
     exports.sms = functions.https.onRequest((req, res) => {
       
