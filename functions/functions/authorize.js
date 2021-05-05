@@ -4,6 +4,60 @@
     // https://fredriccliver.medium.com/port-8080-is-not-open-on-localhost-could-not-start-firestore-emulator-15c8c367d219#:~:text=This%20error%20is%20because%20of,and%20stop%20the%20previous%20process.
     //////////////////////////////
 
+  var notificatonToGroup = async function ( data )  {   
+
+        console.log();
+        console.log("data: " + JSON.stringify(data));
+        console.log();
+
+        var notificationId = data.id;
+
+        const role = data.role;
+        const year = data.year;
+
+        console.log();
+        console.log("role: " + role);
+        console.log("year: " + year);
+        console.log();
+
+        let userRef = firestore.collection("users");
+        let queryResutl = await userRef
+        .where("roleRef", "==", firestore.doc('roles/' + role))
+        .where("yearsRef", "array-contains", firestore.doc('years/' + year)).get()
+        .then(async (querySnapshot) => {
+            
+            size = querySnapshot.docs.length;
+            console.log("size: "+ size);
+
+            if (size>0) {                   
+            
+                await querySnapshot.forEach(async (doc) => {
+
+                    let user = doc.data();
+
+                    /*var notificationRef = await firestore.collection("notifications");         
+                    var notiDoc = await notificationRef.add({            
+                        title: title, 
+                        notification: notification,   
+                        thumbnailImageURL: user.profilePictureURL,              
+                        last_update: new Date(),                        
+                    });*/       
+
+                    var document_path = "notifications/" + notificationId + "/user-token-chat";                 
+                    await firestore.collection(document_path).add({                        
+                        token: user.token,   
+                        userId: user.userID,                                    
+                    });
+                    
+
+                });
+            }
+
+            return {};
+        });
+     
+    };
+
    exports.users = functions.firestore
       .document('users/{userId}')
       .onWrite( async (change,contex) => {
@@ -111,57 +165,5 @@
    
   });   
 
-  var notificatonToGroup = async function ( data )  {   
-
-        console.log();
-        console.log("data: " + JSON.stringify(data));
-        console.log();
-
-        var notificationId = data.id;
-
-        const role = data.role;
-        const year = data.year;
-
-        console.log();
-        console.log("role: " + role);
-        console.log("year: " + year);
-        console.log();
-
-        let userRef = firestore.collection("users");
-        let queryResutl = await userRef
-        .where("roleRef", "==", firestore.doc('roles/' + role))
-        .where("yearsRef", "array-contains", firestore.doc('years/' + year)).get()
-        .then(async (querySnapshot) => {
-            
-            size = querySnapshot.docs.length;
-            console.log("size: "+ size);
-
-            if (size>0) {                   
-            
-                await querySnapshot.forEach(async (doc) => {
-
-                    let user = doc.data();
-
-                    /*var notificationRef = await firestore.collection("notifications");         
-                    var notiDoc = await notificationRef.add({            
-                        title: title, 
-                        notification: notification,   
-                        thumbnailImageURL: user.profilePictureURL,              
-                        last_update: new Date(),                        
-                    });*/       
-
-                    var document_path = "notifications/" + notificationId + "/user-token-chat";                 
-                    await firestore.collection(document_path).add({                        
-                        token: user.token,   
-                        userId: user.userID,                                    
-                    });
-                    
-
-                });
-            }
-
-            return {};
-        });
-     
-    };
+  
 
