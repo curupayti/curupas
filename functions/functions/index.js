@@ -16,7 +16,7 @@
     const os    = require('os');
 
     const mkdirp  = require('mkdirp-promise');
-    const request = require('request');
+    request = require('request');
     const spawn   = require('child-process-promise').spawn;
 
     const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;    
@@ -95,9 +95,8 @@
 
       console.log("pathParam:" + pathParam);   
       
-      if ( pathParam === 'favicon.ico' ) {
-        res.status(204).end();
-        return;
+      if ( pathParam === 'favicon.ico' ) {        
+        return res.status(204).end();
       }
        
       var url = req.url;
@@ -193,6 +192,8 @@
         console.log("urlParams:: " + urlParams);
         console.log("static_url:: " + static_url);
 
+        var response
+
         if (urlParams) {
           return res.render(static_url, urlParams); 
         } else {
@@ -205,12 +206,14 @@
         if (!url) url = location.search;
         var query = url.substr(1);
         var result = {};
-        query.split("&").forEach(function(part) {
+        query.split("&").forEach((part) => {
           var item = part.split("=");
           result[item[0]] = decodeURIComponent(item[1]);
         });
         return result;
       }
+
+      return {};
       
     });
 
@@ -492,6 +495,8 @@
           return { name : _name };
       } 
 
+      return {};
+
     });
    
     
@@ -517,7 +522,7 @@
             body: dataString
         };  
 
-        request(options, function (error, response, body) {
+        request(options, (error, response, body) => { 
 
             if (!error) {
 
@@ -535,7 +540,7 @@
                 return userRef.update({
                   smsId: smsid
                 })
-                .then(function() {
+                .then(() => {
                     res.send(body); 
                     return body;
                 }).catch((error) => {
@@ -555,6 +560,8 @@
           console.log('Error posting SMS:', error);        
           return error;
         });  
+
+        return {};
 
     }); 
     
@@ -602,6 +609,8 @@
         console.error(e);
         return e;
       }      
+
+      return {};
      
 
     });     

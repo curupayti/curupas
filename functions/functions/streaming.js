@@ -1,5 +1,3 @@
-
-  
   var rp = require("request-promise");
   var path = require('path');
   var fs = require('fs'); 
@@ -15,7 +13,7 @@
   var DeleteCollection = function (path, callback) {
     firestore.collection(path).listDocuments().then(val => {
         val.map((val) => {
-            val.delete()
+            return val.delete();
         });
         callback();
         return {};
@@ -55,8 +53,13 @@
       var code = newValue.code;       
 
       if ( fetch_token_trigger || get_playlists ) {   
+
+        var oauth2Client;
         
-        fs.readFile(client_secret, async function processClientSecrets(err, content) {
+        //fs.readFile(client_secret, async function processClientSecrets(err, content) {
+        //fs.readFile(client_secret, (err, content) => {
+
+          var content = fs.readFile(client_secret); 
           
           if (err) {
             console.log('Error loading client secret file: ' + err);
@@ -68,7 +71,7 @@
           let clientSecret = credentials.web.client_secret;
           let clientId = credentials.web.client_id;
           let redirectUrl = credentials.web.redirect_uris[0];
-          var oauth2Client = new OAuth2(clientId, clientSecret, redirectUrl);        
+          oauth2Client = new OAuth2(clientId, clientSecret, redirectUrl);        
 
           console.log("code: " + code);
 
@@ -124,7 +127,7 @@
               var playlistids = [];
       
               rp(options)              
-              .then(async function (results_playlist) {   
+              .then(async (results_playlist) => {   
 
                   var restul = JSON.parse(results_playlist);         
 
@@ -248,14 +251,14 @@
                   },{ merge: true });
                   
                 })                
-                .catch(function (err) {
+                .catch((err) => {
                     console.log("error: " + err );
                 });                        
                  
 
               }
 
-          });
+          //});
 
       }
 
@@ -265,7 +268,9 @@
         let TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
             process.env.USERPROFILE) + '/.credentials/';
         TOKEN_PATH = TOKEN_DIR + 'youtube-nodejs-quickstart.json';        
-        fs.readFile(client_secret, function processClientSecrets(err, content) {
+        
+        fs.readFile(TOKEN_PATH, (err, content) => {
+        
           if (err) {
             console.log('Error loading client secret file: ' + err);
             return;
@@ -280,7 +285,8 @@
         let TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
             process.env.USERPROFILE) + '/.credentials/';
         TOKEN_PATH = TOKEN_DIR + 'youtube-nodejs-quickstart.json';        
-        fs.readFile(client_secret, function processClientSecrets(err, content) {
+        //fs.readFile(client_secret, function processClientSecrets(err, content) {
+        fs.readFile(client_secret, (err, content) => {
           if (err) {
             console.log('Error loading client secret file: ' + err);
             return;
@@ -294,7 +300,7 @@
 
       if ( convert_playlists ) {  
 
-          DeleteCollection("streaming/control/videos", function() {
+          DeleteCollection("streaming/control/videos", () => {
 
               const result = new Promise(async (resolve, reject) => {
 
@@ -313,7 +319,6 @@
                   playlistLength = querySnapshotPlaylist.size;                              
 
                   querySnapshotPlaylist.forEach(async (docPlaylist) => { 
-
 
                       let docp        = docPlaylist.data();
                       var idp         = docp.id;
@@ -363,7 +368,10 @@
                         countPlaylist = 0;
                         return await Promise.all(promise_playlist);
 
+                      } else {
+                        return {};  
                       }
+
                   }); 
 
                   return {};                
@@ -372,6 +380,8 @@
 
                   //console.log("playlist_results::::  " + JSON.stringify(playlist_results));
 
+                  var playlist_prmise = [];
+
                   for (var i=0; i<playlists.length; i++) {
 
                     var idp = playlists[i].uid;
@@ -379,94 +389,94 @@
                     console.log("");
                     console.log("idp: " + idp);                      
 
-                    firestore.collection("streaming").doc("control").collection("media")
-                    .doc(idp).collection("videos").get()
-                    .then(async (querySnapshotVideo) => {
+                    playlist_prmise.push(firestore.collection("streaming").doc("control").collection("media")
+                    .doc(idp).collection("videos"));
 
-                        var videosLength = querySnapshotVideo.size;
-                        var countVideos = 1;  
+                  }
 
-                        console.log("videosLength: " + videosLength);                                        
+                  return Promise.all(playlist_prmise);
 
-                        querySnapshotVideo.forEach(async (docVideo) => {
+              }).then(async (querySnapshotVideo) => {     
 
-                          let docv        = docVideo.data();
-                          var snippetv    = docv.snippet;    
-                          let thumbnailsv = snippetv.thumbnails;
-                          var defaulv     = thumbnailsv.default; 
+                var promise_videos_resolve = await new Promise( async (resolve, reject) => {           
 
-                          let idv           = docv.id;
-                          let title         = snippetv.title;
-                          var description   = "";
+                    var videosLength = querySnapshotVideo.size;
+                    var countVideos = 1;  
 
-                          if (snippetv.description) {
-                              description = snippetv.description;
-                          }
+                    console.log("videosLength: " + videosLength);                                        
 
-                          let channelId     = snippetv.channelId; 
-                          //let localized     = snippetv.localized;  
-                          let channel_title = snippetv.channelTitle;                           
-                          let position      = snippetv.position;              
+                    querySnapshotVideo.forEach(async (docVideo) => {
 
-                          let videoId       = snippetv.resourceId.videoId;
-                          let publishedAt   = snippetv.publishedAt;                            
-                          
-                          let playlistId    = snippetv.playlistId;  
-                          var thumbnailv    = "";
+                      let docv        = docVideo.data();
+                      var snippetv    = docv.snippet;    
+                      let thumbnailsv = snippetv.thumbnails;
+                      var defaulv     = thumbnailsv.default; 
 
-                          console.log("playlistId:" + playlistId);
+                      let idv           = docv.id;
+                      let title         = snippetv.title;
+                      var description   = "";
 
-                          if (defaulv) {
-                            thumbnailv = defaulv.url;
-                          }
+                      if (snippetv.description) {
+                          description = snippetv.description;
+                      }
 
-                          //let j  = `{"id":"${idv}","title":"${title}","description":"${description}","channelId":"${channelId}","position":${position},"videoId":"${videoId}","publishedAt":"${publishedAt}","playlistId":"${playlistId}","thumbnail":"${thumbnailv}"}`;                            
+                      let channelId     = snippetv.channelId; 
+                      //let localized     = snippetv.localized;  
+                      let channel_title = snippetv.channelTitle;                           
+                      let position      = snippetv.position;              
 
-                          let k  = `{                              
-                              "id":"${idv}", 
-                              "title":"${title}",
-                              "uid":"${idv}", 
-                              "description":"${description}",                               
-                              "channelId":"${channelId}",
-                              "channelTitle":"${channel_title}", 
-                              "position":${position}, 
-                              "videoId":"${videoId}", 
-                              "publishedAt":"${publishedAt}", 
-                              "playlistId":"${playlistId}", 
-                              "thumbnail":"${thumbnailv}"                              
-                             }`;  
+                      let videoId       = snippetv.resourceId.videoId;
+                      let publishedAt   = snippetv.publishedAt;                            
+                      
+                      let playlistId    = snippetv.playlistId;  
+                      var thumbnailv    = "";
 
-                          let json_video = JSON.parse( k );    
+                      console.log("playlistId:" + playlistId);
 
-                          promise_videos.push(
-                            firestore.collection("streaming").doc("control").collection("videos").doc(playlistId).collection("videos").add(json_video)
-                          );                         
+                      if (defaulv) {
+                        thumbnailv = defaulv.url;
+                      }
 
-                          console.log("countVideos: " + countVideos + " videosLength: " + videosLength + " countPlaylist: " + countPlaylist + " playlistLength: " + playlistLength);   
+                      //let j  = `{"id":"${idv}","title":"${title}","description":"${description}","channelId":"${channelId}","position":${position},"videoId":"${videoId}","publishedAt":"${publishedAt}","playlistId":"${playlistId}","thumbnail":"${thumbnailv}"}`;                            
 
-                          if ( countVideos === videosLength ) {                                                                                               
-                            if ( countPlaylist === playlistLength ) {                         
+                      let k  = `{                              
+                          "id":"${idv}", 
+                          "title":"${title}",
+                          "uid":"${idv}", 
+                          "description":"${description}",                               
+                          "channelId":"${channelId}",
+                          "channelTitle":"${channel_title}", 
+                          "position":${position}, 
+                          "videoId":"${videoId}", 
+                          "publishedAt":"${publishedAt}", 
+                          "playlistId":"${playlistId}", 
+                          "thumbnail":"${thumbnailv}"                              
+                          }`;  
 
-                              return Promise.all(promise_videos);                                                        
-                            }                                
-                            countPlaylist++; 
-                            countVideos = 1;
-                          }                                               
-                          countVideos++;
+                      let json_video = JSON.parse( k );    
 
-                        });
+                      promise_videos.push(
+                        firestore.collection("streaming").doc("control").collection("videos").doc(playlistId).collection("videos").add(json_video)
+                      );                         
 
-                        return {};  
+                      console.log("countVideos: " + countVideos + " videosLength: " + videosLength + " countPlaylist: " + countPlaylist + " playlistLength: " + playlistLength);   
 
-                    //end videos     
-                    }).catch((error) => {
-                      console.log('Error saving videos:', error);
-                      return error;
+                      if ( countVideos === videosLength ) {                                                                                               
+                        if ( countPlaylist === playlistLength ) {                         
+
+                          //return Promise.all(promise_videos);                                                        
+                          resolve(promise_videos);
+                        }                                
+                        countPlaylist++; 
+                        countVideos = 1;
+                      }                                               
+                      countVideos++;
+
                     });
-                  // end for
-                  }    
 
-                  return {};                
+                  });
+
+                  return Promise.all(promise_videos_resolve);  
 
               }).then(async (promise_videos_results) => {
 
@@ -494,9 +504,7 @@
         //end of deleting collection
         });         
           
-      }
-
-      return newValue;
+      }     
 
     }); 
 
@@ -508,9 +516,9 @@
       var oauth2Client = new OAuth2(clientId, clientSecret, redirectUrl);
 
       // Check if we have previously stored a token.
-      fs.readFile(TOKEN_PATH, function(err, token) {
+      fs.readFile(TOKEN_PATH, (err, token) => {
         if (err) {
-          getNewToken(oauth2Client, callback);
+          return getNewToken(oauth2Client, callback);
         } else {
           oauth2Client.credentials = JSON.parse(token);
           return callback(oauth2Client);
