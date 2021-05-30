@@ -55,8 +55,8 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
 
-    if (_globals.profile_data_loaded == false) {
-      loadProfileData();
+    if (_globals.notification_data_loaded == false) {
+      loadNotificationData();
       _globals.eventBus.on().listen((event) {
         String _event = event.toString();
         if (_event.contains("profile")) {
@@ -84,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  void loadProfileData() async {
+  void loadNotificationData() async {
     setState(() {
       _loading = true;
     });
@@ -92,7 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void loaded() {
-    _globals.profile_data_loaded = true;
+    _globals.notification_data_loaded = true;
     setState(() {
       _loading = false;
     });

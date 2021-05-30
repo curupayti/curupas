@@ -156,9 +156,12 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
     for (var doc in querySnapshot.docs) {
       String year = doc['year'];
       String documentID = doc.id;
-      _groups.add(new Group(
-          year: year, documentID: documentID, yearRef: doc.reference));
-      items.add(new DropdownMenuItem(value: documentID, child: new Text(year)));
+      if ((year != "invitado") && (year != "admin")) {
+        _groups.add(new Group(
+            year: year, documentID: documentID, yearRef: doc.reference));
+        items.add(
+            new DropdownMenuItem(value: documentID, child: new Text(year)));
+      }
     }
     print(items.length);
     return items;
@@ -455,7 +458,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
           Cache.appData.user = user;
           prefs.setBool('group', true);
           prefs.setString('year', year);
-          Cache.appData.user.yearRef = yearRef;
+          Cache.appData.user.yearRefs[0] = yearRef;
           showDialog(
             context: context,
             builder: (BuildContext context) => _buildAboutDialog(context),

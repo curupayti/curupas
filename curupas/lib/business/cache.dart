@@ -1,6 +1,7 @@
 import 'dart:core';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/HTMLS.dart';
 import 'package:curupas/models/curupa_user.dart';
 import 'package:curupas/models/description.dart';
@@ -185,5 +186,159 @@ class Cache {
           .collectionGroup(path)
           .get(GetOptions(source: Source.server));
     }
+  }
+
+  //UPDATES
+  static Future<void> updated(List<Update> _updates) async {
+    UpdateCache updateCache = new UpdateCache();
+    for (var u in _updates) {
+      switch (u.updateType.name) {
+        case "main":
+          updateCache.main = u.updateType;
+          break;
+        case "calendar":
+          updateCache.calendar = u.updateType;
+          break;
+        case "group":
+          updateCache.group = u.updateType;
+          break;
+        case "home":
+          updateCache.home = u.updateType;
+          break;
+        case "profile":
+          updateCache.profile = u.updateType;
+          break;
+      }
+    }
+    appData.updateCache = updateCache;
+    checkUpdateByType(appData.updateCache.main);
+    checkUpdateByType(appData.updateCache.home);
+    checkUpdateByType(appData.updateCache.calendar);
+    checkUpdateByType(appData.updateCache.group);
+    checkUpdateByType(appData.updateCache.profile);
+  }
+
+  static Future<void> checkUpdateByType(UpdateType updateType) async {
+    try {
+      bool updated = false;
+      for (var da in updateType.updates) {
+        String id = da.id;
+        var key = "${updateType.name}-${id}";
+        int timecal = prefs.getInt(key);
+        if (timecal != null) {
+          if (timecal > 0) {
+            DateTime dateCache = DateTime.fromMillisecondsSinceEpoch(
+                (prefs.getInt(key) ?? DateTime.now().millisecondsSinceEpoch));
+            DateTime dateUpdate = da.date.toDate();
+            Duration timeDifference = dateUpdate.difference(dateCache);
+            if (timeDifference.inMilliseconds > 0) {
+              if (updateType.name == "main") {
+                switch (id) {
+                  case "user":
+                    appData.user = null;
+                    updated = true;
+                    _globals.user_data_loaded = false;
+                    break;
+                  case "drawer":
+                    appData.drawerContent = null;
+                    updated = true;
+                    _globals.drawer_data_loaded = false;
+                    break;
+                }
+              }
+              if (updateType.name == "home") {
+                switch (id) {
+                  case "description":
+                    appData.description = null;
+                    updated = true;
+                    break;
+                  case "museums":
+                    appData.museumContent = null;
+                    updated = true;
+                    break;
+                  case "newsletter":
+                    appData.newsletterContent = null;
+                    updated = true;
+                    break;
+                  case "posts":
+                    appData.posts = null;
+                    updated = true;
+                    break;
+                  case "posts":
+                    appData.posts = null;
+                    updated = true;
+                    break;
+                  case "pumas":
+                    appData.pumasContent = null;
+                    updated = true;
+                    break;
+                  case "valores":
+                    appData.valoresContent = null;
+                    updated = true;
+                    break;
+                }
+                _globals.home_data_loaded = false;
+              }
+              if (updateType.name == "calendar") {
+                switch (id) {
+                  case "camada":
+                    appData.calendarCacheCurupas[0] = null;
+                    updated = true;
+                    break;
+                  case "curupa":
+                    appData.calendarCacheCurupas[1] = null;
+                    updated = true;
+                    break;
+                  case "partidos":
+                    appData.calendarCacheCurupas[2] = null;
+                    updated = true;
+                    break;
+                }
+                _globals.calendar_data_loaded = false;
+              }
+              if (updateType.name == "group") {
+                switch (id) {
+                  case "anecdote":
+                    appData.anecdoteContent = null;
+                    updated = true;
+                    break;
+                  case "media":
+                    appData.group.medias = null;
+                    updated = true;
+                    break;
+                  case "giras":
+                    appData.girasContent = null;
+                    updated = true;
+                    break;
+                }
+                _globals.group_data_loaded = false;
+              }
+              if (updateType.name == "profile") {
+                switch (id) {
+                  case "notification":
+                    appData.user = null;
+                    updated = true;
+                    _globals.user_data_loaded = false;
+                    break;
+                }
+              }
+            }
+          } else {
+            setDate(key, da);
+          }
+        } else {
+          setDate(key, da);
+        }
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  static void setDate(String key, UpdateTime da) {
+    int timeUpdate =
+        DateTime.fromMicrosecondsSinceEpoch(da.date.microsecondsSinceEpoch)
+            .millisecondsSinceEpoch;
+    prefs.setInt(key, timeUpdate);
   }
 }

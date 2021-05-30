@@ -23,7 +23,6 @@ class _CalendarPageState extends State<CalendarPage> {
   bool _loading = true;
   int _counting = 0;
   DateTime dateTime;
-  bool loading = true;
   int _beginMonthPadding = 0;
   DateTime _dateTime;
   //String _calendarSelect = "camada";
@@ -54,25 +53,47 @@ class _CalendarPageState extends State<CalendarPage> {
     if (_globals.calendar_data_loaded == false) {
       getCalendar();
     } else {
-      setState(() {
-        loading = false;
-      });
+      loaded();
     }
   }
 
   void getCalendar() async {
-    if (Cache.appData.calendarCacheCurupas[active.id].futureCalendarSnapshot ==
-        null) {
-      Cache.appData.calendarCacheCurupas[active.id].futureCalendarSnapshot =
-          await _globals.getCalendar(active.name).then((snapshot) {
-        Cache.appData.calendarCacheCurupas[active.id].calendarSnapshot =
-            snapshot;
-        _globals.home_data_loaded == true;
-        setState(() {
-          loading = false;
-        });
-      });
+    try {
+      if (Cache.appData.calendarCacheCurupas != null) {
+        if (Cache.appData.calendarCacheCurupas[active.id] == null) {
+          getCalendarByActiveId();
+        } else {
+          loaded();
+        }
+      } else {
+        getCalendarByActiveId();
+      }
+    } on Exception catch (exception) {
+      print(exception.toString());
+    } catch (error) {
+      print(error.toString());
     }
+  }
+
+  void getCalendarByActiveId() async {
+    Cache.appData.calendarCacheCurupas = [];
+    if (active.id >= 0) {
+      await _globals.getCalendar(active.name).then((snapshot) {
+        CalendarCache calendarCache = new CalendarCache();
+        calendarCache.calendarSnapshot = snapshot;
+        Cache.appData.calendarCacheCurupas.insert(active.id, calendarCache);
+        loaded();
+      });
+    } else {
+      loaded();
+    }
+  }
+
+  void loaded() {
+    _globals.calendar_data_loaded = true;
+    setState(() {
+      _loading = false;
+    });
   }
 
   void setActiveUpdate(int id) {
@@ -94,7 +115,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
+    if (_loading) {
       return SpinKitFadingCircle(
         itemBuilder: (BuildContext context, int index) {
           return DecoratedBox(
@@ -161,11 +182,11 @@ class _CalendarPageState extends State<CalendarPage> {
                                               setActiveUpdate(0);
                                               getCalendar();
                                               setState(() {
-                                                loading = true;
+                                                _loading = true;
                                               });
                                               Timer(Duration(seconds: 3), () {
                                                 setState(() {
-                                                  loading = false;
+                                                  _loading = false;
                                                 });
                                               });
                                             }),
@@ -190,11 +211,11 @@ class _CalendarPageState extends State<CalendarPage> {
                                               setActiveUpdate(1);
                                               getCalendar();
                                               setState(() {
-                                                loading = true;
+                                                _loading = true;
                                               });
                                               Timer(Duration(seconds: 3), () {
                                                 setState(() {
-                                                  loading = false;
+                                                  _loading = false;
                                                 });
                                               });
                                             }),
@@ -219,11 +240,11 @@ class _CalendarPageState extends State<CalendarPage> {
                                         setActiveUpdate(2);
                                         getCalendar();
                                         setState(() {
-                                          loading = true;
+                                          _loading = true;
                                         });
                                         Timer(Duration(seconds: 3), () {
                                           setState(() {
-                                            loading = false;
+                                            _loading = false;
                                           });
                                         });
                                       }),

@@ -69,7 +69,7 @@ class _GuestScreenState extends State<GuestScreen> {
 
   LocationData _locationData;
 
-  List<Club> _clubs = new List();
+  List<Club> _clubs = [];
   List<DropdownMenuItem<String>> _clubMenuItems = new List();
   String _currentItem;
   Club _currentClub;

@@ -303,17 +303,21 @@ class Auth {
     return false;
   }
 
-  static Future<List<Update>> getUpdates() async {
-    CollectionReference updateCollection =
-        await FirebaseFirestore.instance.collection("updates");
-    QuerySnapshot collectionSnapshot = await updateCollection.get();
+  static Future<bool> getUpdates() async {
+    final completer = Completer<bool>();
     List<DocumentSnapshot> templist = [];
     List<Update> listUpdates = [];
-    templist = collectionSnapshot.docs;
-    listUpdates = await templist.map((DocumentSnapshot docSnapshot) {
-      return Update.fromDocument(docSnapshot);
-    }).toList();
-    return listUpdates;
+    CollectionReference updateCollection =
+        await FirebaseFirestore.instance.collection("updates");
+    updateCollection.snapshots().listen((collectionSnapshot) async {
+      templist = collectionSnapshot.docs;
+      listUpdates = await templist.map((DocumentSnapshot docSnapshot) {
+        return Update.fromDocument(docSnapshot);
+      }).toList();
+      await Cache.updated(listUpdates);
+      completer.complete();
+    });
+    return completer.future;
   }
 
   static Future<List<GroupMedia>> getMedias(DocumentSnapshot document) async {
@@ -411,7 +415,7 @@ class Auth {
     List<HTML> listContentHtml = [];
     CollectionReference collectionRef = await document.reference
         .collection("collection")
-        .where("group_ref", isEqualTo: group_red);
+        .where("group_ref", arrayContains: group_red); //isEqualTo: group_red);
     QuerySnapshot collectionSnapshot =
         await Cache.getCacheCollection(collectionRef);
     templist = collectionSnapshot.docs;
@@ -463,10 +467,10 @@ class Auth {
   static Future<List<CurupaUser>> getFriends() async {
     List<DocumentSnapshot> templist;
     List<CurupaUser> list = [];
-    DocumentReference yearRef = Cache.appData.user.yearRef;
+    DocumentReference yearRef = Cache.appData.user.yearRefs[0];
     CollectionReference collectionRef = await FirebaseFirestore.instance
         .collection("users")
-        .where("yearRef", isEqualTo: yearRef);
+        .where("yearRef", arrayContains: yearRef);
     QuerySnapshot collectionSnapshot =
         await Cache.getCacheCollection(collectionRef);
     templist = collectionSnapshot.docs;
@@ -615,40 +619,43 @@ class Auth {
         QuerySnapshot collectionSnapshot =
             await Cache.getCacheCollection(collectionRef);
         templist = collectionSnapshot.docs;
-        var docsLength = templist.length;
-        var count = 0;
+        int docsLength = templist.length;
+        int docLengthMinusOne = docsLength - 1;
+        int count = 0;
         List<String> imageList = [];
-        templist.map((DocumentSnapshot docSnapshot) async {
+        await templist.map((DocumentSnapshot docSnapshot) async {
           Map<String, dynamic> doc =
               new Map<String, dynamic>.from(docSnapshot.data());
           var id = doc["uid"];
           //var channelId = doc["channelId"];
-          List<StreamingVideo> streamingvideos =
-              await getStreamingVideosById(id);
+          //List<StreamingVideo> streamingvideos =
+          //    await getStreamingVideosById(id);
           StreamingThumbnail pthumbnail = new StreamingThumbnail();
           pthumbnail.url = doc['thumbnail'];
           Streaming streaming = new Streaming(
             id: doc['id'],
             title: doc['title'],
             channelId: doc['channelId'],
-            playListId: doc['playListId'],
+            playListId: doc['uid'],
             description: doc['description'],
-            videos: streamingvideos,
+            //videos: streamingvideos,
             thumbnail: pthumbnail,
           );
           streaminlistg.add(streaming);
-          print("count: ${count} docsLength: ${docsLength}");
-          if (count == (docsLength - 1)) {
-            return streaminlistg;
-          }
-          count++;
+          print("count: ${count} docLengthMinusOne: ${docLengthMinusOne}");
+          //if (count == docLengthMinusOne) {
+          //  return streaminlistg;
+          //}
+          //count++;
         }).toList();
+        print("streaminlistg: ${streaminlistg.length}");
       } else {
         streaminlistg = Cache.appData.streammer.streamings;
       }
     } on Exception catch (_) {
       print("Error: " + _.toString());
     }
+    return streaminlistg;
   }
 
   static Future<List<StreamingVideo>> getStreamingVideosById(String id) async {

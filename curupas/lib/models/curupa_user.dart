@@ -14,7 +14,7 @@ class CurupaUser {
   final String thumbnailPictureURL;
   final String thumbnailPicture;
   final LocationData locationData;
-  DocumentReference yearRef;
+  List<DocumentReference> yearRefs;
   DocumentReference userRef;
   final DocumentReference roleRef;
   Group group;
@@ -37,7 +37,7 @@ class CurupaUser {
       this.thumbnailPictureURL,
       this.thumbnailPicture,
       this.locationData,
-      this.yearRef,
+      this.yearRefs,
       this.group,
       this.nonSpName,
       this.authorized,
@@ -64,7 +64,7 @@ class CurupaUser {
       'profilePicture': profilePicture,
       'thumbnailPictureURL': thumbnailPictureURL,
       'thumbnailPicture': thumbnailPicture,
-      'yearRef': yearRef,
+      'yearRefs': yearRefs,
       'location': geo,
       'year': year,
       'nonSpName': nonSpName,
@@ -92,7 +92,7 @@ class CurupaUser {
     } catch (error) {
       print(error.toString());
     }
-    DocumentReference yearReference = doc['yearRef'];
+    List<DocumentReference> yearReferences = List.from(doc['yearRefs']);
     CurupaDevice curupaDevice;
     if (doc['device_log'] != null) {
       DocumentSnapshot docDevice = doc['device_log'] as DocumentSnapshot;
@@ -110,7 +110,7 @@ class CurupaUser {
         thumbnailPictureURL: doc['thumbnailPictureURL'],
         thumbnailPicture: doc['thumbnailPicture'],
         locationData: locData,
-        yearRef: yearReference,
+        yearRefs: yearReferences,
         group: doc['group'],
         nonSpName: doc['nonSpName'],
         authorized: doc['authorized'],
@@ -125,8 +125,8 @@ class CurupaUser {
     return CurupaUser.fromJson(doc.data());
   }
 
-  void setyearReference(DocumentReference ref) {
-    yearRef = ref;
+  void setyearReference(List<DocumentReference> ref) {
+    yearRefs = ref;
   }
 
   void setUserReference(DocumentReference ref) {

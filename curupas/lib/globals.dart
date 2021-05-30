@@ -30,6 +30,7 @@ import 'models/curupa_user.dart';
 import 'models/group_media.dart';
 import 'models/museum.dart';
 import 'models/streaming.dart';
+import 'models/streaming_video.dart';
 
 //Events
 EventBus eventBus = EventBus();
@@ -52,33 +53,44 @@ String error_unknown = "ERROR_UNKNOWN";
 String register_error_title = "Error en el registro";
 String signin_error_title = "Error de autentificación";
 
+bool user_data_loaded = false;
+bool drawer_data_loaded = false;
 bool home_data_loaded = false;
 bool calendar_data_loaded = false;
 bool streaming_data_loaded = false;
 bool group_data_loaded = false;
-bool profile_data_loaded = false;
+bool notification_data_loaded = false;
 
 Future<CurupaUser> getUserData(String userId) async {
   CurupaUser _user = new CurupaUser();
-  if (userId != null) {
-    _user = await Auth.getUser(userId);
-    if (_user.yearRef != null) {
-      DocumentSnapshot yearSnapshot =
-          await Cache.getCacheDocumentByReference(_user.yearRef);
-      if (yearSnapshot.exists) {
-        try {
-          Cache.appData.group = await Group.fromDocument(yearSnapshot);
-          _user.group = Cache.appData.group;
-          return _user;
-        } on Exception catch (exception) {
-          print(exception.toString());
-        } catch (error) {
-          print(error.toString());
-        }
+  if (Cache.appData.user.userID == null) {
+    if (userId != null) {
+      _user = await Auth.getUser(userId);
+      _user = await getGroupData(_user);
+    }
+  } else {
+    _user = await getGroupData(Cache.appData.user);
+  }
+  return _user;
+}
+
+Future<CurupaUser> getGroupData(CurupaUser _user) async {
+  if (_user.yearRefs != null) {
+    DocumentSnapshot yearSnapshot =
+        await Cache.getCacheDocumentByReference(_user.yearRefs[0]);
+    if (yearSnapshot.exists) {
+      try {
+        Cache.appData.group = await Group.fromDocument(yearSnapshot);
+        _user.group = Cache.appData.group;
+        eventBus.fire("profile-user");
+        return _user;
+      } on Exception catch (exception) {
+        print(exception.toString());
+      } catch (error) {
+        print(error.toString());
       }
     }
   }
-  //return _user;
 }
 
 class CurupaGuest {
@@ -432,10 +444,23 @@ void getNotifications() async {
 }
 
 //MEDIA
-void getStreaming() async {
-  List<Streaming> _streamings = await Auth.getStreaming();
-  Cache.appData.streammer.serStreamings(_streamings);
-  eventBus.fire("home-streamings");
+void getStreamingCollected() async {
+  try {
+    List<Streaming> _streamings = await Auth.getStreaming();
+    for (var i = 0; i < _streamings.length; i++) {
+      Streaming streaming = _streamings[i];
+      var playListId = streaming.playListId;
+      List<StreamingVideo> streamingvideos =
+          await Auth.getStreamingVideosById(playListId);
+      //Cache.appData.streammer.streamings[i].videos = streamingvideos;
+      streaming.videos = streamingvideos;
+      Cache.appData.streammer.streamings.add(streaming);
+    }
+    Cache.appData.streammer.serStreamings(Cache.appData.streammer.streamings);
+    eventBus.fire("home-streamings");
+  } on Exception catch (error) {
+    print("Error: " + error.toString());
+  }
 }
 
 Future<File> writeYoutubeLog(int counter, String content) async {
