@@ -62,9 +62,10 @@
     firebase.functions().useFunctionsEmulator("http://localhost:5001");
 
     //streaming
-    exports.streaming = require("./streaming");
-    exports.share     = require("./share");
-    exports.authorize = require("./authorize");
+    exports.streaming     = require("./streaming");
+    exports.share         = require("./share");
+    exports.authorize     = require("./authorize");
+    exports.update        = require("./update");
     exports.notifications = require("./notifications");
     
     var OPTION_SHARE  = 'share';            

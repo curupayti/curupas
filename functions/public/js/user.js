@@ -124,7 +124,7 @@
                 phone: $('#edit-user-form  #employee-phone').val()
             });*/
 
-            $(evt.target).is(':checked');
+            $(event.target).is(':checked');
 
 
             $('#editUserModal').modal('hide');
