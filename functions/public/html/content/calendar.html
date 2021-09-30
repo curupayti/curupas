@@ -26,13 +26,29 @@
         <label class="btn btn-secondary">
           <input
             type="radio"
-            name="options"
+            name="options"s
             value="partidos"
             id="partidos"
             autocomplete="off"
           />
           partidos
         </label>
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            categorias
+          </button>
+          <div id="categoryDrop" class="dropdown-menu">
+            <!--<a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <a class="dropdown-item" href="#">Something else here</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Separated link</a>-->
+          </div>
+        </div>
+        <!--<label class="btn btn-secondary dropdown-toggle">
+          <ul id="categoryDrop" class="dropdown-menu"></ul>            
+          categorias
+        </label>-->
       </div>
       <button type="button" class="btn btn-primary mb-3" onclick="closeModal()">
         Nuevo Evento
@@ -92,13 +108,24 @@
                     required
                   />
                 </div>
-                <div class="form-group">
-                  <label for="type">type</label>
-                  <select class="form-control" id="type" required>
-                    <option selected value="camada">Camada</option>
-                    <option value="curupa">Curupas</option>
-                    <option value="partidos">Partidos</option>
-                  </select>
+                <div style="margin-left:0px" class="row">
+                  <div class="form-group">
+                    <label for="type">Tipo</label>
+                    <select class="form-control" id="type" required>
+                      <option selected value="camada">Camada</option>
+                      <option value="curupa">Curupas</option>
+                      <option value="partidos">Partidos</option>
+                      <option value="categorias">Categorias</option>                    
+                    </select>
+                  </div>        
+                  <div id="categorySelect" class="form-group" style="margin-left:20px; display:none">
+                    <label for="typeCategory">Categorias</label>
+                    <select class="form-control" id="categorytype" required>                      
+                      <!--<option value="curupa">Curupas</option>
+                      <option value="partidos">Partidos</option>
+                      <option value="categorias">Categorias</option>-->                    
+                    </select>
+                  </div>
                 </div>
                 <div class="form-group">
                   <label for="date">Event Start Date</label>

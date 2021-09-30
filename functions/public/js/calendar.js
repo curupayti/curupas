@@ -12,10 +12,43 @@ $(document).ready(function () {
     getSelectedCalendar(this.value);
   });
 
-  function getSelectedCalendar(type) {
+  // REAL TIME LISTENER
+  db.collection('categories').onSnapshot(snapshot => {                
+      let changes = snapshot.docChanges();
+      changes.forEach(change => {
+        var id = change.doc.id;       
+        let item = '<a id="' + id + '" class="dropdown-item" href="#">' + id + '</a>';       
+        $("#categoryDrop").append(item);
+        let itemCategry = '<option value="' + id + '">' + id + '</option>';        
+        $("#categorytype").append(itemCategry);
+      });
+      $(".dropdown-menu a").click(function(){
+        var selText = $(this).text();
+        $("#type-toggle .btn").removeClass("active");    
+        var btn = $(this).parents('.btn-group').find('.dropdown-toggle');
+        btn.addClass("active");
+        btn.html(selText+'<span class="caret"></span>');
+        getSelectedCalendar("categorias", selText + "_categorias");
+      });
+  }); 
+
+  $("#type").change(function () {
+    var typeVal= $(this).val();
+    if(typeVal=="categorias") { 
+      $("#categorySelect").css("display", "block");      
+    } else {
+      $("#categorySelect").css("display", "none");      
+    }
+    console.log(typeVal);
+  });
+
+  function getSelectedCalendar(type, collection) {
+    if (collection==undefined) { 
+      collection= type;
+    }
     db.collection("calendar")
       .doc(type)
-      .collection(type + "_collection")
+      .collection(collection + "_collection")
       .get()
       .then((response) => {
         var calendarEvents = [];
@@ -178,6 +211,13 @@ $(document).ready(function () {
     const name = $("#name").val();
     const desc = $("#description").val();
     const type = $("#type").val();
+    var collection;
+    if (type=="categorias") {      
+      const categorytype = $("#categorytype").val();
+      collection = categorytype + "_categorias_collection"      
+    } else {  
+      collection = type + "_collection";
+    }
     const start = $("#start").val();
     const start_time = $("#start_time").val();
     var end = $("#end").val();
@@ -196,7 +236,7 @@ $(document).ready(function () {
     if (!selectedEvent) {
       db.collection("calendar")
         .doc(type)
-        .collection(type + "_collection")
+        .collection(collection)
         .add({
           name,
           summary: desc,
