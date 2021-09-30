@@ -26,6 +26,7 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 import 'business/auth.dart';
 import 'business/cache.dart';
 import 'models/HTMLS.dart';
+import 'models/category.dart';
 import 'models/curupa_user.dart';
 import 'models/group_media.dart';
 import 'models/museum.dart';
@@ -55,22 +56,42 @@ String signin_error_title = "Error de autentificación";
 
 bool user_data_loaded = false;
 bool drawer_data_loaded = false;
+bool years_data_loaded = false;
+bool categories_data_loaded = false;
+
 bool home_data_loaded = false;
 bool calendar_data_loaded = false;
 bool streaming_data_loaded = false;
 bool group_data_loaded = false;
 bool notification_data_loaded = false;
 
+String calendar_active_button = "calendar_active_button";
+
 Future<CurupaUser> getUserData(String userId) async {
   CurupaUser _user = new CurupaUser();
-  if (Cache.appData.user.userID == null) {
-    if (userId != null) {
-      _user = await Auth.getUser(userId);
-      _user = await getGroupData(_user);
+  try {
+    //prefs = await SharedPreferences.getInstance();
+    //bool force = prefs.getBool(force_update_user);
+    //prefs.setBool(force_update_user, false);
+    //if (force) {
+    //if (userId != null) {
+    //_user = await Auth.getUser(userId);
+    //_user = await getGroupData(_user);
+    //}
+    //} else
+    if ((Cache.appData.user.userID == null) ||
+        (Cache.appData.user.isRegistering)) {
+      if (userId != null) {
+        _user = await Auth.getUser(userId);
+        _user = await getGroupData(_user);
+      }
+    } else {
+      _user = await getGroupData(Cache.appData.user);
     }
-  } else {
-    _user = await getGroupData(Cache.appData.user);
+  } catch (error) {
+    print(error);
   }
+  eventBus.fire("main-user");
   return _user;
 }
 
@@ -295,6 +316,11 @@ Future<bool> sendUserSMSVerification(
 
 //MAIN
 
+Future<void> loadUpdates() async {
+  prefs = await SharedPreferences.getInstance();
+  return await Auth.getUpdates();
+}
+
 void getDrawers() async {
   if (Cache.appData.drawerContent == null) {
     HTMLS _pumasContent = await Auth.getHtmlContentByType("drawer");
@@ -381,20 +407,76 @@ void getPosts() async {
 }
 
 //CALENDAR
-Future<QuerySnapshot> getCalendar(String name) async {
+Future<QuerySnapshot> getCalendar(String name, int id) async {
   QuerySnapshot querySnapshot;
-  await Auth.getCalendarData(name).then((snapshot) {
+  String path;
+  if (id == 3) {
+    path =
+        "calendar/${name}/${Cache.appData.user.category.documentID}_collection";
+  } else {
+    path = "calendar/${name}/${name}_collection";
+  }
+  await Auth.getCalendarData(path).then((snapshot) {
     querySnapshot = snapshot;
   });
   return querySnapshot;
 }
 
-Future<QuerySnapshot> getCalendarEvents(DateTime dateTime, String name) {
+Future<QuerySnapshot> getCalendarEvents(
+    DateTime dateTime, String name, int id) {
   Auth.getCalendarEvents(dateTime, name).then((snapshot) {
     //_userEventSnapshot = snapshot;
     eventBus.fire("calendar-event");
     return snapshot;
   });
+}
+
+//CATEGORIES
+
+//Future<List<DropdownMenuItem<String>>> getCategoryList() async {
+Future<List<Category>> getCategoryList() async {
+  //List<DropdownMenuItem<String>> items = [];
+  QuerySnapshot querySnapshot =
+      await Cache.getCacheCollectionByPath("categories");
+  //items.add(new DropdownMenuItem(value: null, child: new Text("----")));
+  List<Category> categories = [];
+  for (var doc in querySnapshot.docs) {
+    String category = doc.id; //['year'];
+    String documentID = doc.id;
+    DocumentReference catRef =
+        FirebaseFirestore.instance.collection('categorias').doc(category);
+    categories.add(new Category(
+        category: category, documentID: documentID, categoryRef: catRef));
+    //items.add(
+    //    new DropdownMenuItem(value: documentID, child: new Text(category)));
+  }
+  Cache.appData.categories = categories;
+  //print(items.length);
+  return categories;
+}
+
+//Future<List<DropdownMenuItem<String>>> getGroupsList() async {
+Future<List<Group>> getGroupsList() async {
+  //List<DropdownMenuItem<String>> items = [];
+  QuerySnapshot querySnapshot = await Cache.getCacheCollectionByPath("years");
+  //items.add(new DropdownMenuItem(value: null, child: new Text("----")));
+  List<Group> groups = [];
+  for (var doc in querySnapshot.docs) {
+    String year = doc['year'];
+    String documentID = doc.id;
+    if ((year != "invitado") && (year != "admin")) {
+      DocumentReference groupRef =
+          FirebaseFirestore.instance.collection('years').doc(doc.reference.id);
+      groups.add(new Group(
+          year: year,
+          documentID: documentID,
+          yearRef: groupRef)); //doc.reference));
+      //items.add(
+      //    new DropdownMenuItem(value: documentID, child: new Text(year)));
+    }
+  }
+  //print(items.length);
+  return groups;
 }
 
 //GROUP
@@ -433,7 +515,7 @@ void getGiras() async {
 
 void getNotifications() async {
   if (Cache.appData.notifications == null) {
-    Auth.getNotifications().then((data) {
+    await Auth.getNotifications().then((data) {
       Cache.appData.notifications = data;
       Cache.appData.notifications.sort((a, b) {
         return a.last_update.compareTo(b.last_update);

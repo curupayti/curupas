@@ -26,7 +26,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 //https://pub.dev/packages/flutter_staggered_grid_view#-example-tab-
 
@@ -67,6 +66,8 @@ class _MainScreenState extends State<MainScreen> {
 
   int currentTab = 0;
 
+  int _counting = 0;
+
   List<Widget> pages;
   Widget currentPage;
   List<PopChoice> currentChoice;
@@ -77,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
 
   bool _loading = true;
 
-  SharedPreferences prefs;
+  //SharedPreferences prefs;
 
   String curupasUrl = 'https://curupas.com.ar/';
 
@@ -241,16 +242,29 @@ class _MainScreenState extends State<MainScreen> {
 
     _selectedChoice = choice_profile[0];
 
-    try {
-      // _loadUpdates();
+    listenNotifications();
 
+    _globals.eventBus.on().listen((event) {
+      String _event = event.toString();
+      if (_event.contains("main")) {
+        _counting = _counting + 1;
+        if (_counting == 2) {
+          setState(() {
+            updeteWidget();
+          });
+        }
+      }
+    });
+
+    try {
       initPlatformState().then((device) {
         if (device["isPhysicalDevice"]) {
           isPhysicalDevice = device["isPhysicalDevice"];
         }
-        _loadUpdates().then((resultUpdated) async {
+        _globals.loadUpdates().then((resultUpdated) async {
           isRegistered().then((result) async {
             if (result) {
+              await _globals.getCategoryList();
               _globals.setFilePickerGlobal();
               String userId = prefs.getString('userId');
               await _globals.getUserData(userId).then((CurupaUser user) async {
@@ -329,12 +343,6 @@ class _MainScreenState extends State<MainScreen> {
                         userId: user.userID,
                         phone: Cache.appData.curupaGuest.phone),
                   );
-                } else if (!user.authorized) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) =>
-                        _buildNotAcceptedDialog(context),
-                  );
                 }
               });
             }
@@ -399,22 +407,6 @@ class _MainScreenState extends State<MainScreen> {
         // do something
       },
     );
-
-    listenNotifications();
-
-    _globals.eventBus.on().listen((event) {
-      String _event = event.toString();
-      if (_event.contains("main")) {
-        setState(() {
-          updeteWidget();
-        });
-      }
-    });
-  }
-
-  Future<void> _loadUpdates() async {
-    prefs = await SharedPreferences.getInstance();
-    return await Auth.getUpdates();
   }
 
   void handleClick(String value) {
@@ -434,9 +426,14 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<bool> getRegistered() async {
-    bool registered = prefs.getBool('registered');
-    bool guest = (prefs.getBool('guest') ?? false);
-    Cache.appData.curupaGuest.isGuest = guest;
+    bool registered = false;
+    try {
+      registered = _globals.prefs.getBool('registered');
+      bool guest = (prefs.getBool('guest') ?? false);
+      Cache.appData.curupaGuest.isGuest = guest;
+    } catch (error) {
+      print("error: ${error}");
+    }
     return registered;
   }
 
@@ -515,7 +512,7 @@ class _MainScreenState extends State<MainScreen> {
             child: const Padding(
               padding: const EdgeInsets.only(left: 20.0),
               child: const Text(
-                'El regreso virtual es crecimiento',
+                'Curupas',
                 style: const TextStyle(fontSize: 20.0),
               ),
             ),
@@ -535,7 +532,7 @@ class _MainScreenState extends State<MainScreen> {
       return ScreenUtilInit(
         designSize: Size(640, 1136),
         allowFontScaling: false,
-        child: Stack(
+        builder: () => Stack(
           children: <Widget>[
             new Container(
               height: MediaQuery.of(context).size.height,

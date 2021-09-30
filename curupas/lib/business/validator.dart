@@ -4,6 +4,11 @@ class Validator {
         .contains(new RegExp(r"^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$"));
   }
 
+  static bool validateSurname(String text) {
+    return text
+        .contains(new RegExp(r"^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$"));
+  }
+
   static bool validatePhone(String text) {
     Pattern pattern = r'^(?:[+0]9)?[0-9]{10}$';
     RegExp regex = new RegExp(pattern);

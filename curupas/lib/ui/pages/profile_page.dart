@@ -46,6 +46,30 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading == false) {
+      _fullnameController.text = Cache.appData.user.name;
+      _groupController.text = Cache.appData.group.year;
+      _emailController.text = Cache.appData.user.email;
+      _phoneController.text = Cache.appData.user.phone;
+      _birthdayController.text = Cache.appData.user.birthday;
+
+      NetworkImage image;
+      String _url, assetName;
+      //String _assetName = "assets/images/profile_picture.png";
+      if (Cache.appData.user.thumbnailPictureURL != null) {
+        _url = Cache.appData.user.thumbnailPictureURL;
+      } else {
+        if (Cache.appData.user.profilePictureURL != null) {
+          _url = Cache.appData.user.profilePictureURL;
+        }
+      }
+
+      _avatarImage = new DecorationImage(
+        image: NetworkImage(_url),
+        fit: BoxFit.cover,
+      );
+    } //else {}
+
     return Container(
       child: ProfilePageScreen(this, _loading),
     );
@@ -69,18 +93,8 @@ class _ProfilePageState extends State<ProfilePage> {
       });
     } else {
       loaded();
-      _fullnameController.text = Cache.appData.user.name;
-      _groupController.text = Cache.appData.group.year;
-      _emailController.text = Cache.appData.user.email;
-      _phoneController.text = Cache.appData.user.phone;
-      _birthdayController.text = Cache.appData.user.birthday;
 
-      _avatarImage = new DecorationImage(
-        image: new NetworkImage(Cache.appData.user.thumbnailPictureURL != null
-            ? Cache.appData.user.thumbnailPictureURL
-            : ""),
-        fit: BoxFit.cover,
-      );
+      print("");
     }
   }
 
@@ -311,48 +325,60 @@ class UpperSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Cache.appData.curupaGuest.isGuest == false
-                        ? new Container(
-                            width: 120.0,
-                            height: 120.0,
-                            decoration: new BoxDecoration(
-                              shape: BoxShape.circle,
-                              image:
-                                  parent != null && parent._avatarImage != null
-                                      ? parent._avatarImage
-                                      : "",
-                            ),
-                          )
-                        : Text(
-                            Cache.appData.user.name,
-                            style: DefaultTextStyle.of(context)
-                                .style
-                                .apply(fontSizeFactor: 2.0),
-                          ),
-                  ],
-                ),
-                Cache.appData.curupaGuest.isGuest == false
-                    ? Padding(
-                        padding: EdgeInsets.only(top: 80.0, right: 60.0),
-                        child: new Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            new GestureDetector(
-                              onTap: () {
-                                optionForPic(context);
-                              },
-                              child: new CircleAvatar(
-                                backgroundColor: Colors.red,
-                                radius: 25.0,
-                                child: new Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.white,
-                                ),
+                    if (Cache.appData.curupaGuest.isGuest == false)
+                      new Stack(
+                        children: <Widget>[
+                          Align(
+                            alignment: Alignment.center,
+                            child: new Container(
+                              width: 120.0,
+                              height: 120.0,
+                              decoration: new BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: parent != null &&
+                                        parent._avatarImage != null
+                                    ? parent._avatarImage
+                                    : "",
                               ),
                             ),
-                          ],
-                        ))
-                    : Padding(
+                          ),
+                          Padding(
+                              padding: EdgeInsets.only(top: 80.0, right: 60.0),
+                              child: new Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  new GestureDetector(
+                                    onTap: () {
+                                      optionForPic(context);
+                                    },
+                                    child: new CircleAvatar(
+                                      backgroundColor: Colors.red,
+                                      radius: 25.0,
+                                      child: new Icon(
+                                        Icons.camera_alt,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )),
+                          Padding(
+                            padding: EdgeInsets.only(top: 145.0),
+                            child: Text(
+                              Cache.appData.user.name,
+                              style: DefaultTextStyle.of(context)
+                                  .style
+                                  .apply(fontSizeFactor: 2.0),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+                if (Cache.appData.curupaGuest.isGuest == true)
+                  new Stack(
+                    children: <Widget>[
+                      Padding(
                         padding: const EdgeInsets.only(
                             left: 20.0, right: 20.0, top: 50.0),
                         child: Text(
@@ -368,27 +394,29 @@ class UpperSection extends StatelessWidget {
                           ),
                         ),
                       ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 80.0, top: 120.0),
-                  child: CustomFlatButton(
-                    enabled: true,
-                    title: "REGISTRAR",
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    textColor: Colors.white,
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/signup',
-                        arguments: Cache.appData.user,
-                      );
-                    },
-                    splashColor: Colors.red,
-                    borderColor: Color.fromRGBO(0, 29, 126, 1),
-                    borderWidth: 0,
-                    color: Colors.red,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 80.0, top: 120.0),
+                        child: CustomFlatButton(
+                          enabled: true,
+                          title: "REGISTRAR",
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          textColor: Colors.white,
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/signup',
+                              arguments: Cache.appData.user,
+                            );
+                          },
+                          splashColor: Colors.red,
+                          borderColor: Color.fromRGBO(0, 29, 126, 1),
+                          borderWidth: 0,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
               ]),
             ],
           ),

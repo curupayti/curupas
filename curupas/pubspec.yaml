@@ -136,6 +136,8 @@ flutter:
     - assets/images/11.png
     - assets/images/12.png
     - assets/images/group_backgrnd.png
+    - assets/images/picture.png
+    - assets/images/profileblank.png
 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

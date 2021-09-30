@@ -36,13 +36,16 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final TextEditingController _fullname = new TextEditingController();
+  //final TextEditingController _fullname = new TextEditingController();
+  final TextEditingController _name = new TextEditingController();
+  final TextEditingController _surname = new TextEditingController();
   final TextEditingController _number = new TextEditingController();
   final TextEditingController _birthday = new TextEditingController();
   final TextEditingController _email = new TextEditingController();
   final TextEditingController _password = new TextEditingController();
 
   CustomTextField _nameField;
+  CustomTextField _surnameField;
   CustomTextField _phoneField;
   CustomTextField _birthdayField;
   CustomTextField _emailField;
@@ -116,10 +119,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
       baseColor: Colors.grey,
       borderColor: Colors.grey[400],
       errorColor: Colors.red,
-      controller: _fullname,
-      hint: "Nombre completo",
+      controller: _name,
+      hint: "Nombre",
       inputAction: TextInputAction.done,
       validator: Validator.validateName,
+    );
+
+    _surnameField = new CustomTextField(
+      baseColor: Colors.grey,
+      borderColor: Colors.grey[400],
+      errorColor: Colors.red,
+      controller: _surname,
+      hint: "Apellido",
+      inputAction: TextInputAction.done,
+      validator: Validator.validateSurname,
     );
 
     inputDoneSignUp = new InputDoneSignUp(this);
@@ -187,7 +200,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         bool completed = true;
         if (!_imageSelected) {
           completed = false;
-        } else if (_fullname.text.isEmpty) {
+        } else if (_name.text.isEmpty) {
+          completed = false;
+        } else if (_surname.text.isEmpty) {
           completed = false;
         } else if (_number.text.isEmpty) {
           completed = false;
@@ -204,16 +219,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     });
 
-    if (widget.user != null) {
-      setState(() {
-        /*_fullname.text = "Jose Vigil";
-          _number.text = "1169776624";
-          _birthday.text = "30/09/1973";
-          _email.text = "josemanuelvigil@gmail.com";*/
-        _fullname.text = widget.user.name;
-        _number.text = widget.user.phone;
-      });
-    }
+    //if (widget.user != null) {
+    //setState(() {
+    //_fullname.text = "Jose Vigil";
+    //_number.text = "1169776624";
+    //_birthday.text = "30/09/1973";
+    //_email.text = "josemanuelvigil@gmail.com";
+    //_fullname.text = widget.user.name;
+    //_number.text = widget.user.phone;
+    //});
+    //}
 
     /*setState(() {
       _fullname.text = "Atilio Beronelli";
@@ -258,7 +273,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       enabled: enabled,
       onPressed: () {
         _signUp(
-            fullname: _fullname.text,
+            name: _name.text,
+            surname: _surname.text,
             phone: _number.text,
             birthday: _birthday.text,
             email: _email.text,
@@ -471,6 +487,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     Padding(
                       padding:
+                          EdgeInsets.only(top: 20.0, left: 15.0, right: 15.0),
+                      child: _surnameField,
+                    ),
+                    Padding(
+                      padding:
                           EdgeInsets.only(top: 10.0, left: 15.0, right: 15.0),
                       child: _phoneField,
                     ),
@@ -575,7 +596,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _signUp(
-      {String fullname,
+      {String name,
+      String surname,
       String phone,
       String birthday,
       String email,
@@ -641,9 +663,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 onPressed: _changeBlackVisible,
               );
             } else {
-              String loweName = fullname.toLowerCase();
-              String toUnderscore = loweName.replaceAll(" ", "_");
-              String toNonSpecial = removeDiacritics(toUnderscore);
+              String loweName = name.toLowerCase();
+              String loweSurname = surname.toLowerCase();
+              String toUnderscoreName = loweName.replaceAll(" ", "_");
+              String toUnderscoreSurname = loweSurname.replaceAll(" ", "_");
+              String toAll = "${toUnderscoreName + "_" + toUnderscoreSurname}";
+              String toNonSpecial = removeDiacritics(toAll);
 
               SharedPreferences prefs = await SharedPreferences.getInstance();
               prefs.setString('userId', uID);
@@ -660,13 +685,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   userID: uID,
                   phone: phone,
                   email: email,
-                  name: fullname,
+                  name: name,
+                  surname: surname,
                   birthday: birthday,
                   nonSpName: toNonSpecial,
                   roleRef: roleRef,
                   smsCode: code,
                   authorized: false,
                   locationData: _locationData);
+
+              Cache.appData.user = user;
 
               var message = _globals.getCodeMessgae(code);
 

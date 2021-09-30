@@ -1,15 +1,13 @@
-import 'package:curupas/utils/common_class.dart';
-import 'package:flutter/cupertino.dart';
-import "package:flutter/material.dart";
 //import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:curupas/business/auth.dart';
 import 'package:curupas/business/validator.dart';
-import 'package:flutter/services.dart';
 import 'package:curupas/globals.dart' as _globals;
-import 'package:curupas/models/curupa_user.dart';
-import 'package:curupas/ui/widgets/alert_sms_dialog.dart';
 import 'package:curupas/ui/widgets/flat_button.dart';
 import 'package:curupas/ui/widgets/text_field.dart';
+import 'package:curupas/utils/common_class.dart';
+import 'package:flutter/cupertino.dart';
+import "package:flutter/material.dart";
+import 'package:flutter/services.dart';
 
 class SignInScreen extends StatefulWidget {
   _SignInScreenState createState() => _SignInScreenState();
@@ -40,7 +38,8 @@ class _SignInScreenState extends State<SignInScreen> {
   void initState() {
     super.initState();
 
-    _email.text = "josemanuelvigil@gmail.com";
+    //_email.text = "josemanuelvigil@gmail.com";
+    _email.text = "jose@gmail.com";
     _password.text = "master";
 
     /*_numberField = new CustomTextField(
@@ -109,7 +108,6 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _createLoginButton(bool enabled, Color textColor) {
-
     _loginButton = CustomFlatButton(
       title: "Ingresa",
       fontSize: 22,

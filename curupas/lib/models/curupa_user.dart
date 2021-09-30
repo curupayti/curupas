@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curupas/business/cache.dart';
 import 'package:curupas/models/device.dart';
 import 'package:curupas/models/group.dart';
 import 'package:location/location.dart';
 
+import 'category.dart';
+
 class CurupaUser {
   final String userID;
   final String name;
+  final String surname;
   final String phone;
   final String birthday;
   final String email;
@@ -17,6 +21,7 @@ class CurupaUser {
   List<DocumentReference> yearRefs;
   DocumentReference userRef;
   final DocumentReference roleRef;
+  final Category category;
   Group group;
   final String nonSpName;
   final bool authorized;
@@ -25,10 +30,12 @@ class CurupaUser {
   final bool smsChecked;
   String token;
   CurupaDevice curupaDevice;
+  bool isRegistering;
 
   CurupaUser(
       {this.userID,
       this.name,
+      this.surname,
       this.phone,
       this.birthday,
       this.email,
@@ -38,6 +45,7 @@ class CurupaUser {
       this.thumbnailPicture,
       this.locationData,
       this.yearRefs,
+      this.category,
       this.group,
       this.nonSpName,
       this.authorized,
@@ -46,7 +54,8 @@ class CurupaUser {
       this.smsId,
       this.smsChecked,
       this.token,
-      this.curupaDevice});
+      this.curupaDevice,
+      this.isRegistering});
 
   Map<String, Object> toJson() {
     GeoPoint geo = GeoPoint(locationData.latitude, locationData.longitude);
@@ -57,6 +66,7 @@ class CurupaUser {
     return {
       'userID': userID,
       'name': name,
+      'surname': surname,
       'phone': phone,
       'birthday': birthday,
       'email': email,
@@ -65,6 +75,7 @@ class CurupaUser {
       'thumbnailPictureURL': thumbnailPictureURL,
       'thumbnailPicture': thumbnailPicture,
       'yearRefs': yearRefs,
+      'category': category,
       'location': geo,
       'year': year,
       'nonSpName': nonSpName,
@@ -99,10 +110,18 @@ class CurupaUser {
       curupaDevice = new CurupaDevice.fromDocument(docDevice);
     }
 
+    Category category;
+    if (doc['categoryRef'] != null) {
+      DocumentReference categoryRef = doc['categoryRef'] as DocumentReference;
+      //category = new Category.fromDocument(categoryRef);
+      category = Cache.getCategoryFromId(categoryRef.id);
+    }
+
     CurupaUser user = new CurupaUser(
         userID: doc['userID'],
         phone: doc['phone'],
         name: doc['name'],
+        surname: doc['surname'],
         birthday: doc['birthday'],
         email: doc['email'],
         profilePictureURL: doc['profilePictureURL'],
@@ -112,6 +131,7 @@ class CurupaUser {
         locationData: locData,
         yearRefs: yearReferences,
         group: doc['group'],
+        category: category,
         nonSpName: doc['nonSpName'],
         authorized: doc['authorized'],
         roleRef: doc['roleRef'],

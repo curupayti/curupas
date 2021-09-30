@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:core';
 import 'dart:io';
 
@@ -7,6 +6,7 @@ import 'package:curupas/business/auth.dart';
 import 'package:curupas/business/cache.dart';
 import 'package:curupas/business/validator.dart';
 import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/models/category.dart';
 import 'package:curupas/models/group.dart';
 import 'package:curupas/ui/widgets/flat_button.dart';
 import 'package:curupas/ui/widgets/text_field.dart';
@@ -27,24 +27,33 @@ class SignUpGroupScreen extends StatefulWidget {
 }
 
 class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
-  List<DropdownMenuItem<String>> _groupMenuItems = new List();
+  List<DropdownMenuItem<String>> _groupMenuItems = [];
+  List<DropdownMenuItem<String>> _categoriesMenuItems = [];
   List<Group> _groups = [];
+  List<Category> _categories = [];
   Group _currentGroup;
-  String _currentItem;
+  Category _currentCategory;
+  String _currentGroupItem;
+  String _currentCategoryItem;
+
+  final TextEditingController _newCategory = new TextEditingController();
+  CustomTextField _newCategoryField;
+  Text _newCategoryText;
+  bool _isNewCategoryVisible = true;
 
   final TextEditingController _newGroup = new TextEditingController();
   CustomTextField _newGroupField;
-
-  VoidCallback onBackPress;
-
-  bool _loadingInProgress;
+  Text _newGroupText;
+  bool _isNewGroupVisible = true;
 
   OverlayEntry overlayEntry;
   FocusNode phoneNumberFocusNodeGroup = new FocusNode();
+
   CustomFlatButton _saveGroupButton;
 
-  Text _newGroupText;
-  bool _isNewGroupVisible = true;
+  VoidCallback onBackPress;
+  int _loadingInProgress;
+
   SharedPreferences prefs;
 
   String curupasUrl = 'https://curupas.com.ar/';
@@ -67,12 +76,12 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
   void initState() {
     super.initState();
 
-    _loadingInProgress = true;
+    _loadingInProgress = 0;
 
     _flutterTapRecognizer = new TapGestureRecognizer()
       ..onTap = () => _openUrl(curupasUrl);
 
-    setButtonEnabled(false);
+    setSaveButtonEnabled(false);
 
     phoneNumberFocusNodeGroup.addListener(() {
       bool hasFocus = phoneNumberFocusNodeGroup.hasFocus;
@@ -82,8 +91,28 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
         removeOverlay();
     });
 
+    _createNewTextCategory("Si sos papa elegi la de tu hijo");
+
+    _newCategoryField = new CustomTextField(
+      baseColor: Colors.grey,
+      borderColor: Colors.grey[400],
+      errorColor: Colors.red,
+      controller: _newCategory,
+      maxLength: 4,
+      style: new TextStyle(
+        fontSize: 25.0,
+        height: 1.5,
+        color: Colors.black,
+        fontWeight: FontWeight.bold,
+      ),
+      hint: "Ingresa tu camada",
+      inputType: TextInputType.number,
+      validator: Validator.validateShortNumber,
+      focusNode: phoneNumberFocusNodeGroup,
+    );
+
     _createNewTextGroup("Si tu camada no esta en el menu crea una nueva");
-    setButtonEnabled(false);
+    setSaveButtonEnabled(false);
 
     _newGroupField = new CustomTextField(
       baseColor: Colors.grey,
@@ -103,23 +132,46 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
       focusNode: phoneNumberFocusNodeGroup,
     );
 
-    getGroupsList().then((val) => setState(() {
-          _loadingInProgress = false;
-          _groupMenuItems = val;
-          print(_groupMenuItems.length);
-          _currentItem = _groupMenuItems[0].value;
-        }));
+    _globals.loadUpdates().then((resultUpdated) async {
+      _globals.getGroupsList().then((groups) => setState(() {
+            List<DropdownMenuItem<String>> itemsGroup = [];
+            for (int i = 0; i < groups.length; i++) {
+              String group = groups[i].year;
+              itemsGroup.add(
+                  new DropdownMenuItem(value: group, child: new Text(group)));
+            }
+            _groups = groups;
+            _loadingInProgress = _loadingInProgress + 1;
+            _groupMenuItems = itemsGroup;
+            print(_groupMenuItems.length);
+            _currentGroupItem = _groupMenuItems[0].value;
+          }));
+      _globals.getCategoryList().then((categories) => setState(() {
+            List<DropdownMenuItem<String>> itemsCategory = [];
+            for (int i = 0; i < categories.length; i++) {
+              String category = categories[i].documentID;
+              itemsCategory.add(new DropdownMenuItem(
+                  value: category, child: new Text(category)));
+            }
+            _categories = categories;
+            _loadingInProgress = _loadingInProgress + 1;
+            _categoriesMenuItems = itemsCategory;
+            print(_categoriesMenuItems.length);
+            _currentCategoryItem = _categoriesMenuItems[0].value;
+          }));
+    });
+
     onBackPress = () {
       Navigator.of(context).pop();
     };
   }
 
   void _enableButton() {
-    setButtonEnabled(true);
+    setSaveButtonEnabled(true);
     _rebuild();
   }
 
-  void setButtonEnabled(bool enabled) {
+  void setSaveButtonEnabled(bool enabled) {
     Color color, borderColor, textColor;
     if (enabled) {
       color = Color.fromRGBO(59, 89, 152, 1.0);
@@ -138,7 +190,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
       textColor: textColor,
       onPressed: () {
         setState(() {
-          _loadingInProgress = true;
+          _loadingInProgress = 0;
           _saveGroup(context);
         });
       },
@@ -149,7 +201,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
     );
   }
 
-  Future<List<DropdownMenuItem<String>>> getGroupsList() async {
+  /*Future<List<DropdownMenuItem<String>>> getGroupsList() async {
     List<DropdownMenuItem<String>> items = [];
     QuerySnapshot querySnapshot = await Cache.getCacheCollectionByPath("years");
     items.add(new DropdownMenuItem(value: null, child: new Text("----")));
@@ -165,7 +217,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
     }
     print(items.length);
     return items;
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +230,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
   }
 
   Widget _buildBody() {
-    if (_loadingInProgress) {
+    if (_loadingInProgress == 0) {
       return Stack(children: <Widget>[
         new Container(
           height: MediaQuery.of(context).size.height,
@@ -242,90 +294,119 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
           ),
         ),
       ]);
-    } else {
-      print(_currentItem);
+    } else if (_loadingInProgress == 2) {
+      print(_currentGroupItem);
       print(_groupMenuItems.length);
       return new Center(
         child: Stack(
+          alignment: Alignment.topLeft,
           children: <Widget>[
-            Stack(
-              alignment: Alignment.topLeft,
+            ListView(
+              shrinkWrap: true,
               children: <Widget>[
-                ListView(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 30.0, bottom: 10.0, left: 10.0, right: 10.0),
-                      child: Text(
-                        "Datos de camada",
-                        softWrap: true,
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: Color.fromRGBO(212, 20, 15, 1.0),
-                          decoration: TextDecoration.none,
-                          fontSize: 24.0,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: "OpenSans",
-                        ),
-                      ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 30.0, bottom: 10.0, left: 10.0, right: 10.0),
+                  child: Text(
+                    "Datos de camada",
+                    softWrap: true,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      color: Color.fromRGBO(212, 20, 15, 1.0),
+                      decoration: TextDecoration.none,
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: "OpenSans",
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 30.0, left: 20.0, right: 20.0),
-                      child: new Container(
-                        child: new Center(
-                            child: new Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            new Text("Selecciona tu camada",
-                                style: TextStyle(
-                                    fontSize: 25.0, color: Colors.grey),
-                                textAlign: TextAlign.center),
-                            new Container(
-                              padding: new EdgeInsets.only(top: 20.0),
-                            ),
-                            new DropdownButton(
-                              value: _currentItem,
-                              items: _groupMenuItems,
-                              iconSize: 80.0,
-                              style: TextStyle(
-                                  fontSize: 35.0,
-                                  color: Colors.black,
-                                  backgroundColor: Colors.white),
-                              onChanged: _changedGroupItem,
-                            )
-                          ],
-                        )),
-                      ),
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsets.only(top: 20.0, left: 50.0, right: 50.0),
-                      child: _newGroupText,
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsets.only(top: 20.0, left: 50.0, right: 50.0),
-                      child: Visibility(
-                        visible: _isNewGroupVisible,
-                        child: _newGroupField,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 30.0, left: 30.0, right: 30.0),
-                      child: _saveGroupButton,
-                    ),
-                  ],
-                ),
-                SafeArea(
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back),
-                    onPressed: onBackPress,
                   ),
                 ),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
+                  child: new Container(
+                    child: new Expanded(
+                        child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Text("Selecciona una Categoria",
+                            style:
+                                TextStyle(fontSize: 25.0, color: Colors.grey),
+                            textAlign: TextAlign.center),
+                        new Container(
+                          padding: new EdgeInsets.only(top: 20.0),
+                        ),
+                        new DropdownButton(
+                          value: _currentCategoryItem,
+                          items: _categoriesMenuItems,
+                          iconSize: 80.0,
+                          style: TextStyle(
+                              fontSize: 35.0,
+                              color: Colors.black,
+                              backgroundColor: Colors.white),
+                          onChanged: _changedCategoryItem,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              top: 20.0, left: 50.0, right: 50.0),
+                          child: Visibility(
+                            visible: _isNewGroupVisible,
+                            child: _newCategoryText,
+                          ),
+                        ),
+                      ],
+                    )),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
+                  child: new Container(
+                    child: new Center(
+                        child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Text("Selecciona tu camada",
+                            style:
+                                TextStyle(fontSize: 25.0, color: Colors.grey),
+                            textAlign: TextAlign.center),
+                        new Container(
+                          padding: new EdgeInsets.only(top: 20.0),
+                        ),
+                        new DropdownButton(
+                          value: _currentGroupItem,
+                          items: _groupMenuItems,
+                          iconSize: 80.0,
+                          style: TextStyle(
+                              fontSize: 35.0,
+                              color: Colors.black,
+                              backgroundColor: Colors.white),
+                          onChanged: _changedGroupItem,
+                        )
+                      ],
+                    )),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 20.0, left: 50.0, right: 50.0),
+                  child: Visibility(
+                    visible: _isNewCategoryVisible,
+                    child: _newGroupText,
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(top: 30.0, left: 30.0, right: 30.0),
+                  child: _saveGroupButton,
+                ),
               ],
+            ),
+            SafeArea(
+              child: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: onBackPress,
+              ),
             ),
           ],
         ),
@@ -339,20 +420,51 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
         textAlign: TextAlign.center);
   }
 
+  void _createNewTextCategory(String text) {
+    _newCategoryText = new Text(text,
+        style: TextStyle(fontSize: 26.0, color: Colors.grey),
+        textAlign: TextAlign.center);
+  }
+
+  void _categorySelected(String selected) {
+    setState(() {
+      _createNewTextCategory(
+          "Elegiste la categoria ${selected}, elegi una camada");
+      //_isNewCategoryVisible = false;
+      _enableButton();
+    });
+  }
+
   void _groupSelected(String selected) {
     setState(() {
       _createNewTextGroup(
           "Elegiste la camada ${selected}, pulsa el boton de guardar");
-      _isNewGroupVisible = false;
+      //_isNewGroupVisible = false;
       _enableButton();
+    });
+  }
+
+  void _changedCategoryItem(String selected) {
+    setState(() {
+      //_loadingInProgress = 0;
+      _currentCategoryItem = selected;
+      if (selected != null) {
+        _currentCategory = _getCategoryById(selected);
+        String categoryId = _currentCategory.documentID;
+        String category = _currentCategory.category;
+        print(category);
+        print(categoryId);
+        _categorySelected(category);
+        _enableButton();
+      }
     });
   }
 
   void _changedGroupItem(String selected) {
     setState(() {
-      _loadingInProgress = false;
-      _currentItem = selected;
+      _currentGroupItem = selected;
       if (selected != null) {
+        //_loadingInProgress = 0;
         _currentGroup = _getGroupById(selected);
         String groupId = _currentGroup.documentID;
         String year = _currentGroup.year;
@@ -366,11 +478,22 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
   Group _getGroupById(String documentId) {
     Group g;
     for (int i = 0; i < _groups.length; i++) {
-      if (_groups[i].documentID == documentId) {
+      String y = _groups[i].year;
+      if (y == documentId) {
         g = _groups[i];
       }
     }
     return g;
+  }
+
+  Category _getCategoryById(String documentId) {
+    Category c;
+    for (int i = 0; i < _categories.length; i++) {
+      if (_categories[i].documentID == documentId) {
+        c = _categories[i];
+      }
+    }
+    return c;
   }
 
   void _createNewYear() async {
@@ -394,12 +517,18 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
             String year = docsnapshot['year'];
             String documentID = docsnapshot.id;
             setState(() {
-              _loadingInProgress = true;
+              _loadingInProgress = 2;
             });
             _groups = [];
-            getGroupsList().then((val) {
+            _globals.getGroupsList().then((groups) {
+              List<DropdownMenuItem<String>> itemsGroup = [];
+              for (int i = 0; i < groups.length; i++) {
+                String group = groups[i].year;
+                itemsGroup.add(
+                    new DropdownMenuItem(value: group, child: new Text(group)));
+              }
               _newGroup.clear();
-              _groupMenuItems = val;
+              _groupMenuItems = itemsGroup;
               _changedGroupItem(documentID);
               _groupSelected(year);
             });
@@ -418,6 +547,9 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
     DocumentReference yearRef =
         FirebaseFirestore.instance.collection('years').doc(groupId);
 
+    DocumentReference categoryRef =
+        FirebaseFirestore.instance.collection('categories').doc(groupId);
+
     int nowTime = new DateTime.now().millisecondsSinceEpoch;
 
     //Upload image
@@ -433,9 +565,13 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
 
     Map<String, dynamic> data = <String, dynamic>{
       'year': _currentGroup.year,
-      'yearRef': yearRef,
+      'yearRefs': [yearRef],
+      'categoryRef': categoryRef.id,
       'stage': 0
     };
+    //remove this
+    //prefs.setBool(force_update_user, true);
+    Cache.appData.user.isRegistering = true;
 
     Auth.updateUser(userId, data).then((user) async {
       if (user != null) {
@@ -458,7 +594,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
           Cache.appData.user = user;
           prefs.setBool('group', true);
           prefs.setString('year', year);
-          Cache.appData.user.yearRefs[0] = yearRef;
+          //Cache.appData.user.yearRefs[0] = yearRef;
           showDialog(
             context: context,
             builder: (BuildContext context) => _buildAboutDialog(context),
@@ -553,7 +689,7 @@ class _SignUpGroupScreenState extends State<SignUpGroupScreen> {
             child: const Padding(
               padding: const EdgeInsets.only(left: 20.0),
               child: const Text(
-                'El regreso virtual es crecimiento',
+                'Curupas',
                 style: const TextStyle(fontSize: 20.0),
               ),
             ),

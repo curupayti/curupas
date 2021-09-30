@@ -81,7 +81,7 @@ class WelcomeScreen extends StatelessWidget {
               splashColor: Colors.black54,
               borderColor: Colors.black12,
               borderWidth: 2,
-              color: Color.fromRGBO(191, 4, 17, 1),
+              color: Color.fromRGBO(0, 29, 126, 1),
             ),
           ),
           Padding(

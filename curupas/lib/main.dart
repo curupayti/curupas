@@ -21,6 +21,7 @@ import 'package:flutter_screenutil/screenutil_init.dart';
 import 'package:notifier/notifier_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curupas/globals.dart' as _globals;
 
 
 import 'models/add_media.dart';
@@ -40,11 +41,12 @@ Future main() async {
   FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SharedPreferences.getInstance().then((prefs) async {
+    _globals.prefs = prefs;
     runApp(
         ScreenUtilInit(
           designSize: Size(640, 1136),
           allowFontScaling: false,
-          child:
+            builder: () =>
             RestartWidget(
             child: NotifierProvider(
               child: CurupaApp(prefs: prefs),

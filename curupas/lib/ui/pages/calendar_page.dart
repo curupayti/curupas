@@ -1,14 +1,13 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curupas/business/cache.dart';
 import 'package:curupas/globals.dart' as _globals;
 import 'package:curupas/models/event_calendar.dart';
-import 'package:curupas/models/update.dart';
 import 'package:curupas/ui/screens/calendar/event_view.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 //https://github.com/mattgraham1/FlutterCalendar
 
@@ -26,9 +25,9 @@ class _CalendarPageState extends State<CalendarPage> {
   int _beginMonthPadding = 0;
   DateTime _dateTime;
   //String _calendarSelect = "camada";
-  SharedPreferences prefs;
+  //SharedPreferences prefs;
 
-  ActiveUpdate active = new ActiveUpdate();
+  //ActiveUpdate active = new ActiveUpdate();
 
   _CalendarPageState() {
     _dateTime = DateTime.now();
@@ -45,11 +44,15 @@ class _CalendarPageState extends State<CalendarPage> {
   void initState() {
     super.initState();
     var type = {};
-    if (Cache.appData.curupaGuest.isGuest) {
+    String name = _globals.prefs.getString(_globals.calendar_active_button);
+    if (name == null) {
+      setActiveUpdate(0);
+    }
+    /*if (Cache.appData.curupaGuest.isGuest) {
       setActiveUpdate(1);
     } else {
       setActiveUpdate(0);
-    }
+    }*/
     if (_globals.calendar_data_loaded == false) {
       getCalendar();
     } else {
@@ -60,7 +63,8 @@ class _CalendarPageState extends State<CalendarPage> {
   void getCalendar() async {
     try {
       if (Cache.appData.calendarCacheCurupas != null) {
-        if (Cache.appData.calendarCacheCurupas[active.id] == null) {
+        String name = _globals.prefs.getString(_globals.calendar_active_button);
+        if (getFutureCalendarSnapshotByName(name) == null) {
           getCalendarByActiveId();
         } else {
           loaded();
@@ -76,16 +80,23 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void getCalendarByActiveId() async {
-    Cache.appData.calendarCacheCurupas = [];
-    if (active.id >= 0) {
-      await _globals.getCalendar(active.name).then((snapshot) {
-        CalendarCache calendarCache = new CalendarCache();
-        calendarCache.calendarSnapshot = snapshot;
-        Cache.appData.calendarCacheCurupas.insert(active.id, calendarCache);
+    try {
+      Cache.appData.calendarCacheCurupas = [];
+      String name = _globals.prefs.getString(_globals.calendar_active_button);
+      if (name != null) {
+        int id = getActiveUpdateByName(name);
+        await _globals.getCalendar(name, id).then((snapshot) {
+          CalendarCache calendarCache = new CalendarCache();
+          calendarCache.name = name;
+          calendarCache.calendarSnapshot = snapshot;
+          Cache.appData.calendarCacheCurupas.add(calendarCache);
+          loaded();
+        });
+      } else {
         loaded();
-      });
-    } else {
-      loaded();
+      }
+    } catch (error) {
+      print(error);
     }
   }
 
@@ -97,20 +108,52 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void setActiveUpdate(int id) {
+    String name;
     switch (id) {
       case 0:
-        active.name = "camada";
-        active.id = id;
+        name = "camada";
         break;
       case 1:
-        active.name = "curupa";
-        active.id = id;
+        name = "curupa";
         break;
       case 2:
-        active.name = "partidos";
-        active.id = id;
+        name = "partidos";
+        break;
+      case 3:
+        name = Cache.appData.user.category.documentID;
         break;
     }
+    _globals.prefs.setString(_globals.calendar_active_button, name);
+  }
+
+  int getActiveUpdateByName(String name) {
+    int id = -1;
+    String group = Cache.appData.user.category.documentID;
+    switch (name) {
+      case "camada":
+        id = 0;
+        break;
+      case "curupa":
+        id = 1;
+        break;
+      case "partidos":
+        id = 2;
+        break;
+    }
+    if (id == -1) {
+      id = 3;
+    }
+    return id;
+  }
+
+  CalendarCache getFutureCalendarSnapshotByName(String name) {
+    CalendarCache calendarCache;
+    for (int i = 0; i < Cache.appData.calendarCacheCurupas.length; i++) {
+      if (Cache.appData.calendarCacheCurupas[i].name == name) {
+        calendarCache = Cache.appData.calendarCacheCurupas[i];
+      }
+    }
+    return calendarCache;
   }
 
   @override
@@ -142,14 +185,16 @@ class _CalendarPageState extends State<CalendarPage> {
           6;
       final double itemWidth = size.width / numWeekDays;
 
-      double button_width = MediaQuery.of(context).size.width / 3;
+      String name = _globals.prefs.getString(_globals.calendar_active_button);
+      CalendarCache calendarCache = getFutureCalendarSnapshotByName(name);
+      Future<QuerySnapshot> futureCalendarSnapshot =
+          calendarCache.futureCalendarSnapshot;
 
       return Scaffold(
         body: SingleChildScrollView(
           child: Container(
             child: new FutureBuilder(
-                future: Cache.appData.calendarCacheCurupas[active.id]
-                    .futureCalendarSnapshot,
+                future: futureCalendarSnapshot,
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   return Container(
                     child: new Column(
@@ -160,96 +205,7 @@ class _CalendarPageState extends State<CalendarPage> {
                             new Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               mainAxisSize: MainAxisSize.max,
-                              children: <Widget>[
-                                Cache.appData.curupaGuest.isGuest == false
-                                    ? SizedBox(
-                                        height: 50.0,
-                                        width: button_width,
-                                        child: FlatButton(
-                                            color: active.id == 0 //"camada"
-                                                ? _getEventColor()
-                                                : Colors.white,
-                                            child: Text(
-                                              "Camada",
-                                              style: new TextStyle(
-                                                fontSize: 20.0,
-                                                height: 1.5,
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            onPressed: () {
-                                              setActiveUpdate(0);
-                                              getCalendar();
-                                              setState(() {
-                                                _loading = true;
-                                              });
-                                              Timer(Duration(seconds: 3), () {
-                                                setState(() {
-                                                  _loading = false;
-                                                });
-                                              });
-                                            }),
-                                      )
-                                    : SizedBox(
-                                        height: 50.0,
-                                        width: button_width,
-                                        child: FlatButton(
-                                            color: active.id == 1 //"curupa"
-                                                ? _getEventColor()
-                                                : Colors.white,
-                                            child: Text(
-                                              "Curupa",
-                                              style: new TextStyle(
-                                                fontSize: 20.0,
-                                                height: 1.5,
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            onPressed: () {
-                                              setActiveUpdate(1);
-                                              getCalendar();
-                                              setState(() {
-                                                _loading = true;
-                                              });
-                                              Timer(Duration(seconds: 3), () {
-                                                setState(() {
-                                                  _loading = false;
-                                                });
-                                              });
-                                            }),
-                                      ),
-                                SizedBox(
-                                  height: 50.0,
-                                  width: button_width,
-                                  child: FlatButton(
-                                      color: active.id == 2 //"partidos"
-                                          ? _getEventColor()
-                                          : Colors.white,
-                                      child: Text(
-                                        "Partidos",
-                                        style: new TextStyle(
-                                          fontSize: 20.0,
-                                          height: 1.5,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        setActiveUpdate(2);
-                                        getCalendar();
-                                        setState(() {
-                                          _loading = true;
-                                        });
-                                        Timer(Duration(seconds: 3), () {
-                                          setState(() {
-                                            _loading = false;
-                                          });
-                                        });
-                                      }),
-                                ),
-                              ],
+                              children: _geButtons(),
                             ),
                           ],
                         ),
@@ -395,6 +351,161 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
+  List<Widget> _geButtons() {
+    List<Widget> listings = [];
+    double button_width;
+    int amount = 2;
+    double font_size = 20.0;
+    if (Cache.appData.curupaGuest.isGuest == false) {
+      amount = 4;
+      font_size = 15.0;
+    }
+    button_width = MediaQuery.of(context).size.width / amount;
+    listings.add(showCurupaButton(button_width, font_size));
+    listings.add(showPartidosButton(button_width, font_size));
+    if (Cache.appData.curupaGuest.isGuest == false) {
+      listings.add(showCamadaButton(button_width, font_size));
+      listings.add(showCategoriasButton(button_width, font_size));
+    }
+    return listings;
+  }
+
+  Widget showCurupaButton(double button_width, double font_size) {
+    String name = _globals.prefs.getString(_globals.calendar_active_button);
+    int activeId = getActiveUpdateByName(name);
+    return SizedBox(
+      height: 50.0,
+      width: button_width,
+      child: FlatButton(
+          color: activeId == 0 //"curupa"
+              ? _getEventColor()
+              : Colors.white,
+          child: Text(
+            "Curupa",
+            style: new TextStyle(
+              fontSize: font_size,
+              height: 1.5,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onPressed: () {
+            setActiveUpdate(0);
+            getCalendar();
+            setState(() {
+              _loading = true;
+            });
+            Timer(Duration(seconds: 3), () {
+              setState(() {
+                _loading = false;
+              });
+            });
+          }),
+    );
+  }
+
+  Widget showPartidosButton(double button_width, double font_size) {
+    String name = _globals.prefs.getString(_globals.calendar_active_button);
+    int activeId = getActiveUpdateByName(name);
+    return SizedBox(
+      height: 50.0,
+      width: button_width,
+      child: FlatButton(
+          color: activeId == 1 //"partidos"
+              ? _getEventColor()
+              : Colors.white,
+          child: Text(
+            "Partidos",
+            style: new TextStyle(
+              fontSize: font_size,
+              height: 1.5,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onPressed: () {
+            setActiveUpdate(1);
+            getCalendar();
+            setState(() {
+              _loading = true;
+            });
+            Timer(Duration(seconds: 3), () {
+              setState(() {
+                _loading = false;
+              });
+            });
+          }),
+    );
+  }
+
+  Widget showCamadaButton(double button_width, double font_size) {
+    String name = _globals.prefs.getString(_globals.calendar_active_button);
+    int activeId = getActiveUpdateByName(name);
+    return SizedBox(
+      height: 50.0,
+      width: button_width,
+      child: FlatButton(
+          color: activeId == 2 //"camada"
+              ? _getEventColor()
+              : Colors.white,
+          child: Text(
+            "Camada",
+            style: new TextStyle(
+              fontSize: font_size,
+              height: 1.5,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onPressed: () {
+            setActiveUpdate(2);
+            getCalendar();
+            setState(() {
+              _loading = true;
+            });
+            Timer(Duration(seconds: 3), () {
+              setState(() {
+                _loading = false;
+              });
+            });
+          }),
+    );
+  }
+
+  Widget showCategoriasButton(double button_width, double font_size) {
+    String name = _globals.prefs.getString(_globals.calendar_active_button);
+    int activeId = getActiveUpdateByName(name);
+    return SizedBox(
+      height: 50.0,
+      width: button_width,
+      child: FlatButton(
+          color: activeId == 3 //"categorias"
+              ? _getEventColor()
+              : Colors.white,
+          child: Text(
+            Cache.appData.user.category.category,
+            style: new TextStyle(
+              fontSize: font_size,
+              height: 1.5,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onPressed: () {
+            setActiveUpdate(3);
+            getCalendar();
+            setState(() {
+              _loading = true;
+            });
+            Timer(Duration(seconds: 3), () {
+              setState(() {
+                _loading = false;
+              });
+            });
+          }),
+    );
+  }
+
   Align buildDayNumberWidget(int dayNumber) {
     //print('buildDayNumberWidget, dayNumber: $dayNumber');
     if ((dayNumber - _beginMonthPadding) == DateTime.now().day &&
@@ -444,8 +555,9 @@ class _CalendarPageState extends State<CalendarPage> {
     int eventCount = 0;
     DateTime eventDate;
     String eventName;
-    Cache.appData.calendarCacheCurupas[active.id].calendarSnapshot.docs
-        .forEach((doc) {
+    String name = _globals.prefs.getString(_globals.calendar_active_button);
+    CalendarCache calendarCache = getFutureCalendarSnapshotByName(name);
+    calendarCache.calendarSnapshot.docs.forEach((doc) {
       eventDate = DateTime.fromMicrosecondsSinceEpoch(
           doc.data()['start'].microsecondsSinceEpoch);
       eventName = doc.data()['name'];
@@ -456,7 +568,6 @@ class _CalendarPageState extends State<CalendarPage> {
         eventCount++;
       }
     });
-
     if (eventCount > 0) {
       return new Expanded(
         child: FittedBox(
@@ -478,15 +589,21 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Color _getEventColor() {
-    if (active.name == "camada") {
-      return Color(0XFF67ABCC);
-    } else if (active.name == "curupa") {
-      return Color(0XFFF3F3F3);
-    } else if (active.name == "partidos") {
-      return Color(0XFF7986D0);
+    String name = _globals.prefs.getString(_globals.calendar_active_button);
+    Color color;
+    if (name == "camada") {
+      //return Color(0XFF67ABCC);
+      color = Colors.lightBlue;
+    } else if (name == "curupa") {
+      //return Color(0XFFF3F3F3);
+      color = Colors.red;
+    } else if (name == "partidos") {
+      //return Color(0XFF7986D0);
+      color = Colors.lightGreen;
     } else {
-      return Colors.yellowAccent;
+      color = Colors.amberAccent;
     }
+    return color;
   }
 
   int getNumberOfDaysInMonth(final int month) {
@@ -629,12 +746,12 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void _onDayTapped(int day) {
+    String name = _globals.prefs.getString(_globals.calendar_active_button);
     Navigator.push(
       context,
       new MaterialPageRoute(
         builder: (BuildContext context) => new EventsView(
-            new DateTime(_dateTime.year, _dateTime.month, day),
-            this.active.name),
+            new DateTime(_dateTime.year, _dateTime.month, day), name),
       ),
     );
   }

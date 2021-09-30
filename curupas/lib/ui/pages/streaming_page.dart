@@ -1,5 +1,6 @@
 import 'package:curupas/business/cache.dart';
 import 'package:curupas/globals.dart' as _globals;
+import 'package:curupas/models/streaming_video.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -15,9 +16,23 @@ class _StreamingPageState extends State<StreamingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: HomeStream(_loading),
-    );
+    if (_loading) {
+      return SpinKitFadingCircle(
+        itemBuilder: (BuildContext context, int index) {
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              color: index.isEven ? Colors.red : Colors.green,
+            ),
+          );
+        },
+      );
+    } else {
+      return Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: HomeStream(),
+      );
+    }
   }
 
   @override
@@ -31,17 +46,13 @@ class _StreamingPageState extends State<StreamingPage> {
           _counting = _counting + 1;
           if (_counting == 1) {
             _counting = 0;
-            setState(() {
-              _loading = false;
-            });
+            loaded();
           }
         }
         print("Counting : ${_counting}");
       });
     } else {
-      setState(() {
-        _loading = false;
-      });
+      loaded();
     }
   }
 
@@ -53,50 +64,17 @@ class _StreamingPageState extends State<StreamingPage> {
   }
 }
 
-class HomeStream extends StatefulWidget {
-  final bool loading;
-
-  HomeStream(this.loading);
-
-  @override
-  _HomeStreamState createState() => new _HomeStreamState();
-}
-
-class _HomeStreamState extends State<HomeStream> {
+class HomeStream extends StatelessWidget {
+  HomeStream();
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      child: HomeScreeAbovePart(widget.loading),
-    );
-  }
-}
-
-class HomeScreeAbovePart extends StatelessWidget {
-  final bool loading;
-  HomeScreeAbovePart(this.loading);
-  @override
-  Widget build(BuildContext context) {
-    if (loading) {
-      return SpinKitFadingCircle(
-        itemBuilder: (BuildContext context, int index) {
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              color: index.isEven ? Colors.red : Colors.green,
-            ),
-          );
-        },
-      );
-    } else {
-      return Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[HomeScreeTopPart(), HomeScreenBottomPart()],
-          ),
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[HomeScreeTopPart(), getPlaylistWidgets()],
         ),
-      );
-    }
+      ),
+    );
   }
 }
 
@@ -225,41 +203,74 @@ class HomeScreeTopPart extends StatelessWidget {
   }
 }
 
-class HomeScreenBottomPart extends StatefulWidget {
-  HomeScreenBottomPart();
-
-  @override
-  _HomeScreenBottomPartState createState() => _HomeScreenBottomPartState();
+Widget getPlaylistWidgets() {
+  List<Widget> list = [];
+  int length = Cache.appData.streammer.streamings.length;
+  for (int i = 0; i < length; i++) {
+    list.add(new HomeScreenPlaylist(id: i));
+  }
+  return new Column(children: list);
 }
 
-class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
-  static String key =
-      "AIzaSyBJffXixRGSguaXNQxbtZb_am90NI9nGHg"; // ** ENTER YOUTUBE API KEY HERE **
+class HomeScreenPlaylist extends StatelessWidget {
+  final int id;
+  HomeScreenPlaylist({Key key, this.id}) : super(key: key);
 
-  //YoutubeAPI ytApi = new YoutubeAPI(key, type: "playlist");
-  //List<YT_API> ytResult = [];
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      height: 360.0,
+      margin: EdgeInsets.only(left: 45.0),
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  Cache.appData.streammer.streamings[id].title, //"Mirar ahora",
+                  style: TextStyle(
+                      fontSize: 22.0, fontFamily: "SF-Pro-Display-Bold"),
+                ) //,
+                /*FlatButton(
+                  child: Text("Ver mas"),
+                  onPressed: () {},
+                )*/
+              ],
+            ),
+          ),
+          Container(
+            height: 280.0,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: movies(id),
+            ),
+          )
+        ],
+      ),
+    );
+  }
 
-  /*callAPI() async {
-      print('UI callled');
-      String query = "Entrenamientos Infantiles";
-      ytResult = await ytApi.search(query);
-      print("length ======= ${ytResult.length}");
-      print("ytResult channelurl ========= ${ytResult[0].channelurl}");
-      print("ytResult channelTitle ========= ${ytResult[0]}");
-
-      print("ytResult channelurl ========= ${ytResult[1].channelurl}");
-      print("ytResult channelTitle ========= ${ytResult[1].channelTitle}");
-
-      print("ytResult channelurl ========= ${ytResult[2].channelurl}");
-      print("ytResult channelTitle ========= ${ytResult[2].channelTitle}");
-
-      print("ytResult channelurl ========= ${ytResult[3].channelurl}");
-      print("ytResult channelTitle ========= ${ytResult[3].channelTitle}");
-    }*/
-
-  List<Widget> movies() {
-    List<Widget> movieList = new List();
-    for (int i = 0; i < 3; i++) {
+  List<Widget> movies(int id) {
+    List<Widget> movieList = [];
+    List<StreamingVideo> videos = Cache.appData.streammer.streamings[id].videos;
+    int length = videos.length;
+    for (int i = 0; i < length; i++) {
+      Image image; // = new Image();
+      if (videos[i].thumbnail == null) {
+        continue;
+      }
+      if (videos[i].thumbnail.url.isEmpty) {
+        image = Image.asset("assets/images/picture.png");
+      } else {
+        image = Image.network(
+          videos[i].thumbnail.url, //videos[i].thumbnail.url,
+          width: double.infinity,
+          height: 130.0,
+          fit: BoxFit.cover,
+        );
+      }
       var movieitem = Padding(
         padding: EdgeInsets.symmetric(vertical: 25.0, horizontal: 12.0),
         child: new GestureDetector(
@@ -284,17 +295,12 @@ class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
                   borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(20.0),
                       topRight: Radius.circular(20.0)),
-                  child: Image.network(
-                    Cache.appData.streammer.streamings[i].thumbnail.url,
-                    width: double.infinity,
-                    height: 130.0,
-                    fit: BoxFit.cover,
-                  ),
+                  child: image,
                 ),
                 Padding(
                   padding:
                       const EdgeInsets.only(top: 4.0, left: 8.0, right: 8.0),
-                  child: Text(Cache.appData.streammer.streamings[i].title,
+                  child: Text(videos[i].title,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 16.0, fontFamily: "SF-Pro-Display-Bold")),
@@ -311,48 +317,6 @@ class _HomeScreenBottomPartState extends State<HomeScreenBottomPart> {
       movieList.add(movieitem);
     }
     return movieList;
-  }
-
-  @override
-  void initState() {
-    //callAPI();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Container(
-      height: 360.0,
-      margin: EdgeInsets.only(left: 45.0),
-      child: Column(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  "Mirar ahora",
-                  style: TextStyle(
-                      fontSize: 22.0, fontFamily: "SF-Pro-Display-Bold"),
-                ),
-                FlatButton(
-                  child: Text("Ver mas"),
-                  onPressed: () {},
-                )
-              ],
-            ),
-          ),
-          Container(
-            height: 280.0,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: movies(),
-            ),
-          )
-        ],
-      ),
-    );
   }
 }
 

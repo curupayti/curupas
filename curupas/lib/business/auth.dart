@@ -20,7 +20,6 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cache.dart';
 
@@ -28,7 +27,7 @@ enum authProblems { UserNotFound, PasswordNotValid, NetworkError, UnknownError }
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
-SharedPreferences prefs;
+//SharedPreferences prefs;
 
 final analytics = new FirebaseAnalytics();
 
@@ -126,10 +125,9 @@ class Auth {
   }
 
   static void setUserFrefs(String userId) async {
-    prefs = await SharedPreferences.getInstance();
-    prefs.setBool('registered', true);
-    prefs.setBool('group', true);
-    prefs.setString('userId', userId);
+    _globals.prefs.setBool('registered', true);
+    _globals.prefs.setBool('group', true);
+    _globals.prefs.setString('userId', userId);
   }
 
   static Future<String> signUp(String email, String password) async {
@@ -344,6 +342,7 @@ class Auth {
   }
 
   static Future<SMS> getUserDataForSMS(String userID) async {
+    prefs.setBool(force_update_user, true);
     DocumentSnapshot doc = await Cache.getCacheDocument("users/${userID}");
     if (doc.exists) {
       SMS sms = new SMS();
@@ -433,7 +432,7 @@ class Auth {
       NotificationCloud noti = NotificationCloud.fromDocument(doc);
       notiList.add(noti);
     }
-    print(notiList);
+    //print(notiList);
     return notiList;
   }
 
@@ -562,9 +561,8 @@ class Auth {
     return museums;
   }
 
-  static Future<QuerySnapshot> getCalendarData(String name) async {
-    QuerySnapshot userEvents = await Cache.getCacheCollectionByPath(
-        'calendar/$name/${name}_collection');
+  static Future<QuerySnapshot> getCalendarData(String path) async {
+    QuerySnapshot userEvents = await Cache.getCacheCollectionByPath(path);
     return userEvents;
   }
 

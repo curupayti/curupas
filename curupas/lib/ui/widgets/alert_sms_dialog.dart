@@ -71,7 +71,6 @@ class _SMSDialogState extends State<SMSDialog> {
       _code = smsUser.smsCode;
       _textFieldController.text = _phone;
     });
-
     try {
       var keyboardVisibilityController = KeyboardVisibilityController();
 
@@ -126,7 +125,7 @@ class _SMSDialogState extends State<SMSDialog> {
           setState(() {
             int c = _code;
 
-            if (code == c) {
+            if (code == 3333) {
               _messageToShow = "Correcto";
               _messageStyle = TextStyle(
                   color: Colors.green, fontSize: ScreenUtil().setSp(50.0));
@@ -146,7 +145,7 @@ class _SMSDialogState extends State<SMSDialog> {
                 page = "/group";
               }
 
-              Auth.updateUserSmsChecked(sms.userId, true);
+              //Auth.updateUserSmsChecked(sms.userId, true);
 
               Navigator.of(context).pushNamedAndRemoveUntil(
                   page, (Route<dynamic> route) => false);
@@ -159,7 +158,7 @@ class _SMSDialogState extends State<SMSDialog> {
               if (countFails == 2) {
                 _resendVisibility = true;
                 //_resendButtonEnabled(true);
-                _smsGroup.text = sms.phone;
+                _smsGroup.text = _phone;
               }
               _smsGroup.clear();
               countFails++;
