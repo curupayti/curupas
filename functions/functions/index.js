@@ -511,7 +511,7 @@
         var headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer 7FA7ED241142E7BE36671CE0FEC9E84F'
+            'Authorization': 'Bearer XXXXXXXXXXXXXXXXXXXXXXXXXX'
         };
 
         var dataString = '{"recipient":' + phone + ',"message":"' + payload + ',"service_id":' + 110 + '}';        
